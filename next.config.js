@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path')
+const { defaultLocale } = require('yup')
 
 /** @type {import('next').NextConfig} */
 
@@ -15,5 +16,11 @@ module.exports = {
     }
 
     return config
-  }
+  },
+  i18n: {
+    locales: ['en', 'es'],
+    defaultLocale: 'en'
+  },
+
+  output: 'standalone'
 }

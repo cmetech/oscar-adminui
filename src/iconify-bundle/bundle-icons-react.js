@@ -41,17 +41,16 @@ const sources = {
     'twemoji:auto-rickshaw'
   ],
   svg: [
-    /*
-        {
-            dir: 'src/iconify-bundle/svg',
-            monotone: false,
-            prefix: 'custom'
-        }
-{
-          dir: 'src/iconify-bundle/emojis',
-          monotone: false,
-          prefix: 'emoji'
-        } */
+    {
+      dir: 'src/iconify-bundle/svg',
+      monotone: false,
+      prefix: 'custom'
+    },
+    {
+      dir: 'src/iconify-bundle/emojis',
+      monotone: false,
+      prefix: 'emoji'
+    }
   ]
 }
 

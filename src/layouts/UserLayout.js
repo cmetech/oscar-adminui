@@ -60,7 +60,7 @@ const AppBrand = () => {
       <i className='icon icon-econ' />
       <Stack>
         <HeaderTitle variant='h6' sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { ml: 3 }) }}>
-          COMET
+          OSCAR
         </HeaderTitle>
         <Typography
           noWrap

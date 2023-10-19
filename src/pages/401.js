@@ -50,7 +50,6 @@ const Error401 = () => {
           Back to Home
         </Button>
       </Box>
-      <FooterIllustrations />
     </Box>
   )
 }

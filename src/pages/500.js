@@ -59,7 +59,6 @@ const Error500 = () => {
           Back to Home
         </Button>
       </Box>
-      <FooterIllustrations image={<TreeIllustration alt='tree' src='/images/pages/tree-3.png' />} />
     </Box>
   )
 }

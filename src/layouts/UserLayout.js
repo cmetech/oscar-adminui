@@ -62,7 +62,12 @@ const AppBrand = () => {
         <HeaderTitle variant='h6' sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { ml: 3 }) }}>
           COMET
         </HeaderTitle>
-        <Typography noWrap variant='caption' color={textColor} sx={{ paddingLeft: 3 }}>
+        <Typography
+          noWrap
+          variant='caption'
+          color={textColor}
+          sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { paddingLeft: 3 }) }}
+        >
           powered by Ericsson InSite
         </Typography>
       </Stack>

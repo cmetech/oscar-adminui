@@ -200,7 +200,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                     fontWeight: 600,
                     textTransform: 'none',
                     fontSize: '1.5rem !important',
-                    color: 'white'
+                    color: `${theme.palette.mode === 'light' ? '#101217' : 'white'}`
                   }}
                 >
                   {themeConfig.templateName}

@@ -18,7 +18,8 @@ import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 
 // ** Context
-import { useAuth } from 'src/hooks/useAuth'
+// import { useAuth } from 'src/hooks/useAuth'
+import { signOut, useSession } from 'next-auth/react'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -38,7 +39,12 @@ const UserDropdown = props => {
 
   // ** Hooks
   const router = useRouter()
-  const { logout } = useAuth()
+
+  // const { logout } = useAuth()
+
+  const userSession = useSession()
+  const userFullName = userSession?.data?.user?.fullName || 'John Doe'
+  const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
   // ** Vars
   const { direction } = settings
@@ -70,7 +76,9 @@ const UserDropdown = props => {
   }
 
   const handleLogout = () => {
-    logout()
+    signOut({ callbackUrl: '/', redirect: false }).then(() => {
+      router.asPath = '/'
+    })
     handleDropdownClose()
   }
 
@@ -87,10 +95,10 @@ const UserDropdown = props => {
         }}
       >
         <Avatar
-          alt='John Doe'
+          alt={userFullName}
           onClick={handleDropdownOpen}
-          sx={{ width: 40, height: 40 }}
-          src='/images/avatars/1.png'
+          sx={{ width: 40, height: 40, bgcolor: '#4D97ED', color: '#fff' }}
+          src={`/images/avatars/${imageFileName}.png`}
         />
       </Badge>
       <Menu
@@ -111,12 +119,16 @@ const UserDropdown = props => {
                 horizontal: 'right'
               }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar
+                alt={userFullName}
+                src={`/images/avatars/${imageFileName}.png`}
+                sx={{ width: '2.5rem', height: '2.5rem', bgcolor: '#4D97ED', color: '#fff' }}
+              />
             </Badge>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                Admin
+                {userSession.data.user.role}
               </Typography>
             </Box>
           </Box>
@@ -128,29 +140,11 @@ const UserDropdown = props => {
             Profile
           </Box>
         </MenuItem>
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
-          <Box sx={styles}>
-            <Icon icon='mdi:email-outline' />
-            Inbox
-          </Box>
-        </MenuItem>
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
-          <Box sx={styles}>
-            <Icon icon='mdi:message-outline' />
-            Chat
-          </Box>
-        </MenuItem>
         <Divider />
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
           <Box sx={styles}>
             <Icon icon='mdi:cog-outline' />
             Settings
-          </Box>
-        </MenuItem>
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
-          <Box sx={styles}>
-            <Icon icon='mdi:currency-usd' />
-            Pricing
           </Box>
         </MenuItem>
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>

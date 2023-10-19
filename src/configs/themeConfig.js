@@ -6,13 +6,13 @@
  */
 const themeConfig = {
   // ** Layout Configs
-  templateName: 'Materio' /* App Name */,
+  templateName: 'COMET powered by Ericsson InSite' /* App Name */,
   layout: 'vertical' /* vertical | horizontal */,
-  mode: 'light' /* light | dark | semi-dark /*! Note: semi-dark value will only work for Vertical Layout */,
+  mode: 'dark' /* light | dark | semi-dark /*! Note: semi-dark value will only work for Vertical Layout */,
   direction: 'ltr' /* ltr | rtl */,
   skin: 'default' /* default | bordered */,
-  contentWidth: 'boxed' /* full | boxed */,
-  footer: 'static' /* fixed | static | hidden */,
+  contentWidth: 'full' /* full | boxed */,
+  footer: 'fixed' /* fixed | static | hidden */,
   // ** Routing Configs
   routingLoader: true /* true | false */,
   // ** Navigation (Menu) Configs
@@ -28,7 +28,7 @@ const themeConfig = {
   horizontalMenuToggle: 'hover' /* click | hover /*! Note: This is for Horizontal navigation menu only */,
   horizontalMenuAnimation: true /* true | false */,
   // ** AppBar Configs
-  appBar: 'fixed' /* fixed | static | hidden /*! Note: hidden value will only work for Vertical Layout */,
+  appBar: 'static' /* fixed | static | hidden /*! Note: hidden value will only work for Vertical Layout */,
   appBarBlur: true /* true | false */,
   // ** Other Configs
   responsiveFontSizes: true /* true | false */,

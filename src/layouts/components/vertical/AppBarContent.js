@@ -6,8 +6,8 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 
 // ** Components
-import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
-import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
+import UserModeToggler from 'src/layouts/components/shared-components/UserModeToggler'
+import UserDropdown from 'src/layouts/components/UserDropdown'
 
 const AppBarContent = props => {
   // ** Props
@@ -21,10 +21,9 @@ const AppBarContent = props => {
             <Icon icon='mdi:menu' />
           </IconButton>
         ) : null}
-
-        <ModeToggler settings={settings} saveSettings={saveSettings} />
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+        <UserModeToggler settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>
     </Box>

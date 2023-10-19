@@ -5,18 +5,21 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 // ** Hooks Import
-import { useAuth } from 'src/hooks/useAuth'
+// import { useAuth } from 'src/hooks/useAuth'
+import { useSession } from 'next-auth/react'
 
 const AuthGuard = props => {
   const { children, fallback } = props
-  const auth = useAuth()
+
+  // const auth = useAuth()
+  const session = useSession()
   const router = useRouter()
   useEffect(
     () => {
       if (!router.isReady) {
         return
       }
-      if (auth.user === null && !window.localStorage.getItem('userData')) {
+      if (session.status === 'unauthenticated') {
         if (router.asPath !== '/') {
           router.replace({
             pathname: '/login',
@@ -28,9 +31,9 @@ const AuthGuard = props => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router.route]
+    [router.route, session.status]
   )
-  if (auth.loading || auth.user === null) {
+  if (session.status !== 'authenticated') {
     return fallback
   }
 

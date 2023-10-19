@@ -12,11 +12,14 @@ import { buildAbilityFor } from 'src/configs/acl'
 
 // ** Component Import
 import NotAuthorized from 'src/pages/401'
-import Spinner from 'src/@core/components/spinner'
+
+// import Spinner from 'src/@core/components/spinner'
+import UserFallbackSpinner from 'src/layouts/UserSpinner'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Hooks
-import { useAuth } from 'src/hooks/useAuth'
+// import { useAuth } from 'src/hooks/useAuth'
+import { useSession } from 'next-auth/react'
 
 // ** Util Import
 import getHomeRoute from 'src/layouts/components/acl/getHomeRoute'
@@ -26,30 +29,31 @@ const AclGuard = props => {
   const { aclAbilities, children, guestGuard = false, authGuard = true } = props
 
   // ** Hooks
-  const auth = useAuth()
+  // const auth = useAuth()
+  const session = useSession()
   const router = useRouter()
 
   // ** Vars
   let ability
   useEffect(() => {
-    if (auth.user && auth.user.role && !guestGuard && router.route === '/') {
-      const homeRoute = getHomeRoute(auth.user.role)
+    if (session?.data?.user && session?.data?.user.role && !guestGuard && router.route === '/') {
+      const homeRoute = getHomeRoute(session?.data?.user.role)
       router.replace(homeRoute)
     }
-  }, [auth.user, guestGuard, router])
+  }, [session?.data?.user, guestGuard, router])
 
   // User is logged in, build ability for the user based on his role
-  if (auth.user && !ability) {
-    ability = buildAbilityFor(auth.user.role, aclAbilities.subject)
+  if (session?.data?.user && !ability) {
+    ability = buildAbilityFor(session?.data?.user.role, aclAbilities.subject)
     if (router.route === '/') {
-      return <Spinner />
+      return <UserFallbackSpinner />
     }
   }
 
   // If guest guard or no guard is true or any error page
   if (guestGuard || router.route === '/404' || router.route === '/500' || !authGuard) {
     // If user is logged in and his ability is built
-    if (auth.user && ability) {
+    if (session?.data?.user && ability) {
       return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>
     } else {
       // If user is not logged in (render pages like login, register etc..)
@@ -58,9 +62,9 @@ const AclGuard = props => {
   }
 
   // Check the access of current user and render pages
-  if (ability && auth.user && ability.can(aclAbilities.action, aclAbilities.subject)) {
+  if (ability && session?.data?.user && ability.can(aclAbilities.action, aclAbilities.subject)) {
     if (router.route === '/') {
-      return <Spinner />
+      return <UserFallbackSpinner />
     }
 
     return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>

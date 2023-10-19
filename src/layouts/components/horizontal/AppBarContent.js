@@ -3,7 +3,7 @@ import Box from '@mui/material/Box'
 
 // ** Components
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
-import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
+import UserDropdown from 'src/layouts/components/UserDropdown'
 
 const AppBarContent = props => {
   // ** Props

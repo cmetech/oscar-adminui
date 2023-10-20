@@ -89,7 +89,7 @@ const TypographyStyled = styled(Typography)(({ theme }) => ({
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
   textDecoration: 'none',
-  color: theme.palette.primary.main
+  color: theme.palette.customColors.brandBlue
 }))
 
 const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
@@ -106,7 +106,7 @@ const schema = yup.object().shape({
 
 const defaultValues = {
   password: 'admin',
-  email: 'admin@ericsson.com'
+  email: 'corey.ellis@ericsson.com'
 }
 
 const LoginPage = ({ csrfToken, providers }) => {
@@ -176,7 +176,8 @@ const LoginPage = ({ csrfToken, providers }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'background.paper'
+              backgroundColor: 'background.paper',
+              border: '2px solid white'
             }}
           >
             <BoxWrapper>
@@ -191,7 +192,14 @@ const LoginPage = ({ csrfToken, providers }) => {
                   color: 'white'
                 }}
               >
-                <i className='icon icon-econ' />
+                {/* <i className='icon icon-econ' /> */}
+                <Box
+                  bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : 'F4F5FA'}
+                  component='img'
+                  sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
+                  src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}
+                  alt='logo'
+                />
                 <Typography
                   variant='h6'
                   sx={{
@@ -203,7 +211,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                     color: `${theme.palette.mode === 'light' ? '#101217' : 'white'}`
                   }}
                 >
-                  {themeConfig.templateName}
+                  {/* {themeConfig.templateName} */}
                 </Typography>
               </Box>
               <Box sx={{ mb: 6 }}>
@@ -223,7 +231,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                         onBlur={onBlur}
                         onChange={onChange}
                         error={Boolean(errors.email)}
-                        placeholder='admin@ericsson.com'
+                        placeholder='corey.ellis@ericsson.com'
                       />
                     )}
                   />

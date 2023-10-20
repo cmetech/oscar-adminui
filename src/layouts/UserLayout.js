@@ -1,6 +1,7 @@
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Link from 'next/link'
 import Stack from '@mui/material/Stack'
+import { useSession } from 'next-auth/react'
 
 // ** Layout Imports
 // !Do not remove this Layout import
@@ -11,6 +12,8 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Icon from 'src/@core/components/icon'
 import { styled, useTheme } from '@mui/material/styles'
+import Badge from '@mui/material/Badge'
+import Avatar from '@mui/material/Avatar'
 
 // ** Navigation Imports
 import VerticalNavItems from 'src/navigation/vertical'
@@ -93,6 +96,47 @@ const AppBrand = () => {
   )
 }
 
+const User = () => {
+  const BadgeContentSpan = styled('span')(({ theme }) => ({
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: theme.palette.success.main,
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`
+  }))
+
+  const userSession = useSession()
+  const userFullName = userSession?.data?.user?.fullName || 'John Doe'
+  const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
+
+  return (
+    <Box sx={{ py: 2, px: 4, mb: 2.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Badge
+          overlap='circular'
+          badgeContent={<BadgeContentSpan />}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right'
+          }}
+        >
+          <Avatar
+            src={`/images/avatars/${imageFileName}.png`}
+            alt={userFullName}
+            sx={{ width: '2.5rem', height: '2.5rem' }}
+          />
+        </Badge>
+        <Box sx={{ ml: 3, display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
+          <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
+          <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
+            {userSession.data.user.role}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
 const UserLayout = ({ children, contentHeightFixed }) => {
   // ** Hooks
   const { settings, saveSettings } = useSettings()
@@ -124,6 +168,7 @@ const UserLayout = ({ children, contentHeightFixed }) => {
       }}
       verticalLayoutProps={{
         navMenu: {
+          beforeContent: () => <User />,
           navItems: VerticalNavItems(),
           branding: () => <AppBrand />
 

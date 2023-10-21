@@ -1,6 +1,14 @@
-export const fetchServices = async () => {
-  const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-  const data = await response.json()
+const services = [
+  { id: '1', name: 'adminui', status: 'running', lastStarted: '2023-10-20T12:34:56Z' },
+  { id: '2', name: 'oscarui', status: 'stop', lastStarted: '2023-10-19T10:20:30Z' }
 
-  return data
+  // ... add more services
+]
+
+export const fetchServices = async () => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+
+  // Return mock data
+  return services
 }

@@ -50,10 +50,10 @@ const UserThemeOptions = () => {
     if (skin === 'bordered' && mode === 'light') {
       return customWhiteColor
     } else if (skin === 'bordered' && mode === 'dark') {
-      return '#101217'
+      return '#0c0c0c'
     } else if (mode === 'light') {
       return '#F4F5FA'
-    } else return '#101217'
+    } else return '#0c0c0c'
   }
 
   return {
@@ -61,7 +61,7 @@ const UserThemeOptions = () => {
       primary: {
         light: '#4A4A4A', // '#9E69FD',
         main: '#242424', // '#9155FD',
-        dark: '#101217', // dark: '#804BDF',
+        dark: '#0C0C0C', // dark: '#804BDF',
         contrastText: '#FFF'
       },
       customColors: {
@@ -74,7 +74,7 @@ const UserThemeOptions = () => {
         avatarBg: mode === 'light' ? '#F0EFF0' : '#28243D',
         darkBg: skin === 'bordered' ? '#312D4B' : '#28243D',
         lightBg: skin === 'bordered' ? whiteColor : '#F4F5FA',
-        tableHeaderBg: mode === 'light' ? '#F9FAFC' : '#4A4A4A',
+        tableHeaderBg: mode === 'light' ? '#A0A0A0' : '#242424',
         brandBlue1: mode === 'light' ? '#4D97ED' : '#4D97ED',
         brandBlack: '#0C0C0C',
         brandWhite: '#FAFAFA',

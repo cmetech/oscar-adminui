@@ -1,5 +1,5 @@
 import logger from '../../../middleware/logger'
-import { fetchPosts, fetchServices } from '../../../api-helpers/fetchServices'
+import { fetchServices } from '../../../api-helpers/fetchServices'
 
 const handler = async (req, res) => {
   const { method } = req

@@ -60,7 +60,6 @@ const AppBrand = () => {
 
   return (
     <StyledLink href='/'>
-      <i className='icon icon-econ' />
       <Stack>
         {navCollapsed ? (
           <Box
@@ -168,6 +167,17 @@ const UserLayout = ({ children, contentHeightFixed }) => {
       }}
       verticalLayoutProps={{
         navMenu: {
+          componentProps: {
+            sx: {
+              '& .MuiList-root .nav-link:hover': {
+                bgcolor: '#A0A0A0',
+                borderRadius: '0 20px 20px 0'
+              },
+              '& .MuiList-root .nav-link:hover .MuiTypography-root': {
+                color: '#fff'
+              }
+            }
+          },
           beforeContent: () => <User />,
           navItems: VerticalNavItems(),
           branding: () => <AppBrand />

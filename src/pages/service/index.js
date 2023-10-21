@@ -99,15 +99,15 @@ const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
   ...customCheckbox(theme)
 }))
 
+const columns = [
+  { field: 'id', headerName: 'ID', width: 90 },
+  { field: 'name', headerName: 'Service Name', width: 150 },
+  { field: 'status', headerName: 'Service Status', width: 130 },
+  { field: 'lastStarted', headerName: 'Last Started', width: 200 }
+]
+
 const ServiceDataGrid = () => {
   const { data: services, isLoading } = useQuery({ queryKey: ['services'], queryFn: fetchServices })
-
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Service Name', width: 150 },
-    { field: 'status', headerName: 'Service Status', width: 130 },
-    { field: 'lastStarted', headerName: 'Last Started', width: 200 }
-  ]
 
   return (
     <div style={{ height: 400, width: '100%' }}>

@@ -51,6 +51,14 @@ function customCheckbox(theme) {
   }
 }
 
+function customDataGridPanel(theme) {
+  return {
+    '& .MuiDataGrid-panelHeader .MuiInput-root .MuiInput-input:after': {
+      color: theme.palette.mode === 'light' ? '#000' : '#fff'
+    }
+  }
+}
+
 const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
   border: 0,
   color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.85)',
@@ -96,7 +104,8 @@ const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-toolbarContainer .MuiButton-root:hover': {
     color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
   },
-  ...customCheckbox(theme)
+  ...customCheckbox(theme),
+  ...customDataGridPanel(theme)
 }))
 
 const columns = [

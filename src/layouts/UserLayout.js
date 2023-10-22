@@ -171,9 +171,12 @@ const UserLayout = ({ children, contentHeightFixed }) => {
             sx: {
               '& .MuiList-root .nav-link:hover': {
                 bgcolor: '#A0A0A0',
-                borderRadius: '0 20px 20px 0'
+                borderRadius: '0 22px 22px 0'
               },
               '& .MuiList-root .nav-link:hover .MuiTypography-root': {
+                color: '#fff'
+              },
+              '& .MuiList-root .nav-link:hover .MuiListItemIcon-root': {
                 color: '#fff'
               }
             }

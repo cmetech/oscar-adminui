@@ -16,9 +16,30 @@ const services = [
 ]
 
 export const fetchServices = async () => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  const stub = process.env.STUB === 'true'
 
-  // Return mock data
-  return services
+  if (stub) {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // Return mock data
+    return services
+  } else {
+    try {
+      const port = process.env.OSCARADMINUI_PORT || 4100
+      const host = process.env.OSCARAPI_SERVICENAME || 'oscarapi'
+
+      const response = await axios.get(`http://${host}:${port}/docker_compose_ps/`, {
+        params: {
+          project_name: 'your_project_name'
+        }
+      })
+
+      return response.data.Containers // Assuming the FastAPI endpoint returns a "Containers" field in the JSON response
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+
+      return null
+    }
+  }
 }

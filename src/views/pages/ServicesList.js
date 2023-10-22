@@ -252,7 +252,7 @@ const ServiceDataGrid = () => {
   const { data: services, isLoading } = useQuery({ queryKey: ['services'], queryFn: fetchServices })
 
   return (
-    <div style={{ height: 700, width: '100%' }}>
+    <div style={{ height: 900, width: '100%' }}>
       <EricssonDataGrid
         rows={services || []}
         columns={columns}

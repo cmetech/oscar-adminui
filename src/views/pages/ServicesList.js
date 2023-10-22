@@ -15,7 +15,8 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 
 // ** Custom Components
-import CustomChip from 'src/@core/components/mui/chip'
+//import CustomChip from 'src/@core/components/mui/chip'
+import ServiceCustomChip from 'src/views/pages/misc/ServiceCustomChip'
 
 function customCheckbox(theme) {
   return {
@@ -119,12 +120,12 @@ const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
 }))
 
 const columns = [
-  { field: 'id', headerName: 'ID', flex: 0.1, minWidth: 10 },
+  { field: 'id', headerName: 'ID', flex: 0.02, minWidth: 10 },
   {
     field: 'name',
     headerName: 'Service Name',
     type: 'string',
-    flex: 0.1,
+    flex: 0.02,
     minWidth: 10,
     renderCell: params => {
       const { row } = params
@@ -142,9 +143,9 @@ const columns = [
   },
   {
     field: 'type',
-    headerName: 'Service Type & Status',
+    headerName: 'Service Status',
     type: 'string',
-    flex: 0.1,
+    flex: 0.04,
     minWidth: 10,
     renderCell: params => {
       const { row } = params
@@ -163,21 +164,42 @@ const columns = [
       return (
         <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
           {row.type === 'container' ? (
-            <Icon icon='mdi:docker' />
+            <ServiceCustomChip
+              size='medium'
+              skin='light'
+              color={color}
+              label={status}
+              icon='mdi:docker'
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
+            />
           ) : row.type === 'workflow' ? (
-            <Icon icon='mdi:workflow' />
+            <ServiceCustomChip
+              size='medium'
+              skin='light'
+              color={color}
+              label={status}
+              icon='mdi:workflow'
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
+            />
           ) : row.type === 'fabric' ? (
-            <Icon icon='mdi:alpha-f-circle' />
+            <ServiceCustomChip
+              size='medium'
+              skin='light'
+              color={color}
+              label={status}
+              icon='mdi:alpha-f-circle'
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
+            />
           ) : (
-            <Icon icon='mdi:default-icon' /> // Default icon
+            <ServiceCustomChip
+              size='medium'
+              skin='light'
+              color={color}
+              label='unknown'
+              icon='mdi:default-icon'
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
+            />
           )}
-          <CustomChip
-            size='small'
-            skin='light'
-            color={color}
-            label={status}
-            sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-          />
         </Stack>
       )
     }

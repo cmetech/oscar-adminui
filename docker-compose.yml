@@ -6,7 +6,7 @@ services:
     platform: linux/amd64
     image: oscar/adminui-amd64:v1.0.0
     ports:
-      - '3000:3000'
+      - '4100:4100'
     networks:
       - my_network
     environment:

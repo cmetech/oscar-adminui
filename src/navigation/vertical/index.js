@@ -9,9 +9,9 @@ const navigation = () => {
       sectionTitle: 'Reports'
     },
     {
-      title: 'Service',
+      title: 'Services',
       icon: 'mdi:list-status',
-      path: '/service'
+      path: '/services'
     },
     {
       sectionTitle: 'Tools'

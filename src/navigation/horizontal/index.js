@@ -1,21 +1,57 @@
-const navigation = () => [
-  {
-    title: 'Home',
-    path: '/home',
-    icon: 'mdi:home-outline',
-  },
-  {
-    title: 'Second Page',
-    path: '/second-page',
-    icon: 'mdi:email-outline',
-  },
-  {
-    path: '/acl',
-    action: 'read',
-    subject: 'acl-page',
-    title: 'Access Control',
-    icon: 'mdi:shield-outline',
-  }
-]
+const navigation = () => {
+  return [
+    {
+      title: 'Overview',
+      path: '/home',
+      icon: 'mdi:home'
+    },
+    {
+      sectionTitle: 'Reports'
+    },
+    {
+      title: 'Services',
+      icon: 'mdi:list-status',
+      path: '/services'
+    },
+    {
+      sectionTitle: 'Tools'
+    },
+    {
+      title: 'Monitoring',
+      path: 'https://www.google.com',
+      icon: 'mdi:monitor-eye',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Automations',
+      path: 'https://www.google.com',
+      icon: 'mdi:arrow-decision-auto',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      sectionTitle: 'Administration'
+    },
+    {
+      badgeContent: '3',
+      badgeColor: 'info',
+      title: 'Management',
+      icon: 'mdi:cog',
+      children: [
+        {
+          title: 'Environment Settings',
+          path: '/acl',
+          icon: 'mdi:email'
+        },
+        {
+          title: 'Second Page',
+          path: '/second-page',
+          icon: 'mdi:email'
+        }
+      ]
+    }
+  ]
+}
 
 export default navigation

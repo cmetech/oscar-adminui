@@ -7,6 +7,16 @@ import { styled, useTheme } from '@mui/material/styles'
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
 
+// ** MUI Imports
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Stack from '@mui/material/Stack'
+import IconButton from '@mui/material/IconButton'
+import Icon from 'src/@core/components/icon'
+
+// ** Custom Components
+import CustomChip from 'src/@core/components/mui/chip'
+
 function customCheckbox(theme) {
   return {
     '& .MuiCheckbox-root svg': {
@@ -109,25 +119,131 @@ const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
 }))
 
 const columns = [
-  { field: 'id', headerName: 'ID', width: 90 },
-  { field: 'name', headerName: 'Service Name', width: 150 },
-  { field: 'status', headerName: 'Service Status', width: 130 },
-  { field: 'lastStarted', headerName: 'Last Started', width: 200 }
+  { field: 'id', headerName: 'ID', flex: 0.1, minWidth: 10 },
+  {
+    field: 'name',
+    headerName: 'Service Name',
+    type: 'string',
+    flex: 0.1,
+    minWidth: 10,
+    renderCell: params => {
+      const { row } = params
+
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {row.name.toUpperCase()}
+            </Typography>
+          </Box>
+        </Box>
+      )
+    }
+  },
+  {
+    field: 'type',
+    headerName: 'Service Type & Status',
+    type: 'string',
+    flex: 0.1,
+    minWidth: 10,
+    renderCell: params => {
+      const { row } = params
+
+      let color = 'success'
+      const status = row.status.toLowerCase()
+
+      if (status == 'failed') {
+        color = 'error'
+      } else if (status == 'pending') {
+        color = 'warning'
+      } else if (status == 'stopped') {
+        color = 'info'
+      }
+
+      return (
+        <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
+          {row.type === 'container' ? (
+            <Icon icon='mdi:docker' />
+          ) : row.type === 'workflow' ? (
+            <Icon icon='mdi:workflow' />
+          ) : row.type === 'fabric' ? (
+            <Icon icon='mdi:alpha-f-circle' />
+          ) : (
+            <Icon icon='mdi:default-icon' /> // Default icon
+          )}
+          <CustomChip
+            size='small'
+            skin='light'
+            color={color}
+            label={status}
+            sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+          />
+        </Stack>
+      )
+    }
+  },
+  {
+    field: 'lastStarted',
+    headerName: 'Last Started',
+    type: 'string',
+    flex: 0.1,
+    minWidth: 10,
+    renderCell: params => {
+      const { row } = params
+
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {row.lastStarted}
+            </Typography>
+          </Box>
+        </Box>
+      )
+    }
+  },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    type: 'string',
+    flex: 0.1,
+    minWidth: 10,
+    renderCell: params => {
+      return (
+        <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
+          <IconButton size='small' title='Clear' aria-label='Clear' onClick={null}>
+            <Icon icon='mdi:play' />
+          </IconButton>
+          <IconButton size='small' title='Clear' aria-label='Clear' onClick={null}>
+            <Icon icon='mdi:stop' />
+          </IconButton>
+          <IconButton size='small' title='Clear' aria-label='Clear' onClick={null}>
+            <Icon icon='mdi:restart' />
+          </IconButton>
+        </Stack>
+      )
+    }
+  }
 ]
 
 const ServiceDataGrid = () => {
   const { data: services, isLoading } = useQuery({ queryKey: ['services'], queryFn: fetchServices })
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 700, width: '100%' }}>
       <EricssonDataGrid
         rows={services || []}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
         checkboxSelection
-        components={{
-          Toolbar: GridToolbar
+        slots={{
+          toolbar: GridToolbar
+        }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true
+          }
         }}
         loading={isLoading}
       />

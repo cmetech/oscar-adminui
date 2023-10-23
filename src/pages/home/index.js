@@ -6,9 +6,10 @@ import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
-import TabList from '@mui/lab/TabList'
+import MuiTabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
+import { styled, useTheme } from '@mui/material/styles'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -86,6 +87,25 @@ const Home = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
+
+  // Styled TabList
+  const TabList = styled(MuiTabList)(({ theme }) => ({
+    '& .MuiTab-root': {
+      minHeight: 38,
+      minWidth: 130,
+      borderRadius: 6,
+      color:
+        theme.palette.mode === 'light' ? theme.palette.customColors.brandBlack : theme.palette.customColors.brandWhite,
+      '&.Mui-selected': {
+        backgroundColor: theme.palette.mode === 'light' ? '#E5E5E5' : theme.palette.primary.main,
+        color:
+          theme.palette.mode === 'light' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
+      }
+    },
+    '& .MuiTabs-indicator': {
+      display: 'none'
+    }
+  }))
 
   return (
     <ApexChartWrapper>

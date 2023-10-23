@@ -53,7 +53,11 @@ const TabularSummaryStatisticsCard = props => {
               <Box sx={{ height: 75, width: '100%', maxWidth: '120px' }}>
                 <ResponsiveContainer>
                   <BarChart height={100} data={chartData}>
-                    <Bar dataKey='value' fill={theme.palette.primary.main} radius={4} barSize={5} />
+                    {theme.palette.mode === 'light' ? (
+                      <Bar dataKey='value' fill={theme.palette.customColors.brandBlack} radius={4} barSize={5} />
+                    ) : (
+                      <Bar dataKey='value' fill={theme.palette.customColors.brandWhite} radius={4} barSize={5} />
+                    )}
                   </BarChart>
                 </ResponsiveContainer>
               </Box>

@@ -183,7 +183,9 @@ const UserLayout = ({ children, contentHeightFixed }) => {
           },
           beforeContent: () => <User />,
           navItems: VerticalNavItems(),
-          branding: () => <AppBrand />
+          branding: () => <AppBrand />,
+          lockedIcon: <Icon icon='mdi:arrow-left-bold-circle-outline' />,
+          unlockedIcon: <Icon icon='mdi:arrow-right-bold-circle-outline' />
 
           // Uncomment the below line when using server-side menu in vertical layout and comment the above line
           // navItems: verticalMenuItems

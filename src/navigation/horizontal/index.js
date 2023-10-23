@@ -6,12 +6,12 @@ const navigation = () => {
       icon: 'mdi:home'
     },
     {
-      sectionTitle: 'Reports'
+      title: 'Second Page',
+      path: '/second-page',
+      icon: 'mdi:email'
     },
     {
-      title: 'Services',
-      icon: 'mdi:list-status',
-      path: '/services'
+      sectionTitle: 'Reports'
     },
     {
       sectionTitle: 'Tools'
@@ -34,22 +34,14 @@ const navigation = () => {
       sectionTitle: 'Administration'
     },
     {
-      badgeContent: '3',
-      badgeColor: 'info',
-      title: 'Management',
-      icon: 'mdi:cog',
-      children: [
-        {
-          title: 'Environment Settings',
-          path: '/acl',
-          icon: 'mdi:email'
-        },
-        {
-          title: 'Second Page',
-          path: '/second-page',
-          icon: 'mdi:email'
-        }
-      ]
+      title: 'Services',
+      icon: 'mdi:list-status',
+      path: '/services'
+    },
+    {
+      title: 'Automations',
+      path: '/automations',
+      icon: 'mdi:arrow-decision-auto'
     }
   ]
 }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
-import { fetchServices } from '../../api-helpers/fetchServices'
+import { fetchAutomations } from '../../api-helpers/fetchAutomations'
 import { styled, useTheme } from '@mui/material/styles'
 
 // ** Hook Import
@@ -123,7 +123,7 @@ const columns = [
   { field: 'id', headerName: 'ID', flex: 0.02, minWidth: 10 },
   {
     field: 'name',
-    headerName: 'Service Name',
+    headerName: 'Name',
     type: 'string',
     flex: 0.02,
     minWidth: 10,
@@ -143,7 +143,7 @@ const columns = [
   },
   {
     field: 'type',
-    headerName: 'Service Status',
+    headerName: 'Status',
     type: 'string',
     flex: 0.04,
     minWidth: 10,
@@ -163,13 +163,13 @@ const columns = [
 
       return (
         <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-          {row.type === 'container' ? (
+          {row.type === 'playbook' ? (
             <ServiceCustomChip
               size='medium'
               skin='light'
               color={color}
               label={status}
-              icon='mdi:docker'
+              icon='mdi:arrow-decision-auto'
               sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
             />
           ) : row.type === 'workflow' ? (
@@ -187,7 +187,7 @@ const columns = [
               skin='light'
               color={color}
               label={status}
-              icon='mdi:alpha-f-circle'
+              icon='mdi:wrench-clock'
               sx={{ '& .MuiChip-label': { textTransform: 'capitalize', width: '80px' } }}
             />
           ) : (
@@ -248,13 +248,13 @@ const columns = [
   }
 ]
 
-const ServiceDataGrid = () => {
-  const { data: services, isLoading } = useQuery({ queryKey: ['services'], queryFn: fetchServices })
+const AutomationsDataGrid = () => {
+  const { data: automations, isLoading } = useQuery({ queryKey: ['automations'], queryFn: fetchAutomations })
 
   return (
     <div style={{ height: 900, width: '100%' }}>
       <EricssonDataGrid
-        rows={services || []}
+        rows={automations || []}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
@@ -273,4 +273,4 @@ const ServiceDataGrid = () => {
   )
 }
 
-export default ServiceDataGrid
+export default AutomationsDataGrid

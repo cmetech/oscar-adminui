@@ -12,7 +12,7 @@ const themeConfig = {
   direction: 'ltr' /* ltr | rtl */,
   skin: 'default' /* default | bordered */,
   contentWidth: 'full' /* full | boxed */,
-  footer: 'fixed' /* fixed | static | hidden */,
+  footer: 'hidden' /* fixed | static | hidden */,
   // ** Routing Configs
   routingLoader: true /* true | false */,
   // ** Navigation (Menu) Configs

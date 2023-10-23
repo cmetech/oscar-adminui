@@ -9,11 +9,6 @@ const navigation = () => {
       sectionTitle: 'Reports'
     },
     {
-      title: 'Services',
-      icon: 'mdi:list-status',
-      path: '/services'
-    },
-    {
       sectionTitle: 'Tools'
     },
     {
@@ -24,32 +19,35 @@ const navigation = () => {
       openInNewTab: true
     },
     {
-      title: 'Automations',
-      path: 'https://www.google.com',
-      icon: 'mdi:arrow-decision-auto',
-      externalLink: true,
-      openInNewTab: true
-    },
-    {
       sectionTitle: 'Administration'
     },
     {
-      badgeContent: '3',
-      badgeColor: 'info',
-      title: 'Management',
-      icon: 'mdi:cog',
-      children: [
-        {
-          title: 'Environment Settings',
-          path: '/acl',
-          icon: 'mdi:email'
-        },
-        {
-          title: 'Second Page',
-          path: '/second-page',
-          icon: 'mdi:email'
-        }
-      ]
+      title: 'Services',
+      icon: 'mdi:list-status',
+      path: '/services'
+    },
+    {
+      title: 'Automations',
+      path: '/automations',
+      icon: 'mdi:arrow-decision-auto'
+    },
+    {
+      sectionTitle: 'Help & Feedback'
+    },
+    {
+      title: 'OSCAR Academy',
+      path: '/oscar-academy',
+      icon: 'mdi:information-slab-circle'
+    },
+    {
+      title: 'Feedback',
+      path: '/feedback',
+      icon: 'mdi:comment-alert'
+    },
+    {
+      title: "What's New",
+      path: '/new-features',
+      icon: 'mdi:new-box'
     }
   ]
 }

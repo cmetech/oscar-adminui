@@ -11,28 +11,28 @@ import CardContent from '@mui/material/CardContent'
 import Icon from 'src/@core/components/icon'
 
 // ** Views
-import ServicesDataGrid from 'src/views/pages/ServicesDataGrid'
+import AutomationsDataGrid from 'src/views/pages/AutomationsDataGrid'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { set } from 'nprogress'
 
-const ServicesDashboard = () => {
+const AutomationsDashboard = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <ServicesDataGrid />
+        <AutomationsDataGrid />
       </Grid>
     </Grid>
   )
 }
 
-ServicesDashboard.acl = {
+AutomationsDashboard.acl = {
   action: 'read',
-  subject: 'services-page'
+  subject: 'automations-page'
 }
 
-export default ServicesDashboard
+export default AutomationsDashboard

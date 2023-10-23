@@ -102,6 +102,10 @@ const Home = () => {
           theme.palette.mode === 'light' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
       }
     },
+    '& .MuiTab-root:hover': {
+      color:
+        theme.palette.mode === 'light' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
+    },
     '& .MuiTabs-indicator': {
       display: 'none'
     }

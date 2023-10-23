@@ -19,6 +19,11 @@ const navigation = () => {
       sectionTitle: 'Service Continuity'
     },
     {
+      title: 'Alerts & Incidents',
+      icon: 'mdi:bell-alert',
+      path: '/services'
+    },
+    {
       title: 'Availability',
       icon: 'mdi:list-status',
       path: '/services'
@@ -62,7 +67,7 @@ const navigation = () => {
     {
       title: 'OSCAR Academy',
       path: '/oscar-academy',
-      icon: 'mdi:information-slab-circle'
+      icon: 'mdi:school-outline'
     },
     {
       title: 'Feedback',

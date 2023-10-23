@@ -60,7 +60,11 @@ const MenuFooter = () => {
         borderTop: theme => `1px solid ${theme.palette.divider}`
       }}
     >
-      {navCollapsed ? null : <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />}
+      {navCollapsed ? (
+        <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
+      ) : (
+        <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
+      )}
     </Box>
   )
 }

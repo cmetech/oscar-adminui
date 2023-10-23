@@ -161,7 +161,9 @@ const LoginPage = ({ csrfToken, providers }) => {
     <Box
       className='content-center'
       sx={{
-        backgroundImage: 'url(/images/comet-login-bg1.jpg)',
+        backgroundImage: `${
+          theme.palette.mode === 'dark' ? 'url(/images/black-spotlight-bg.jpg)' : 'url(/images/white-spotlight-bg.jpg)'
+        }`,
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed'

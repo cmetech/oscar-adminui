@@ -47,6 +47,24 @@ const StyledLink = styled(Link)(({ mode }) => ({
   color: mode === 'light' ? '#0c0c0c' : '#fff'
 }))
 
+const MenuFooter = () => {
+  const { settings } = useSettings()
+  const { navCollapsed, mode } = settings
+
+  return (
+    <Box
+      sx={{
+        pt: 10,
+        display: 'flex',
+        justifyContent: 'center',
+        borderTop: theme => `1px solid ${theme.palette.divider}`
+      }}
+    >
+      {navCollapsed ? null : <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />}
+    </Box>
+  )
+}
+
 const AppBrand = () => {
   const { settings, saveSettings } = useSettings()
   const theme = useTheme()
@@ -139,6 +157,7 @@ const User = () => {
 const UserLayout = ({ children, contentHeightFixed }) => {
   // ** Hooks
   const { settings, saveSettings } = useSettings()
+  const theme = useTheme()
 
   // ** Vars for server side navigation
   // const { menuItems: verticalMenuItems } = ServerSideVerticalNavItems()
@@ -178,10 +197,17 @@ const UserLayout = ({ children, contentHeightFixed }) => {
               },
               '& .MuiList-root .nav-link:hover .MuiListItemIcon-root': {
                 color: '#fff'
+              },
+              '& .MuiDivider-root .MuiTypography-root': {
+                color:
+                  theme.palette.mode === 'dark'
+                    ? theme.palette.customColors.brandBlue
+                    : theme.palette.customColors.brandBlue
               }
             }
           },
           beforeContent: () => <User />,
+          afterContent: () => <MenuFooter />,
           navItems: VerticalNavItems(),
           branding: () => <AppBrand />,
           lockedIcon: <Icon icon='mdi:arrow-left-bold-circle-outline' />,

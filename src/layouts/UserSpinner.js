@@ -30,6 +30,7 @@ const UserFallbackSpinner = ({ sx }) => {
       }}
     >
       <Stack>
+        <img src='/images/oscar.png' width='200' height='200' alt='spinner' />
         {navCollapsed ? (
           <Box
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}

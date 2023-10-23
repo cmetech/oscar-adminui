@@ -6,30 +6,55 @@ const navigation = () => {
       icon: 'mdi:home'
     },
     {
-      sectionTitle: 'Reports'
+      sectionTitle: 'Observability'
     },
     {
-      sectionTitle: 'Tools'
-    },
-    {
-      title: 'Monitoring',
-      path: 'https://www.google.com',
+      title: 'Advanced Dashboards',
+      path: 'https://www.grafana.com',
       icon: 'mdi:monitor-eye',
       externalLink: true,
       openInNewTab: true
     },
     {
-      sectionTitle: 'Administration'
+      sectionTitle: 'Service Continuity'
     },
     {
-      title: 'Services',
+      title: 'Availability',
       icon: 'mdi:list-status',
       path: '/services'
     },
     {
-      title: 'Automations',
-      path: '/automations',
+      title: 'Capacity',
+      icon: 'mdi:thermometer-check',
+      path: '/services'
+    },
+    {
+      title: 'Performance',
+      icon: 'mdi:chart-areaspline-variant',
+      path: '/services'
+    },
+    {
+      title: 'SLA',
+      icon: 'mdi:check-decagram',
+      path: '/services'
+    },
+    {
+      sectionTitle: 'AI/Automation'
+    },
+    {
+      title: 'Runbooks',
+      path: '/runbooks',
       icon: 'mdi:arrow-decision-auto'
+    },
+    {
+      title: 'Workflows',
+      path: '/workflows',
+      icon: 'mdi:sitemap'
+    },
+    {
+      title: 'Canaries (Synthetic)',
+      path: '/workflows',
+      icon: 'mdi:api'
     },
     {
       sectionTitle: 'Help & Feedback'

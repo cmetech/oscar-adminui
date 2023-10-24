@@ -162,7 +162,9 @@ const LoginPage = ({ csrfToken, providers }) => {
       className='content-center'
       sx={{
         backgroundImage: `${
-          theme.palette.mode === 'dark' ? 'url(/images/black-spotlight-bg.jpg)' : 'url(/images/white-spotlight-bg.jpg)'
+          theme.palette.mode === 'dark'
+            ? 'url(/images/black-spotlight-bg.jpg)'
+            : 'url(/images/white-spotlight-bg-1.jpg)'
         }`,
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',

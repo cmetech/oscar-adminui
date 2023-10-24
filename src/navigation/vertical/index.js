@@ -10,7 +10,7 @@ const navigation = () => {
     },
     {
       title: 'Advanced Dashboards',
-      path: 'https://www.grafana.com',
+      path: 'https:localhost/ui',
       icon: 'mdi:monitor-eye',
       externalLink: true,
       openInNewTab: true

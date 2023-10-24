@@ -18,6 +18,40 @@ services:
       MONGODB_URI: ${MONGODB_URI}
       NODE_ENV: production
 
+  oscarapi:
+    container_name: oscarapi
+    platform: linux/amd64
+    image: oscar/api-amd64:v1.0.0
+    ports:
+      - '4200:4200'
+    networks:
+      - my_network
+    command:
+      - /bin/sh
+      - -c
+      - |
+        uvicorn app.main:app --host 0.0.0.0 --port 4200
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  oscarfabric:
+    container_name: oscarfabric
+    platform: linux/amd64
+    image: oscar/fabric-amd64:v1.0.0
+    ports:
+      - '5200:5200'
+    networks:
+      - my_network
+    command:
+      - /bin/zsh
+      - -c
+      - |
+        /home/splunk/.local/bin/uvicorn app.main:app --host 0.0.0.0 --port 5200
+    volumes:
+      - ./src/fabfile:/home/splunk/fabfile
+      - ./src/fabric.yml:/home/splunk/fabric.yml
+      - ./src/utils:/home/splunk/utils
+
 networks:
   my_network:
     name: my_network

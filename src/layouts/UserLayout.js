@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Link from 'next/link'
 import Stack from '@mui/material/Stack'
@@ -14,6 +15,9 @@ import Icon from 'src/@core/components/icon'
 import { styled, useTheme } from '@mui/material/styles'
 import Badge from '@mui/material/Badge'
 import Avatar from '@mui/material/Avatar'
+import Fade from '@mui/material/Fade'
+import Paper from '@mui/material/Paper'
+import Popper from '@mui/material/Popper'
 
 // ** Navigation Imports
 import VerticalNavItems from 'src/navigation/vertical'
@@ -49,7 +53,16 @@ const StyledLink = styled(Link)(({ mode }) => ({
 
 const MenuFooter = () => {
   const { settings } = useSettings()
-  const { navCollapsed, mode } = settings
+  const { navCollapsed, mode, disablePopper } = settings
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [open, setOpen] = useState(false)
+  const [placement, setPlacement] = useState()
+
+  const handleClick = newPlacement => event => {
+    setAnchorEl(event.currentTarget)
+    setOpen(prev => placement !== newPlacement || !prev)
+    setPlacement(newPlacement)
+  }
 
   return (
     <Box
@@ -60,10 +73,27 @@ const MenuFooter = () => {
         borderTop: theme => `1px solid ${theme.palette.divider}`
       }}
     >
+      {disablePopper ? null : (
+        <Popper open={open} anchorEl={anchorEl} placement={placement} transition>
+          {({ TransitionProps }) => (
+            <Fade {...TransitionProps} timeout={350}>
+              {navCollapsed ? (
+                <Paper sx={{ marginLeft: 3 }}>
+                  <Typography sx={{ p: 2 }}>The content of the Popper.</Typography>
+                </Paper>
+              ) : (
+                <Paper sx={{ marginLeft: 15 }}>
+                  <Typography sx={{ p: 2 }}>The content of the Popper.</Typography>
+                </Paper>
+              )}
+            </Fade>
+          )}
+        </Popper>
+      )}
       {navCollapsed ? (
-        <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
+        <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' onClick={handleClick('right-end')} />
       ) : (
-        <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
+        <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' onClick={handleClick('right-end')} />
       )}
     </Box>
   )
@@ -149,9 +179,14 @@ const User = () => {
         </Badge>
         <Box sx={{ ml: 3, display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
           <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
-          <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-            {userSession.data.user.role}
-          </Typography>
+          <Stack direction='row' alignItems='center' spacing={0.5}>
+            <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
+              {userSession.data.user.role}
+            </Typography>
+            {userSession.data.user.role === 'admin' ? (
+              <Icon icon='mdi:shield-crown-outline' color='success' sx={{ width: 10, height: 10, ml: 0.5 }} />
+            ) : null}
+          </Stack>
         </Box>
       </Box>
     </Box>

@@ -83,12 +83,19 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const schema = yup.object().shape({
-  firstname: yup.string().max(10).required(),
-  lastname: yup.string().max(10).required(),
-  username: yup.string().max(10).required(),
+  firstname: yup.string().max(20).required(),
+  lastname: yup.string().max(20).required(),
+  username: yup.string().max(20).required(),
   email: yup.string().email().required(),
   password: yup.string().min(5).required()
 })
+
+const defaultValues = {
+  username: 'Enter Username',
+  firstname: 'Enter First Name',
+  lastname: 'Enter Last Name',
+  email: 'user@email.com'
+}
 
 const RegisterPage = () => {
   // ** States
@@ -110,6 +117,7 @@ const RegisterPage = () => {
     handleSubmit,
     formState: { errors }
   } = useForm({
+    defaultValues,
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })

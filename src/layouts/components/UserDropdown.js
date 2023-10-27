@@ -55,6 +55,7 @@ const UserDropdown = props => {
 
   const handleDropdownClose = url => {
     if (url) {
+      console.log('url', url)
       router.push(url)
     }
     setAnchorEl(null)
@@ -134,7 +135,7 @@ const UserDropdown = props => {
           </Box>
         </Box>
         <Divider sx={{ mt: '0 !important' }} />
-        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose()}>
+        <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/account-settings/account')}>
           <Box sx={styles}>
             <Icon icon='mdi:account-outline' />
             Profile

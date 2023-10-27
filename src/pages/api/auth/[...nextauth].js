@@ -93,10 +93,6 @@ export const authOptions = {
           throw new Error('NextAuth - Authorize: Auth Error')
         }
       }
-    }),
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET
     })
 
     // ** ...add more providers here
@@ -138,6 +134,7 @@ export const authOptions = {
          * For adding custom parameters to user in session, we first need to add those parameters
          * in token which then will be available in the `session()` callback
          */
+
         token.role = user.role
         token.fullName = user.fullName
       }

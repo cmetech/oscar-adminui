@@ -93,27 +93,160 @@ model Model {
   version String   @db.VarChar(20)
 }
 
-model OAUsers {
-  username        String    @unique(map: "username") @db.VarChar(20)
-  first_name      String    @db.VarChar(20)
-  last_name       String    @db.VarChar(20)
-  id              String    @id @db.Char(36)
-  email           String    @unique(map: "ix_OAUsers_email") @db.VarChar(320)
-  hashed_password String    @db.VarChar(1024)
-  is_active       Boolean
-  is_superuser    Boolean
-  is_verified     Boolean
-  created_at      DateTime? @default(now()) @db.Timestamp(0)
-  modified_at     DateTime? @default(now()) @db.Timestamp(0)
+model APSchedulerJobs {
+  id            String @id
+  next_run_time Float?
+  job_state     Bytes  @db.Blob
+
+  @@index([next_run_time], map: "ix_APSchedulerJobs_next_run_time")
 }
 
-model ServerInventory {
-  ID          Int    @id @default(autoincrement())
-  datacenter  String @db.VarChar(50)
-  environment String @db.VarChar(50)
-  component   String @db.VarChar(50)
-  ipaddress   String @db.VarChar(15)
-  hostname    String @db.VarChar(150)
+model IM_Components {
+  id               String             @id @db.Char(36)
+  name             String             @unique(map: "name") @db.VarChar(255)
+  type             String?            @db.VarChar(255)
+  details          String?            @db.VarChar(255)
+  created_at       DateTime?          @default(now()) @db.Timestamp(0)
+  modified_at      DateTime?          @default(now()) @db.Timestamp(0)
+  IM_Servers       IM_Servers[]
+  IM_Subcomponents IM_Subcomponents[]
+}
+
+model IM_DataCenters {
+  id              String            @id @db.Char(36)
+  name            String            @unique(map: "name") @db.VarChar(255)
+  location        String?           @db.VarChar(255)
+  created_at      DateTime?         @default(now()) @db.Timestamp(0)
+  modified_at     DateTime?         @default(now()) @db.Timestamp(0)
+  IM_Environments IM_Environments[]
+}
+
+model IM_Environments {
+  id             String         @id @db.Char(36)
+  name           String         @db.VarChar(255)
+  description    String?        @db.VarChar(255)
+  datacenter_id  String         @db.Char(36)
+  created_at     DateTime?      @default(now()) @db.Timestamp(0)
+  modified_at    DateTime?      @default(now()) @db.Timestamp(0)
+  IM_DataCenters IM_DataCenters @relation(fields: [datacenter_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Environments_ibfk_1")
+  IM_Servers     IM_Servers[]
+
+  @@index([datacenter_id], map: "datacenter_id")
+}
+
+model IM_ServerMetadata {
+  id          String     @id @db.Char(36)
+  server_id   String     @db.Char(36)
+  key         String     @db.VarChar(255)
+  value       String     @db.VarChar(255)
+  created_at  DateTime?  @default(now()) @db.Timestamp(0)
+  modified_at DateTime?  @default(now()) @db.Timestamp(0)
+  IM_Servers  IM_Servers @relation(fields: [server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_ServerMetadata_ibfk_1")
+
+  @@index([server_id], map: "server_id")
+}
+
+model IM_ServerNetworkInterfaces {
+  id          String     @id @db.Char(36)
+  server_id   String     @db.Char(36)
+  name        String     @db.VarChar(255)
+  label       String?    @db.VarChar(255)
+  ip_address  String     @unique(map: "ip_address") @db.VarChar(255)
+  created_at  DateTime?  @default(now()) @db.Timestamp(0)
+  modified_at DateTime?  @default(now()) @db.Timestamp(0)
+  IM_Servers  IM_Servers @relation(fields: [server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_ServerNetworkInterfaces_ibfk_1")
+
+  @@index([server_id], map: "server_id")
+}
+
+model IM_Servers {
+  id                         String                       @id @db.Char(36)
+  hostname                   String                       @db.VarChar(255)
+  status                     String                       @db.VarChar(255)
+  environment_id             String                       @db.Char(36)
+  component_id               String?                      @db.Char(36)
+  subcomponent_id            String?                      @db.Char(36)
+  group_id                   String?                      @db.Char(36)
+  created_at                 DateTime?                    @default(now()) @db.Timestamp(0)
+  modified_at                DateTime?                    @default(now()) @db.Timestamp(0)
+  IM_ServerMetadata          IM_ServerMetadata[]
+  IM_ServerNetworkInterfaces IM_ServerNetworkInterfaces[]
+  IM_Environments            IM_Environments              @relation(fields: [environment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Servers_ibfk_1")
+  IM_Components              IM_Components?               @relation(fields: [component_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Servers_ibfk_2")
+  IM_Subcomponents           IM_Subcomponents?            @relation(fields: [subcomponent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Servers_ibfk_3")
+  IM_UserGroups              IM_UserGroups?               @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Servers_ibfk_4")
+
+  @@index([component_id], map: "component_id")
+  @@index([environment_id], map: "environment_id")
+  @@index([group_id], map: "group_id")
+  @@index([subcomponent_id], map: "subcomponent_id")
+}
+
+model IM_Subcomponents {
+  id             String        @id @db.Char(36)
+  component_id   String        @db.Char(36)
+  name           String        @db.VarChar(255)
+  specifications String?       @db.VarChar(255)
+  created_at     DateTime?     @default(now()) @db.Timestamp(0)
+  modified_at    DateTime?     @default(now()) @db.Timestamp(0)
+  IM_Servers     IM_Servers[]
+  IM_Components  IM_Components @relation(fields: [component_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_Subcomponents_ibfk_1")
+
+  @@index([component_id], map: "component_id")
+}
+
+model IM_UserGroups {
+  id                        String                      @id @db.Char(36)
+  name                      String                      @unique(map: "name") @db.VarChar(255)
+  description               String?                     @db.VarChar(255)
+  created_at                DateTime?                   @default(now()) @db.Timestamp(0)
+  modified_at               DateTime?                   @default(now()) @db.Timestamp(0)
+  IM_Servers                IM_Servers[]
+  IM_User_Group_Association IM_User_Group_Association[]
+}
+
+model IM_User_Group_Association {
+  user_id       String        @db.Char(36)
+  group_id      String        @db.Char(36)
+  Users         Users         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_User_Group_Association_ibfk_1")
+  IM_UserGroups IM_UserGroups @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "IM_User_Group_Association_ibfk_2")
+
+  @@id([user_id, group_id])
+  @@index([group_id], map: "group_id")
+}
+
+model TaskManagerHistory {
+  id          String    @id @db.Char(36)
+  name        String    @db.VarChar(255)
+  state       String    @db.VarChar(255)
+  alias       String?   @db.VarChar(255)
+  received    DateTime? @db.DateTime(0)
+  sent        DateTime? @db.DateTime(0)
+  started     DateTime? @db.DateTime(0)
+  succeeded   DateTime? @db.DateTime(0)
+  timestamp   DateTime? @db.DateTime(0)
+  kwargs      String?   @db.VarChar(255)
+  args        String?   @db.VarChar(255)
+  result      String?   @db.Text
+  worker      String?   @db.VarChar(255)
+  runtime     Float?    @db.Float
+  root_id     String?   @db.Char(36)
+  routing_key String?   @db.VarChar(255)
+}
+
+model Users {
+  username                  String                      @unique(map: "username") @db.VarChar(20)
+  first_name                String                      @db.VarChar(20)
+  last_name                 String                      @db.VarChar(20)
+  id                        String                      @id @db.Char(36)
+  email                     String                      @unique(map: "ix_Users_email") @db.VarChar(320)
+  hashed_password           String                      @db.VarChar(1024)
+  is_active                 Boolean
+  is_superuser              Boolean
+  is_verified               Boolean
+  created_at                DateTime?                   @default(now()) @db.Timestamp(0)
+  modified_at               DateTime?                   @default(now()) @db.Timestamp(0)
+  IM_User_Group_Association IM_User_Group_Association[]
 }
 
 enum Model_ID {

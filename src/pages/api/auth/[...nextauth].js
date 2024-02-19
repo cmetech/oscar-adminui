@@ -3,59 +3,11 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GithubProvider from 'next-auth/providers/github'
 
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 
 import axios from 'axios'
+import https from 'https'
 import formData from 'form-data'
-
-/*
- * As we do not have backend server, the refresh token feature has not been incorporated into the template.
- * Please refer https://next-auth.js.org/tutorials/refresh-token-rotation link for a reference.
- */
-const users = [
-  {
-    id: 1,
-    role: 'admin',
-    password: 'admin',
-    username: 'ecorell',
-    fullName: 'Corey Ellis',
-    email: 'corey.ellis@ericsson.com'
-  },
-  {
-    id: 2,
-    role: 'client',
-    password: 'guest',
-    username: 'guest',
-    fullName: 'John Doe',
-    email: 'guest@ericsson.com'
-  },
-  {
-    id: 3,
-    role: 'admin',
-    password: 'admin',
-    username: 'ekargaj',
-    fullName: 'Kartik Gajjar',
-    email: 'kartik.gajjar@ericsson.com'
-  },
-  {
-    id: 4,
-    role: 'admin',
-    password: 'admin',
-    username: 'erupnag',
-    fullName: 'Rupesh Nagar',
-    email: 'rupesh.nagar@ericsson.com'
-  },
-  {
-    id: 5,
-    role: 'admin',
-    password: 'admin',
-    username: 'adminuser',
-    fullName: 'Admin User',
-    email: 'admin@ericsson.com'
-  }
-]
 
 export const authOptions = {
   // ** Configure one or more authentication providers
@@ -74,79 +26,56 @@ export const authOptions = {
       credentials: {},
 
       async authorize(credentials) {
-        const { email, password } = credentials
+        try {
+          // Use URLSearchParams to construct x-www-form-urlencoded data
+          const params = new URLSearchParams()
+          params.append('username', credentials.email) // Make sure to use 'username' as the key if that's what your backend expects
+          params.append('password', credentials.password)
 
-        if (process.env.STUB === 'true') {
-          /*
-           * You need to provide your own logic here that takes the credentials submitted and returns either
-           * an object representing a user or value that is false/null if the credentials are invalid.
-           * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-           * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
-           */
+          // Create an instance of https.Agent for the request to bypass SSL certificate errors
+          const httpsAgent = new https.Agent({
+            rejectUnauthorized: false // Remember, this is for development only!
+          })
 
-          try {
-            // ** Login API Call to match the user credentials and receive user data in response along with his role
-            const user = users.find(u => u.email === email && u.password === password)
+          // Perform the login API call and return the token
+          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/login`, params, {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            httpsAgent
+          })
 
-            if (user) {
-              /*
-               * Please unset all the sensitive information of the user either from API response or before returning
-               * user data below. Below return statement will set the user object in the token and the same is set in
-               * the session which will be accessible all over the app.
-               */
-              return user
-            }
+          // Retrieve the current user logged in
+          if (response.status === 200 && response.data.access_token) {
+            const accessToken = response.data.access_token
 
-            throw new Error('Email or Password is Invalid')
-          } catch {
-            throw new Error('NextAuth - Authorize: Auth Error')
-          }
-        } else {
-          const prisma = new PrismaClient()
+            try {
+              const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+                headers: {
+                  accept: 'application/json',
+                  Authorization: `Bearer ${accessToken}`
+                },
+                httpsAgent
+              })
 
-          try {
-            // Query user by email
-            const user = await prisma.oAUsers.findUnique({
-              where: {
-                email: email
+              if (userResponse.status === 200) {
+                const userWithToken = {
+                  ...userResponse.data,
+                  access_token: accessToken,
+                  token_type: response.data.token_type
+                }
+
+                // console.log(userWithToken) // Process user details
+
+                return userWithToken
               }
-            })
-
-            if (!user) {
-              throw new Error('No user found')
+            } catch (error) {
+              console.error('Failed to fetch user details:', error)
             }
-
-            // Check if user is active
-            if (user.is_active === 0) {
-              throw new Error('User is deactivated')
-            }
-
-            // Compare hashed password
-            const isValid = await bcrypt.compare(password, user.hashed_password)
-
-            if (!isValid) {
-              throw new Error('Invalid password')
-            }
-
-            // Remove sensitive hashed_password field
-            const { hashed_password, ...safeUser } = user
-
-            // Add fullName to the user object
-            safeUser.fullName = `${safeUser.first_name} ${safeUser.last_name}`
-
-            // Add role based on is_superuser
-            safeUser.role = safeUser.is_superuser ? 'admin' : 'regular'
-
-            // Add password to the user object
-            safeUser.password = password
-
-            console.log('User:', safeUser)
-
-            return safeUser
-          } catch (error) {
-            console.error('Authorize error:', error)
-            throw new Error('NextAuth - Authorize: Auth Error')
           }
+        } catch (error) {
+          console.error('Authorize error:', error)
+          throw new Error('NextAuth - Authorize: Auth Error')
         }
       }
     })
@@ -185,53 +114,31 @@ export const authOptions = {
      * via `jwt()` callback to make them accessible in the `session()` callback
      */
     async jwt({ token, user, session }) {
-      console.log('JWT Callback', { token, user, session })
+      // console.log('JWT Callback', { token, user, session })
       if (user) {
-        // Prepare form data for API call
-        const formData = new FormData()
-        formData.append('username', user.email) // Assuming you have username in the user object
-        formData.append('password', user.password) // CAUTION: Storing password in JWT is not recommended
+        // Extract API token from the response
+        const apiToken = user.access_token
 
-        try {
-          // Make API call to get API token
-          const response = await axios({
-            method: 'post',
-            url: `${process.env.OAPI_URL}/auth/jwt/login`,
-            data: formData,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          })
-
-          // Extract API token from the response
-          const apiToken = response.data.access_token // Specific to your API's response structure
-
-          // Add API token to JWT
-          const updatedToken = {
-            ...token,
-            apiToken,
-            role: user.role,
-            fullName: user.fullName,
-            username: user.username
-          }
-
-          // Log the updated token object
-          console.log('Updated Token', updatedToken)
-
-          // Return the updated token object
-          return updatedToken
-        } catch (error) {
-          console.error('Error fetching API token:', error)
-
-          // Handle error as needed
-          return token
+        // Add API token to JWT
+        const updatedToken = {
+          ...token,
+          apiToken,
+          role: user.is_superuser ? 'admin' : 'user',
+          name: user.first_name + ' ' + user.last_name,
+          username: user.username
         }
+
+        // Log the updated token object
+        // console.log('Updated Token', updatedToken)
+
+        // Return the updated token object
+        return updatedToken
       }
 
       return token
     },
     async session({ session, token, user }) {
-      console.log('Session Callback', { session, token, user })
+      // console.log('Session Callback', { session, token, user })
       if (session.user) {
         // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
         const updatedSession = {
@@ -239,7 +146,6 @@ export const authOptions = {
           user: {
             ...session.user,
             role: token.role,
-            fullName: token.fullName,
             username: token.username,
             apiToken: token.apiToken
           },
@@ -247,7 +153,7 @@ export const authOptions = {
         }
 
         // Log the updated session object
-        console.log('Updated Session', updatedSession)
+        // console.log('Updated Session', updatedSession)
 
         // Return the updated session object
         return updatedSession

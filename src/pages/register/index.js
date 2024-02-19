@@ -1,5 +1,6 @@
 // ** React Imports
 import { useState, Fragment } from 'react'
+import https from 'https'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -130,11 +131,14 @@ const RegisterPage = () => {
         first_name: data.firstname,
         last_name: data.lastname,
         email: data.email,
-        password: data.password
+        password: data.password,
+        is_active: 1,
+        is_superuser: 0,
+        is_verified: 0
       }
 
-      // Make the POST request
-      const response = await axios.post('http://localhost:4200/auth/register', payload)
+      // Register User
+      const response = await axios.post('/api/auth/register', payload)
 
       console.log('status', response.status)
       if (response.status === 201) {

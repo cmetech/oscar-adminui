@@ -22,5 +22,14 @@ module.exports = {
     defaultLocale: 'en'
   },
 
+  serverRuntimeConfig: {
+    API_URL: process.env.API_ENDPOINT
+  },
+
+  // Will be available on both server and client
+  publicRuntimeConfig: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL
+  },
+
   output: 'standalone'
 }

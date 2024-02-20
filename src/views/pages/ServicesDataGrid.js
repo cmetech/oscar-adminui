@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid'
+import { DataGridPro, GridToolbar } from '@mui/x-data-grid-pro'
 import { useQuery } from '@tanstack/react-query'
 import { fetchServices } from '../../api-helpers/fetchServices'
 import { styled, useTheme } from '@mui/material/styles'
@@ -70,7 +70,7 @@ function customDataGridPanel(theme) {
   }
 }
 
-const EricssonDataGrid = styled(DataGrid)(({ theme }) => ({
+const EricssonDataGrid = styled(DataGridPro)(({ theme }) => ({
   border: 0,
   color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.85)',
   fontFamily: [

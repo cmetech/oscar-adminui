@@ -86,6 +86,18 @@ const navigation = () => {
       subject: 'all'
     },
     {
+      sectionTitle: 'Administration',
+      action: 'manage',
+      subject: 'admin-section'
+    },
+    {
+      title: 'Settings',
+      icon: 'mdi:cog',
+      path: '/settings',
+      action: 'manage',
+      subject: 'settings-nav'
+    },
+    {
       sectionTitle: 'Help & Feedback',
       action: 'read',
       subject: 'all'

@@ -74,44 +74,43 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   color: theme.palette.customColors.brandYellow
 }))
 
-const TextfieldStyled = styled(TextField)(({ theme }) => ({
-  '& label.Mui-focused': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
-  },
-  '& .MuiOutlinedInput-root': {
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
-    }
-  }
-}))
+const ResetPassword = () => {
+  // ** States
+  const [values, setValues] = useState({
+    newPassword: '',
+    showNewPassword: false,
+    confirmNewPassword: '',
+    showConfirmNewPassword: false
+  })
 
-const ForgotPassword = () => {
+  // ** Hook
   const theme = useTheme()
   const router = useRouter()
   const { settings } = useSettings()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
+  const token = router.query.token
 
   // ** Vars
   const { skin } = settings
 
   const handleSubmit = async e => {
     e.preventDefault()
-    console.log(e.target[0].value)
 
     try {
       // Construct the data payload
       const payload = {
-        email: e.target[0].value
+        token: token,
+        password: values.newPassword
       }
 
       // Make the POST request
-      const response = await axios.post('/api/auth/forgot-password', payload)
+      const response = await axios.post('/api/auth/reset-password', payload)
 
       console.log('status', response.status)
-      if (response.status === 202) {
+      if (response.status === 200) {
         // Redirect to the login page
         router.replace('/login')
-      } else {
+      } else if (response.status === 400) {
         // Handle and log errors
         console.log('Error:', response.data)
       }
@@ -119,6 +118,32 @@ const ForgotPassword = () => {
       // Handle and log errors
       console.log('Error:', error.response ? error.response.data : error.message)
     }
+  }
+
+  // Handle New Password
+  const handleNewPasswordChange = prop => event => {
+    setValues({ ...values, [prop]: event.target.value })
+  }
+
+  const handleClickShowNewPassword = () => {
+    setValues({ ...values, showNewPassword: !values.showNewPassword })
+  }
+
+  const handleMouseDownNewPassword = event => {
+    event.preventDefault()
+  }
+
+  // Handle Confirm New Password
+  const handleConfirmNewPasswordChange = prop => event => {
+    setValues({ ...values, [prop]: event.target.value })
+  }
+
+  const handleClickShowConfirmNewPassword = () => {
+    setValues({ ...values, showConfirmNewPassword: !values.showConfirmNewPassword })
+  }
+
+  const handleMouseDownConfirmNewPassword = event => {
+    event.preventDefault()
   }
 
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
@@ -185,15 +210,61 @@ const ForgotPassword = () => {
                 </Typography>
               </Box>
               <Box sx={{ mb: 6 }}>
-                <TypographyStyled variant='h5'>Forgot Password? 🔒</TypographyStyled>
+                <Typography variant='h5' sx={{ fontWeight: 600, mb: 1.5 }}>
+                  Reset Password 🔒
+                </Typography>
                 <Typography variant='body2'>
-                  Enter your email and we&prime;ll send you instructions to reset your password
+                  Your new password must be different from previously used passwords
                 </Typography>
               </Box>
               <form noValidate autoComplete='off' onSubmit={handleSubmit}>
-                <TextfieldStyled autoFocus type='email' label='Email' sx={{ display: 'flex', mb: 4 }} />
+                <FormControl sx={{ display: 'flex', mb: 4 }}>
+                  <InputLabel htmlFor='auth-reset-password-new-password'>New Password</InputLabel>
+                  <OutlinedInput
+                    autoFocus
+                    label='New Password'
+                    value={values.newPassword}
+                    id='auth-reset-password-new-password'
+                    onChange={handleNewPasswordChange('newPassword')}
+                    type={values.showNewPassword ? 'text' : 'password'}
+                    endAdornment={
+                      <InputAdornment position='end'>
+                        <IconButton
+                          edge='end'
+                          onClick={handleClickShowNewPassword}
+                          aria-label='toggle password visibility'
+                          onMouseDown={handleMouseDownNewPassword}
+                        >
+                          <Icon icon={values.showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                </FormControl>
+                <FormControl sx={{ display: 'flex', mb: 4 }}>
+                  <InputLabel htmlFor='auth-reset-password-confirm-password'>Confirm Password</InputLabel>
+                  <OutlinedInput
+                    label='Confirm Password'
+                    value={values.confirmNewPassword}
+                    id='auth-reset-password-confirm-password'
+                    type={values.showConfirmNewPassword ? 'text' : 'password'}
+                    onChange={handleConfirmNewPasswordChange('confirmNewPassword')}
+                    endAdornment={
+                      <InputAdornment position='end'>
+                        <IconButton
+                          edge='end'
+                          aria-label='toggle password visibility'
+                          onClick={handleClickShowConfirmNewPassword}
+                          onMouseDown={handleMouseDownConfirmNewPassword}
+                        >
+                          <Icon icon={values.showConfirmNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                </FormControl>
                 <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 5.25 }}>
-                  Send reset link
+                  Set New Password
                 </Button>
                 <Typography variant='body2' sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <LinkStyled href='/login'>
@@ -209,7 +280,7 @@ const ForgotPassword = () => {
     </Box>
   )
 }
-ForgotPassword.getLayout = page => <BlankLayout>{page}</BlankLayout>
-ForgotPassword.guestGuard = true
+ResetPassword.getLayout = page => <BlankLayout>{page}</BlankLayout>
+ResetPassword.authGuard = false
 
-export default ForgotPassword
+export default ResetPassword

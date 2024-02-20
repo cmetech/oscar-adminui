@@ -43,8 +43,8 @@ const UserDropdown = props => {
   // const { logout } = useAuth()
 
   const userSession = useSession()
-  const userFullName = userSession?.data?.user?.fullName || 'John Doe'
-  const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
+  const userName = userSession?.data?.user?.name || 'John Doe'
+  const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
   // ** Vars
   const { direction } = settings
@@ -96,7 +96,7 @@ const UserDropdown = props => {
         }}
       >
         <Avatar
-          alt={userFullName}
+          alt={userName}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40, bgcolor: '#4D97ED', color: '#fff' }}
           src={`/images/avatars/${imageFileName}.png`}
@@ -121,13 +121,13 @@ const UserDropdown = props => {
               }}
             >
               <Avatar
-                alt={userFullName}
+                alt={userName}
                 src={`/images/avatars/${imageFileName}.png`}
                 sx={{ width: '2.5rem', height: '2.5rem', bgcolor: '#4D97ED', color: '#fff' }}
               />
             </Badge>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{userName}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
                 {userSession.data.user.role}
               </Typography>

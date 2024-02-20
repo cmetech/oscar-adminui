@@ -36,6 +36,7 @@ import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsCo
 
 // ** Styled Components
 import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
+import { LicenseInfo } from '@mui/x-data-grid-pro'
 
 // ** Utils Imports
 import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
@@ -82,6 +83,11 @@ const Guard = ({ children, authGuard, guestGuard }) => {
     return <AuthGuard fallback={<UserFallbackSpinner />}>{children}</AuthGuard>
   }
 }
+
+// ** Set License
+LicenseInfo.setLicenseKey(
+  'c7dee20a3641649c8e01b4630f5126c7Tz04NDczMyxFPTE3NDAwOTE1MzIwMDAsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI='
+)
 
 // ** Configure JSS & ClassName
 const App = props => {

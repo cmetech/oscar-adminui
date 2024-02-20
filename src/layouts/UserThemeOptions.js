@@ -62,7 +62,37 @@ const UserThemeOptions = () => {
         light: '#4A4A4A', // '#9E69FD',
         main: '#242424', // '#9155FD',
         dark: '#0C0C0C', // dark: '#804BDF',
-        contrastText: '#FFF'
+        contrastText: customWhiteColor
+      },
+      secondary: {
+        light: '#9C9FA4',
+        main: '#8A8D93',
+        dark: '#777B82',
+        contrastText: customWhiteColor
+      },
+      error: {
+        light: '#FF6166',
+        main: '#FF4C51',
+        dark: '#E04347',
+        contrastText: customWhiteColor
+      },
+      warning: {
+        light: '#FFCA64',
+        main: '#FFB400',
+        dark: '#E09E00',
+        contrastText: customWhiteColor
+      },
+      info: {
+        light: '#32BAFF',
+        main: '#16B1FF',
+        dark: '#139CE0',
+        contrastText: customWhiteColor
+      },
+      success: {
+        light: '#6AD01F',
+        main: '#56CA00',
+        dark: '#4CB200',
+        contrastText: customWhiteColor
       },
       customColors: {
         dark: customDarkColor,

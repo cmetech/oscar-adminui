@@ -157,7 +157,7 @@ const User = () => {
   }))
 
   const userSession = useSession()
-  const userFullName = userSession?.data?.user?.fullName || 'John Doe'
+  const userFullName = userSession?.data?.user?.name || 'John Doe'
   const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
   return (

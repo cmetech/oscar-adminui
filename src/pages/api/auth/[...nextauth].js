@@ -123,7 +123,7 @@ export const authOptions = {
         const updatedToken = {
           ...token,
           apiToken,
-          role: user.is_superuser ? 'admin' : 'user',
+          role: user.is_superuser ? 'admin' : 'regular',
           name: user.first_name + ' ' + user.last_name,
           username: user.username
         }

@@ -56,7 +56,17 @@ const UserFallbackSpinner = ({ sx }) => {
           powered by Ericsson InSite
         </Typography>
       </Stack>
-      <CircularProgress disableShrink sx={{ mt: 10 }} />
+      <CircularProgress
+        disableShrink
+        sx={{
+          mt: 10,
+          color: `${
+            theme.palette.mode == 'dark'
+              ? theme.palette.customColors.brandYellow4
+              : theme.palette.customColors.brandBlack
+          }`
+        }}
+      />
     </Box>
   )
 }

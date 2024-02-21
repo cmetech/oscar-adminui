@@ -137,7 +137,7 @@ const EnvironmentsList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.035,
+      flex: 0.04,
       minWidth: 100,
       field: 'name',
       editable: editmode,

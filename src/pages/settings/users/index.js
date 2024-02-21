@@ -22,7 +22,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import Icon from 'src/@core/components/icon'
 
 // ** Views
-import UsersList from 'src/views/pages/UsersList'
+import UsersList from 'src/views/pages/users/UsersList'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -56,6 +56,7 @@ const Settings = () => {
 
   const [value, setValue] = useState('1')
   const [userTotal, setUserTotal] = useState(0)
+  const [serverTotal, setServerTotal] = useState(0)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -67,20 +68,9 @@ const Settings = () => {
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='users'>
             {userTotal == 0 ? <Tab value='1' label='Users' /> : <Tab value='1' label={'Users (' + userTotal + ')'} />}
-            <Tab value='2' label='Config' />
           </TabList>
           <TabPanel value='1'>
             <UsersList set_user_total={setUserTotal} />
-          </TabPanel>
-          <TabPanel value='2'>
-            <Card>
-              <CardHeader title='Config' />
-              <CardContent>
-                <Typography variant='body1' component='div'>
-                  <pre>{JSON.stringify(publicRuntimeConfig, null, 2)}</pre>
-                </Typography>
-              </CardContent>
-            </Card>
           </TabPanel>
         </TabContext>
       </Grid>

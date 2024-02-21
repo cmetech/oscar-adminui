@@ -91,9 +91,16 @@ const navigation = () => {
       subject: 'admin-section'
     },
     {
-      title: 'Settings',
-      icon: 'mdi:cog',
-      path: '/settings',
+      title: 'Users',
+      icon: 'mdi:account-multiple',
+      path: '/settings/users',
+      action: 'manage',
+      subject: 'settings-nav'
+    },
+    {
+      title: 'Inventory',
+      icon: 'mdi:server',
+      path: '/settings/inventory',
       action: 'manage',
       subject: 'settings-nav'
     },

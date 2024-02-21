@@ -1,6 +1,7 @@
 // pages/api/users/[id].js
 import axios from 'axios'
 import https from 'https'
+import oscarConfig from 'src/configs/oscarConfig'
 
 export default async function handler(req, res) {
   const { id } = req.query // Extract the user ID from the request URL
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
 
   // Create an instance of https.Agent for the request to bypass SSL certificate errors
   const httpsAgent = new https.Agent({
-    rejectUnauthorized: false // Remember, this is for development only!
+    rejectUnauthorized: oscarConfig.SSL_VERIFY // Remember, this is for development only!
   })
 
   try {

@@ -3,45 +3,132 @@ const navigation = () => {
     {
       title: 'Overview',
       path: '/home',
-      icon: 'mdi:home'
+      icon: 'mdi:home',
+      action: 'read',
+      subject: 'all'
     },
     {
-      title: 'Second Page',
-      path: '/second-page',
-      icon: 'mdi:email'
+      sectionTitle: 'Observability',
+      action: 'read',
+      subject: 'all'
     },
     {
-      sectionTitle: 'Reports'
-    },
-    {
-      sectionTitle: 'Tools'
-    },
-    {
-      title: 'Monitoring',
-      path: 'https://www.google.com',
+      title: 'Advanced Dashboards',
+      path: 'https:localhost/ui',
       icon: 'mdi:monitor-eye',
       externalLink: true,
-      openInNewTab: true
+      openInNewTab: true,
+      action: 'read',
+      subject: 'all'
     },
     {
-      title: 'Automations',
-      path: 'https://www.google.com',
-      icon: 'mdi:arrow-decision-auto',
-      externalLink: true,
-      openInNewTab: true
+      sectionTitle: 'Service Continuity',
+      action: 'read',
+      subject: 'all'
     },
     {
-      sectionTitle: 'Administration'
+      title: 'Alerts & Incidents',
+      icon: 'mdi:bell-alert',
+      path: '/services',
+      action: 'read',
+      subject: 'all'
     },
     {
-      title: 'Services',
+      title: 'Availability',
       icon: 'mdi:list-status',
+      path: '/services',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Capacity',
+      icon: 'mdi:thermometer-check',
+      path: '/services',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Performance',
+      icon: 'mdi:chart-areaspline-variant',
+      path: '/services',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'SLA',
+      icon: 'mdi:check-decagram',
       path: '/services'
     },
     {
-      title: 'Automations',
-      path: '/automations',
-      icon: 'mdi:arrow-decision-auto'
+      sectionTitle: 'AI/Automation',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Runbooks',
+      path: '/runbooks',
+      icon: 'mdi:arrow-decision-auto',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Workflows',
+      path: '/workflows',
+      icon: 'mdi:sitemap',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Canaries (Synthetic)',
+      path: '/workflows',
+      icon: 'mdi:api',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      sectionTitle: 'Administration',
+      action: 'manage',
+      subject: 'admin-section'
+    },
+    {
+      title: 'Users',
+      icon: 'mdi:account-multiple',
+      path: '/settings/users',
+      action: 'manage',
+      subject: 'settings-nav'
+    },
+    {
+      title: 'Inventory',
+      icon: 'mdi:server',
+      path: '/settings/inventory',
+      action: 'manage',
+      subject: 'settings-nav'
+    },
+    {
+      sectionTitle: 'Help & Feedback',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'OSCAR Academy',
+      path: '/oscar-academy',
+      icon: 'mdi:school-outline',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Feedback',
+      path: '/feedback',
+      icon: 'mdi:comment-alert',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: "What's New",
+      path: '/new-features',
+      icon: 'mdi:new-box',
+      action: 'read',
+      subject: 'all'
     }
   ]
 }

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { fi } from 'date-fns/locale'
 import https from 'https'
+import oscarConfig from '../../../configs/oscarConfig'
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -10,7 +11,7 @@ async function handler(req, res) {
 
     // Create an instance of https.Agent for the request to bypass SSL certificate errors
     const httpsAgent = new https.Agent({
-      rejectUnauthorized: false // Remember, this is for development only!
+      rejectUnauthorized: oscarConfig.SSL_VERIFY // Remember, this is for development only!
     })
 
     try {

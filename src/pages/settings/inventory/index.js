@@ -101,19 +101,19 @@ const Settings = () => {
             )}
           </TabList>
           <TabPanel value='1'>
-            <DatacentersList set_total={setDatacenterTotal} />
+            <DatacentersList set_total={setDatacenterTotal} total={datacenterTotal} />
           </TabPanel>
           <TabPanel value='2'>
-            <EnvironmentsList set_total={setEnvironmentTotal} />
+            <EnvironmentsList set_total={setEnvironmentTotal} total={environmentTotal} />
           </TabPanel>
           <TabPanel value='3'>
-            <ServersList set_total={setServerTotal} />
+            <ServersList set_total={setServerTotal} total={serverTotal} />
           </TabPanel>
           <TabPanel value='4'>
-            <ComponentsList set_total={setComponentTotal} />
+            <ComponentsList set_total={setComponentTotal} total={componentTotal} />
           </TabPanel>
           <TabPanel value='5'>
-            <SubcomponentsList set_total={setSubcomponentTotal} />
+            <SubcomponentsList set_total={setSubcomponentTotal} total={subcomponentTotal} />
           </TabPanel>
         </TabContext>
       </Grid>

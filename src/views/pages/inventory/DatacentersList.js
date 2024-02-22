@@ -131,6 +131,7 @@ const DatacentersList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [currentDatacenter, setCurrentDatacenter] = useState(null)
 
   const editmode = false
 
@@ -269,7 +270,7 @@ const DatacentersList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.location}
+                {row?.location?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -336,7 +337,7 @@ const DatacentersList = props => {
               title='Edit'
               aria-label='Edit'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentDatacenter(params.row)
                 setOpenDialog(true)
               }}
             >
@@ -348,7 +349,7 @@ const DatacentersList = props => {
               aria-label='Delete Datacenter'
               color='error'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentDatacenter(params.row)
                 setDeleteDialog(true)
               }}
             >
@@ -360,15 +361,11 @@ const DatacentersList = props => {
     }
   ]
 
-  const handleUpdateUserDialogClose = () => {
+  const handleUpdateDialogClose = () => {
     setOpenDialog(false)
   }
 
-  const handleDisableUserDialogClose = () => {
-    setDeactivateDialog(false)
-  }
-
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
   }
 
@@ -379,14 +376,14 @@ const DatacentersList = props => {
         maxWidth='md'
         scroll='body'
         open={openDialog}
-        onClose={handleUpdateUserDialogClose}
+        onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentDatacenter?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -398,25 +395,25 @@ const DatacentersList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentDatacenter?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateUserDialogClose()}
+            onClick={() => handleUpdateDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit User Information
+              Edit Datacenter Information
             </Typography>
-            <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to datacenter information will be effective immediately.</Typography>
           </Box>
-          <UpdateDatacenterWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateDatacenterWizard currentDatacenter={currentDatacenter} rows={rows} setRows={setRows} />
         </DialogContent>
       </Dialog>
     )
@@ -429,14 +426,14 @@ const DatacentersList = props => {
         maxWidth='md'
         scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentDatacenter?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -448,14 +445,14 @@ const DatacentersList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentDatacenter?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleDeleteUserDialogClose()}
+            onClick={() => handleDeleteDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -467,17 +464,18 @@ const DatacentersList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                  Please confirm that you want to delete this datacenter. This action cannot be undone. All Environments
+                  and Servers associated with this datacenter will also be deleted.
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
             Delete
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
+          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
             Cancel
           </Button>
         </DialogActions>
@@ -485,7 +483,7 @@ const DatacentersList = props => {
     )
   }
 
-  const handleDeactivateUserDialogSubmit = async () => {
+  const handleDeactivateDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -526,7 +524,7 @@ const DatacentersList = props => {
     }
   }
 
-  const handleDeleteUserDialogSubmit = async () => {
+  const handleDeleteDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -535,20 +533,21 @@ const DatacentersList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const endpoint = `/api/users/${currentUser.id}`
+      const endpoint = `/api/inventory/datacenters/${currentDatacenter.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentUser.id)
+        const updatedRows = rows.filter(row => row.id !== currentDatacenter.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
+        props.set_total(props.total - 1)
 
-        toast.success('User successfully deleted')
+        toast.success('Successfully deleted Datacenter')
       }
     } catch (error) {
-      console.error('Error deleting user', error)
-      toast.error('Error deleting of user')
+      console.error('Failed to delete Datacenter', error)
+      toast.error('Failed to delete Datacenter')
     }
   }
 

@@ -49,14 +49,14 @@ import { main } from '@popperjs/core'
 
 const steps = [
   {
-    title: 'Component Information',
-    subtitle: 'Edit Component Information',
-    description: 'Edit the Name, Type, and Description for the component.'
+    title: 'Sub-Component Information',
+    subtitle: 'Add Sub-Component Information',
+    description: 'Add the Name, Component Name, and Specifications for the component.'
   },
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the Component details and submit.'
+    description: 'Review the Sub-Component details and submit.'
   }
 ]
 
@@ -125,11 +125,11 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
-const UpdateComponentWizard = props => {
+const AddSubcomponentWizard = props => {
   // ** States
-  const [componentName, setComponentName] = useState(props.currentComponent?.name || '')
-  const [componentDetails, setComponentDetails] = useState(props.currentComponent?.details || '')
-  const [componentType, setComponentType] = useState(props.currentComponent?.type || '')
+  const [subComponentName, setSubComponentName] = useState('')
+  const [componentName, setComponentName] = useState('')
+  const [subComponentSpecification, setSubComponentSpecification] = useState('')
   const [activeStep, setActiveStep] = useState(0)
 
   const theme = useTheme()
@@ -152,41 +152,29 @@ const UpdateComponentWizard = props => {
         }
 
         const payload = {
-          name: componentName,
-          details: componentDetails,
-          type: componentType
+          name: subComponentName,
+          component_name: componentName,
+          specification: subComponentSpecification
         }
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/inventory/components/${props.currentComponent.id}`
-        const response = await axios.patch(endpoint, payload, { headers })
+        const endpoint = '/api/inventory/subcomponents'
+        const response = await axios.post(endpoint, payload, { headers })
 
         if (response.data) {
-          const updatedComponent = response.data
-
-          const updatedRows = props.rows.map(row => {
-            if (row.id === updatedComponent.id) {
-              return updatedComponent
-            }
-
-            return row
-          })
-
-          props.setRows(updatedRows)
-
-          toast.success('Component details updated successfully')
+          toast.success('Sub-Component details added successfully')
         }
       } catch (error) {
-        console.error('Error updating component details', error)
-        toast.error('Error updating component details')
+        console.error('Error updating sub-component details', error)
+        toast.error('Error updating sub-component details')
       }
     }
   }
 
   const handleReset = () => {
-    setComponentName(props?.currentComponent?.name || '')
-    setComponentDetails(props?.currentComponent?.details || '')
-    setComponentType(props?.currentComponent?.type || '')
+    setComponentName('')
+    setSubComponentName('')
+    setSubComponentSpecification('')
     setActiveStep(0)
   }
 
@@ -195,17 +183,25 @@ const UpdateComponentWizard = props => {
     setComponentName(event.target.value)
   }
 
-  const handleComponentDetailsChange = event => {
-    setComponentDetails(event.target.value)
+  const handleSubComponentNameChange = event => {
+    setSubComponentName(event.target.value)
   }
 
-  const handleComponentTypeChange = event => {
-    setComponentType(event.target.value)
+  const handleSubComponentSpecificationChange = event => {
+    setSubComponentSpecification(event.target.value)
   }
 
   // Handle Confirm Password
   const handleConfirmChange = prop => event => {
     setState({ ...state, [prop]: event.target.value })
+  }
+
+  const handleClickShowConfirmPassword = () => {
+    setState({ ...state, showPassword2: !state.showPassword2 })
+  }
+
+  const handleMouseDownConfirmPassword = event => {
+    event.preventDefault()
   }
 
   const getStepContent = step => {
@@ -218,8 +214,8 @@ const UpdateComponentWizard = props => {
                 <FormControl fullWidth>
                   <TextfieldStyled
                     fullWidth
-                    value={componentName.toUpperCase()}
-                    onChange={handleComponentNameChange}
+                    value={subComponentName.toUpperCase()}
+                    onChange={handleSubComponentNameChange}
                     label='Name'
                   />
                 </FormControl>
@@ -228,9 +224,9 @@ const UpdateComponentWizard = props => {
                 <FormControl fullWidth>
                   <TextfieldStyled
                     fullWidth
-                    value={componentDetails.toUpperCase()}
-                    onChange={handleComponentDetailsChange}
-                    label='Details'
+                    value={subComponentSpecification.toUpperCase()}
+                    onChange={handleSubComponentSpecificationChange}
+                    label='Description'
                   />
                 </FormControl>
               </Grid>
@@ -238,9 +234,9 @@ const UpdateComponentWizard = props => {
                 <FormControl fullWidth>
                   <TextfieldStyled
                     fullWidth
-                    value={componentType.toUpperCase()}
-                    onChange={handleComponentTypeChange}
-                    label='Type'
+                    value={componentName.toUpperCase()}
+                    onChange={handleComponentNameChange}
+                    label='Component Name'
                   />
                 </FormControl>
               </Grid>
@@ -268,17 +264,17 @@ const UpdateComponentWizard = props => {
                 </Typography>
                 <Grid item xs={12}>
                   <Typography>
-                    Name: <strong>{componentName.toUpperCase()}</strong>
+                    Name: <strong>{subComponentName.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>
-                    Details: <strong>{componentDetails.toUpperCase()}</strong>
+                    Component Name: <strong>{componentName.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>
-                    Type: <strong>{componentType.toUpperCase()}</strong>
+                    Description: <strong>{subComponentSpecification.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
               </Grid>
@@ -294,7 +290,7 @@ const UpdateComponentWizard = props => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>Component details have been submitted.</Typography>
+          <Typography>Sub Component details have been submitted.</Typography>
           <Grid container spacing={1}>
             <Grid item xs={4}>
               <Typography
@@ -313,17 +309,17 @@ const UpdateComponentWizard = props => {
               </Typography>
               <Grid item xs={12}>
                 <Typography>
-                  Name: <strong>{componentName.toUpperCase()}</strong>
+                  Name: <strong>{subComponentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Details: <strong>{componentDetails.toUpperCase()}</strong>
+                  Component Name: <strong>{componentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Type: <strong>{componentType.toUpperCase()}</strong>
+                  Description: <strong>{subComponentSpecification.toUpperCase()}</strong>
                 </Typography>
               </Grid>
             </Grid>
@@ -395,4 +391,4 @@ const UpdateComponentWizard = props => {
   )
 }
 
-export default UpdateComponentWizard
+export default AddSubcomponentWizard

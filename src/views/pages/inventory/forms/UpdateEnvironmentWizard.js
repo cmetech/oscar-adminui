@@ -49,14 +49,14 @@ import { main } from '@popperjs/core'
 
 const steps = [
   {
-    title: 'General Information',
-    subtitle: 'Edit General Information',
-    description: 'Edit the First Name, Last Name, Username, Email, Status, Admin, and Verified fields for a user.'
+    title: 'Environment Information',
+    subtitle: 'Edit Environment Information',
+    description: 'Edit the Name and Description for the environment.'
   },
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the User details and submit.'
+    description: 'Review the Environment details and submit.'
   }
 ]
 
@@ -127,13 +127,8 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 
 const UpdateEnvironmentWizard = props => {
   // ** States
-  const [firstName, setFirstName] = useState(props?.currentUser?.first_name || '')
-  const [lastName, setLastName] = useState(props?.currentUser?.last_name || '')
-  const [username, setUsername] = useState(props?.currentUser?.username || '')
-  const [email, setEmail] = useState(props?.currentUser?.email || '')
-  const [isActive, setIsActive] = useState(props?.currentUser?.is_active || false)
-  const [isSuperUser, setIsSuperUser] = useState(props?.currentUser?.is_superuser || false)
-  const [isVerified, setIsVerified] = useState(props?.currentUser?.is_verified || false)
+  const [environmentName, setEnvironmentName] = useState(props?.currentEnvironment?.name || '')
+  const [environmentDescription, setEnvironmentDescription] = useState(props?.currentEnvironment?.description || '')
   const [activeStep, setActiveStep] = useState(0)
 
   const theme = useTheme()
@@ -156,24 +151,20 @@ const UpdateEnvironmentWizard = props => {
         }
 
         const payload = {
-          username: username,
-          first_name: firstName,
-          last_name: lastName,
-          is_active: isActive,
-          is_superuser: isSuperUser,
-          is_verified: isVerified
+          name: environmentName,
+          description: environmentDescription
         }
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/users/${props.currentUser.id}`
+        const endpoint = `/api/inventory/environments/${props.currentEnvironment.id}`
         const response = await axios.patch(endpoint, payload, { headers })
 
         if (response.data) {
-          const updatedUser = response.data
+          const updatedEnvironment = response.data
 
           const updatedRows = props.rows.map(row => {
-            if (row.id === updatedUser.id) {
-              return updatedUser
+            if (row.id === updatedEnvironment.id) {
+              return updatedEnvironment
             }
 
             return row
@@ -181,53 +172,28 @@ const UpdateEnvironmentWizard = props => {
 
           props.setRows(updatedRows)
 
-          toast.success('User status updated successfully')
+          toast.success('Environment details updated successfully')
         }
       } catch (error) {
-        console.error('Error updating activation status of user', error)
-        toast.error('Error updating activation status of user')
+        console.error('Error updating environment details', error)
+        toast.error('Error updating environment details')
       }
     }
   }
 
   const handleReset = () => {
-    setFirstName(props?.currentUser?.first_name || '')
-    setLastName(props?.currentUser?.last_name || '')
-    setUsername(props?.currentUser?.username || '')
-    setEmail(props?.currentUser?.email || '')
-    setIsActive(props?.currentUser?.is_active || false)
-    setIsSuperUser(props?.currentUser?.is_superuser || false)
-    setIsVerified(props?.currentUser?.is_verified || false)
+    setEnvironmentName(props?.currentEnvironment?.name || '')
+    setEnvironmentDescription(props?.currentEnvironment?.description || '')
     setActiveStep(0)
   }
 
   // Handle changes to the form fields
-  const handleFirstNameChange = event => {
-    setFirstName(event.target.value)
+  const handleEnvironmentNameChange = event => {
+    setEnvironmentName(event.target.value)
   }
 
-  const handleLastNameChange = event => {
-    setLastName(event.target.value)
-  }
-
-  const handleEmailChange = event => {
-    setEmail(event.target.value)
-  }
-
-  const handleUsernameChange = event => {
-    setUsername(event.target.value)
-  }
-
-  const handleStatusChange = event => {
-    setIsActive(event.target.checked)
-  }
-
-  const handleIsAdminChange = event => {
-    setIsSuperUser(event.target.checked)
-  }
-
-  const handleIsVerifiedChange = event => {
-    setIsVerified(event.target.checked)
+  const handleEnvironmentDescriptionChange = event => {
+    setEnvironmentDescription(event.target.value)
   }
 
   // Handle Confirm Password
@@ -251,48 +217,21 @@ const UpdateEnvironmentWizard = props => {
             <Grid container spacing={6}>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={firstName} onChange={handleFirstNameChange} label='First Name' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={lastName} onChange={handleLastNameChange} label='Last Name' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={username} onChange={handleUsernameChange} label='Username' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={email} onChange={handleUsernameChange} label='Email' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <FormControlLabel
-                    control={<CheckboxStyled checked={isActive} onChange={handleStatusChange} name='isActive' />}
-                    label='Status (Active)'
+                  <TextfieldStyled
+                    fullWidth
+                    value={environmentName.toUpperCase()}
+                    onChange={handleEnvironmentNameChange}
+                    label='Name'
                   />
                 </FormControl>
               </Grid>
-
-              <Grid item sm={4} xs={12}>
+              <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <FormControlLabel
-                    control={<CheckboxStyled checked={isSuperUser} onChange={handleIsAdminChange} name='isSuperUser' />}
-                    label='Is Admin'
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <FormControlLabel
-                    control={
-                      <CheckboxStyled checked={isVerified} onChange={handleIsVerifiedChange} name='isVerified' />
-                    }
-                    label='Is Verified'
+                  <TextfieldStyled
+                    fullWidth
+                    value={environmentDescription.toUpperCase()}
+                    onChange={handleEnvironmentDescriptionChange}
+                    label='Description'
                   />
                 </FormControl>
               </Grid>
@@ -320,30 +259,12 @@ const UpdateEnvironmentWizard = props => {
                 </Typography>
                 <Grid item xs={12}>
                   <Typography>
-                    Name:{' '}
-                    <strong>
-                      {firstName} {lastName}
-                    </strong>
+                    Name: <strong>{environmentName.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>
-                    Username: <strong>{username}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Status: <strong>{isActive.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Admin: <strong>{isSuperUser.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Verified: <strong>{isVerified.toString()}</strong>
+                    Description: <strong>{environmentDescription.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
               </Grid>
@@ -359,7 +280,7 @@ const UpdateEnvironmentWizard = props => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>User details have been submitted.</Typography>
+          <Typography>Environment details have been submitted.</Typography>
           <Grid container spacing={1}>
             <Grid item xs={4}>
               <Typography
@@ -378,30 +299,12 @@ const UpdateEnvironmentWizard = props => {
               </Typography>
               <Grid item xs={12}>
                 <Typography>
-                  Name:{' '}
-                  <strong>
-                    {firstName} {lastName}
-                  </strong>
+                  Name: <strong>{environmentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Username: <strong>{username}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Status: <strong>{isActive.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Admin: <strong>{isSuperUser.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Verified: <strong>{isVerified.toString()}</strong>
+                  Description: <strong>{environmentDescription.toUpperCase()}</strong>
                 </Typography>
               </Grid>
             </Grid>

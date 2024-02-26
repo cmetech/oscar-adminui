@@ -130,7 +130,6 @@ const DatacentersList = props => {
   const [openDialog, setOpenDialog] = useState(false)
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
   const [currentDatacenter, setCurrentDatacenter] = useState(null)
 
   const editmode = false
@@ -481,47 +480,6 @@ const DatacentersList = props => {
         </DialogActions>
       </Dialog>
     )
-  }
-
-  const handleDeactivateDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const payload = {
-        username: currentUser?.username,
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        is_active: currentUser?.is_active ? false : true
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
-      const response = await axios.patch(endpoint, payload, { headers })
-
-      if (response.data) {
-        const updatedUser = response.data
-
-        const updatedRows = rows.map(row => {
-          if (row.id === updatedUser.id) {
-            return updatedUser
-          }
-
-          return row
-        })
-
-        setRows(updatedRows)
-        setDeactivateDialog(false)
-
-        toast.success('User status updated successfully')
-      }
-    } catch (error) {
-      console.error('Error updating activation status of user', error)
-      toast.error('Error updating activation status of user')
-    }
   }
 
   const handleDeleteDialogSubmit = async () => {

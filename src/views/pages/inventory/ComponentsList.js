@@ -131,6 +131,7 @@ const ComponentsList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [currentComponent, setCurrentComponent] = useState(null)
 
   const editmode = false
 
@@ -266,7 +267,7 @@ const ComponentsList = props => {
               title='Edit'
               aria-label='Edit'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentComponent(params.row)
                 setOpenDialog(true)
               }}
             >
@@ -278,7 +279,7 @@ const ComponentsList = props => {
               aria-label='Delete Component'
               color='error'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentComponent(params.row)
                 setDeleteDialog(true)
               }}
             >
@@ -290,15 +291,15 @@ const ComponentsList = props => {
     }
   ]
 
-  const handleUpdateUserDialogClose = () => {
+  const handleUpdateComponentDialogClose = () => {
     setOpenDialog(false)
   }
 
-  const handleDisableUserDialogClose = () => {
+  const handleDisableComponentDialogClose = () => {
     setDeactivateDialog(false)
   }
 
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteComponentDialogClose = () => {
     setDeleteDialog(false)
   }
 
@@ -309,14 +310,14 @@ const ComponentsList = props => {
         maxWidth='md'
         scroll='body'
         open={openDialog}
-        onClose={handleUpdateUserDialogClose}
+        onClose={handleUpdateComponentDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentComponent?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -328,25 +329,25 @@ const ComponentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentComponent?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateUserDialogClose()}
+            onClick={() => handleUpdateComponentDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit User Information
+              Edit Component Information
             </Typography>
-            <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to component information will be effective immediately.</Typography>
           </Box>
-          <UpdateComponentWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateComponentWizard currentComponent={currentComponent} rows={rows} setRows={setRows} />
         </DialogContent>
       </Dialog>
     )
@@ -359,14 +360,14 @@ const ComponentsList = props => {
         maxWidth='md'
         scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteComponentDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentComponent?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -378,14 +379,14 @@ const ComponentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentComponent?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleDeleteUserDialogClose()}
+            onClick={() => handleDeleteComponentDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -397,17 +398,17 @@ const ComponentsList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                  Please confirm that you want to delete this component.
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteComponentDialogSubmit} color='primary'>
             Delete
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
+          <Button variant='outlined' onClick={handleDeleteComponentDialogClose} color='secondary'>
             Cancel
           </Button>
         </DialogActions>
@@ -415,7 +416,7 @@ const ComponentsList = props => {
     )
   }
 
-  const handleDeactivateUserDialogSubmit = async () => {
+  const handleDeleteComponentDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -424,61 +425,20 @@ const ComponentsList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const payload = {
-        username: currentUser?.username,
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        is_active: currentUser?.is_active ? false : true
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
-      const response = await axios.patch(endpoint, payload, { headers })
-
-      if (response.data) {
-        const updatedUser = response.data
-
-        const updatedRows = rows.map(row => {
-          if (row.id === updatedUser.id) {
-            return updatedUser
-          }
-
-          return row
-        })
-
-        setRows(updatedRows)
-        setDeactivateDialog(false)
-
-        toast.success('User status updated successfully')
-      }
-    } catch (error) {
-      console.error('Error updating activation status of user', error)
-      toast.error('Error updating activation status of user')
-    }
-  }
-
-  const handleDeleteUserDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
+      const endpoint = `/api/inventory/components/${currentComponent.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentUser.id)
+        const updatedRows = rows.filter(row => row.id !== currentComponent.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
 
-        toast.success('User successfully deleted')
+        toast.success('Component successfully deleted')
       }
     } catch (error) {
-      console.error('Error deleting user', error)
-      toast.error('Error deleting of user')
+      console.error('Error deleting component', error)
+      toast.error('Error deleting of component')
     }
   }
 

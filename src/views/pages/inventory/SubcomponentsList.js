@@ -130,7 +130,7 @@ const SubcomponentsList = props => {
   const [openDialog, setOpenDialog] = useState(false)
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
+  const [currentSubcomponent, setCurrentSubcomponent] = useState(null)
 
   const editmode = false
 
@@ -180,6 +180,26 @@ const SubcomponentsList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
                 {row?.component_name?.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.05,
+      minWidth: 100,
+      field: 'specification',
+      editable: editmode,
+      headerName: 'Specification',
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.specifications?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -246,7 +266,7 @@ const SubcomponentsList = props => {
               title='Edit'
               aria-label='Edit'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentSubcomponent(params.row)
                 setOpenDialog(true)
               }}
             >
@@ -258,7 +278,7 @@ const SubcomponentsList = props => {
               aria-label='Delete Component'
               color='error'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentSubcomponent(params.row)
                 setDeleteDialog(true)
               }}
             >
@@ -270,15 +290,15 @@ const SubcomponentsList = props => {
     }
   ]
 
-  const handleUpdateUserDialogClose = () => {
+  const handleUpdateSubcomponentDialogClose = () => {
     setOpenDialog(false)
   }
 
-  const handleDisableUserDialogClose = () => {
+  const handleDisableSubcomponentDialogClose = () => {
     setDeactivateDialog(false)
   }
 
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteSubcomponentDialogClose = () => {
     setDeleteDialog(false)
   }
 
@@ -289,14 +309,14 @@ const SubcomponentsList = props => {
         maxWidth='md'
         scroll='body'
         open={openDialog}
-        onClose={handleUpdateUserDialogClose}
+        onClose={handleUpdateSubcomponentDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentSubcomponent?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -308,25 +328,25 @@ const SubcomponentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentSubcomponent?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateUserDialogClose()}
+            onClick={() => handleUpdateSubcomponentDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit User Information
+              Edit Subcomponent Information
             </Typography>
-            <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to subcomponent information will be effective immediately.</Typography>
           </Box>
-          <UpdateSubcomponentWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateSubcomponentWizard currentSubcomponent={currentSubcomponent} rows={rows} setRows={setRows} />
         </DialogContent>
       </Dialog>
     )
@@ -339,14 +359,14 @@ const SubcomponentsList = props => {
         maxWidth='md'
         scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteSubcomponentDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentSubcomponent?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -358,14 +378,14 @@ const SubcomponentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentSubcomponent?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleDeleteUserDialogClose()}
+            onClick={() => handleDeleteSubcomponentDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -377,17 +397,17 @@ const SubcomponentsList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                  Please confirm that you want to delete this subcomponent.
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteSubcomponentDialogSubmit} color='primary'>
             Delete
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
+          <Button variant='outlined' onClick={handleDeleteSubcomponentDialogClose} color='secondary'>
             Cancel
           </Button>
         </DialogActions>
@@ -395,7 +415,7 @@ const SubcomponentsList = props => {
     )
   }
 
-  const handleDeactivateUserDialogSubmit = async () => {
+  const handleDeleteSubcomponentDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -404,61 +424,20 @@ const SubcomponentsList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const payload = {
-        username: currentUser?.username,
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        is_active: currentUser?.is_active ? false : true
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
-      const response = await axios.patch(endpoint, payload, { headers })
-
-      if (response.data) {
-        const updatedUser = response.data
-
-        const updatedRows = rows.map(row => {
-          if (row.id === updatedUser.id) {
-            return updatedUser
-          }
-
-          return row
-        })
-
-        setRows(updatedRows)
-        setDeactivateDialog(false)
-
-        toast.success('User status updated successfully')
-      }
-    } catch (error) {
-      console.error('Error updating activation status of user', error)
-      toast.error('Error updating activation status of user')
-    }
-  }
-
-  const handleDeleteUserDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
+      const endpoint = `/api/inventory/subcomponents/${currentSubcomponent.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentUser.id)
+        const updatedRows = rows.filter(row => row.id !== currentSubcomponent.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
 
-        toast.success('User successfully deleted')
+        toast.success('Subcomponent successfully deleted')
       }
     } catch (error) {
-      console.error('Error deleting user', error)
-      toast.error('Error deleting of user')
+      console.error('Error deleting subcomponent', error)
+      toast.error('Error deleting of subcomponent')
     }
   }
 

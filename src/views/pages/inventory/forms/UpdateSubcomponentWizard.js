@@ -49,14 +49,14 @@ import { main } from '@popperjs/core'
 
 const steps = [
   {
-    title: 'General Information',
-    subtitle: 'Edit General Information',
-    description: 'Edit the First Name, Last Name, Username, Email, Status, Admin, and Verified fields for a user.'
+    title: 'Sub-Component Information',
+    subtitle: 'Edit Sub-Component Information',
+    description: 'Edit the Name and Description for the sub-component.'
   },
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the User details and submit.'
+    description: 'Review the Sub-Component details and submit.'
   }
 ]
 
@@ -127,13 +127,11 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 
 const UpdateSubcomponentWizard = props => {
   // ** States
-  const [firstName, setFirstName] = useState(props?.currentUser?.first_name || '')
-  const [lastName, setLastName] = useState(props?.currentUser?.last_name || '')
-  const [username, setUsername] = useState(props?.currentUser?.username || '')
-  const [email, setEmail] = useState(props?.currentUser?.email || '')
-  const [isActive, setIsActive] = useState(props?.currentUser?.is_active || false)
-  const [isSuperUser, setIsSuperUser] = useState(props?.currentUser?.is_superuser || false)
-  const [isVerified, setIsVerified] = useState(props?.currentUser?.is_verified || false)
+  const [subComponentName, setSubcomponentName] = useState(props.currentSubcomponent?.name || '')
+
+  const [subComponentSpecifications, setSubcomponentSpecifications] = useState(
+    props.currentSubcomponent?.specifications || ''
+  )
   const [activeStep, setActiveStep] = useState(0)
 
   const theme = useTheme()
@@ -156,24 +154,20 @@ const UpdateSubcomponentWizard = props => {
         }
 
         const payload = {
-          username: username,
-          first_name: firstName,
-          last_name: lastName,
-          is_active: isActive,
-          is_superuser: isSuperUser,
-          is_verified: isVerified
+          name: subComponentName,
+          specifications: subComponentSpecifications
         }
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/users/${props.currentUser.id}`
+        const endpoint = `/api/inventory/subcomponents/${props.currentSubcomponent.id}`
         const response = await axios.patch(endpoint, payload, { headers })
 
         if (response.data) {
-          const updatedUser = response.data
+          const updatedSubComponent = response.data
 
           const updatedRows = props.rows.map(row => {
-            if (row.id === updatedUser.id) {
-              return updatedUser
+            if (row.id === updatedSubComponent.id) {
+              return updatedSubComponent
             }
 
             return row
@@ -181,66 +175,28 @@ const UpdateSubcomponentWizard = props => {
 
           props.setRows(updatedRows)
 
-          toast.success('User status updated successfully')
+          toast.success('Sub-Component status updated successfully')
         }
       } catch (error) {
-        console.error('Error updating activation status of user', error)
-        toast.error('Error updating activation status of user')
+        console.error('Error updating sub-component details', error)
+        toast.error('Error updating sub-component details')
       }
     }
   }
 
   const handleReset = () => {
-    setFirstName(props?.currentUser?.first_name || '')
-    setLastName(props?.currentUser?.last_name || '')
-    setUsername(props?.currentUser?.username || '')
-    setEmail(props?.currentUser?.email || '')
-    setIsActive(props?.currentUser?.is_active || false)
-    setIsSuperUser(props?.currentUser?.is_superuser || false)
-    setIsVerified(props?.currentUser?.is_verified || false)
+    setSubcomponentName(props.currentSubcomponent?.name || '')
+    setSubcomponentSpecifications(props.currentSubcomponent?.specifications || '')
     setActiveStep(0)
   }
 
   // Handle changes to the form fields
-  const handleFirstNameChange = event => {
-    setFirstName(event.target.value)
+  const handleSubComponentNameChange = event => {
+    setSubcomponentName(event.target.value)
   }
 
-  const handleLastNameChange = event => {
-    setLastName(event.target.value)
-  }
-
-  const handleEmailChange = event => {
-    setEmail(event.target.value)
-  }
-
-  const handleUsernameChange = event => {
-    setUsername(event.target.value)
-  }
-
-  const handleStatusChange = event => {
-    setIsActive(event.target.checked)
-  }
-
-  const handleIsAdminChange = event => {
-    setIsSuperUser(event.target.checked)
-  }
-
-  const handleIsVerifiedChange = event => {
-    setIsVerified(event.target.checked)
-  }
-
-  // Handle Confirm Password
-  const handleConfirmChange = prop => event => {
-    setState({ ...state, [prop]: event.target.value })
-  }
-
-  const handleClickShowConfirmPassword = () => {
-    setState({ ...state, showPassword2: !state.showPassword2 })
-  }
-
-  const handleMouseDownConfirmPassword = event => {
-    event.preventDefault()
+  const handleSubComponentSpecificationsChange = event => {
+    setSubcomponentSpecifications(event.target.value)
   }
 
   const getStepContent = step => {
@@ -251,48 +207,21 @@ const UpdateSubcomponentWizard = props => {
             <Grid container spacing={6}>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={firstName} onChange={handleFirstNameChange} label='First Name' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={lastName} onChange={handleLastNameChange} label='Last Name' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={username} onChange={handleUsernameChange} label='Username' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={email} onChange={handleUsernameChange} label='Email' />
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <FormControlLabel
-                    control={<CheckboxStyled checked={isActive} onChange={handleStatusChange} name='isActive' />}
-                    label='Status (Active)'
+                  <TextfieldStyled
+                    fullWidth
+                    value={subComponentName.toUpperCase()}
+                    onChange={handleSubComponentNameChange}
+                    label='Name'
                   />
                 </FormControl>
               </Grid>
-
-              <Grid item sm={4} xs={12}>
+              <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <FormControlLabel
-                    control={<CheckboxStyled checked={isSuperUser} onChange={handleIsAdminChange} name='isSuperUser' />}
-                    label='Is Admin'
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <FormControl fullWidth>
-                  <FormControlLabel
-                    control={
-                      <CheckboxStyled checked={isVerified} onChange={handleIsVerifiedChange} name='isVerified' />
-                    }
-                    label='Is Verified'
+                  <TextfieldStyled
+                    fullWidth
+                    value={subComponentSpecifications.toUpperCase()}
+                    onChange={handleSubComponentSpecificationsChange}
+                    label='Details'
                   />
                 </FormControl>
               </Grid>
@@ -320,30 +249,12 @@ const UpdateSubcomponentWizard = props => {
                 </Typography>
                 <Grid item xs={12}>
                   <Typography>
-                    Name:{' '}
-                    <strong>
-                      {firstName} {lastName}
-                    </strong>
+                    Name: <strong>{subComponentName.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>
-                    Username: <strong>{username}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Status: <strong>{isActive.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Admin: <strong>{isSuperUser.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Verified: <strong>{isVerified.toString()}</strong>
+                    Details: <strong>{subComponentSpecifications.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
               </Grid>
@@ -359,7 +270,7 @@ const UpdateSubcomponentWizard = props => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>User details have been submitted.</Typography>
+          <Typography>Sub-Component details have been submitted.</Typography>
           <Grid container spacing={1}>
             <Grid item xs={4}>
               <Typography
@@ -378,30 +289,12 @@ const UpdateSubcomponentWizard = props => {
               </Typography>
               <Grid item xs={12}>
                 <Typography>
-                  Name:{' '}
-                  <strong>
-                    {firstName} {lastName}
-                  </strong>
+                  Name: <strong>{subComponentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Username: <strong>{username}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Status: <strong>{isActive.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Admin: <strong>{isSuperUser.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Verified: <strong>{isVerified.toString()}</strong>
+                  Details: <strong>{subComponentSpecifications.toUpperCase()}</strong>
                 </Typography>
               </Grid>
             </Grid>

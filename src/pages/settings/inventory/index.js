@@ -54,6 +54,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AddDatacenterWizard from 'src/views/pages/inventory/forms/AddDatacenterWizard'
 import AddEnvironmentWizard from 'src/views/pages/inventory/forms/AddEnvironmentWizard'
 import AddComponentWizard from 'src/views/pages/inventory/forms/AddComponentWizard'
+import AddSubcomponentWizard from 'src/views/pages/inventory/forms/AddSubcomponentWizard'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -125,7 +126,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
       case '4': // Components
         return <AddComponentWizard />
       case '5':
-        return <Typography>Form not configured for this tab.</Typography>
+        return <AddSubcomponentWizard />
 
       // Add cases for other tabs with different fields
       default:

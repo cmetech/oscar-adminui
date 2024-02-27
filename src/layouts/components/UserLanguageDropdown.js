@@ -55,6 +55,9 @@ const UserLanguageDropdown = ({ settings }) => {
         <MenuItem sx={{ py: 2 }} selected={i18n.language === 'fr'} onClick={() => handleLangItemClick('fr')}>
           French
         </MenuItem>
+        <MenuItem sx={{ py: 2 }} selected={i18n.language === 'es'} onClick={() => handleLangItemClick('es')}>
+          Spanish
+        </MenuItem>
       </Menu>
     </Fragment>
   )

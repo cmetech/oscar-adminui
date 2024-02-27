@@ -12,6 +12,7 @@ import { CacheProvider } from '@emotion/react'
 
 import { defaultACLObj } from 'src/configs/acl'
 import themeConfig from 'src/configs/themeConfig'
+import 'src/configs/i18n'
 
 // ** Fake-DB Import
 // import 'src/@fake-db'

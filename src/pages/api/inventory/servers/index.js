@@ -42,6 +42,28 @@ async function handler(req, res) {
       console.error('Error proxying export targets:', error)
       res.status(error.response?.status || 500).json({ message: error.message })
     }
+  } else if (req.method === 'POST') {
+    // Logic for handling POST request to add a new datacenter
+    try {
+      const data = req.body
+
+      const response = await axios.post(`${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/servers`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+      })
+
+      // Respond with the data returned from the middleware backend
+      res.status(201).json(response.data)
+    } catch (error) {
+      console.error('Error adding server:', error)
+      res.status(error.response?.status || 500).json({ message: error.message })
+    }
+  } else {
+    // Handle unsupported HTTP methods
+    res.setHeader('Allow', ['GET', 'POST'])
+    res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }
 

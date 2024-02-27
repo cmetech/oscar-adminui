@@ -9,6 +9,7 @@ import Icon from 'src/@core/components/icon'
 import UserModeToggler from 'src/layouts/components/shared-components/UserModeToggler'
 import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
+import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
 
 const notifications = [
   {
@@ -71,6 +72,7 @@ const AppBarContent = props => {
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
+        <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>
     </Box>

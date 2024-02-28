@@ -45,6 +45,8 @@ import { endOfDay, startOfDay, subHours } from 'date-fns'
 import { useTheme } from '@mui/material/styles'
 import { grid } from '@mui/system'
 import axios from 'axios'
+import { t } from 'i18next'
+import { useTranslation } from 'react-i18next'
 
 const predefinedRanges = [
   {
@@ -210,6 +212,8 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
   const [openUploadCSVDialog, setOpenUploadCSVDialog] = useState(false)
   const modeDependentColor = theme.palette.mode === 'light' ? 'secondary' : 'primary'
 
+  const { t } = useTranslation()
+
   // const { tripsRef, breadcrumbsRef, idleEventsRef } = dataGridRefs
 
   const { afterToday } = DateRangePicker
@@ -266,7 +270,7 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         size='small'
         value={props.value}
         onChange={props.onChange}
-        placeholder='Search…'
+        placeholder={`${t('Search')}…`}
         InputProps={{
           startAdornment: (
             <Box sx={{ mr: 2, display: 'flex' }}>

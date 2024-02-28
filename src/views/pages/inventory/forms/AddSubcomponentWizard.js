@@ -51,7 +51,7 @@ const steps = [
   {
     title: 'Sub-Component Information',
     subtitle: 'Add Sub-Component Information',
-    description: 'Add the Name, Component Name, and Specifications for the component.'
+    description: 'Add the Name and Specifications for the component.'
   },
   {
     title: 'Review',
@@ -128,7 +128,6 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 const AddSubcomponentWizard = props => {
   // ** States
   const [subComponentName, setSubComponentName] = useState('')
-  const [componentName, setComponentName] = useState('')
   const [subComponentSpecification, setSubComponentSpecification] = useState('')
   const [activeStep, setActiveStep] = useState(0)
 
@@ -153,8 +152,7 @@ const AddSubcomponentWizard = props => {
 
         const payload = {
           name: subComponentName,
-          component_name: componentName,
-          specification: subComponentSpecification
+          specifications: subComponentSpecification
         }
 
         // Update the endpoint to point to your Next.js API route
@@ -172,17 +170,12 @@ const AddSubcomponentWizard = props => {
   }
 
   const handleReset = () => {
-    setComponentName('')
     setSubComponentName('')
     setSubComponentSpecification('')
     setActiveStep(0)
   }
 
   // Handle changes to the form fields
-  const handleComponentNameChange = event => {
-    setComponentName(event.target.value)
-  }
-
   const handleSubComponentNameChange = event => {
     setSubComponentName(event.target.value)
   }
@@ -230,16 +223,6 @@ const AddSubcomponentWizard = props => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled
-                    fullWidth
-                    value={componentName.toUpperCase()}
-                    onChange={handleComponentNameChange}
-                    label='Component Name'
-                  />
-                </FormControl>
-              </Grid>
             </Grid>
           </Fragment>
         )
@@ -265,11 +248,6 @@ const AddSubcomponentWizard = props => {
                 <Grid item xs={12}>
                   <Typography>
                     Name: <strong>{subComponentName.toUpperCase()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Component Name: <strong>{componentName.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -310,11 +288,6 @@ const AddSubcomponentWizard = props => {
               <Grid item xs={12}>
                 <Typography>
                   Name: <strong>{subComponentName.toUpperCase()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Component Name: <strong>{componentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>

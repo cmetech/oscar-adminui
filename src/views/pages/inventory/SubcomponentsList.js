@@ -137,11 +137,11 @@ const SubcomponentsList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.025,
+      flex: 0.035,
       minWidth: 100,
       field: 'name',
       editable: editmode,
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
@@ -169,29 +169,9 @@ const SubcomponentsList = props => {
     {
       flex: 0.05,
       minWidth: 100,
-      field: 'component',
-      editable: editmode,
-      headerName: 'Component',
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.component_name?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.05,
-      minWidth: 100,
       field: 'specification',
       editable: editmode,
-      headerName: 'Specification',
+      headerName: t('Specification'),
       renderCell: params => {
         const { row } = params
 
@@ -211,7 +191,7 @@ const SubcomponentsList = props => {
       minWidth: 250,
       field: 'createdAtTime',
       editable: editmode,
-      headerName: 'Created At',
+      headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
 
@@ -234,7 +214,7 @@ const SubcomponentsList = props => {
       minWidth: 100,
       field: 'updatedAtTime',
       editable: editmode,
-      headerName: 'Updated At',
+      headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
 
@@ -254,7 +234,7 @@ const SubcomponentsList = props => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('Actions'),
       type: 'string',
       flex: 0.025,
       minWidth: 10,

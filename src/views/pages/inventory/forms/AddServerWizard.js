@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, use, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 
@@ -43,7 +43,7 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { el, fi } from 'date-fns/locale'
+import { da, el, fi } from 'date-fns/locale'
 import { set } from 'nprogress'
 import { main } from '@popperjs/core'
 
@@ -77,7 +77,7 @@ const steps = [
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the Environment details and submit.'
+    description: 'Review the Server details and submit.'
   }
 ]
 
@@ -208,9 +208,60 @@ const AddServerWizard = props => {
   const [serverForm, setServerForm] = useState(initialServerFormState)
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
+  const [components, setComponents] = useState([])
+  const [datacenters, setDatacenters] = useState([])
+  const [environments, setEnvironments] = useState([])
 
   const theme = useTheme()
   const session = useSession()
+
+  useEffect(() => {
+    const fetchDatacenters = async () => {
+      try {
+        // Directly use the result of the await expression
+        const response = await axios.get('/api/inventory/datacenters')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const datacenterNames = data.map(datacenter => datacenter.name.toUpperCase())
+        setDatacenters(datacenterNames)
+      } catch (error) {
+        console.error('Failed to fetch datacenters:', error)
+      }
+    }
+
+    const fetchEnviroments = async () => {
+      try {
+        // Directly use the result of the await expression
+        const response = await axios.get('/api/inventory/environments')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const environmentNames = data.map(environment => environment.name.toUpperCase())
+        setEnvironments(environmentNames)
+      } catch (error) {
+        console.error('Failed to fetch environments:', error)
+      }
+    }
+
+    const fetchComponents = async () => {
+      try {
+        // Directly use the result of the await expression
+        const response = await axios.get('/api/inventory/components')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const componentNames = data.map(component => component.name.toUpperCase())
+        setComponents(componentNames)
+      } catch (error) {
+        console.error('Failed to fetch components:', error)
+      }
+    }
+
+    fetchDatacenters()
+    fetchEnviroments()
+    fetchComponents()
+  }, []) // Empty dependency array means this effect runs once on mount
 
   // Function to handle form field changes
   const handleFormChange = (event, index, section) => {
@@ -256,33 +307,38 @@ const AddServerWizard = props => {
     }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
-      console.log('Submitting server details', serverForm)
+      try {
+        const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
 
-      //   try {
-      //     const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
+        const headers = {
+          Accept: 'application/json',
+          Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+        }
 
-      //     const headers = {
-      //       Accept: 'application/json',
-      //       Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      //     }
+        const payload = {
+          hostname: serverForm.hostName,
+          datacenter_name: serverForm.datacenterName,
+          environment_name: serverForm.environmentName,
+          component_name: serverForm.componentName,
+          metadata: serverForm.metadata,
+          network_interfaces: serverForm.networkInterfaces,
+          ip_address: serverForm.networkInterfaces[0].ip_address,
+          status: serverForm.status
+        }
 
-      //     const payload = {
-      //       name: environmentName,
-      //       description: environmentDescription,
-      //       datacenter_name: datacenterName
-      //     }
+        console.log('Submitting server details', payload)
 
-      //     // Update the endpoint to point to your Next.js API route
-      //     const endpoint = '/api/inventory/servers'
-      //     const response = await axios.post(endpoint, payload, { headers })
+        // Update the endpoint to point to your Next.js API route
+        const endpoint = '/api/inventory/servers'
+        const response = await axios.post(endpoint, payload, { headers })
 
-      //     if (response.data) {
-      //       toast.success('Server details added successfully')
-      //     }
-      //   } catch (error) {
-      //     console.error('Error updating server details', error)
-      //     toast.error('Error updating server details')
-      //   }
+        if (response.data) {
+          toast.success('Server details added successfully')
+        }
+      } catch (error) {
+        console.error('Error adding server details', error)
+        toast.error('Error adding server details')
+      }
     }
   }
 
@@ -297,7 +353,7 @@ const AddServerWizard = props => {
     return serverForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={5}>
+          <Grid item xs={section === 'metadata' ? 5 : 4}>
             <TextField
               key={`field1-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -309,7 +365,7 @@ const AddServerWizard = props => {
               margin='normal'
             />
           </Grid>
-          <Grid item xs={5}>
+          <Grid item xs={section === 'metadata' ? 5 : 3}>
             <TextField
               key={`field2-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -321,6 +377,21 @@ const AddServerWizard = props => {
               margin='normal'
             />
           </Grid>
+          {/* Conditional TextField for Label only in networkInterfaces */}
+          {section === 'networkInterfaces' && (
+            <Grid item xs={3}>
+              <TextField
+                key={`label-${section}-${index}-${resetFormFields}`}
+                fullWidth
+                label='Label'
+                name='label'
+                value={entry.label}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )}
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton onClick={() => addSectionEntry(section)} color='primary'>
               <Icon icon='mdi:plus-circle-outline' />
@@ -371,37 +442,72 @@ const AddServerWizard = props => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id='componentName'
-                  name='componentName'
-                  label='Component Name'
-                  fullWidth
-                  autoComplete='off'
+                <Autocomplete
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='componentName-autocomplete'
+                  options={components}
                   value={serverForm.componentName}
-                  onChange={handleFormChange}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} label='Component Name' fullWidth required autoComplete='off' />
+                  )}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  id='datacenterName'
-                  name='datacenterName'
-                  label='Datacenter Name'
-                  fullWidth
-                  autoComplete='off'
+                <Autocomplete
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='datacenterName-autocomplete'
+                  options={datacenters}
                   value={serverForm.datacenterName}
-                  onChange={handleFormChange}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                  )}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  id='environmentName'
-                  name='environmentName'
-                  label='Environment Name'
-                  fullWidth
-                  autoComplete='off'
+                <Autocomplete
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='environmentName-autocomplete'
+                  options={environments}
                   value={serverForm.environmentName}
-                  onChange={handleFormChange}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} label='Environment Name' fullWidth required autoComplete='off' />
+                  )}
                 />
               </Grid>
               <Grid item xs={12}>

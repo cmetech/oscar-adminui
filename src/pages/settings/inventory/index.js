@@ -336,6 +336,7 @@ const Settings = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const { serverRuntimeConfig, publicRuntimeConfig } = getConfig()
+  const { t } = useTranslation()
 
   const [value, setValue] = useState('1')
   const [datacenterTotal, setDatacenterTotal] = useState(0)
@@ -392,11 +393,11 @@ const Settings = () => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicText = tabValue => {
     const mapping = {
-      1: 'Datacenter',
-      2: 'Environment',
-      3: 'Server',
-      4: 'Component',
-      5: 'Subcomponent'
+      1: t('Datacenter'),
+      2: t('Environment'),
+      3: t('Server'),
+      4: t('Component'),
+      5: t('Subcomponent')
     }
 
     return mapping[tabValue] || 'Item'
@@ -406,7 +407,7 @@ const Settings = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
-          <Typography variant='h4'>Inventory Management</Typography>
+          <Typography variant='h4'>{t('Inventory Management')}</Typography>
           <Box display='flex' alignItems='center'>
             <Button
               variant='contained'
@@ -423,11 +424,11 @@ const Settings = () => {
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='assets'>
             {datacenterTotal == 0 ? (
-              <Tab value='1' label='Datacenters' icon={<Icon icon='mdi:office-building' />} iconPosition='start' />
+              <Tab value='1' label={t('Datacenters')} icon={<Icon icon='mdi:office-building' />} iconPosition='start' />
             ) : (
               <Tab
                 value='1'
-                label={'Datacenters (' + datacenterTotal + ')'}
+                label={`${t('Datacenters')} (${datacenterTotal})`}
                 icon={<Icon icon='mdi:office-building' />}
                 iconPosition='start'
               />
@@ -435,44 +436,44 @@ const Settings = () => {
             {environmentTotal == 0 ? (
               <Tab
                 value='2'
-                label='Environments'
+                label={t('Environments')}
                 icon={<Icon icon='mdi:file-table-box-multiple' />}
                 iconPosition='start'
               />
             ) : (
               <Tab
                 value='2'
-                label={'Environments (' + environmentTotal + ')'}
+                label={`${t('Environments')} (${environmentTotal})`}
                 icon={<Icon icon='mdi:file-table-box-multiple' />}
                 iconPosition='start'
               />
             )}
             {serverTotal == 0 ? (
-              <Tab value='3' label='Servers' icon={<Icon icon='mdi:server' />} iconPosition='start' />
+              <Tab value='3' label={t('Servers')} icon={<Icon icon='mdi:server' />} iconPosition='start' />
             ) : (
               <Tab
                 value='3'
-                label={'Servers (' + serverTotal + ')'}
+                label={`${t('Servers')} (${serverTotal})`}
                 icon={<Icon icon='mdi:server' />}
                 iconPosition='start'
               />
             )}
             {componentTotal == 0 ? (
-              <Tab value='4' label='Components' icon={<Icon icon='mdi:group' />} iconPosition='start' />
+              <Tab value='4' label={t('Components')} icon={<Icon icon='mdi:group' />} iconPosition='start' />
             ) : (
               <Tab
                 value='4'
-                label={'Components (' + componentTotal + ')'}
+                label={`${t('Components')} (${componentTotal})`}
                 icon={<Icon icon='mdi:group' />}
                 iconPosition='start'
               />
             )}
             {subcomponentTotal == 0 ? (
-              <Tab value='5' label='SubComponents' icon={<Icon icon='mdi:select-group' />} iconPosition='start' />
+              <Tab value='5' label={t('Subcomponents')} icon={<Icon icon='mdi:select-group' />} iconPosition='start' />
             ) : (
               <Tab
                 value='5'
-                label={'SubComponents (' + subcomponentTotal + ')'}
+                label={`${t('Subcomponents')} (${subcomponentTotal})`}
                 icon={<Icon icon='mdi:select-group' />}
                 iconPosition='start'
               />

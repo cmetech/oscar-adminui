@@ -22,8 +22,7 @@ async function handler(req, res) {
         const filteredData = dataToFilter.filter(
           item =>
             item?.id?.toString().toLowerCase().includes(queryLowered) ||
-            item?.name?.toLowerCase().includes(queryLowered) ||
-            item?.component_name?.toLowerCase().includes(queryLowered)
+            item?.name?.toLowerCase().includes(queryLowered)
         )
 
         res.status(200).json({

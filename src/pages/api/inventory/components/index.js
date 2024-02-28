@@ -23,6 +23,7 @@ async function handler(req, res) {
           item =>
             item?.id?.toString().toLowerCase().includes(queryLowered) ||
             item?.name?.toLowerCase().includes(queryLowered) ||
+            item?.subcomponent_name?.toLowerCase().includes(queryLowered) ||
             item?.type?.toLowerCase().includes(queryLowered) ||
             item?.details?.toLowerCase().includes(queryLowered)
         )

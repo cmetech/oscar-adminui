@@ -141,7 +141,7 @@ const ServersList = props => {
       minWidth: 100,
       field: 'name',
       editable: editmode,
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
@@ -171,7 +171,7 @@ const ServersList = props => {
       minWidth: 100,
       field: 'environment',
       editable: editmode,
-      headerName: 'Environment',
+      headerName: t('Environment'),
       renderCell: params => {
         const { row } = params
 
@@ -200,7 +200,7 @@ const ServersList = props => {
       flex: 0.015,
       field: 'status',
       editable: editmode,
-      headerName: 'Status',
+      headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -208,7 +208,7 @@ const ServersList = props => {
 
         let color = 'error'
         let label = 'UNKN'
-        if (row?.status === 'active') {
+        if (row?.status?.toLowerCase() === 'active') {
           color = 'success'
           label = 'ACTIVE'
         } else {
@@ -237,7 +237,7 @@ const ServersList = props => {
       minWidth: 100,
       field: 'component',
       editable: editmode,
-      headerName: 'Component',
+      headerName: t('Component'),
       renderCell: params => {
         const { row } = params
 
@@ -255,7 +255,7 @@ const ServersList = props => {
                       : theme.palette.customColors.brandYellow
                 }}
               >
-                {row?.subcomponent_name}
+                {row?.subcomponent_name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -267,7 +267,7 @@ const ServersList = props => {
       minWidth: 250,
       field: 'createdAtTime',
       editable: editmode,
-      headerName: 'Created At',
+      headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
 
@@ -290,7 +290,7 @@ const ServersList = props => {
       minWidth: 100,
       field: 'updatedAtTime',
       editable: editmode,
-      headerName: 'Updated At',
+      headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
 
@@ -310,7 +310,7 @@ const ServersList = props => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('Actions'),
       type: 'string',
       flex: 0.025,
       minWidth: 10,
@@ -685,6 +685,10 @@ const ServersList = props => {
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
+          localeText={{
+            toolbarColumns: t('Columns'),
+            toolbarFilters: t('Filters')
+          }}
           initialState={{
             columns: {
               columnVisibilityModel: {

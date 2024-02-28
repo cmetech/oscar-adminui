@@ -142,7 +142,7 @@ const ComponentsList = props => {
       minWidth: 100,
       field: 'name',
       editable: editmode,
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
@@ -170,9 +170,29 @@ const ComponentsList = props => {
     {
       flex: 0.05,
       minWidth: 100,
+      field: 'subcomponent',
+      editable: editmode,
+      headerName: t('Subcomponent'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.subcomponent_name}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.05,
+      minWidth: 100,
       field: 'type',
       editable: editmode,
-      headerName: 'Type',
+      headerName: t('Type'),
       renderCell: params => {
         const { row } = params
 
@@ -192,7 +212,7 @@ const ComponentsList = props => {
       minWidth: 100,
       field: 'details',
       editable: editmode,
-      headerName: 'Description',
+      headerName: t('Description'),
       renderCell: params => {
         const { row } = params
 
@@ -212,7 +232,7 @@ const ComponentsList = props => {
       minWidth: 250,
       field: 'createdAtTime',
       editable: editmode,
-      headerName: 'Created At',
+      headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
 
@@ -235,7 +255,7 @@ const ComponentsList = props => {
       minWidth: 100,
       field: 'updatedAtTime',
       editable: editmode,
-      headerName: 'Updated At',
+      headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
 
@@ -255,7 +275,7 @@ const ComponentsList = props => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('Actions'),
       type: 'string',
       flex: 0.025,
       minWidth: 10,

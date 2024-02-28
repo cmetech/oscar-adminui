@@ -141,7 +141,7 @@ const EnvironmentsList = props => {
       minWidth: 100,
       field: 'name',
       editable: editmode,
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
@@ -170,7 +170,7 @@ const EnvironmentsList = props => {
       flex: 0.025,
       field: 'active_servers',
       editable: editmode,
-      headerName: 'Active Servers',
+      headerName: t('Active Servers'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -200,7 +200,7 @@ const EnvironmentsList = props => {
       flex: 0.025,
       field: 'inactive_servers',
       editable: editmode,
-      headerName: 'In-Active Servers',
+      headerName: t('In-Active Servers'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -231,7 +231,7 @@ const EnvironmentsList = props => {
       minWidth: 100,
       field: 'description',
       editable: editmode,
-      headerName: 'Description',
+      headerName: t('Description'),
       renderCell: params => {
         const { row } = params
 
@@ -251,7 +251,7 @@ const EnvironmentsList = props => {
       minWidth: 250,
       field: 'createdAtTime',
       editable: editmode,
-      headerName: 'Created At',
+      headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
 
@@ -274,7 +274,7 @@ const EnvironmentsList = props => {
       minWidth: 100,
       field: 'updatedAtTime',
       editable: editmode,
-      headerName: 'Updated At',
+      headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
 

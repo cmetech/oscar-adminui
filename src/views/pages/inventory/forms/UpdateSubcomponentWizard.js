@@ -174,6 +174,7 @@ const UpdateSubcomponentWizard = props => {
           })
 
           props.setRows(updatedRows)
+          props.currentSubcomponent = updatedSubComponent
 
           toast.success('Sub-Component status updated successfully')
         }

@@ -168,7 +168,7 @@ const ComponentsList = props => {
       }
     },
     {
-      flex: 0.05,
+      flex: 0.025,
       minWidth: 100,
       field: 'subcomponent',
       editable: editmode,
@@ -188,7 +188,7 @@ const ComponentsList = props => {
       }
     },
     {
-      flex: 0.05,
+      flex: 0.025,
       minWidth: 100,
       field: 'type',
       editable: editmode,
@@ -228,7 +228,7 @@ const ComponentsList = props => {
       }
     },
     {
-      flex: 0.05,
+      flex: 0.025,
       minWidth: 250,
       field: 'createdAtTime',
       editable: editmode,
@@ -251,7 +251,7 @@ const ComponentsList = props => {
       }
     },
     {
-      flex: 0.05,
+      flex: 0.025,
       minWidth: 100,
       field: 'updatedAtTime',
       editable: editmode,

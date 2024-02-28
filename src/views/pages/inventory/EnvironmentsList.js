@@ -131,6 +131,7 @@ const EnvironmentsList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [currentEnvironment, setCurrentEnvironment] = useState(null)
 
   const editmode = false
 
@@ -306,7 +307,7 @@ const EnvironmentsList = props => {
               title='Edit'
               aria-label='Edit'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentEnvironment(params.row)
                 setOpenDialog(true)
               }}
             >
@@ -318,7 +319,7 @@ const EnvironmentsList = props => {
               aria-label='Delete Environment'
               color='error'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentEnvironment(params.row)
                 setDeleteDialog(true)
               }}
             >
@@ -330,33 +331,29 @@ const EnvironmentsList = props => {
     }
   ]
 
-  const handleUpdateUserDialogClose = () => {
+  const handleUpdateDialogClose = () => {
     setOpenDialog(false)
   }
 
-  const handleDisableUserDialogClose = () => {
-    setDeactivateDialog(false)
-  }
-
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
   }
 
-  const UserEditDialog = () => {
+  const EditDialog = () => {
     return (
       <Dialog
         fullWidth
         maxWidth='md'
         scroll='body'
         open={openDialog}
-        onClose={handleUpdateUserDialogClose}
+        onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentEnvironment?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -368,110 +365,45 @@ const EnvironmentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentEnvironment?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateUserDialogClose()}
+            onClick={() => handleUpdateDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit User Information
+              Edit Environment Information
             </Typography>
-            <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to environment information will be effective immediately.</Typography>
           </Box>
-          <UpdateEnvironmentWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateEnvironmentWizard currentEnvironment={currentEnvironment} rows={rows} setRows={setRows} />
         </DialogContent>
       </Dialog>
     )
   }
 
-  const UserDisableDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={deactivateDialog}
-        onClose={handleDisableUserDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentUser?.id ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {currentUser?.is_active
-                    ? 'Please confirm that you want to deactivate this user.'
-                    : 'Please confirm that you want to activate this user.'}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeactivateUserDialogSubmit} color='primary'>
-            {currentUser?.is_active ? 'Deactivate' : 'Activate'}
-          </Button>
-          <Button variant='outlined' onClick={handleDisableUserDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }
-
-  const UserDeleteDialog = () => {
+  const DeleteDialog = () => {
     return (
       <Dialog
         fullWidth
         maxWidth='md'
         scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentEnvironment?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -483,14 +415,14 @@ const EnvironmentsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentEnvironment?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleDeleteUserDialogClose()}
+            onClick={() => handleDeleteDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -502,17 +434,18 @@ const EnvironmentsList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                  Please confirm that you want to delete this environment. This action cannot be undone. All Servers
+                  associated with this environment will also be deleted.
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
             Delete
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
+          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
             Cancel
           </Button>
         </DialogActions>
@@ -520,7 +453,7 @@ const EnvironmentsList = props => {
     )
   }
 
-  const handleDeactivateUserDialogSubmit = async () => {
+  const handleDeleteDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -529,61 +462,21 @@ const EnvironmentsList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const payload = {
-        username: currentUser?.username,
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        is_active: currentUser?.is_active ? false : true
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
-      const response = await axios.patch(endpoint, payload, { headers })
-
-      if (response.data) {
-        const updatedUser = response.data
-
-        const updatedRows = rows.map(row => {
-          if (row.id === updatedUser.id) {
-            return updatedUser
-          }
-
-          return row
-        })
-
-        setRows(updatedRows)
-        setDeactivateDialog(false)
-
-        toast.success('User status updated successfully')
-      }
-    } catch (error) {
-      console.error('Error updating activation status of user', error)
-      toast.error('Error updating activation status of user')
-    }
-  }
-
-  const handleDeleteUserDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
+      const endpoint = `/api/inventory/environments/${currentEnvironment.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentUser.id)
+        const updatedRows = rows.filter(row => row.id !== currentEnvironment.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
+        props.set_total(props.total - 1)
 
-        toast.success('User successfully deleted')
+        toast.success('Successfully deleted environment')
       }
     } catch (error) {
-      console.error('Error deleting user', error)
-      toast.error('Error deleting of user')
+      console.error('Failed to delete Environment', error)
+      toast.error('Failed to delete Environment')
     }
   }
 
@@ -695,9 +588,8 @@ const EnvironmentsList = props => {
             }
           }}
         />
-        <UserEditDialog />
-        <UserDisableDialog />
-        <UserDeleteDialog />
+        <EditDialog />
+        <DeleteDialog />
       </Card>
     </Box>
   )

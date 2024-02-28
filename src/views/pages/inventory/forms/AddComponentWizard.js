@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, use, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 
@@ -46,6 +46,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 import { el, fi } from 'date-fns/locale'
 import { set } from 'nprogress'
 import { main } from '@popperjs/core'
+import { sub } from 'date-fns'
 
 const steps = [
   {
@@ -128,16 +129,40 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 const AddComponentWizard = props => {
   // ** States
   const [componentName, setComponentName] = useState('')
+  const [subcomponentName, setSubcomponentName] = useState('')
   const [componentDetails, setComponentDetails] = useState('')
   const [componentType, setComponentType] = useState('')
+  const [subComponents, setSubComponents] = useState([])
   const [activeStep, setActiveStep] = useState(0)
 
   const theme = useTheme()
   const session = useSession()
 
+  useEffect(() => {
+    const fetchSubComponents = async () => {
+      try {
+        // Directly use the result of the await expression
+        const response = await axios.get('/api/inventory/subcomponents')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const subComponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
+        setSubComponents(subComponentNames)
+      } catch (error) {
+        console.error('Failed to fetch subcomponents:', error)
+      }
+    }
+
+    fetchSubComponents()
+  }, []) // Empty dependency array means this effect runs once on mount
+
   // Handle Stepper
   const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1)
+  }
+
+  const handleSubcomponentNameChange = event => {
+    setSubcomponentName(event.target.value)
   }
 
   const handleNext = async () => {
@@ -153,6 +178,7 @@ const AddComponentWizard = props => {
 
         const payload = {
           name: componentName,
+          subcomponent_name: subcomponentName,
           type: componentType,
           details: componentDetails
         }
@@ -220,6 +246,33 @@ const AddComponentWizard = props => {
                   />
                 </FormControl>
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='subcomponentName-autocomplete'
+                  options={subComponents}
+                  value={subcomponentName}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleSubcomponentNameChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleSubcomponentNameChange(
+                        { target: { name: 'subcomponentName', value: newInputValue } },
+                        null,
+                        null
+                      )
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} label='Subcomponent Name' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
                   <TextfieldStyled
@@ -269,6 +322,11 @@ const AddComponentWizard = props => {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>
+                    Subcomponent Name: <strong>{subcomponentName.toUpperCase()}</strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
                     Type: <strong>{componentType.toUpperCase()}</strong>
                   </Typography>
                 </Grid>
@@ -310,6 +368,11 @@ const AddComponentWizard = props => {
               <Grid item xs={12}>
                 <Typography>
                   Name: <strong>{componentName.toUpperCase()}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Subcomponent Name: <strong>{subcomponentName.toUpperCase()}</strong>
                 </Typography>
               </Grid>
               <Grid item xs={12}>

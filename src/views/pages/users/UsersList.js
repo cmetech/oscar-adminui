@@ -141,7 +141,7 @@ const UsersList = props => {
       minWidth: 100,
       field: 'name',
       editable: editmode,
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
@@ -183,7 +183,7 @@ const UsersList = props => {
       minWidth: 100,
       field: 'email',
       editable: editmode,
-      headerName: 'Email',
+      headerName: t('Email'),
       renderCell: params => {
         const { row } = params
 
@@ -230,7 +230,7 @@ const UsersList = props => {
       flex: 0.025,
       field: 'status',
       editable: editmode,
-      headerName: 'Status',
+      headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -266,7 +266,7 @@ const UsersList = props => {
       flex: 0.025,
       field: 'superuser',
       editable: editmode,
-      headerName: 'Has Admin Access',
+      headerName: t('Has Admin Access'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -311,7 +311,7 @@ const UsersList = props => {
       flex: 0.025,
       field: 'is_verified',
       editable: editmode,
-      headerName: 'Is Verified',
+      headerName: t('Is Verified'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -393,7 +393,7 @@ const UsersList = props => {
     // },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('Actions'),
       type: 'string',
       flex: 0.025,
       minWidth: 10,

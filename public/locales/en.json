@@ -30,5 +30,10 @@
     "Delete": "Delete",
     "Export": "Export",
     "Availability": "Availability",
-    "Overview": "Overview"
+    "Overview": "Overview",
+    "Email": "Email",
+    "Role": "Role",
+    "Has Admin Access": "Has Admin Access",
+    "Is Verified": "Is Verified",
+    "Users": "Users"
 }

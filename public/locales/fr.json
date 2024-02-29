@@ -30,5 +30,10 @@
     "Delete": "Supprimer",
     "Export": "Exporter",
     "Availability": "Disponibilité",
-    "Overview": "Aperçu"
+    "Overview": "Aperçu",
+    "Email": "E-mail",
+    "Role": "Rôle",
+    "Has Admin Access": "Accès administrateur",
+    "Is Verified": "Est vérifié",
+    "Users": "Utilisateurs"
 }

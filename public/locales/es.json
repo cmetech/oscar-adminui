@@ -16,7 +16,7 @@
     "Location": "Ubicación",
     "Created At": "Creado el",
     "Updated At": "Actualizado el",
-    "Actions": "Acciones",
+    "Actions": "Comportamiento",
     "Search": "Buscar",
     "Support": "Soporte",
     "Feedback": "Retroalimentación",
@@ -30,5 +30,10 @@
     "Delete": "Eliminar",
     "Export": "Exportar",
     "Availability": "Disponibilidad",
-    "Overview": "Visión general"
+    "Overview": "Visión general",
+    "Email": "Correo electrónico",
+    "Role": "Role",
+    "Has Admin Access": "Acceso de administrador",
+    "Is Verified": "Está verificado",
+    "Users": "Usuarios"
 }

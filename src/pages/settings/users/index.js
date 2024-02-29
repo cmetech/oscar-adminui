@@ -1,6 +1,7 @@
 // ** React Imports
 import { useContext, useState } from 'react'
 import getConfig from 'next/config'
+import { useTranslation } from 'react-i18next'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -53,6 +54,7 @@ const Settings = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const { serverRuntimeConfig, publicRuntimeConfig } = getConfig()
+  const { t } = useTranslation()
 
   const [value, setValue] = useState('1')
   const [userTotal, setUserTotal] = useState(0)
@@ -67,7 +69,11 @@ const Settings = () => {
       <Grid item xs={12}>
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='users'>
-            {userTotal == 0 ? <Tab value='1' label='Users' /> : <Tab value='1' label={'Users (' + userTotal + ')'} />}
+            {userTotal == 0 ? (
+              <Tab value='1' label={t('Users')} />
+            ) : (
+              <Tab value='1' label={`${t('Users')} (${userTotal})`} />
+            )}
           </TabList>
           <TabPanel value='1'>
             <UsersList set_user_total={setUserTotal} />

@@ -7,6 +7,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useSession } from 'next-auth/react'
 import themeConfig from 'src/configs/themeConfig'
 import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -65,10 +66,13 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
+import ServerDetailPanel from 'src/views/pages/inventory/ServerDetailPanel'
+import { serverIdsAtom } from 'src/lib/atoms'
 
 import { th } from 'date-fns/locale'
 import { current } from '@reduxjs/toolkit'
 import { set } from 'nprogress'
+import { from } from 'form-data'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -132,6 +136,13 @@ const ServersList = props => {
   const [currentServer, setCurrentServer] = useState(null)
 
   const editmode = false
+
+  const getDetailPanelContent = useCallback(({ row }) => <ServerDetailPanel row={row} />, [])
+  const getDetailPanelHeight = useCallback(() => 600, [])
+
+  const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
+    setDetailPanelExpandedRowIds(newIds)
+  }, [])
 
   // column definitions
   const columns = [
@@ -420,7 +431,7 @@ const ServersList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentServer?.name?.toUpperCase() ?? ''}
+              {currentServer?.hostname?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -550,8 +561,18 @@ const ServersList = props => {
     fetchData(sort, value, sortColumn)
   }
 
-  const handleRowSelection = rowid => {
-    setRowSelectionModel(rowids)
+  const handleRowSelection = newRowSelectionModel => {
+    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
+
+    console.log('Added IDs:', addedIds)
+
+    addedIds.forEach(id => {
+      const row = rows.find(r => r.id === id)
+      console.log('Added Row:', row)
+    })
+
+    // Update the row selection model
+    setRowSelectionModel(newRowSelectionModel)
   }
 
   return (
@@ -576,7 +597,7 @@ const ServersList = props => {
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
-          checkboxSelection={false}
+          checkboxSelection={true}
           disableRowSelectionOnClick
           sortingMode='server'
           paginationMode='server'
@@ -588,6 +609,10 @@ const ServersList = props => {
           components={{ Toolbar: ServerSideToolbar }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
+          getDetailPanelHeight={getDetailPanelHeight}
+          getDetailPanelContent={getDetailPanelContent}
+          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           loading={loading}
           keepNonExistentRowsSelected
           componentsProps={{

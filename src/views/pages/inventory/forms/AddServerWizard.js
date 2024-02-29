@@ -30,6 +30,7 @@ import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -81,6 +82,17 @@ const steps = [
   }
 ]
 
+const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+      color: theme.palette.common.black
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.common.black
+    }
+  })
+)
+
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
   '&.Mui-checked': {
@@ -100,14 +112,23 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 }))
 
 const SelectStyled = styled(Select)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    fieldset: {
-      borderColor: 'inherit' // default border color
+  '&.MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     },
-    '&.Mui-focused': {
-      fieldset: {
-        borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // border color when focused
-      }
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // border color when focused
+    }
+  }
+}))
+
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))
@@ -154,7 +175,7 @@ const Section = ({ title, data }) => {
         <Grid container spacing={2} key={`${title}-${index}`}>
           {Object.entries(item).map(([itemKey, itemValue]) => (
             <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
-              <TextField
+              <TextfieldStyled
                 fullWidth
                 label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
                 value={itemValue.toString()}
@@ -184,7 +205,7 @@ const ReviewAndSubmitSection = ({ serverForm }) => {
           return (
             <Grid container spacing={2} key={key}>
               <Grid item xs={12} sm={6}>
-                <TextField
+                <TextfieldStyled
                   fullWidth
                   label={key.charAt(0).toUpperCase() + key.slice(1)}
                   value={value.toString()}
@@ -266,14 +287,18 @@ const AddServerWizard = props => {
   // Function to handle form field changes
   const handleFormChange = (event, index, section) => {
     const { name, value } = event.target
+
+    // Upper case the value being entered
+    const upperCasedValue = value.toUpperCase()
+
     if (section) {
       // Handle changes for dynamic sections (metadata or networkInterfaces)
       const updatedSection = [...serverForm[section]]
-      updatedSection[index][name] = value
+      updatedSection[index][name] = upperCasedValue
       setServerForm({ ...serverForm, [section]: updatedSection })
     } else {
       // Handle changes for static fields
-      setServerForm({ ...serverForm, [name]: value })
+      setServerForm({ ...serverForm, [name]: upperCasedValue })
     }
   }
 
@@ -354,7 +379,7 @@ const AddServerWizard = props => {
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
           <Grid item xs={section === 'metadata' ? 5 : 4}>
-            <TextField
+            <TextfieldStyled
               key={`field1-${section}-${index}-${resetFormFields}`}
               fullWidth
               label={section === 'metadata' ? 'Key' : 'Name'}
@@ -366,7 +391,7 @@ const AddServerWizard = props => {
             />
           </Grid>
           <Grid item xs={section === 'metadata' ? 5 : 3}>
-            <TextField
+            <TextfieldStyled
               key={`field2-${section}-${index}-${resetFormFields}`}
               fullWidth
               label={section === 'metadata' ? 'Value' : 'IP Address'}
@@ -380,7 +405,7 @@ const AddServerWizard = props => {
           {/* Conditional TextField for Label only in networkInterfaces */}
           {section === 'networkInterfaces' && (
             <Grid item xs={3}>
-              <TextField
+              <TextfieldStyled
                 key={`label-${section}-${index}-${resetFormFields}`}
                 fullWidth
                 label='Label'
@@ -393,7 +418,10 @@ const AddServerWizard = props => {
             </Grid>
           )}
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton onClick={() => addSectionEntry(section)} color='primary'>
+            <IconButton
+              onClick={() => addSectionEntry(section)}
+              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+            >
               <Icon icon='mdi:plus-circle-outline' />
             </IconButton>
             {serverForm[section].length > 1 && (
@@ -430,19 +458,21 @@ const AddServerWizard = props => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id='hostName'
-                  name='hostName'
-                  label='Host Name'
-                  fullWidth
-                  autoComplete='off'
-                  value={serverForm.hostName}
-                  onChange={handleFormChange}
-                />
+                <CustomToolTip title='The hostname of the server' placement='top'>
+                  <TextfieldStyled
+                    required
+                    id='hostName'
+                    name='hostName'
+                    label='Host Name'
+                    fullWidth
+                    autoComplete='off'
+                    value={serverForm.hostName}
+                    onChange={handleFormChange}
+                  />
+                </CustomToolTip>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -465,7 +495,7 @@ const AddServerWizard = props => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -488,7 +518,7 @@ const AddServerWizard = props => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -506,26 +536,25 @@ const AddServerWizard = props => {
                     }
                   }}
                   renderInput={params => (
-                    <TextField {...params} label='Environment Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id='status'
-                  name='status'
-                  label='Status'
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true
-                  }}
-                  value={serverForm.status}
-                  onChange={handleFormChange}
-                >
-                  <option value='Active'>Active</option>
-                  <option value='Inactive'>Inactive</option>
-                </TextField>
+              <Grid item xs={6}>
+                <FormControl fullWidth>
+                  <InputLabelStyled id='status-select-label'>Status</InputLabelStyled>
+                  <SelectStyled
+                    labelId='status-select-label'
+                    id='status-simple-select'
+                    value={serverForm.status.toUpperCase()}
+                    label='Status'
+                    onChange={handleFormChange}
+                    name='status'
+                  >
+                    <MenuItem value={'ACTIVE'}>ACTIVE</MenuItem>
+                    <MenuItem value={'INACTIVE'}>INACTIVE</MenuItem>
+                  </SelectStyled>
+                </FormControl>
               </Grid>
             </Grid>
           </Fragment>
@@ -537,8 +566,16 @@ const AddServerWizard = props => {
               {renderDynamicFormSection('networkInterfaces')}
               <Box>
                 <Button
-                  startIcon={<Icon icon='mdi:plus-circle-outline' />}
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
                   onClick={() => addSectionEntry('networkInterfaces')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                 >
                   Add Network Interface
                 </Button>
@@ -552,7 +589,18 @@ const AddServerWizard = props => {
             <Stack direction='column' spacing={1}>
               {renderDynamicFormSection('metadata')}
               <Box>
-                <Button startIcon={<Icon icon='mdi:plus-circle-outline' />} onClick={() => addSectionEntry('metadata')}>
+                <Button
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
+                  onClick={() => addSectionEntry('metadata')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
+                >
                   Add Metadata
                 </Button>
               </Box>

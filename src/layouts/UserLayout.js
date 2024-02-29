@@ -221,14 +221,17 @@ const UserLayout = ({ children, contentHeightFixed }) => {
       saveSettings={saveSettings}
       contentHeightFixed={contentHeightFixed}
       footerProps={{
-        content: () => <UserFooterContent />
+        content: () => <UserFooterContent theme={theme} />
       }}
       verticalLayoutProps={{
         navMenu: {
           componentProps: {
             sx: {
               '& .MuiList-root .nav-link:hover': {
-                bgcolor: '#A0A0A0',
+                bgcolor:
+                  theme.palette.mode === 'dark'
+                    ? theme.palette.customColors.brandYellow4
+                    : theme.palette.customColors.brandGray3,
                 borderRadius: '0 22px 22px 0'
               },
               '& .MuiList-root .nav-link:hover .MuiTypography-root': {
@@ -240,8 +243,8 @@ const UserLayout = ({ children, contentHeightFixed }) => {
               '& .MuiDivider-root .MuiTypography-root': {
                 color:
                   theme.palette.mode === 'dark'
-                    ? theme.palette.customColors.brandBlue
-                    : theme.palette.customColors.brandBlue
+                    ? theme.palette.customColors.brandYellow
+                    : theme.palette.customColors.brandBlack
               }
             }
           },

@@ -16,15 +16,25 @@ const StyledLink = styled(Link)({
   color: '#FFFFFF'
 })
 
-const UserFooterContent = () => {
+const UserFooterContent = props => {
   // ** Var
   const hidden = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const theme = props.theme
 
   const { t } = useTranslation()
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Typography sx={{ mr: 2 }}>
+      <Typography
+        sx={{
+          mr: 2,
+          color: `${
+            theme.palette.mode === 'light'
+              ? theme.palette.customColors.brandBlack
+              : theme.palette.customColors.brandWhite
+          }`
+        }}
+      >
         <i class='icon icon-econ' style={{ fontSize: '1rem' }} />
         {` © Ericsson 1994-${new Date().getFullYear()}`}
       </Typography>

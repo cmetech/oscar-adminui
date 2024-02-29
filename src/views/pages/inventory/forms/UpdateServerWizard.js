@@ -53,7 +53,7 @@ const initialServerFormState = {
   componentName: '',
   datacenterName: '',
   environmentName: '',
-  status: 'Active',
+  status: 'ACTIVE',
   metadata: [{ key: '', value: '' }],
   networkInterfaces: [{ name: '', ip_address: '', label: '' }]
 }
@@ -223,11 +223,11 @@ const UpdateServerWizard = props => {
     // Check if currentServer exists and is not empty
     if (currentServer && Object.keys(currentServer).length > 0) {
       const updatedServerForm = {
-        hostName: currentServer.hostname || '',
-        componentName: currentServer.component_name || '',
-        datacenterName: currentServer.datacenter_name || '',
-        environmentName: currentServer.environment_name || '',
-        status: currentServer.status || 'Active',
+        hostName: currentServer.hostname.toUpperCase() || '',
+        componentName: currentServer.component_name.toUpperCase() || '',
+        datacenterName: currentServer.datacenter_name.toUpperCase() || '',
+        environmentName: currentServer.environment_name.toUpperCase() || '',
+        status: currentServer.status.toUpperCase() || 'ACTIVE',
         metadata: currentServer.metadata || [{ key: '', value: '' }],
         networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
       }
@@ -286,14 +286,18 @@ const UpdateServerWizard = props => {
   // Function to handle form field changes
   const handleFormChange = (event, index, section) => {
     const { name, value } = event.target
+
+    // Upper case the value being entered
+    const upperCasedValue = value.toUpperCase()
+
     if (section) {
       // Handle changes for dynamic sections (metadata or networkInterfaces)
       const updatedSection = [...serverForm[section]]
-      updatedSection[index][name] = value
+      updatedSection[index][name] = upperCasedValue
       setServerForm({ ...serverForm, [section]: updatedSection })
     } else {
       // Handle changes for static fields
-      setServerForm({ ...serverForm, [name]: value })
+      setServerForm({ ...serverForm, [name]: upperCasedValue })
     }
   }
 

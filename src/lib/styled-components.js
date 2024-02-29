@@ -80,7 +80,7 @@ const CustomDataGridRoot = styled(DataGridPro)(({ theme }) => ({
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor:
-      theme.palette.mode === 'light' ? theme.palette.customColors.brandGray3 : theme.palette.customColors.brandBlack
+      theme.palette.mode === 'light' ? theme.palette.customColors.brandGray4 : theme.palette.customColors.brandBlack
   },
   '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
     borderRight: `1px solid ${theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'}`

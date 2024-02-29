@@ -104,7 +104,7 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
 
@@ -112,6 +112,19 @@ const MoreActionsDropdown = ({ onDelete, onExport }) => {
 
   const handleDropdownOpen = event => {
     setAnchorEl(event.currentTarget)
+  }
+
+  // Function to determine the dynamic text based on the selected tab
+  const getDynamicTitle = tabValue => {
+    const mapping = {
+      1: 'Datacenters',
+      2: 'Environments',
+      3: 'Servers',
+      4: 'Components',
+      5: 'Subcomponents'
+    }
+
+    return mapping[tabValue] || 'Add Wizard'
   }
 
   const handleDropdownClose = url => {
@@ -137,6 +150,9 @@ const MoreActionsDropdown = ({ onDelete, onExport }) => {
     }
   }
 
+  // Define tabs where the Delete menu item should be shown
+  const deletableTabs = ['3']
+
   return (
     <Fragment>
       <IconButton color='warning' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
@@ -150,18 +166,20 @@ const MoreActionsDropdown = ({ onDelete, onExport }) => {
         onClose={() => handleDropdownClose()}
         sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
       >
-        <MenuItem
-          sx={{ p: 0 }}
-          onClick={() => {
-            onDelete()
-            handleDropdownClose()
-          }}
-        >
-          <Box sx={styles}>
-            <Icon icon='mdi:delete-forever-outline' />
-            {t('Delete')}
-          </Box>
-        </MenuItem>
+        {deletableTabs.includes(tabValue) && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onDelete()
+              handleDropdownClose()
+            }}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:delete-forever-outline' />
+              {t('Delete')} {getDynamicTitle(tabValue)}
+            </Box>
+          </MenuItem>
+        )}
         <MenuItem
           sx={{ p: 0 }}
           onClick={() => {
@@ -487,7 +505,7 @@ const Settings = () => {
             >
               {getDynamicText(value)}
             </Button>
-            <MoreActionsDropdown onDelete={handleDelete} onExport={handleExport} />
+            <MoreActionsDropdown onDelete={handleDelete} onExport={handleExport} tabValue={value} />
           </Box>
         </Box>
         <TabContext value={value}>

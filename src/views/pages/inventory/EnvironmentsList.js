@@ -159,7 +159,7 @@ const EnvironmentsList = props => {
                       : theme.palette.customColors.brandYellow
                 }}
               >
-                {row?.datacenter_name}
+                {row?.datacenter_name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -177,7 +177,7 @@ const EnvironmentsList = props => {
         const { row } = params
 
         let color = 'success'
-        let label = `Active (${row?.active_servers || 0})`
+        let label = `ACTIVE (${row?.active_servers || 0})`
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -207,7 +207,7 @@ const EnvironmentsList = props => {
         const { row } = params
 
         let color = 'error'
-        let label = `In-Active (${row?.inactive_servers || 0})`
+        let label = `IN-ACTIVE (${row?.inactive_servers || 0})`
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

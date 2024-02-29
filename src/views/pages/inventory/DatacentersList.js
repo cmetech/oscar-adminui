@@ -177,7 +177,7 @@ const DatacentersList = props => {
         const { row } = params
 
         let color = 'warning'
-        let label = `Environments (${row?.environment_count || 0})`
+        let label = `ENVIRONMENTS (${row?.environment_count || 0})`
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -207,7 +207,7 @@ const DatacentersList = props => {
         const { row } = params
 
         let color = 'success'
-        let label = `Active (${row?.active_servers || 0})`
+        let label = `ACTIVE (${row?.active_servers || 0})`
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -237,7 +237,7 @@ const DatacentersList = props => {
         const { row } = params
 
         let color = 'error'
-        let label = `In-Active (${row?.inactive_servers || 0})`
+        let label = `IN-ACTIVE (${row?.inactive_servers || 0})`
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

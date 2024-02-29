@@ -140,7 +140,7 @@ const AppBrand = () => {
           color={textColor}
           sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { paddingLeft: 3, marginBottom: 2 }) }}
         >
-          powered by Ericsson InSite
+          powered by Ericsson
         </Typography>
       </Stack>
     </StyledLink>

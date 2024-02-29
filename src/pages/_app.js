@@ -107,9 +107,9 @@ const App = props => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>{`${themeConfig.templateName} - powered by Ericsson InSite`}</title>
-        <meta name='description' content={`${themeConfig.templateName} – powered by Ericsson InSite`} />
-        <meta name='keywords' content='Ericsson, COMET, powered by Ericsson InSite, Monitoring' />
+        <title>{`${themeConfig.templateName} - powered by Ericsson`}</title>
+        <meta name='description' content={`${themeConfig.templateName} – powered by Ericsson`} />
+        <meta name='keywords' content='Ericsson, COMET, powered by Ericsson, Monitoring' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
 

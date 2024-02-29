@@ -53,7 +53,7 @@ const UserFallbackSpinner = ({ sx }) => {
           />
         )}
         <Typography noWrap variant='caption' color={textColor}>
-          powered by Ericsson InSite
+          powered by Ericsson
         </Typography>
       </Stack>
       <CircularProgress

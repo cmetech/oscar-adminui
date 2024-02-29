@@ -180,7 +180,7 @@ const ComponentsList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.subcomponent_name}
+                {row?.subcomponent_name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -200,7 +200,7 @@ const ComponentsList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.type}
+                {row?.type?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -220,7 +220,7 @@ const ComponentsList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.details}
+                {row?.details?.toUpperCase()}
               </Typography>
             </Box>
           </Box>

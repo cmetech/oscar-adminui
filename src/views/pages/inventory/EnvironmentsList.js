@@ -130,7 +130,6 @@ const EnvironmentsList = props => {
   const [openDialog, setOpenDialog] = useState(false)
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
   const [currentEnvironment, setCurrentEnvironment] = useState(null)
 
   const editmode = false

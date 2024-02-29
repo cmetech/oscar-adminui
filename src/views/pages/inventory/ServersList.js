@@ -64,7 +64,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import UpdateUserWizard from 'src/views/pages/misc/forms/UpdateUserWizard'
+import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 
 import { th } from 'date-fns/locale'
 import { current } from '@reduxjs/toolkit'
@@ -127,10 +127,9 @@ const ServersList = props => {
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
 
   // ** Dialog
-  const [openDialog, setOpenDialog] = useState(false)
-  const [deactivateDialog, setDeactivateDialog] = useState(false)
+  const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
+  const [currentServer, setCurrentServer] = useState(null)
 
   const editmode = false
 
@@ -322,30 +321,18 @@ const ServersList = props => {
               title='Edit'
               aria-label='Edit'
               onClick={() => {
-                setCurrentUser(params.row)
-                setOpenDialog(true)
+                setCurrentServer(params.row)
+                setEditDialog(true)
               }}
             >
               <Icon icon='mdi:account-edit' />
             </IconButton>
             <IconButton
               size='small'
-              title={params.row?.is_active ? 'Deactivate User' : 'Activate User'}
-              aria-label={params.row?.is_active ? 'Deactivate User' : 'Activate User'}
-              color={params.row?.is_active ? 'success' : 'error'}
-              onClick={() => {
-                setCurrentUser(params.row)
-                setDeactivateDialog(true)
-              }}
-            >
-              <Icon icon={params.row.status === 'active' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-            </IconButton>
-            <IconButton
-              size='small'
               title='Delete User'
               aria-label='Delete User'
               onClick={() => {
-                setCurrentUser(params.row)
+                setCurrentServer(params.row)
                 setDeleteDialog(true)
               }}
             >
@@ -357,33 +344,33 @@ const ServersList = props => {
     }
   ]
 
-  const handleUpdateUserDialogClose = () => {
-    setOpenDialog(false)
+  const handleUpdateDialogClose = () => {
+    setEditDialog(false)
   }
 
-  const handleDisableUserDialogClose = () => {
+  const handleDisableDialogClose = () => {
     setDeactivateDialog(false)
   }
 
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
   }
 
-  const UserEditDialog = () => {
+  const EditDialog = () => {
     return (
       <Dialog
         fullWidth
         maxWidth='md'
         scroll='body'
-        open={openDialog}
-        onClose={handleUpdateUserDialogClose}
+        open={editDialog}
+        onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentServer?.hostname?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -395,118 +382,45 @@ const ServersList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentServer?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateUserDialogClose()}
+            onClick={() => handleUpdateDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit User Information
+              Edit Server Information
             </Typography>
-            <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to server information will be effective immediately.</Typography>
           </Box>
-          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          {currentServer && <UpdateServerWizard currentServer={currentServer} rows={rows} setRows={setRows} />}
         </DialogContent>
-        {/* <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleUpdateDriverDialogClose} color='primary'>
-            Save
-          </Button>
-          <Button variant='outlined' onClick={handleUpdateDriverDialogSubmit} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions> */}
       </Dialog>
     )
   }
 
-  const UserDisableDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={deactivateDialog}
-        onClose={handleDisableUserDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentUser?.id ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {currentUser?.is_active
-                    ? 'Please confirm that you want to deactivate this user.'
-                    : 'Please confirm that you want to activate this user.'}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeactivateUserDialogSubmit} color='primary'>
-            {currentUser?.is_active ? 'Deactivate' : 'Activate'}
-          </Button>
-          <Button variant='outlined' onClick={handleDisableUserDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }
-
-  const UserDeleteDialog = () => {
+  const DeleteDialog = () => {
     return (
       <Dialog
         fullWidth
         maxWidth='md'
         scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
       >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+              {currentServer?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -518,14 +432,14 @@ const ServersList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentUser?.id ?? ''}
+              {currentServer?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleDeleteUserDialogClose()}
+            onClick={() => handleDeleteDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -537,17 +451,17 @@ const ServersList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                  Please confirm that you want to delete this server.
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
             Delete
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
+          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
             Cancel
           </Button>
         </DialogActions>
@@ -555,7 +469,7 @@ const ServersList = props => {
     )
   }
 
-  const handleDeactivateUserDialogSubmit = async () => {
+  const handleDeleteDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
 
@@ -564,61 +478,21 @@ const ServersList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const payload = {
-        username: currentUser?.username,
-        first_name: currentUser?.first_name,
-        last_name: currentUser?.last_name,
-        is_active: currentUser?.is_active ? false : true
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
-      const response = await axios.patch(endpoint, payload, { headers })
-
-      if (response.data) {
-        const updatedUser = response.data
-
-        const updatedRows = rows.map(row => {
-          if (row.id === updatedUser.id) {
-            return updatedUser
-          }
-
-          return row
-        })
-
-        setRows(updatedRows)
-        setDeactivateDialog(false)
-
-        toast.success('User status updated successfully')
-      }
-    } catch (error) {
-      console.error('Error updating activation status of user', error)
-      toast.error('Error updating activation status of user')
-    }
-  }
-
-  const handleDeleteUserDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const endpoint = `/api/users/${currentUser.id}`
+      const endpoint = `/api/inventory/servers/${currentServer.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentUser.id)
+        const updatedRows = rows.filter(row => row.id !== currentServer.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
+        props.set_total(props.total - 1)
 
-        toast.success('User successfully deleted')
+        toast.success('Successfully deleted Server')
       }
     } catch (error) {
-      console.error('Error deleting user', error)
-      toast.error('Error deleting of user')
+      console.error('Failed to delete Server', error)
+      toast.error('Failed to delete Server')
     }
   }
 
@@ -734,9 +608,8 @@ const ServersList = props => {
             }
           }}
         />
-        <UserEditDialog />
-        <UserDisableDialog />
-        <UserDeleteDialog />
+        <EditDialog />
+        <DeleteDialog />
       </Card>
     </Box>
   )

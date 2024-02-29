@@ -3,6 +3,7 @@ import { useContext, useState, useEffect, forwardRef, Fragment } from 'react'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
+import { serverIdsAtom } from 'src/lib/atoms'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -43,6 +44,8 @@ import { styled, useTheme } from '@mui/material/styles'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { useForm, Controller, get } from 'react-hook-form'
 import axios from 'axios'
+import { saveAs } from 'file-saver'
+import ExcelJS from 'exceljs'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -65,6 +68,7 @@ import AddSubcomponentWizard from 'src/views/pages/inventory/forms/AddSubcompone
 import AddServerWizard from 'src/views/pages/inventory/forms/AddServerWizard'
 import { set } from 'nprogress'
 import toast from 'react-hot-toast'
+import { useAtom } from 'jotai'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -347,6 +351,7 @@ const Settings = () => {
   const [openModal, setOpenModal] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [serverIds] = useAtom(serverIdsAtom)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -364,17 +369,81 @@ const Settings = () => {
     setIsExportModalOpen(false)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     // Implement delete functionality
     console.log('Deleting...')
-    toast.success('Deleting...')
+    console.log('serverIds', serverIds)
+
+    try {
+      const response = await axios.put('/api/inventory/servers/bulk', {
+        ids: serverIds // Assuming the API expects an object with an ids array
+      })
+
+      // Handle 204 No Content response here
+      // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
+      if (response.status === 204) {
+        toast.success('Servers deleted successfully')
+      } else {
+        toast.error('Error deleting servers')
+      }
+    } catch (error) {
+      console.error('Error deleting servers:', error)
+
+      // Handle errors here, e.g., show an error notification
+      toast.error('Error deleting servers')
+    }
+
     setIsDeleteModalOpen(false)
   }
 
-  const handleConfirmExport = () => {
-    // Implement export functionality
-    console.log('Exporting...')
-    toast.success('Exporting...')
+  const handleConfirmExport = async () => {
+    try {
+      // Fetch server data
+      const response = await axios.get('/api/inventory/servers')
+      const servers = response.data.rows
+
+      // Create a new workbook
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet('Servers')
+
+      // Define columns
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 30 },
+        { header: 'Hostname', key: 'hostname', width: 25 },
+        { header: 'Datacenter', key: 'datacenter_name', width: 25 },
+        { header: 'Environment', key: 'environment_name', width: 25 },
+        { header: 'Status', key: 'status', width: 15 },
+        { header: 'Component', key: 'component_name', width: 20 },
+        { header: 'Subcomponent', key: 'subcomponent_name', width: 20 },
+        { header: 'Metadata', key: 'metadata', width: 50 },
+        { header: 'Network Interfaces', key: 'network_interfaces', width: 50 },
+        { header: 'Created At', key: 'created_at', width: 20 },
+        { header: 'Modified At', key: 'modified_at', width: 20 }
+      ]
+
+      // Add rows
+      servers.forEach(server => {
+        worksheet.addRow({
+          ...server,
+          metadata: server.metadata.map(meta => `${meta.key}: ${meta.value}`).join('; '),
+          network_interfaces: server.network_interfaces.map(ni => `${ni.name} (${ni.ip_address})`).join('; ')
+        })
+      })
+
+      // Generate Excel file
+      const buffer = await workbook.xlsx.writeBuffer()
+
+      // Trigger file download
+      saveAs(
+        new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        'Servers.xlsx'
+      )
+      console.log('Exporting...')
+      toast.success('Exporting...') // Assuming you have a toast notification system
+    } catch (error) {
+      console.error('Error exporting servers:', error)
+      toast.error('Error exporting servers') // Assuming you have a toast notification system
+    }
     setIsExportModalOpen(false)
   }
 

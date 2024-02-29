@@ -129,6 +129,7 @@ const ServersList = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
+  const [serverIds, setServerIds] = useAtom(serverIdsAtom)
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -573,6 +574,9 @@ const ServersList = props => {
 
     // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
+
+    // Update the Jotai atom with the new selection model
+    setServerIds(newRowSelectionModel)
   }
 
   return (

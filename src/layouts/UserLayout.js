@@ -35,6 +35,7 @@ import HorizontalAppBarContent from './components/horizontal/AppBarContent'
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
 import themeConfig from 'src/configs/themeConfig'
+import oscarConfig from 'src/configs/oscarConfig'
 
 const HeaderTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
@@ -140,7 +141,7 @@ const AppBrand = () => {
           color={textColor}
           sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { paddingLeft: 3, marginBottom: 2 }) }}
         >
-          powered by Ericsson
+          {oscarConfig.BRANDING_TAGLINE}
         </Typography>
       </Stack>
     </StyledLink>

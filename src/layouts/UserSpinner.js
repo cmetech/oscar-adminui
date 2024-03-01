@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 
 import { useSettings } from 'src/@core/hooks/useSettings'
+import oscarConfig from 'src/configs/oscarConfig'
 
 const UserFallbackSpinner = ({ sx }) => {
   // ** Hook
@@ -53,7 +54,7 @@ const UserFallbackSpinner = ({ sx }) => {
           />
         )}
         <Typography noWrap variant='caption' color={textColor}>
-          powered by Ericsson
+          {oscarConfig.BRANDING_TAGLINE}
         </Typography>
       </Stack>
       <CircularProgress

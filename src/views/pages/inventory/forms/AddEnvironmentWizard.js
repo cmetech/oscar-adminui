@@ -43,9 +43,9 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { el, fi } from 'date-fns/locale'
-import { set } from 'nprogress'
-import { main } from '@popperjs/core'
+
+// ** Import yup for form validation
+import * as yup from 'yup'
 
 const steps = [
   {
@@ -123,7 +123,22 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// Define validation schema for the form
+const validationSchema = yup.object({
+  environmentName: yup
+    .string()
+    .required('Environment Name is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  environmentDescription: yup.string().trim(),
+  datacenterName: yup
+    .string()
+    .required('Datacenter Name is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim()
+})
 
 const AddEnvironmentWizard = props => {
   // ** States
@@ -131,9 +146,40 @@ const AddEnvironmentWizard = props => {
   const [environmentDescription, setEnvironmentDescription] = useState('')
   const [datacenterName, setDatacenterName] = useState('')
   const [activeStep, setActiveStep] = useState(0)
+  const [formErrors, setFormErrors] = useState({})
 
   const theme = useTheme()
   const session = useSession()
+
+  // Validate Form
+  const validateForm = async () => {
+    try {
+      // Validate the form values
+      await validationSchema.validate(
+        { environmentName, environmentDescription, datacenterName },
+        { abortEarly: false }
+      )
+
+      // If validation is successful, clear errors
+      setFormErrors({})
+
+      return true
+    } catch (yupError) {
+      if (yupError.inner) {
+        // Transform the validation errors to a more manageable structure
+        const transformedErrors = yupError.inner.reduce(
+          (acc, currentError) => ({
+            ...acc,
+            [currentError.path]: currentError.message
+          }),
+          {}
+        )
+        setFormErrors(transformedErrors)
+      }
+
+      return false
+    }
+  }
 
   // Handle Stepper
   const handleBack = () => {
@@ -141,6 +187,12 @@ const AddEnvironmentWizard = props => {
   }
 
   const handleNext = async () => {
+    // Validate the form before proceeding to the next step or submitting
+    const isValid = await validateForm()
+    if (!isValid) {
+      return // Stop the submission or the next step if the validation fails
+    }
+
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
@@ -217,6 +269,8 @@ const AddEnvironmentWizard = props => {
                     value={environmentName.toUpperCase()}
                     onChange={handleEnvironmentNameChange}
                     label='Name'
+                    error={Boolean(formErrors.environmentName)}
+                    helperText={formErrors.environmentName}
                   />
                 </FormControl>
               </Grid>
@@ -227,6 +281,8 @@ const AddEnvironmentWizard = props => {
                     value={environmentDescription.toUpperCase()}
                     onChange={handleEnvironmentDescriptionChange}
                     label='Description'
+                    error={Boolean(formErrors.environmentDescription)}
+                    helperText={formErrors.environmentDescription}
                   />
                 </FormControl>
               </Grid>
@@ -237,6 +293,8 @@ const AddEnvironmentWizard = props => {
                     value={datacenterName.toUpperCase()}
                     onChange={handleDatacenterNameChange}
                     label='Datacenter Name'
+                    error={Boolean(formErrors.datacenterName)}
+                    helperText={formErrors.datacenterName}
                   />
                 </FormControl>
               </Grid>

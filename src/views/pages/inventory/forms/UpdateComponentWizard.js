@@ -43,9 +43,9 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { el, fi } from 'date-fns/locale'
-import { set } from 'nprogress'
-import { main } from '@popperjs/core'
+
+// ** Import yup for form validation
+import * as yup from 'yup'
 
 const steps = [
   {
@@ -123,7 +123,29 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// Define validation schema for form
+const validationSchema = yup.object({
+  componentName: yup
+    .string()
+    .trim()
+    .required('Component Name is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  subcomponentName: yup
+    .string()
+    .trim()
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  componentType: yup
+    .string()
+    .trim()
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  componentDetails: yup.string().trim()
+})
 
 const UpdateComponentWizard = props => {
   // ** States
@@ -133,9 +155,45 @@ const UpdateComponentWizard = props => {
   const [subcomponentName, setSubcomponentName] = useState(props.currentComponent?.subcomponent_name || '')
   const [subComponents, setSubComponents] = useState([])
   const [activeStep, setActiveStep] = useState(0)
+  const [formErrors, setFormErrors] = useState({})
 
   const theme = useTheme()
   const session = useSession()
+
+  // Validate Form
+  const validateForm = async () => {
+    try {
+      // Validate the form values
+      await validationSchema.validate(
+        {
+          componentName,
+          subcomponentName,
+          componentType,
+          componentDetails
+        },
+        { abortEarly: false }
+      )
+
+      // If validation is successful, clear errors
+      setFormErrors({})
+
+      return true
+    } catch (yupError) {
+      if (yupError.inner) {
+        // Transform the validation errors to a more manageable structure
+        const transformedErrors = yupError.inner.reduce(
+          (acc, currentError) => ({
+            ...acc,
+            [currentError.path]: currentError.message
+          }),
+          {}
+        )
+        setFormErrors(transformedErrors)
+      }
+
+      return false
+    }
+  }
 
   useEffect(() => {
     const fetchSubComponents = async () => {
@@ -165,6 +223,12 @@ const UpdateComponentWizard = props => {
   }
 
   const handleNext = async () => {
+    // Validate the form before proceeding to the next step or submitting
+    const isValid = await validateForm()
+    if (!isValid) {
+      return // Stop the submission or the next step if the validation fails
+    }
+
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
@@ -248,6 +312,8 @@ const UpdateComponentWizard = props => {
                     value={componentName.toUpperCase()}
                     onChange={handleComponentNameChange}
                     label='Name'
+                    error={Boolean(formErrors?.componentName)}
+                    helperText={formErrors?.componentName}
                   />
                 </FormControl>
               </Grid>
@@ -276,6 +342,8 @@ const UpdateComponentWizard = props => {
                   renderInput={params => (
                     <TextField {...params} label='Subcomponent Name' fullWidth required autoComplete='off' />
                   )}
+                  error={Boolean(formErrors?.subcomponentName)}
+                  helperText={formErrors?.subcomponentName}
                 />
               </Grid>
               <Grid item sm={6} xs={12}>
@@ -285,6 +353,8 @@ const UpdateComponentWizard = props => {
                     value={componentDetails.toUpperCase()}
                     onChange={handleComponentDetailsChange}
                     label='Details'
+                    error={Boolean(formErrors?.componentDetails)}
+                    helperText={formErrors?.componentDetails}
                   />
                 </FormControl>
               </Grid>
@@ -295,6 +365,8 @@ const UpdateComponentWizard = props => {
                     value={componentType.toUpperCase()}
                     onChange={handleComponentTypeChange}
                     label='Type'
+                    error={Boolean(formErrors?.componentType)}
+                    helperText={formErrors?.componentType}
                   />
                 </FormControl>
               </Grid>

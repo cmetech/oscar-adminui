@@ -66,9 +66,9 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateEnvironmentWizard from 'src/views/pages/inventory/forms/UpdateEnvironmentWizard'
 
-import { th } from 'date-fns/locale'
-import { current } from '@reduxjs/toolkit'
-import { set } from 'nprogress'
+import { environmentsAtom, refetchEnvironmentTriggerAtom } from 'src/lib/atoms'
+import { capitalizeWords } from 'src/lib/utils'
+import { useAtom } from 'jotai'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -131,6 +131,8 @@ const EnvironmentsList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentEnvironment, setCurrentEnvironment] = useState(null)
+  const [environments, setEnvironments] = useAtom(environmentsAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchEnvironmentTriggerAtom)
 
   const editmode = false
 
@@ -239,7 +241,7 @@ const EnvironmentsList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.description}
+                {capitalizeWords(row?.description)}
               </Typography>
             </Box>
           </Box>
@@ -469,7 +471,10 @@ const EnvironmentsList = props => {
 
         setRows(updatedRows)
         setDeleteDialog(false)
-        props.set_total(props.total - 1)
+
+        // props.set_total(props.total - 1)
+
+        setRefetchTrigger(Date.now())
 
         toast.success('Successfully deleted environment')
       }
@@ -500,6 +505,7 @@ const EnvironmentsList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
+          setEnvironments(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
@@ -511,7 +517,7 @@ const EnvironmentsList = props => {
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
-  }, [fetchData, searchValue, sort, sortColumn])
+  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {

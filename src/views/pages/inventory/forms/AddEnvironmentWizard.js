@@ -1,7 +1,8 @@
 // ** React Imports
-import { Fragment, use, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -47,6 +48,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
+import { environmentsAtom, refetchEnvironmentTriggerAtom } from 'src/lib/atoms'
+
 const steps = [
   {
     title: 'Environment Information',
@@ -87,6 +90,17 @@ const SelectStyled = styled(Select)(({ theme }) => ({
       fieldset: {
         borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // border color when focused
       }
+    }
+  }
+}))
+
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))
@@ -147,9 +161,30 @@ const AddEnvironmentWizard = props => {
   const [datacenterName, setDatacenterName] = useState('')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [datacenters, setDatacenters] = useState([])
+  const [, setEnvironments] = useAtom(environmentsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchEnvironmentTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
+
+  useEffect(() => {
+    const fetchDatacenters = async () => {
+      try {
+        // Directly use the result of the await expression
+        const response = await axios.get('/api/inventory/datacenters')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const datacenterNames = data.map(datacenter => datacenter.name.toUpperCase())
+        setDatacenters(datacenterNames)
+      } catch (error) {
+        console.error('Failed to fetch datacenters:', error)
+      }
+    }
+
+    fetchDatacenters()
+  }, []) // Empty dependency array means this effect runs once on mount
 
   // Validate Form
   const validateForm = async () => {
@@ -213,8 +248,9 @@ const AddEnvironmentWizard = props => {
         const endpoint = '/api/inventory/environments'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.data) {
+        if (response.status == 201 && response.data) {
           toast.success('Environment details added successfully')
+          setRefetchTrigger(Date.now())
         }
       } catch (error) {
         console.error('Error updating environment details', error)
@@ -288,11 +324,18 @@ const AddEnvironmentWizard = props => {
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled
-                    fullWidth
-                    value={datacenterName.toUpperCase()}
-                    onChange={handleDatacenterNameChange}
-                    label='Datacenter Name'
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='datacenterName-autocomplete'
+                    options={datacenters}
+                    onChange={(event, value) => setDatacenterName(value)}
+                    onInputChange={(event, value) => setDatacenterName(value)}
+                    renderInput={params => (
+                      <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                    )}
                     error={Boolean(formErrors.datacenterName)}
                     helperText={formErrors.datacenterName}
                   />

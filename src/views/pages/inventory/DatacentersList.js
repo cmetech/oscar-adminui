@@ -66,9 +66,8 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateDatacenterWizard from 'src/views/pages/inventory/forms/UpdateDatacenterWizard'
 
-import { th } from 'date-fns/locale'
-import { current } from '@reduxjs/toolkit'
-import { set } from 'nprogress'
+import { datacentersAtom, refetchDatacenterTriggerAtom } from 'src/lib/atoms'
+import { useAtom } from 'jotai'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -131,6 +130,8 @@ const DatacentersList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentDatacenter, setCurrentDatacenter] = useState(null)
+  const [datacenters, setDatacenters] = useAtom(datacentersAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchDatacenterTriggerAtom)
 
   const editmode = false
 
@@ -499,7 +500,10 @@ const DatacentersList = props => {
 
         setRows(updatedRows)
         setDeleteDialog(false)
-        props.set_total(props.total - 1)
+
+        // props.set_total(props.total - 1)
+
+        setRefetchTrigger(Date.now())
 
         toast.success('Successfully deleted Datacenter')
       }
@@ -530,18 +534,19 @@ const DatacentersList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
+          setDatacenters(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, setDatacenters]
   )
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
-  }, [fetchData, searchValue, sort, sortColumn])
+  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {

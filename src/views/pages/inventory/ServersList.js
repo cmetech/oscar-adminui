@@ -69,11 +69,6 @@ import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWiza
 import ServerDetailPanel from 'src/views/pages/inventory/ServerDetailPanel'
 import { serverIdsAtom } from 'src/lib/atoms'
 
-import { th } from 'date-fns/locale'
-import { current } from '@reduxjs/toolkit'
-import { set } from 'nprogress'
-import { from } from 'form-data'
-
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
 

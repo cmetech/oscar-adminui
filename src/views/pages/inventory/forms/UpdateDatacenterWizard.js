@@ -2,6 +2,7 @@
 import { Fragment, use, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,9 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+
+import { datacentersAtom, refetchTriggerAtom } from 'src/lib/atoms'
+import { set } from 'nprogress'
 
 const steps = [
   {
@@ -141,6 +145,8 @@ const UpdateDatacenterWizard = props => {
   const [datacenterLocation, setDatacenterLocation] = useState(props?.currentDatacenter?.location || '')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setDatacenters] = useAtom(datacentersAtom)
+  const [, setRefetchTrigger] = useAtom(refetchTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()

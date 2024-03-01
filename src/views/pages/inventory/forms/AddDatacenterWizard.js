@@ -2,6 +2,7 @@
 import { Fragment, use, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+
+import { datacentersAtom, refetchDatacenterTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -141,6 +144,8 @@ const AddDatacenterWizard = props => {
   const [datacenterLocation, setDatacenterLocation] = useState('')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setDatacenters] = useAtom(datacentersAtom)
+  const [, setRefetchTrigger] = useAtom(refetchDatacenterTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -203,8 +208,9 @@ const AddDatacenterWizard = props => {
         const endpoint = '/api/inventory/datacenters'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.data) {
+        if (response.status === 201 && response.data) {
           toast.success('Datacenter details added successfully')
+          setRefetchTrigger(Date.now())
         }
       } catch (error) {
         console.error('Error updating datacenter details', error)

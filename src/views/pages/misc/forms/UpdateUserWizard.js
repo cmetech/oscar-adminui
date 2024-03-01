@@ -43,9 +43,9 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { el, fi } from 'date-fns/locale'
-import { set } from 'nprogress'
-import { main } from '@popperjs/core'
+
+// ** Import yup for form validation
+import * as yup from 'yup'
 
 const steps = [
   {
@@ -123,7 +123,23 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// Define validation schema
+const validationSchema = yup.object({
+  firstName: yup
+    .string()
+    .trim()
+    .required('First name is required')
+    .matches(/^[A-Za-z]+$/, 'Only alpha characters are allowed')
+    .min(3, 'first name must be at least 3 characters'),
+  lastName: yup
+    .string()
+    .trim()
+    .required('Last name is required')
+    .matches(/^[A-Za-z]+$/, 'Only alpha characters are allowed')
+    .min(3, 'last name must be at least 3 characters'),
+  username: yup.string().trim().required('Username is required').min(3, 'username must be at least 3 characters'),
+  email: yup.string().email('Enter a valid email').required('Email is required').trim()
+})
 
 const UpdateUserWizard = props => {
   // ** States
@@ -135,9 +151,45 @@ const UpdateUserWizard = props => {
   const [isSuperUser, setIsSuperUser] = useState(props?.currentUser?.is_superuser || false)
   const [isVerified, setIsVerified] = useState(props?.currentUser?.is_verified || false)
   const [activeStep, setActiveStep] = useState(0)
+  const [formErrors, setFormErrors] = useState({})
 
   const theme = useTheme()
   const session = useSession()
+
+  // Validate Form
+  const validateForm = async () => {
+    try {
+      // Validate the form values
+      await validationSchema.validate(
+        {
+          firstName,
+          lastName,
+          username,
+          email
+        },
+        { abortEarly: false }
+      )
+
+      // If validation is successful, clear errors
+      setFormErrors({})
+
+      return true
+    } catch (yupError) {
+      if (yupError.inner) {
+        // Transform the validation errors to a more manageable structure
+        const transformedErrors = yupError.inner.reduce(
+          (acc, currentError) => ({
+            ...acc,
+            [currentError.path]: currentError.message
+          }),
+          {}
+        )
+        setFormErrors(transformedErrors)
+      }
+
+      return false
+    }
+  }
 
   // Handle Stepper
   const handleBack = () => {
@@ -145,6 +197,12 @@ const UpdateUserWizard = props => {
   }
 
   const handleNext = async () => {
+    // Validate the form before proceeding to the next step or submitting
+    const isValid = await validateForm()
+    if (!isValid) {
+      return // Stop the submission or the next step if the validation fails
+    }
+
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
@@ -251,22 +309,50 @@ const UpdateUserWizard = props => {
             <Grid container spacing={6}>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={firstName} onChange={handleFirstNameChange} label='First Name' />
+                  <TextfieldStyled
+                    fullWidth
+                    value={firstName}
+                    onChange={handleFirstNameChange}
+                    label='First Name'
+                    error={Boolean(formErrors.firstName)}
+                    helperText={formErrors.firstName}
+                  />
                 </FormControl>
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={lastName} onChange={handleLastNameChange} label='Last Name' />
+                  <TextfieldStyled
+                    fullWidth
+                    value={lastName}
+                    onChange={handleLastNameChange}
+                    label='Last Name'
+                    error={Boolean(formErrors.lastName)}
+                    helperText={formErrors.lastName}
+                  />
                 </FormControl>
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={username} onChange={handleUsernameChange} label='Username' />
+                  <TextfieldStyled
+                    fullWidth
+                    value={username}
+                    onChange={handleUsernameChange}
+                    label='Username'
+                    error={Boolean(formErrors.username)}
+                    helperText={formErrors.username}
+                  />
                 </FormControl>
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled fullWidth value={email} onChange={handleUsernameChange} label='Email' />
+                  <TextfieldStyled
+                    fullWidth
+                    value={email}
+                    onChange={handleUsernameChange}
+                    label='Email'
+                    error={Boolean(formErrors.email)}
+                    helperText={formErrors.email}
+                  />
                 </FormControl>
               </Grid>
               <Grid item sm={4} xs={12}>

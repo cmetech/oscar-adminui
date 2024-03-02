@@ -104,7 +104,7 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
 
@@ -192,6 +192,18 @@ const MoreActionsDropdown = ({ onDelete, onExport, tabValue }) => {
             {t('Export')}
           </Box>
         </MenuItem>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onUpload()
+            handleDropdownClose()
+          }}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:upload' />
+            {t('Upload Servers')}
+          </Box>
+        </MenuItem>
       </Menu>
     </Fragment>
   )
@@ -269,11 +281,91 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
         <DialogContentText>Are you sure you want to export all selected {getDynamicTitle(tab)}?</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color='primary'>
-          Cancel
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
         </Button>
-        <Button onClick={onConfirm} color='secondary' autoFocus>
-          Export
+        <Button
+          onClick={onConfirm}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:file-export' />}
+        >
+          {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
+  const [file, setFile] = useState(null)
+
+  const handleFileChange = event => {
+    setFile(event.target.files[0])
+  }
+
+  const { t } = useTranslation()
+
+  const handleSubmit = async () => {
+    if (!file) {
+      toast.error('Please select a file to upload.')
+
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      // Replace '/api/inventory/servers/bulk' with your Next.js API route that proxies the request
+      const response = await axios.post('/api/inventory/servers/bulk', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      // Handle response here
+      console.log(response.data)
+      onClose() // Close the dialog on success
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      toast.error('Error uploading file')
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Upload Servers</DialogTitle>
+      <DialogContent>
+        <input type='file' onChange={handleFileChange} />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:upload-multiple' />}
+        >
+          {t('Upload')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -390,6 +482,7 @@ const Settings = () => {
   const [openModal, setOpenModal] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [openUploadDialog, setOpenUploadDialog] = useState(false)
   const [serverIds] = useAtom(serverIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
@@ -401,12 +494,20 @@ const Settings = () => {
     setIsExportModalOpen(true)
   }
 
+  const handleUpload = () => {
+    setOpenUploadDialog(true)
+  }
+
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false)
   }
 
   const handleCloseExportModal = () => {
     setIsExportModalOpen(false)
+  }
+
+  const handleCloseUploadDialog = () => {
+    setOpenUploadDialog(false)
   }
 
   const handleConfirmDelete = async () => {
@@ -532,7 +633,12 @@ const Settings = () => {
             >
               {getDynamicText(value)}
             </Button>
-            <MoreActionsDropdown onDelete={handleDelete} onExport={handleExport} tabValue={value} />
+            <MoreActionsDropdown
+              onDelete={handleDelete}
+              onExport={handleExport}
+              onUpload={handleUpload}
+              tabValue={value}
+            />
           </Box>
         </Box>
         <TabContext value={value}>
@@ -622,6 +728,16 @@ const Settings = () => {
         isOpen={isExportModalOpen}
         onClose={handleCloseExportModal}
         onConfirm={handleConfirmExport}
+        tab={value}
+      />
+
+      <ServerUploadDialog
+        open={openUploadDialog}
+        onClose={() => setOpenUploadDialog(false)}
+        onSuccess={() => {
+          // Handle success, e.g., showing a success message or refreshing the list
+          setOpenUploadDialog(false)
+        }}
         tab={value}
       />
     </Grid>

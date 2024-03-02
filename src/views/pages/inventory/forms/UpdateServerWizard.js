@@ -519,10 +519,7 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
+                  autoHighlight
                   id='componentName-autocomplete'
                   options={components}
                   value={serverForm.componentName}
@@ -536,7 +533,7 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
                     }
                   }}
                   renderInput={params => (
-                    <TextfieldStyled {...params} label='Component Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Choose Component' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>

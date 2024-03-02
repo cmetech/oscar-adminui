@@ -398,7 +398,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     const { name, value } = event.target
 
     // Upper case the value being entered
-    const upperCasedValue = value.toUpperCase()
+    const upperCasedValue = value?.toUpperCase()
 
     if (section) {
       // Handle changes for dynamic sections (metadata or networkInterfaces)
@@ -632,10 +632,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
+                  autoHighlight
                   id='componentName-autocomplete'
                   options={components}
                   value={serverForm.componentName}
@@ -650,7 +647,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                   }}
                   onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
-                    <TextField {...params} label='Component Name' fullWidth required autoComplete='off' />
+                    <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
                   )}
                   error={!!formErrors.componentName}
                   helperText={formErrors.componentName || ''}

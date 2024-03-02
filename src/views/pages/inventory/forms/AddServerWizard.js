@@ -263,6 +263,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   const [components, setComponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
+  const [isEnvironmentEnabled, setIsEnvironmentEnabled] = useState(false)
+  const [filteredEnvironments, setFilteredEnvironments] = useState([])
   const [formErrors, setFormErrors] = useState({})
   const [, setServers] = useAtom(serversAtom)
   const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
@@ -314,7 +316,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     }
 
     fetchDatacenters()
-    fetchEnviroments()
+
+    // fetchEnviroments()
     fetchComponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
@@ -391,7 +394,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   }
 
   // Function to handle form field changes
-  const handleFormChange = (event, index, section) => {
+  const handleFormChange = async (event, index, section) => {
     const { name, value } = event.target
 
     // Upper case the value being entered
@@ -410,6 +413,22 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
       // Validate the field after the value has been updated
       validateField(name, upperCasedValue)
+    }
+
+    if (name === 'datacenterName') {
+      setIsEnvironmentEnabled(false) // Disable environment field initially
+      setFilteredEnvironments([]) // Reset filtered environments
+
+      try {
+        const response = await axios.get(`/api/inventory/environments?datacenter_name=${upperCasedValue}`)
+        const data = response.data.rows
+        const environmentNames = data.map(env => env.name.toUpperCase())
+        setFilteredEnvironments(environmentNames)
+        setIsEnvironmentEnabled(true) // Enable environment field after fetching
+      } catch (error) {
+        console.error('Failed to fetch environments for the selected datacenter:', error)
+        toast.error('Failed to fetch environments')
+      }
     }
   }
 
@@ -670,7 +689,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                   selectOnFocus
                   handleHomeEndKeys
                   id='environmentName-autocomplete'
-                  options={environments}
+                  options={isEnvironmentEnabled ? filteredEnvironments : []}
                   value={serverForm.environmentName}
                   onChange={(event, newValue) => {
                     // Directly calling handleFormChange with a synthetic event object

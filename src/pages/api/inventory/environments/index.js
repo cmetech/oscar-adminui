@@ -6,13 +6,26 @@ import oscarConfig from '../../../../configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type } = query
+    const { q = '', column = '', sort = '', type, name, datacenter_name } = query
     const queryLowered = q.toLowerCase()
 
+    // Prepare query parameters for the backend API call
+    const backendParams = new URLSearchParams()
+    if (datacenter_name) {
+      backendParams.append('datacenter_name', datacenter_name)
+    }
+
+    if (name) {
+      backendParams.append('name', name)
+    }
+
     try {
-      const response = await axios.get(`${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/environments`, {
-        httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
-      })
+      const response = await axios.get(
+        `${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/environments?${backendParams.toString()}`,
+        {
+          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+        }
+      )
 
       if (response?.data) {
         // console.log('export targets', response?.data)

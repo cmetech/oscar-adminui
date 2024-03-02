@@ -3,7 +3,7 @@ import { useContext, useState, useEffect, forwardRef, Fragment } from 'react'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { serverIdsAtom } from 'src/lib/atoms'
+import { serverIdsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -219,10 +219,23 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
         <DialogContentText>Are you sure you want to delete all selected {getDynamicTitle(tab)}?</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color='primary'>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
           Cancel
         </Button>
-        <Button onClick={onConfirm} color='secondary' autoFocus>
+        <Button
+          onClick={onConfirm}
+          size='large'
+          variant='contained'
+          color='error'
+          autoFocus
+          startIcon={<Icon icon='mdi:delete-forever' />}
+        >
           Delete
         </Button>
       </DialogActions>
@@ -374,6 +387,7 @@ const Settings = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [serverIds] = useAtom(serverIdsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -405,6 +419,7 @@ const Settings = () => {
       // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
       if (response.status === 204) {
         toast.success('Servers deleted successfully')
+        setRefetchTrigger(Date.now())
       } else {
         toast.error('Error deleting servers')
       }

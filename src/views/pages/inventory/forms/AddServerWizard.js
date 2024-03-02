@@ -224,7 +224,7 @@ const ReviewAndSubmitSection = ({ serverForm }) => {
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
-const AddServerWizard = props => {
+const AddServerWizard = ({ onSuccess, ...props }) => {
   // ** States
   const [serverForm, setServerForm] = useState(initialServerFormState)
   const [activeStep, setActiveStep] = useState(0)
@@ -359,6 +359,9 @@ const AddServerWizard = props => {
 
         if (response.data) {
           toast.success('Server details added successfully')
+
+          // Call the onSuccess callback after successful submission
+          onSuccess()
         }
       } catch (error) {
         console.error('Error adding server details', error)

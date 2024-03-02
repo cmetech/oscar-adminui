@@ -154,7 +154,7 @@ const validationSchema = yup.object({
     .trim()
 })
 
-const AddEnvironmentWizard = props => {
+const AddEnvironmentWizard = ({ onSuccess, ...props }) => {
   // ** States
   const [environmentName, setEnvironmentName] = useState('')
   const [environmentDescription, setEnvironmentDescription] = useState('')
@@ -251,6 +251,9 @@ const AddEnvironmentWizard = props => {
         if (response.status === 201 && response.data) {
           toast.success('Environment details added successfully')
           setRefetchTrigger(Date.now())
+
+          // Call the onSuccess callback after successful submission
+          onSuccess()
         }
       } catch (error) {
         console.error('Error updating environment details', error)

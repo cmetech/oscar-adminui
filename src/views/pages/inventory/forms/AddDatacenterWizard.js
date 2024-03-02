@@ -138,7 +138,7 @@ const validationSchema = yup.object({
   datacenterLocation: yup.string().trim()
 })
 
-const AddDatacenterWizard = props => {
+const AddDatacenterWizard = ({ onSuccess, ...props }) => {
   // ** States
   const [datacenterName, setDatacenterName] = useState('')
   const [datacenterLocation, setDatacenterLocation] = useState('')
@@ -211,6 +211,9 @@ const AddDatacenterWizard = props => {
         if (response.status === 201 && response.data) {
           toast.success('Datacenter details added successfully')
           setRefetchTrigger(Date.now())
+
+          // Call the onSuccess callback after successful submission
+          onSuccess()
         }
       } catch (error) {
         console.error('Error updating datacenter details', error)

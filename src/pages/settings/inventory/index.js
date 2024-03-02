@@ -298,18 +298,22 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
     if (!open) reset()
   }, [open, reset])
 
+  const handleSuccess = () => {
+    handleClose()
+  }
+
   const dynamicFields = () => {
     switch (tab) {
       case '1': // Datacenters
-        return <AddDatacenterWizard />
+        return <AddDatacenterWizard onSuccess={handleSuccess} />
       case '2': // Environments
-        return <AddEnvironmentWizard />
+        return <AddEnvironmentWizard onSuccess={handleSuccess} />
       case '3': // Servers
-        return <AddServerWizard />
+        return <AddServerWizard onSuccess={handleSuccess} />
       case '4': // Components
-        return <AddComponentWizard />
+        return <AddComponentWizard onSuccess={handleSuccess} />
       case '5':
-        return <AddSubcomponentWizard />
+        return <AddSubcomponentWizard onSuccess={handleSuccess} />
 
       // Add cases for other tabs with different fields
       default:
@@ -475,6 +479,10 @@ const Settings = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false)
+  }
+
+  const handleSuccess = () => {
+    handleCloseModal()
   }
 
   // Function to determine the dynamic text based on the selected tab

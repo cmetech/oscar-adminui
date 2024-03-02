@@ -154,7 +154,7 @@ const validationSchema = yup.object({
   componentType: yup.string().trim()
 })
 
-const AddComponentWizard = props => {
+const AddComponentWizard = ({ onSuccess, ...props }) => {
   // ** States
   const [componentName, setComponentName] = useState('')
   const [subcomponentName, setSubcomponentName] = useState('')
@@ -262,6 +262,9 @@ const AddComponentWizard = props => {
         if (response.status === 201 && response.data) {
           toast.success('Component details added successfully')
           setRefetchTrigger(Date.now())
+
+          // Call the onSuccess callback after successful submission
+          onSuccess()
         }
       } catch (error) {
         console.error('Error updating component details', error)

@@ -66,9 +66,8 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateSubcomponentWizard from 'src/views/pages/inventory/forms/UpdateSubcomponentWizard'
 
-import { th } from 'date-fns/locale'
-import { current } from '@reduxjs/toolkit'
-import { set } from 'nprogress'
+import { subcomponentsAtom, refetchSubcomponentTriggerAtom } from 'src/lib/atoms'
+import { useAtom } from 'jotai'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -93,12 +92,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
   }
 }))
-
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
 
 const SubcomponentsList = props => {
   // ** Hooks
@@ -131,6 +124,8 @@ const SubcomponentsList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentSubcomponent, setCurrentSubcomponent] = useState(null)
+  const [subcomponents, setSubcomponents] = useAtom(subcomponentsAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSubcomponentTriggerAtom)
 
   const editmode = false
 
@@ -326,7 +321,12 @@ const SubcomponentsList = props => {
             </Typography>
             <Typography variant='body2'>Updates to subcomponent information will be effective immediately.</Typography>
           </Box>
-          <UpdateSubcomponentWizard currentSubcomponent={currentSubcomponent} rows={rows} setRows={setRows} />
+          <UpdateSubcomponentWizard
+            currentSubcomponent={currentSubcomponent}
+            rows={rows}
+            setRows={setRows}
+            onClose={handleUpdateSubcomponentDialogClose}
+          />
         </DialogContent>
       </Dialog>
     )
@@ -413,6 +413,8 @@ const SubcomponentsList = props => {
         setRows(updatedRows)
         setDeleteDialog(false)
 
+        setRefetchTrigger(Date.now())
+
         toast.success('Subcomponent successfully deleted')
       }
     } catch (error) {
@@ -442,18 +444,19 @@ const SubcomponentsList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
+          setSubcomponents(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, setSubcomponents]
   )
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
-  }, [fetchData, searchValue, sort, sortColumn])
+  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {

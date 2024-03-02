@@ -413,7 +413,12 @@ const DatacentersList = props => {
             </Typography>
             <Typography variant='body2'>Updates to datacenter information will be effective immediately.</Typography>
           </Box>
-          <UpdateDatacenterWizard currentDatacenter={currentDatacenter} rows={rows} setRows={setRows} />
+          <UpdateDatacenterWizard
+            currentDatacenter={currentDatacenter}
+            rows={rows}
+            setRows={setRows}
+            onClose={handleUpdateDialogClose}
+          />
         </DialogContent>
       </Dialog>
     )

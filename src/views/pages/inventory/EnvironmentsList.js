@@ -384,7 +384,12 @@ const EnvironmentsList = props => {
             </Typography>
             <Typography variant='body2'>Updates to environment information will be effective immediately.</Typography>
           </Box>
-          <UpdateEnvironmentWizard currentEnvironment={currentEnvironment} rows={rows} setRows={setRows} />
+          <UpdateEnvironmentWizard
+            currentEnvironment={currentEnvironment}
+            rows={rows}
+            setRows={setRows}
+            onClose={handleUpdateDialogClose}
+          />
         </DialogContent>
       </Dialog>
     )
@@ -512,7 +517,7 @@ const EnvironmentsList = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, setEnvironments]
   )
 
   useEffect(() => {

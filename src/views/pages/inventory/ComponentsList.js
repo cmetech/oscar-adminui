@@ -66,9 +66,8 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateComponentWizard from 'src/views/pages/inventory/forms/UpdateComponentWizard'
 
-import { th } from 'date-fns/locale'
-import { current } from '@reduxjs/toolkit'
-import { set } from 'nprogress'
+import { componentsAtom, refetchComponentTriggerAtom } from 'src/lib/atoms'
+import { useAtom } from 'jotai'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -93,12 +92,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
   }
 }))
-
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
 
 const ComponentsList = props => {
   // ** Hooks
@@ -132,6 +125,8 @@ const ComponentsList = props => {
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [currentComponent, setCurrentComponent] = useState(null)
+  const [components, setComponents] = useAtom(componentsAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchComponentTriggerAtom)
 
   const editmode = false
 
@@ -367,7 +362,12 @@ const ComponentsList = props => {
             </Typography>
             <Typography variant='body2'>Updates to component information will be effective immediately.</Typography>
           </Box>
-          <UpdateComponentWizard currentComponent={currentComponent} rows={rows} setRows={setRows} />
+          <UpdateComponentWizard
+            currentComponent={currentComponent}
+            rows={rows}
+            setRows={setRows}
+            onClose={handleUpdateComponentDialogClose}
+          />
         </DialogContent>
       </Dialog>
     )
@@ -454,6 +454,8 @@ const ComponentsList = props => {
         setRows(updatedRows)
         setDeleteDialog(false)
 
+        setRefetchTrigger(Date.now())
+
         toast.success('Component successfully deleted')
       }
     } catch (error) {
@@ -483,18 +485,19 @@ const ComponentsList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
+          setComponents(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, setComponents]
   )
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
-  }, [fetchData, searchValue, sort, sortColumn])
+  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {

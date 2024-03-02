@@ -2,6 +2,7 @@
 import { Fragment, use, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+import { subcomponentsAtom, refetchSubcomponentTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -134,7 +136,7 @@ const validationSchema = yup.object({
   subComponentSpecification: yup.string().trim()
 })
 
-const UpdateSubcomponentWizard = props => {
+const UpdateSubcomponentWizard = ({ onClose, ...props }) => {
   // ** States
   const [subComponentName, setSubcomponentName] = useState(props.currentSubcomponent?.name || '')
 
@@ -143,6 +145,8 @@ const UpdateSubcomponentWizard = props => {
   )
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setSubcomponents] = useAtom(subcomponentsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchSubcomponentTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -151,7 +155,7 @@ const UpdateSubcomponentWizard = props => {
   const validateForm = async () => {
     try {
       // Validate the form values
-      await validationSchema.validate({ subComponentName, subComponentSpecification }, { abortEarly: false })
+      await validationSchema.validate({ subComponentName }, { abortEarly: false })
 
       // If validation is successful, clear errors
       setFormErrors({})
@@ -183,6 +187,8 @@ const UpdateSubcomponentWizard = props => {
     // Validate the form before proceeding to the next step or submitting
     const isValid = await validateForm()
     if (!isValid) {
+      // console.log('Form is invalid')
+
       return // Stop the submission or the next step if the validation fails
     }
 
@@ -206,20 +212,22 @@ const UpdateSubcomponentWizard = props => {
         const response = await axios.patch(endpoint, payload, { headers })
 
         if (response.data) {
-          const updatedSubComponent = response.data
+          const updatedSubcomponent = response.data
 
           const updatedRows = props.rows.map(row => {
-            if (row.id === updatedSubComponent.id) {
-              return updatedSubComponent
+            if (row.id === updatedSubcomponent.id) {
+              return updatedSubcomponent
             }
 
             return row
           })
 
           props.setRows(updatedRows)
-          props.currentSubcomponent = updatedSubComponent
 
           toast.success('Sub-Component status updated successfully')
+
+          // Close the modal
+          onClose && onClose()
         }
       } catch (error) {
         console.error('Error updating sub-component details', error)

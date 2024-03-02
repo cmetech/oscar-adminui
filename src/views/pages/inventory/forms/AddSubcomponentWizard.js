@@ -2,6 +2,7 @@
 import { Fragment, use, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+
+import { subcomponentsAtom, refetchSubcomponentTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -123,6 +126,17 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
 // Define validation schema for the form
 const validationSchema = yup.object({
   subComponentName: yup
@@ -140,6 +154,8 @@ const AddSubcomponentWizard = props => {
   const [subComponentSpecification, setSubComponentSpecification] = useState('')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setSubComponents] = useAtom(subcomponentsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchSubcomponentTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -202,8 +218,9 @@ const AddSubcomponentWizard = props => {
         const endpoint = '/api/inventory/subcomponents'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.data) {
+        if (response.status === 201 && response.data) {
           toast.success('Sub-Component details added successfully')
+          setRefetchTrigger(Date.now())
         }
       } catch (error) {
         console.error('Error updating sub-component details', error)

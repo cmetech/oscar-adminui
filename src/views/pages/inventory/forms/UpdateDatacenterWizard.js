@@ -48,8 +48,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
-import { datacentersAtom, refetchTriggerAtom } from 'src/lib/atoms'
-import { set } from 'nprogress'
+import { datacentersAtom, refetchDatacenterTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -131,7 +130,6 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 const validationSchema = yup.object({
   datacenterName: yup
     .string()
-    .trim()
     .required('Datacenter Name is required')
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
@@ -139,14 +137,14 @@ const validationSchema = yup.object({
   datacenterLocation: yup.string().trim()
 })
 
-const UpdateDatacenterWizard = props => {
+const UpdateDatacenterWizard = ({ onClose, ...props }) => {
   // ** States
   const [datacenterName, setDatacenterName] = useState(props?.currentDatacenter?.name || '')
   const [datacenterLocation, setDatacenterLocation] = useState(props?.currentDatacenter?.location || '')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
   const [, setDatacenters] = useAtom(datacentersAtom)
-  const [, setRefetchTrigger] = useAtom(refetchTriggerAtom)
+  const [, setRefetchTrigger] = useAtom(refetchDatacenterTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -223,6 +221,9 @@ const UpdateDatacenterWizard = props => {
           props.setRows(updatedRows)
 
           toast.success('Datacenter details updated successfully')
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
         console.error('Error updating datacenter details', error)

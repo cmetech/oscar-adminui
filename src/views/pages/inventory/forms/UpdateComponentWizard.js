@@ -2,6 +2,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+
+import { componentsAtom, refetchComponentTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -127,27 +130,24 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 const validationSchema = yup.object({
   componentName: yup
     .string()
-    .trim()
     .required('Component Name is required')
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
     .trim(),
   subcomponentName: yup
     .string()
-    .trim()
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
     .trim(),
   componentType: yup
     .string()
-    .trim()
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
     .trim(),
   componentDetails: yup.string().trim()
 })
 
-const UpdateComponentWizard = props => {
+const UpdateComponentWizard = ({ onClose, ...props }) => {
   // ** States
   const [componentName, setComponentName] = useState(props.currentComponent?.name || '')
   const [componentDetails, setComponentDetails] = useState(props.currentComponent?.details || '')
@@ -156,6 +156,8 @@ const UpdateComponentWizard = props => {
   const [subComponents, setSubComponents] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setComponents] = useAtom(componentsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchComponentTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -265,6 +267,9 @@ const UpdateComponentWizard = props => {
           props.currentComponent = updatedComponent
 
           toast.success('Component details updated successfully')
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
         console.error('Error updating component details', error)
@@ -325,7 +330,7 @@ const UpdateComponentWizard = props => {
                   handleHomeEndKeys
                   id='subcomponentName-autocomplete'
                   options={subComponents}
-                  value={subcomponentName}
+                  value={subcomponentName.toUpperCase()}
                   onChange={(event, newValue) => {
                     // Directly calling handleFormChange with a synthetic event object
                     handleSubcomponentNameChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)

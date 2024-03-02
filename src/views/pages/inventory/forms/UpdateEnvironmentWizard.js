@@ -134,7 +134,7 @@ const validationSchema = yup.object({
   environmentDescription: yup.string().trim()
 })
 
-const UpdateEnvironmentWizard = props => {
+const UpdateEnvironmentWizard = ({ onClose, ...props }) => {
   // ** States
   const [environmentName, setEnvironmentName] = useState(props?.currentEnvironment?.name || '')
   const [environmentDescription, setEnvironmentDescription] = useState(props?.currentEnvironment?.description || '')
@@ -216,6 +216,9 @@ const UpdateEnvironmentWizard = props => {
           props.setRows(updatedRows)
 
           toast.success('Environment details updated successfully')
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
         console.error('Error updating environment details', error)

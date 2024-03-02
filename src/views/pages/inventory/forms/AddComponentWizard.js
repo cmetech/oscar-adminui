@@ -2,6 +2,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -46,6 +47,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+
+import { componentsAtom, refetchComponentTriggerAtom } from 'src/lib/atoms'
 
 const steps = [
   {
@@ -123,6 +126,17 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
 // Define validation schema for form
 const validationSchema = yup.object({
   componentName: yup
@@ -135,16 +149,9 @@ const validationSchema = yup.object({
   subcomponentName: yup
     .string()
     .trim()
-    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
-    .min(3, 'Name must be at least 3 characters')
-    .trim(),
-  componentType: yup
-    .string()
-    .trim()
-    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
-    .min(3, 'Name must be at least 3 characters')
-    .trim(),
-  componentDetails: yup.string().trim()
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed'),
+  componentDetails: yup.string().trim(),
+  componentType: yup.string().trim()
 })
 
 const AddComponentWizard = props => {
@@ -156,6 +163,8 @@ const AddComponentWizard = props => {
   const [subComponents, setSubComponents] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const [, setComponents] = useAtom(componentsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchComponentTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -168,8 +177,8 @@ const AddComponentWizard = props => {
         {
           componentName,
           subcomponentName,
-          componentType,
-          componentDetails
+          componentDetails,
+          componentType
         },
         { abortEarly: false }
       )
@@ -250,8 +259,9 @@ const AddComponentWizard = props => {
         const endpoint = '/api/inventory/components'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.data) {
+        if (response.status === 201 && response.data) {
           toast.success('Component details added successfully')
+          setRefetchTrigger(Date.now())
         }
       } catch (error) {
         console.error('Error updating component details', error)
@@ -312,7 +322,7 @@ const AddComponentWizard = props => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus

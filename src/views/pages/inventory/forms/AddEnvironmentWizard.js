@@ -248,7 +248,7 @@ const AddEnvironmentWizard = props => {
         const endpoint = '/api/inventory/environments'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.status == 201 && response.data) {
+        if (response.status === 201 && response.data) {
           toast.success('Environment details added successfully')
           setRefetchTrigger(Date.now())
         }

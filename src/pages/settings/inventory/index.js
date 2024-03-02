@@ -176,7 +176,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, tabValue }) => {
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
-              {t('Delete')} {getDynamicTitle(tabValue)}
+              {t('Delete')} {t(getDynamicTitle(tabValue))}
             </Box>
           </MenuItem>
         )}
@@ -199,6 +199,8 @@ const MoreActionsDropdown = ({ onDelete, onExport, tabValue }) => {
 
 // ** Confirmation Modal
 const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
+  const { t } = useTranslation()
+
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
@@ -214,9 +216,9 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>Confirm Action</DialogTitle>
+      <DialogTitle>{t('Confirm Action')}</DialogTitle>
       <DialogContent>
-        <DialogContentText>Are you sure you want to delete all selected {getDynamicTitle(tab)}?</DialogContentText>
+        <DialogContentText>{t('Delete all selected?')}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button
@@ -226,7 +228,7 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
           color='secondary'
           startIcon={<Icon icon='mdi:close' />}
         >
-          Cancel
+          {t('Cancel')}
         </Button>
         <Button
           onClick={onConfirm}
@@ -236,7 +238,7 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
           autoFocus
           startIcon={<Icon icon='mdi:delete-forever' />}
         >
-          Delete
+          {t('Delete')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -245,6 +247,8 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
 
 // ** Confirmation Modal
 const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
+  const { t } = useTranslation()
+
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {

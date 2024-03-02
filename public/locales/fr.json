@@ -35,5 +35,8 @@
     "Role": "Rôle",
     "Has Admin Access": "Accès administrateur",
     "Is Verified": "Est vérifié",
-    "Users": "Utilisateurs"
+    "Users": "Utilisateurs",
+    "Confirm Action": "Confirmer l'action",
+    "Delete all selected?": "Supprimer tous les éléments sélectionnés ?",
+    "Cancel": "Annuler"
 }

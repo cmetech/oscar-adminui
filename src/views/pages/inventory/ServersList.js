@@ -67,7 +67,8 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import ServerDetailPanel from 'src/views/pages/inventory/ServerDetailPanel'
-import { serverIdsAtom } from 'src/lib/atoms'
+import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { setRef } from '@mui/material'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -125,6 +126,8 @@ const ServersList = props => {
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [serverIds, setServerIds] = useAtom(serverIdsAtom)
+  const [servers, setServers] = useAtom(serverIdsAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -338,6 +341,7 @@ const ServersList = props => {
               size='small'
               title='Delete User'
               aria-label='Delete User'
+              color='error'
               onClick={() => {
                 setCurrentServer(params.row)
                 setDeleteDialog(true)
@@ -407,7 +411,14 @@ const ServersList = props => {
             </Typography>
             <Typography variant='body2'>Updates to server information will be effective immediately.</Typography>
           </Box>
-          {currentServer && <UpdateServerWizard currentServer={currentServer} rows={rows} setRows={setRows} />}
+          {currentServer && (
+            <UpdateServerWizard
+              currentServer={currentServer}
+              rows={rows}
+              setRows={setRows}
+              onClose={handleUpdateDialogClose}
+            />
+          )}
         </DialogContent>
       </Dialog>
     )
@@ -493,7 +504,10 @@ const ServersList = props => {
 
         setRows(updatedRows)
         setDeleteDialog(false)
-        props.set_total(props.total - 1)
+
+        // props.set_total(props.total - 1)
+
+        setRefetchTrigger(Date.now())
 
         toast.success('Successfully deleted Server')
       }
@@ -524,18 +538,19 @@ const ServersList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
+          setServers(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, setServers]
   )
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
-  }, [fetchData, searchValue, sort, sortColumn])
+  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {

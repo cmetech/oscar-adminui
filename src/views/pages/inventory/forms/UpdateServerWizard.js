@@ -30,6 +30,7 @@ import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -43,9 +44,9 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { da, el, fi } from 'date-fns/locale'
-import { set } from 'nprogress'
-import { main } from '@popperjs/core'
+
+// ** Import yup for form validation
+import * as yup from 'yup'
 
 // Define initial state for the server form
 const initialServerFormState = {
@@ -80,6 +81,17 @@ const steps = [
     description: 'Review the Server details and submit.'
   }
 ]
+
+const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+      color: theme.palette.common.black
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.common.black
+    }
+  })
+)
 
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
@@ -144,6 +156,17 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
 const Section = ({ title, data }) => {
   return (
     <Fragment>
@@ -203,7 +226,7 @@ const ReviewAndSubmitSection = ({ serverForm }) => {
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
-const UpdateServerWizard = props => {
+const UpdateServerWizard = ({ onClose, ...props }) => {
   // Destructure all props here
   const { currentServer, rows, setRows } = props
 
@@ -368,6 +391,9 @@ const UpdateServerWizard = props => {
           props.setRows(updatedRows)
 
           toast.success('Server details updated successfully')
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
         console.error('Error updating server details', error)
@@ -401,7 +427,7 @@ const UpdateServerWizard = props => {
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
           <Grid item xs={section === 'metadata' ? 5 : 4}>
-            <TextField
+            <TextfieldStyled
               key={`field1-${section}-${index}-${resetFormFields}`}
               fullWidth
               label={section === 'metadata' ? 'Key' : 'Name'}
@@ -413,7 +439,7 @@ const UpdateServerWizard = props => {
             />
           </Grid>
           <Grid item xs={section === 'metadata' ? 5 : 3}>
-            <TextField
+            <TextfieldStyled
               key={`field2-${section}-${index}-${resetFormFields}`}
               fullWidth
               label={section === 'metadata' ? 'Value' : 'IP Address'}
@@ -427,7 +453,7 @@ const UpdateServerWizard = props => {
           {/* Conditional TextField for Label only in networkInterfaces */}
           {section === 'networkInterfaces' && (
             <Grid item xs={3}>
-              <TextField
+              <TextfieldStyled
                 key={`label-${section}-${index}-${resetFormFields}`}
                 fullWidth
                 label='Label'
@@ -440,7 +466,10 @@ const UpdateServerWizard = props => {
             </Grid>
           )}
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton onClick={() => addSectionEntry(section)} color='primary'>
+            <IconButton
+              onClick={() => addSectionEntry(section)}
+              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+            >
               <Icon icon='mdi:plus-circle-outline' />
             </IconButton>
             {serverForm[section].length > 1 && (
@@ -477,7 +506,7 @@ const UpdateServerWizard = props => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <TextField
+                <TextfieldStyled
                   required
                   id='hostName'
                   name='hostName'
@@ -489,7 +518,7 @@ const UpdateServerWizard = props => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -507,12 +536,12 @@ const UpdateServerWizard = props => {
                     }
                   }}
                   renderInput={params => (
-                    <TextField {...params} label='Component Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Component Name' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -530,12 +559,12 @@ const UpdateServerWizard = props => {
                     }
                   }}
                   renderInput={params => (
-                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus
@@ -553,12 +582,12 @@ const UpdateServerWizard = props => {
                     }
                   }}
                   renderInput={params => (
-                    <TextField {...params} label='Environment Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <TextfieldStyled
                   id='status'
                   name='status'
                   label='Status'
@@ -572,7 +601,7 @@ const UpdateServerWizard = props => {
                 >
                   <option value='Active'>Active</option>
                   <option value='Inactive'>Inactive</option>
-                </TextField>
+                </TextfieldStyled>
               </Grid>
             </Grid>
           </Fragment>
@@ -584,8 +613,16 @@ const UpdateServerWizard = props => {
               {renderDynamicFormSection('networkInterfaces')}
               <Box>
                 <Button
-                  startIcon={<Icon icon='mdi:plus-circle-outline' />}
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
                   onClick={() => addSectionEntry('networkInterfaces')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                 >
                   Add Network Interface
                 </Button>
@@ -599,7 +636,18 @@ const UpdateServerWizard = props => {
             <Stack direction='column' spacing={1}>
               {renderDynamicFormSection('metadata')}
               <Box>
-                <Button startIcon={<Icon icon='mdi:plus-circle-outline' />} onClick={() => addSectionEntry('metadata')}>
+                <Button
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
+                  onClick={() => addSectionEntry('metadata')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                >
                   Add Metadata
                 </Button>
               </Box>

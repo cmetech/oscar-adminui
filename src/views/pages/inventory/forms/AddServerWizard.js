@@ -2,6 +2,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -44,9 +45,11 @@ import toast from 'react-hot-toast'
 
 // ** Styled Component
 import StepperWrapper from 'src/@core/styles/mui/stepper'
-import { da, el, fi } from 'date-fns/locale'
-import { set } from 'nprogress'
-import { main } from '@popperjs/core'
+
+// ** Import yup for form validation
+import * as yup from 'yup'
+
+import { serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
 
 // Define initial state for the server form
 const initialServerFormState = {
@@ -165,6 +168,34 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
+// Define validation schema for the form
+const validationSchema = yup.object({
+  hostName: yup.string().required('Host Name is required'),
+  componentName: yup.string().required('Component Name is required'),
+  datacenterName: yup.string().required('Datacenter Name is required'),
+  environmentName: yup.string().required('Environment Name is required'),
+  status: yup.string().required('Status is required'),
+  metadata: yup.array().of(
+    yup.object().shape({
+      key: yup.string().required('Key is required'),
+      value: yup.string().required('Value is required')
+    })
+  ),
+  networkInterfaces: yup.array().of(
+    yup.object().shape({
+      name: yup.string().required('Name is required'),
+      ip_address: yup
+        .string()
+        .required('IP Address is required')
+        .matches(
+          /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+          'Invalid IP address format'
+        ),
+      label: yup.string().required('Label is required')
+    })
+  )
+})
+
 const Section = ({ title, data }) => {
   return (
     <Fragment>
@@ -232,6 +263,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   const [components, setComponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
+  const [formErrors, setFormErrors] = useState({})
+  const [, setServers] = useAtom(serversAtom)
+  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -284,6 +318,78 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     fetchComponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
+  const validateField = async (fieldName, value, index, section) => {
+    // Construct the correct path for nested fields
+    const fieldPath = section ? `${section}[${index}].${fieldName}` : fieldName
+
+    console.log(`Validating Field: ${fieldPath} with Value: ${value}`)
+
+    try {
+      // Adjust the context object based on whether we're validating a section or a top-level field
+      const contextObject = section ? { [section]: serverForm[section] } : serverForm
+
+      await validationSchema.validateAt(fieldPath, contextObject)
+
+      console.log(`Validation Success for: ${fieldPath}`)
+
+      // If validation is successful, clear any existing error for the field
+      // This might need to be adjusted to handle errors for specific array indices
+      setFormErrors(prevErrors => ({
+        ...prevErrors,
+        [fieldPath]: ''
+      }))
+    } catch (error) {
+      console.log(`Validation Error for: ${fieldPath}, Message: ${error.message}`)
+
+      // If validation fails, set the error message for the field
+      // Adjust this to handle array fields correctly
+      setFormErrors(prevErrors => ({
+        ...prevErrors,
+        [fieldPath]: error.message
+      }))
+    }
+  }
+
+  const validateForm = async () => {
+    try {
+      // Assuming serverForm is the state holding your form data
+      // and validationSchema is your Yup schema
+      await validationSchema.validate(serverForm, { abortEarly: false })
+
+      // If validation is successful, clear errors
+      setFormErrors({})
+
+      return true
+    } catch (yupError) {
+      if (yupError instanceof yup.ValidationError) {
+        // Log the entire error
+        console.log('Validation Error:', yupError)
+
+        // Log detailed info about each validation error
+        yupError.inner.forEach(error => {
+          console.log(`Field: ${error.path}, Error: ${error.message}`)
+        })
+
+        // Transform the validation errors to a more manageable structure
+        // and set them to state or handle them as needed
+        const transformedErrors = yupError.inner.reduce(
+          (acc, currentError) => ({
+            ...acc,
+            [currentError.path]: currentError.message
+          }),
+          {}
+        )
+
+        setFormErrors(transformedErrors)
+      } else {
+        // Handle other types of errors (e.g., network errors)
+        console.error('An unexpected error occurred:', yupError)
+      }
+
+      return false
+    }
+  }
+
   // Function to handle form field changes
   const handleFormChange = (event, index, section) => {
     const { name, value } = event.target
@@ -297,8 +403,13 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
       updatedSection[index][name] = upperCasedValue
       setServerForm({ ...serverForm, [section]: updatedSection })
     } else {
+      console.log(`Updating ${name} to ${value}`)
+
       // Handle changes for static fields
       setServerForm({ ...serverForm, [name]: upperCasedValue })
+
+      // Validate the field after the value has been updated
+      validateField(name, upperCasedValue)
     }
   }
 
@@ -332,6 +443,14 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
+      // Validate the form before proceeding to the next step or submitting
+      const isValid = await validateForm()
+      if (!isValid) {
+        console.log('Form validation failed')
+
+        return // Stop the submission or the next step if the validation fails
+      }
+
       try {
         const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
 
@@ -357,8 +476,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
         const endpoint = '/api/inventory/servers'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.data) {
+        if (response.status === 201 && response.data) {
           toast.success('Server details added successfully')
+          setRefetchTrigger(Date.now())
 
           // Call the onSuccess callback after successful submission
           onSuccess()
@@ -378,64 +498,78 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
   // Render form fields for metadata and network interfaces
   const renderDynamicFormSection = section => {
-    return serverForm[section].map((entry, index) => (
-      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-        <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={section === 'metadata' ? 5 : 4}>
-            <TextfieldStyled
-              key={`field1-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'metadata' ? 'Key' : 'Name'}
-              name={section === 'metadata' ? 'key' : 'name'}
-              value={entry.key || entry.name}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
-          <Grid item xs={section === 'metadata' ? 5 : 3}>
-            <TextfieldStyled
-              key={`field2-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'metadata' ? 'Value' : 'IP Address'}
-              name={section === 'metadata' ? 'value' : 'ip_address'}
-              value={entry.value || entry.ip_address}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
-          {/* Conditional TextField for Label only in networkInterfaces */}
-          {section === 'networkInterfaces' && (
-            <Grid item xs={3}>
+    return serverForm[section].map((entry, index) => {
+      const errorKeyBase = section === 'metadata' ? 'value' : 'ip_address'
+      const errorKey = `${section}[${index}].${errorKeyBase}`
+
+      return (
+        <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
+          <Grid container spacing={3} alignItems='center'>
+            <Grid item xs={section === 'metadata' ? 5 : 4}>
               <TextfieldStyled
-                key={`label-${section}-${index}-${resetFormFields}`}
+                key={`field1-${section}-${index}-${resetFormFields}`}
                 fullWidth
-                label='Label'
-                name='label'
-                value={entry.label}
+                label={section === 'metadata' ? 'Key' : 'Name'}
+                name={section === 'metadata' ? 'key' : 'name'}
+                value={entry.key || entry.name}
                 onChange={e => handleFormChange(e, index, section)}
+                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
                 margin='normal'
+                error={!!formErrors[errorKey]}
+                helperText={formErrors[errorKey] || ''}
               />
             </Grid>
-          )}
-          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton
-              onClick={() => addSectionEntry(section)}
-              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-            >
-              <Icon icon='mdi:plus-circle-outline' />
-            </IconButton>
-            {serverForm[section].length > 1 && (
-              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                <Icon icon='mdi:minus-circle-outline' />
-              </IconButton>
+            <Grid item xs={section === 'metadata' ? 5 : 3}>
+              <TextfieldStyled
+                key={`field2-${section}-${index}-${resetFormFields}`}
+                fullWidth
+                label={section === 'metadata' ? 'Value' : 'IP Address'}
+                name={section === 'metadata' ? 'value' : 'ip_address'}
+                value={entry.value || entry.ip_address}
+                onChange={e => handleFormChange(e, index, section)}
+                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                variant='outlined'
+                margin='normal'
+                error={!!formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`]}
+                helperText={formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`] || ''}
+              />
+            </Grid>
+            {/* Conditional TextField for Label only in networkInterfaces */}
+            {section === 'networkInterfaces' && (
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`label-${section}-${index}-${resetFormFields}`}
+                  fullWidth
+                  label='Label'
+                  name='label'
+                  value={entry.label}
+                  onChange={e => handleFormChange(e, index, section)}
+                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                  error={!!formErrors[`networkInterfaces[${index}].label`]}
+                  helperText={formErrors[`networkInterfaces[${index}].label`] || ''}
+                />
+              </Grid>
             )}
+            <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <IconButton
+                onClick={() => addSectionEntry(section)}
+                style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+              >
+                <Icon icon='mdi:plus-circle-outline' />
+              </IconButton>
+              {serverForm[section].length > 1 && (
+                <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                  <Icon icon='mdi:minus-circle-outline' />
+                </IconButton>
+              )}
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
-    ))
+        </Box>
+      )
+    })
   }
 
   // Handle Confirm Password
@@ -471,6 +605,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                     autoComplete='off'
                     value={serverForm.hostName}
                     onChange={handleFormChange}
+                    onBlur={e => validateField(e.target.name, e.target.value)}
+                    error={!!formErrors.hostName}
+                    helperText={formErrors.hostName || ''}
                   />
                 </CustomToolTip>
               </Grid>
@@ -492,9 +629,12 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                       handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
                     }
                   }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
                     <TextField {...params} label='Component Name' fullWidth required autoComplete='off' />
                   )}
+                  error={!!formErrors.componentName}
+                  helperText={formErrors.componentName || ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -515,9 +655,12 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                       handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
                     }
                   }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
                     <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
                   )}
+                  error={!!formErrors.datacenterName}
+                  helperText={formErrors.datacenterName || ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -538,6 +681,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                       handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
                     }
                   }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
                   )}
@@ -552,7 +696,10 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                     value={serverForm.status.toUpperCase()}
                     label='Status'
                     onChange={handleFormChange}
+                    onBlur={e => validateField(e.target.name, e.target.value)}
                     name='status'
+                    error={!!formErrors.status}
+                    helperText={formErrors.status || ''}
                   >
                     <MenuItem value={'ACTIVE'}>ACTIVE</MenuItem>
                     <MenuItem value={'INACTIVE'}>INACTIVE</MenuItem>

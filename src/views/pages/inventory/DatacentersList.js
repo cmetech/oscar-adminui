@@ -177,7 +177,7 @@ const DatacentersList = props => {
       renderCell: params => {
         const { row } = params
 
-        let color = 'warning'
+        let color = 'info'
         let label = `ENVIRONMENTS (${row?.environment_count || 0})`
 
         return (

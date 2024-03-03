@@ -512,11 +512,10 @@ const Settings = () => {
 
   const handleConfirmDelete = async () => {
     // Implement delete functionality
-    console.log('Deleting...')
-    console.log('serverIds', serverIds)
+    console.log('Deleting serverIds', serverIds)
 
     try {
-      const response = await axios.put('/api/inventory/servers/bulk', {
+      const response = await axios.put('/api/inventory/servers', {
         ids: serverIds // Assuming the API expects an object with an ids array
       })
 

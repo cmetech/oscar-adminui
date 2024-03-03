@@ -60,9 +60,39 @@ async function handler(req, res) {
       console.error('Error adding server:', error)
       res.status(error.response?.status || 500).json({ message: error.message })
     }
+  } else if (req.method === 'PUT') {
+    try {
+      // Extract the list of server IDs from the request body
+      const { ids } = req.body
+
+      // console.log('Received IDs:', ids)
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: "Invalid input: 'ids' must be a non-empty array." })
+      }
+
+      // Call the underlying middleware API
+      const response = await axios.put(
+        `${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/servers/bulk`,
+        ids, // Send the list of IDs in the request body
+        {
+          headers: {
+            accept: '*/*',
+            'Content-Type': 'application/json'
+          },
+          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+        }
+      )
+
+      // Since there's no content to return, send a 204 status code and a message acknowledging the deletion
+      res.status(204).end()
+    } catch (error) {
+      console.error('Error calling middleware API:', error)
+      res.status(error.response?.status || 500).json({ message: error.message })
+    }
   } else {
     // Handle unsupported HTTP methods
-    res.setHeader('Allow', ['GET', 'POST'])
+    res.setHeader('Allow', ['GET', 'POST', 'PUT'])
     res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }

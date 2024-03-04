@@ -93,14 +93,14 @@ const navigation = () => {
     {
       title: 'Users',
       icon: 'mdi:account-multiple',
-      path: '/settings/users',
+      path: '/administration/users',
       action: 'manage',
       subject: 'settings-nav'
     },
     {
       title: 'Inventory',
       icon: 'mdi:server',
-      path: '/settings/inventory',
+      path: '/administration/inventory',
       action: 'manage',
       subject: 'settings-nav'
     },

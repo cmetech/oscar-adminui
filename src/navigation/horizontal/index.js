@@ -93,40 +93,26 @@ const navigation = () => {
     {
       title: 'Users',
       icon: 'mdi:account-multiple',
-      path: '/settings/users',
+      path: '/administration/users',
       action: 'manage',
       subject: 'settings-nav'
     },
     {
       title: 'Inventory',
       icon: 'mdi:server',
-      path: '/settings/inventory',
+      path: '/administration/inventory',
       action: 'manage',
       subject: 'settings-nav'
     },
     {
-      sectionTitle: 'Help & Feedback',
+      sectionTitle: 'Ask Oscar',
       action: 'read',
       subject: 'all'
     },
     {
-      title: 'OSCAR Academy',
-      path: '/oscar-academy',
-      icon: 'mdi:school-outline',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Feedback',
-      path: '/feedback',
-      icon: 'mdi:comment-alert',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: "What's New",
-      path: '/new-features',
-      icon: 'mdi:new-box',
+      title: 'Oscar Chat',
+      icon: 'mdi:frequently-asked-questions',
+      path: '#',
       action: 'read',
       subject: 'all'
     }

@@ -569,7 +569,8 @@ const ComponentsList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
-              showButtons: false
+              showButtons: false,
+              showexport: true
             }
           }}
         />

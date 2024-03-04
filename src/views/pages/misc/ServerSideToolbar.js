@@ -117,46 +117,51 @@ const predefinedRanges = [
 ]
 
 function ExcelExportMenuItem(props) {
-  const { hideMenu, datagridrefs, reportId } = props
+  const { hideMenu } = props
 
   const exportToExcel = async () => {
     try {
-      console.log('Exporting to Excel...', reportId)
-      const response = await axios.post('/api/reports/trip/export', { reportId })
+      // Fetch server data
+      const response = await axios.get('/api/inventory/servers')
+      const servers = response.data.rows
 
-      console.log('Response:', response)
-      const { trip, idle, gps } = response.data
-
+      // Create a new workbook
       const workbook = new ExcelJS.Workbook()
-      const tripsSheet = workbook.addWorksheet('Trip')
-      const idleEventsSheet = workbook.addWorksheet('IdleEvents')
-      const gpsSheet = workbook.addWorksheet('GPS')
+      const worksheet = workbook.addWorksheet('Servers')
 
-      // Function to add array of objects to a worksheet
-      const addRowsToSheet = (sheet, data) => {
-        if (data && data.length > 0) {
-          // Add the header row
-          const headerRow = Object.keys(data[0])
-          sheet.addRow(headerRow)
+      // Define columns
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 30 },
+        { header: 'Hostname', key: 'hostname', width: 25 },
+        { header: 'Datacenter', key: 'datacenter_name', width: 25 },
+        { header: 'Environment', key: 'environment_name', width: 25 },
+        { header: 'Status', key: 'status', width: 15 },
+        { header: 'Component', key: 'component_name', width: 20 },
+        { header: 'Subcomponent', key: 'subcomponent_name', width: 20 },
+        { header: 'Metadata', key: 'metadata', width: 50 },
+        { header: 'Network Interfaces', key: 'network_interfaces', width: 50 },
+        { header: 'Created At', key: 'created_at', width: 20 },
+        { header: 'Modified At', key: 'modified_at', width: 20 }
+      ]
 
-          // Add the rest of the data
-          data.forEach(row => {
-            sheet.addRow(Object.values(row))
-          })
-        } else {
-          console.log('No data to export for sheet:', sheet.name)
-        }
-      }
+      // Add rows
+      servers.forEach(server => {
+        worksheet.addRow({
+          ...server,
+          metadata: server.metadata.map(meta => `${meta.key}: ${meta.value}`).join('; '),
+          network_interfaces: server.network_interfaces.map(ni => `${ni.name} (${ni.ip_address})`).join('; ')
+        })
+      })
 
-      // Add data to each sheet
-      addRowsToSheet(tripsSheet, [trip])
-      addRowsToSheet(idleEventsSheet, idle)
-      addRowsToSheet(gpsSheet, gps)
-
-      // Write workbook to buffer and trigger download
+      // Generate Excel file
       const buffer = await workbook.xlsx.writeBuffer()
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-      saveAs(blob, `DataGridsExport-${reportId}.xlsx`)
+
+      // Trigger file download
+      saveAs(
+        new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        'Servers.xlsx'
+      )
+      console.log('Exporting...')
     } catch (error) {
       console.error('Error exporting to Excel:', error)
     }
@@ -177,7 +182,7 @@ const CustomExportButton = props => {
     <GridToolbarExportContainer {...props}>
       <GridPrintExportMenuItem option={printOptions} />
       <GridCsvExportMenuItem options={csvOptions} />
-      <ExcelExportMenuItem datagridrefs={props.datagridrefs} reportId={props.reportId} />
+      <ExcelExportMenuItem />
     </GridToolbarExportContainer>
   )
 }
@@ -201,7 +206,7 @@ const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive,
           setFilterActive(false)
         }}
       />
-      {props.showexport ? <CustomExportButton datagridrefs={props.datagridrefs} reportId={props.reportId} /> : null}
+      {props.showexport ? <CustomExportButton /> : null}
     </GridToolbarContainer>
   )
 }

@@ -1,61 +1,84 @@
 // Next.js API route for proxying export targets requests to FastAPI
 import axios from 'axios'
 import https from 'https'
+import FormData from 'form-data'
 import oscarConfig from 'src/configs/oscarConfig'
 import { IncomingForm } from 'formidable'
 import fs from 'fs'
 
 async function handler(req, res) {
-  if (req.method === 'POST') {
-    // Parse the form data
-    const form = new IncomingForm()
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        console.error('Error parsing form data:', err)
+  // console.log('Handler triggered for POST /api/inventory/servers/bulk')
 
-        return res.status(500).json({ message: 'Form data parsing error' })
-      }
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST'])
 
-      // Check if the file is provided
-      const uploadedFile = files.file
-      if (!uploadedFile) {
-        return res.status(400).json({ message: 'No file uploaded' })
-      }
+    return res.status(405).end(`Method ${req.method} Not Allowed`)
+  }
 
-      // Here, ensure you're accessing the correct property for the file path
-      const filePath = uploadedFile.filepath // Adjust this line if the property name is different
+  // Wrap the formidable parsing in a Promise to manage the asynchronous flow
+  const form = new IncomingForm()
 
-      // Verify filePath is not undefined
-      if (!filePath) {
-        return res.status(500).json({ message: 'File path is undefined' })
-      }
-
-      // Now use filePath with fs.createReadStream
-      const formData = new FormData()
-      formData.append('file', fs.createReadStream(filePath), uploadedFile.originalFilename)
-
-      try {
-        // Forward the file to the middleware API
-        const response = await axios.post(`${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/servers/upload`, formData, {
-          headers: {
-            ...formData.getHeaders(),
-            'Content-Type': 'multipart/form-data'
-          },
-          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+  try {
+    const parseFormAsync = req =>
+      new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) reject(err)
+          resolve({ fields, files })
         })
+      })
 
-        // Forward the response from the middleware API back to the client
-        return res.status(response.status).json(response.data)
-      } catch (error) {
-        console.error('Error uploading file to middleware API:', error)
+    const { files } = await parseFormAsync(req)
 
-        return res.status(error.response?.status || 500).json({ message: 'Error uploading file' })
-      }
+    // console.log('Files:', files)
+
+    const uploadedFile = files.file[0]
+
+    if (!uploadedFile) {
+      return res.status(400).json({ message: 'No file uploaded' })
+    }
+
+    const filePath = uploadedFile.filepath
+    if (!filePath) {
+      return res.status(500).json({ message: 'File path is undefined' })
+    }
+
+    const formData = new FormData()
+    formData.append('file', fs.createReadStream(filePath), uploadedFile.originalFilename)
+
+    // console.log('FormData Headers:', formData.getHeaders())
+
+    const response = await axios.post(`${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/servers/upload`, formData, {
+      headers: {
+        ...formData.getHeaders(),
+        'Content-Type': 'multipart/form-data'
+      },
+      httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
     })
-  } else {
-    // Handle unsupported HTTP methods
-    res.setHeader('Allow', ['PUT'])
-    res.status(405).end(`Method ${req.method} Not Allowed`)
+
+    if (response.status === 201 && response.data) {
+      // Delete the uploaded file after successful upload
+      fs.unlinkSync(filePath)
+
+      console.log('Response Status:', response.status)
+      console.log('Response Data:', response.data)
+      res.status(response.status).json(response.data)
+    }
+  } catch (error) {
+    console.error('Axios Error', error.toJSON())
+    if (error.response) {
+      // The request was made and the server responded with a status code that falls out of the range of 2xx
+      console.error('Status:', error.response.status)
+      console.error('Headers:', error.response.headers)
+      console.error('Data:', error.response.data)
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Request:', error.request)
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error Message:', error.message)
+    }
+
+    return res.status(500).json({ message: 'Internal Server Error' })
   }
 }
 

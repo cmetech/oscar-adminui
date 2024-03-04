@@ -1,5 +1,5 @@
 // ** React Imports
-import { useContext, useState, useEffect, forwardRef, Fragment } from 'react'
+import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'react'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
@@ -307,9 +307,29 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
 
 const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
   const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState('')
+
+  const fileInputRef = useRef(null)
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click()
+  }
 
   const handleFileChange = event => {
-    setFile(event.target.files[0])
+    const file = event.target.files[0]
+    if (file) {
+      setFile(file)
+      setFileName(file.name)
+    } else {
+      setFile(null)
+      setFileName('')
+    }
+  }
+
+  const handleClose = () => {
+    setFile(null)
+    setFileName('')
+    onClose()
   }
 
   const { t } = useTranslation()
@@ -334,7 +354,10 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
 
       // Handle response here
       console.log(response.data)
+      setFileName('')
+      setFile(null)
       onClose() // Close the dialog on success
+      toast.success('Server are being uploaded and processed.')
     } catch (error) {
       console.error('Error uploading file:', error)
       toast.error('Error uploading file')
@@ -345,7 +368,29 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Upload Servers</DialogTitle>
       <DialogContent>
-        <input type='file' onChange={handleFileChange} />
+        <IconButton
+          size='small'
+          onClick={() => handleClose()}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+        {/* Hidden file input */}
+        <input
+          type='file'
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: 'none' }} // Hide the input
+        />
+        {/* Custom styled button */}
+        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary'>
+          {t('Choose File')}
+        </Button>
+        {fileName && (
+          <Typography variant='subtitle1' sx={{ mt: 2 }}>
+            Selected file: {fileName}
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button

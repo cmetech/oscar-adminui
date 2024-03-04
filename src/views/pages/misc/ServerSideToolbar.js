@@ -180,8 +180,8 @@ const printOptions = { hideFooter: true, hideToolbar: true }
 const CustomExportButton = props => {
   return (
     <GridToolbarExportContainer {...props}>
-      <GridPrintExportMenuItem option={printOptions} />
-      <GridCsvExportMenuItem options={csvOptions} />
+      {/* <GridPrintExportMenuItem option={printOptions} />
+      <GridCsvExportMenuItem options={csvOptions} /> */}
       <ExcelExportMenuItem />
     </GridToolbarExportContainer>
   )

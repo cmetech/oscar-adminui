@@ -58,11 +58,7 @@ import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // Form Dialog Components
-import AddDatacenterWizard from 'src/views/pages/inventory/forms/AddDatacenterWizard'
-import AddEnvironmentWizard from 'src/views/pages/inventory/forms/AddEnvironmentWizard'
-import AddComponentWizard from 'src/views/pages/inventory/forms/AddComponentWizard'
-import AddSubcomponentWizard from 'src/views/pages/inventory/forms/AddSubcomponentWizard'
-import AddServerWizard from 'src/views/pages/inventory/forms/AddServerWizard'
+import AddTaskWizard from 'src/views/pages/tasks-management/forms/AddTaskWizard'
 import toast from 'react-hot-toast'
 import { useAtom } from 'jotai'
 
@@ -185,7 +181,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             {t('Export')}
           </Box>
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           sx={{ p: 0 }}
           onClick={() => {
             onUpload()
@@ -196,7 +192,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             <Icon icon='mdi:upload' />
             {t('Upload Tasks')}
           </Box>
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </Fragment>
   )
@@ -438,7 +434,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   const dynamicFields = () => {
     switch (tab) {
       case '1': // Datacenters
-        return <AddDatacenterWizard onSuccess={handleSuccess} />
+        return <AddTaskWizard onSuccess={handleSuccess} />
 
       // Add cases for other tabs with different fields
       default:

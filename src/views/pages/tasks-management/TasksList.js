@@ -94,12 +94,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
-
 const TasksList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -132,7 +126,8 @@ const TasksList = props => {
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentServer, setCurrentServer] = useState(null)
+  const [disableDialog, setDisableDialog] = useState(false)
+  const [currentTask, setCurrentTask] = useState(null)
 
   const editmode = false
 
@@ -366,14 +361,28 @@ const TasksList = props => {
       flex: 0.02,
       minWidth: 10,
       renderCell: params => {
+        const { row } = params
+
         return (
           <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
             <IconButton
               size='small'
-              title='Edit'
-              aria-label='Edit'
+              title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
               onClick={() => {
-                setCurrentServer(params.row)
+                setCurrentTask(row)
+                setDisableDialog(true)
+              }}
+            >
+              <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Edit Task'
+              aria-label='Edit Task'
+              onClick={() => {
+                setCurrentTask(row)
                 setEditDialog(true)
               }}
             >
@@ -381,11 +390,11 @@ const TasksList = props => {
             </IconButton>
             <IconButton
               size='small'
-              title='Delete User'
-              aria-label='Delete User'
+              title='Delete Task'
+              aria-label='Delete Task'
               color='error'
               onClick={() => {
-                setCurrentServer(params.row)
+                setCurrentTask(row)
                 setDeleteDialog(true)
               }}
             >
@@ -402,7 +411,7 @@ const TasksList = props => {
   }
 
   const handleDisableDialogClose = () => {
-    setDeactivateDialog(false)
+    setDisableDialog(false)
   }
 
   const handleDeleteDialogClose = () => {
@@ -423,7 +432,7 @@ const TasksList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentServer?.hostname?.toUpperCase() ?? ''}
+              {currentTask?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -435,7 +444,7 @@ const TasksList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentServer?.id ?? ''}
+              {currentTask?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -449,13 +458,13 @@ const TasksList = props => {
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Server Information
+              Edit Task Information
             </Typography>
-            <Typography variant='body2'>Updates to server information will be effective immediately.</Typography>
+            <Typography variant='body2'>Updates to task information will be effective immediately.</Typography>
           </Box>
-          {currentServer && (
+          {currentTask && (
             <UpdateServerWizard
-              currentServer={currentServer}
+              currentTask={currentTask}
               rows={rows}
               setRows={setRows}
               onClose={handleUpdateDialogClose}
@@ -480,7 +489,7 @@ const TasksList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentServer?.hostname?.toUpperCase() ?? ''}
+              {currentTask?.name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -492,7 +501,7 @@ const TasksList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentServer?.id ?? ''}
+              {currentTask?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -511,7 +520,7 @@ const TasksList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this server.
+                  Please confirm that you want to delete this task.
                 </Typography>
               </Box>
             </Stack>
@@ -529,6 +538,125 @@ const TasksList = props => {
     )
   }
 
+  const DisableDialog = () => {
+    // Determine if the task is currently enabled
+    const isTaskEnabled = currentTask?.status?.toLowerCase() === 'enabled'
+
+    // Determine the dialog title text based on the task status
+    const dialogTitleText = isTaskEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
+
+    // Determine the action button text based on the task status
+    const actionButtonText = isTaskEnabled ? 'Disable' : 'Enable'
+
+    return (
+      <Dialog
+        fullWidth
+        maxWidth='md'
+        scroll='body'
+        open={disableDialog}
+        onClose={handleDisableDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby='form-dialog-title'
+      >
+        <DialogTitle id='form-dialog-title'>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {currentTask?.name?.toUpperCase() ?? ''}
+            </Typography>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {currentTask?.id ?? ''}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleDisableDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+              </Box>
+              <Box>
+                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                  {dialogTitleText}
+                  {currentTask?.name}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDisableDialogSubmit} color='primary'>
+            {actionButtonText}
+          </Button>
+          <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const handleDisableDialogSubmit = async () => {
+    const isCurrentlyEnabled = currentTask?.status === 'enabled'
+    const newStatus = isCurrentlyEnabled ? 'disabled' : 'enabled'
+
+    const payload = {
+      id: currentTask?.id,
+      status: newStatus
+    }
+
+    try {
+      // Replace this URL with your actual endpoint URL
+      const url = `/api/tasks/${payload.id}/status`
+      const apiToken = session?.data?.user?.apiToken
+
+      const response = await axios.patch(
+        url,
+        { status: payload.status },
+        {
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (response.status === 200) {
+        // Assuming 200 is your success status code
+        // Update UI to reflect the task's new status
+        const updatedRows = rows.map(row => (row.id === payload.id ? { ...row, status: payload.status } : row))
+        setRows(updatedRows)
+
+        // Show success message
+        toast.success(`Task ${isCurrentlyEnabled ? 'Disabled' : 'Enabled'}`)
+      } else {
+        // Handle unsuccessful update
+        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+      }
+    } catch (error) {
+      console.error('Failed to update Task status', error)
+      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+    }
+
+    // Close the dialog
+    setDisableDialog(false)
+  }
+
   const handleDeleteDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.user?.apiToken
@@ -538,11 +666,11 @@ const TasksList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const endpoint = `/api/inventory/servers/${currentServer.id}`
+      const endpoint = `/api/tasks/${currentTask.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentServer.id)
+        const updatedRows = rows.filter(row => row.id !== currentTask.id)
 
         setRows(updatedRows)
         setDeleteDialog(false)
@@ -551,11 +679,11 @@ const TasksList = props => {
 
         setRefetchTrigger(Date.now())
 
-        toast.success('Successfully deleted Server')
+        toast.success('Successfully deleted Task')
       }
     } catch (error) {
-      console.error('Failed to delete Server', error)
-      toast.error('Failed to delete Server')
+      console.error('Failed to delete Task', error)
+      toast.error('Failed to delete Task')
     }
   }
 
@@ -690,6 +818,7 @@ const TasksList = props => {
             }
           }}
         />
+        <DisableDialog />
         <EditDialog />
         <DeleteDialog />
       </Card>

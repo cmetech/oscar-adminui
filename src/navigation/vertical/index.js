@@ -65,23 +65,9 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Runbooks',
-      path: '/runbooks',
+      title: 'Tasks',
+      path: '/tasks',
       icon: 'mdi:arrow-decision-auto',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Workflows',
-      path: '/workflows',
-      icon: 'mdi:sitemap',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Canaries (Synthetic)',
-      path: '/workflows',
-      icon: 'mdi:api',
       action: 'read',
       subject: 'all'
     },

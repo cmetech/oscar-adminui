@@ -613,25 +613,27 @@ const TasksList = props => {
 
   const handleDisableDialogSubmit = async () => {
     const isCurrentlyEnabled = currentTask?.status === 'enabled'
-    const newStatus = isCurrentlyEnabled ? 'disabled' : 'enabled'
+    const taskId = currentTask?.id
 
-    const payload = {
-      id: currentTask?.id,
-      status: newStatus
+    if (!taskId) {
+      console.error('Task ID is undefined')
+      toast.error('Task ID is undefined or invalid')
+
+      return
     }
 
-    try {
-      // Replace this URL with your actual endpoint URL
-      const url = `/api/tasks/${payload.id}/status`
-      const apiToken = session?.data?.user?.apiToken
+    const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
 
-      const response = await axios.patch(
-        url,
-        { status: payload.status },
+    // Determine the correct endpoint URL based on the task's current status
+    const endpoint = isCurrentlyEnabled ? `/api/tasks/disable/${taskId}` : `/api/tasks/enable/${taskId}`
+
+    try {
+      const response = await axios.post(
+        endpoint,
+        {}, // No body is required for these requests
         {
           headers: {
-            Authorization: `Bearer ${apiToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${apiToken}`
           }
         }
       )
@@ -639,17 +641,18 @@ const TasksList = props => {
       if (response.status === 200) {
         // Assuming 200 is your success status code
         // Update UI to reflect the task's new status
-        const updatedRows = rows.map(row => (row.id === payload.id ? { ...row, status: payload.status } : row))
+        const newStatus = isCurrentlyEnabled ? 'disabled' : 'enabled'
+        const updatedRows = rows.map(row => (row.id === taskId ? { ...row, status: newStatus } : row))
         setRows(updatedRows)
 
         // Show success message
-        toast.success(`Task ${isCurrentlyEnabled ? 'Disabled' : 'Enabled'}`)
+        toast.success(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
       } else {
         // Handle unsuccessful update
         toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
       }
     } catch (error) {
-      console.error('Failed to update Task status', error)
+      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`, error)
       toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
     }
 
@@ -666,7 +669,11 @@ const TasksList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const endpoint = `/api/tasks/${currentTask.id}`
+      // console.log('Deleting Task:', currentTask)
+
+      const endpoint = `/api/tasks/delete/${currentTask.id}`
+
+      console.log('DELETE Endpoint:', endpoint)
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {

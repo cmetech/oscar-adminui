@@ -743,15 +743,26 @@ const TasksManager = () => {
       const response = await axios.post('/api/tasks/disable', selectedTaskIds)
       const { Message, TaskIds } = response.data
 
-      // Iterate over TaskIds and display success message for each
-      TaskIds.forEach(taskId => {
-        toast.success(`${Message}: ${taskId}`)
-      })
+      if (response.status === 200) {
+        // Iterate over TaskIds and display success message for each
+        TaskIds.forEach(taskId => {
+          toast.success(`${Message}: ${taskId}`)
+        })
 
-      // Trigger re-fetch of the grid data
-      setRefetchTrigger(Date.now())
+        // Trigger re-fetch of the grid data
+        setRefetchTrigger(Date.now())
+
+        // Close the disable modal dialog
+        setIsDisableModalOpen(false) // Add this line to close the dialog
+        setSelectedTaskIds([]) // Clear the selected task IDs
+      } else {
+        toast.error('Error disabling tasks')
+      }
     } catch (error) {
       toast.error(`Error disabling tasks: ${error.response?.data?.message || error.message}`)
+
+      // Close the disable modal dialog
+      setIsDisableModalOpen(false) // Add this line to close the dialog
     }
   }
 
@@ -760,17 +771,28 @@ const TasksManager = () => {
 
     try {
       const response = await axios.post('/api/tasks/enable', selectedTaskIds)
-      const { Message, TaskIds } = response.data
 
-      // Iterate over TaskIds and display success message for each
-      TaskIds.forEach(taskId => {
-        toast.success(`${Message}: ${taskId}`)
-      })
+      if (response.status === 200) {
+        const { Message, TaskIds } = response.data
 
-      // Trigger re-fetch of the grid data
-      setRefetchTrigger(Date.now())
+        // Iterate over TaskIds and display success message for each
+        TaskIds.forEach(taskId => {
+          toast.success(`${Message}: ${taskId}`)
+        })
+
+        // Trigger re-fetch of the grid data
+        setRefetchTrigger(Date.now())
+
+        // Close the enable modal dialog
+        setIsEnableModalOpen(false) // Add this line to close the dialog
+        setSelectedTaskIds([]) // Clear the selected task IDs
+      } else {
+        toast.error('Error enabling tasks')
+      }
     } catch (error) {
       toast.error(`Error enabling tasks: ${error.response?.data?.message || error.message}`)
+
+      setIsEnableModalOpen(false)
     }
   }
 

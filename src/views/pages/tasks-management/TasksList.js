@@ -694,6 +694,12 @@ const TasksList = props => {
     }
   }
 
+  // Use an effect to synchronize the DataGrid's selection model with tasksIds
+  useEffect(() => {
+    // This updates the DataGrid's selection model whenever tasksIds changes
+    setRowSelectionModel(tasksIds)
+  }, [tasksIds])
+
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
   }, [rowCount, setRowCountState])

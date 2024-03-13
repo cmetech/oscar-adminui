@@ -67,7 +67,7 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
-import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 import { setRef } from '@mui/material'
 
 function loadServerRows(page, pageSize, data) {
@@ -119,9 +119,9 @@ const TasksList = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
-  const [serverIds, setServerIds] = useAtom(serverIdsAtom)
-  const [servers, setServers] = useAtom(serverIdsAtom)
-  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [tasksIds, setTaskIds] = useAtom(taskIdsAtom)
+  const [tasks, setTasks] = useAtom(tasksAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -715,14 +715,14 @@ const TasksList = props => {
           setRowCount(res.data.total)
           data = res.data.rows
           props.set_total(res.data.total)
-          setServers(data)
+          setTasks(data)
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setServers]
+    [paginationModel.page, paginationModel.pageSize, setTasks]
   )
 
   useEffect(() => {
@@ -763,7 +763,7 @@ const TasksList = props => {
     setRowSelectionModel(newRowSelectionModel)
 
     // Update the Jotai atom with the new selection model
-    setServerIds(newRowSelectionModel)
+    setTaskIds(newRowSelectionModel)
   }
 
   return (

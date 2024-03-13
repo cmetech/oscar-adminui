@@ -3,7 +3,7 @@ import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'r
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { serverIdsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -96,7 +96,7 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
 
@@ -140,7 +140,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
   }
 
   // Define tabs where the Delete menu item should be shown
-  const deletableTabs = ['1', '2']
+  const deletableTabs = ['1']
 
   return (
     <Fragment>
@@ -166,6 +166,34 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
               {t('Delete')} {t(getDynamicTitle(tabValue))}
+            </Box>
+          </MenuItem>
+        )}
+        {deletableTabs.includes(tabValue) && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onEnable()
+              handleDropdownClose()
+            }}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:plus-box' />
+              {t('Enable')} {t(getDynamicTitle(tabValue))}
+            </Box>
+          </MenuItem>
+        )}
+        {deletableTabs.includes(tabValue) && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onDisable()
+              handleDropdownClose()
+            }}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:minus-box' />
+              {t('Disable')} {t(getDynamicTitle(tabValue))}
             </Box>
           </MenuItem>
         )}
@@ -237,6 +265,95 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
           startIcon={<Icon icon='mdi:delete-forever' />}
         >
           {t('Delete')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+// ** Confirmation Modal
+const ConfirmationDisableModal = ({ isOpen, onClose, onConfirm, tab }) => {
+  const { t } = useTranslation()
+
+  // Function to determine the dynamic text based on the selected tab
+  const getDynamicTitle = tabValue => {
+    const mapping = {
+      1: 'tasks',
+      2: 'task history'
+    }
+
+    return mapping[tabValue] || ''
+  }
+
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{t('Confirm Action')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{t('Disable all selected?')}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:minus-box' />}
+        >
+          {t('Disable')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+const ConfirmationEnableModal = ({ isOpen, onClose, onConfirm, tab }) => {
+  const { t } = useTranslation()
+
+  // Function to determine the dynamic text based on the selected tab
+  const getDynamicTitle = tabValue => {
+    const mapping = {
+      1: 'tasks',
+      2: 'task history'
+    }
+
+    return mapping[tabValue] || ''
+  }
+
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{t('Confirm Action')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{t('Enable all selected?')}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          size='large'
+          variant='contained'
+          color='info'
+          autoFocus
+          startIcon={<Icon icon='mdi:plus-box' />}
+        >
+          {t('Enable')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -496,8 +613,10 @@ const TasksManager = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [openUploadDialog, setOpenUploadDialog] = useState(false)
-  const [serverIds] = useAtom(serverIdsAtom)
-  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
+  const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
+  const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -509,6 +628,14 @@ const TasksManager = () => {
 
   const handleUpload = () => {
     setOpenUploadDialog(true)
+  }
+
+  const handleDisable = () => {
+    setIsDisableModalOpen(true)
+  }
+
+  const handleEnable = () => {
+    setIsEnableModalOpen(true)
   }
 
   const handleCloseDeleteModal = () => {
@@ -523,9 +650,17 @@ const TasksManager = () => {
     setOpenUploadDialog(false)
   }
 
+  const handleCloseDisableModal = () => {
+    setIsDisableModalOpen(false)
+  }
+
+  const handleCloseEnableModal = () => {
+    setIsEnableModalOpen(false)
+  }
+
   const handleConfirmDelete = async () => {
     // Implement delete functionality
-    console.log('Deleting serverIds', serverIds)
+    console.log('Deleting tasks', taskIds)
 
     try {
       const response = await axios.put('/api/inventory/servers', {
@@ -535,16 +670,16 @@ const TasksManager = () => {
       // Handle 204 No Content response here
       // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
       if (response.status === 204) {
-        toast.success('Servers deleted successfully')
+        toast.success('Tasks deleted successfully')
         setRefetchTrigger(Date.now())
       } else {
-        toast.error('Error deleting servers')
+        toast.error('Error deleting tasks')
       }
     } catch (error) {
-      console.error('Error deleting servers:', error)
+      console.error('Error deleting tasks:', error)
 
       // Handle errors here, e.g., show an error notification
-      toast.error('Error deleting servers')
+      toast.error('Error deleting tasks')
     }
 
     setIsDeleteModalOpen(false)
@@ -601,6 +736,44 @@ const TasksManager = () => {
     setIsExportModalOpen(false)
   }
 
+  const handleConfirmDisable = async () => {
+    console.log('Disabling tasks', selectedTaskIds)
+
+    try {
+      const response = await axios.post('/api/tasks/disable', selectedTaskIds)
+      const { Message, TaskIds } = response.data
+
+      // Iterate over TaskIds and display success message for each
+      TaskIds.forEach(taskId => {
+        toast.success(`${Message}: ${taskId}`)
+      })
+
+      // Trigger re-fetch of the grid data
+      setRefetchTrigger(Date.now())
+    } catch (error) {
+      toast.error(`Error disabling tasks: ${error.response?.data?.message || error.message}`)
+    }
+  }
+
+  const handleConfirmEnable = async () => {
+    console.log('Enabling tasks', selectedTaskIds)
+
+    try {
+      const response = await axios.post('/api/tasks/enable', selectedTaskIds)
+      const { Message, TaskIds } = response.data
+
+      // Iterate over TaskIds and display success message for each
+      TaskIds.forEach(taskId => {
+        toast.success(`${Message}: ${taskId}`)
+      })
+
+      // Trigger re-fetch of the grid data
+      setRefetchTrigger(Date.now())
+    } catch (error) {
+      toast.error(`Error enabling tasks: ${error.response?.data?.message || error.message}`)
+    }
+  }
+
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
@@ -632,18 +805,22 @@ const TasksManager = () => {
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
           <Typography variant='h4'>{t('Task Management')}</Typography>
           <Box display='flex' alignItems='center'>
-            <Button
-              variant='contained'
-              color='warning'
-              sx={{ marginRight: 1 }}
-              startIcon={<Icon icon='mdi:plus' />}
-              onClick={handleOpenModal}
-            >
-              {getDynamicText(value)}
-            </Button>
+            {value === '1' && (
+              <Button
+                variant='contained'
+                color='warning'
+                sx={{ marginRight: 1 }}
+                startIcon={<Icon icon='mdi:plus' />}
+                onClick={handleOpenModal}
+              >
+                {getDynamicText(value)}
+              </Button>
+            )}
             <MoreActionsDropdown
               onDelete={handleDelete}
               onExport={handleExport}
+              onEnable={handleEnable}
+              onDisable={handleDisable}
               onUpload={handleUpload}
               tabValue={value}
             />
@@ -693,6 +870,20 @@ const TasksManager = () => {
           // Handle success, e.g., showing a success message or refreshing the list
           setOpenUploadDialog(false)
         }}
+        tab={value}
+      />
+
+      <ConfirmationDisableModal
+        isOpen={isDisableModalOpen}
+        onClose={handleCloseDisableModal}
+        onConfirm={handleConfirmDisable}
+        tab={value}
+      />
+
+      <ConfirmationEnableModal
+        isOpen={isEnableModalOpen}
+        onClose={handleCloseEnableModal}
+        onConfirm={handleConfirmEnable}
         tab={value}
       />
     </Grid>

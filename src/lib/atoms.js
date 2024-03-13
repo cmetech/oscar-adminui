@@ -3,11 +3,15 @@ import { atomWithReset } from 'jotai/utils'
 
 export const serverIdsAtom = atom([])
 
+export const taskIdsAtom = atom([])
+
 export const datacentersAtom = atom([])
 
 export const environmentsAtom = atom([])
 
 export const serversAtom = atom([])
+
+export const tasksAtom = atom([])
 
 export const componentsAtom = atom([])
 
@@ -22,3 +26,5 @@ export const refetchServerTriggerAtom = atom(0)
 export const refetchComponentTriggerAtom = atom(0)
 
 export const refetchSubcomponentTriggerAtom = atom(0)
+
+export const refetchTaskTriggerAtom = atom(0)

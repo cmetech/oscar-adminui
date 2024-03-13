@@ -659,27 +659,39 @@ const TasksManager = () => {
   }
 
   const handleConfirmDelete = async () => {
-    // Implement delete functionality
-    console.log('Deleting tasks', taskIds)
+    console.log('Deleting tasks', selectedTaskIds)
+
+    // Generate an array of promises for deleting each task
+    const deletePromises = selectedTaskIds.map(taskId =>
+      axios
+        .delete(`/api/tasks/delete/${taskId}`)
+        .then(() => ({ success: true, taskId }))
+        .catch(error => ({ success: false, taskId, error }))
+    )
 
     try {
-      const response = await axios.put('/api/inventory/servers', {
-        ids: serverIds // Assuming the API expects an object with an ids array
+      // Wait for all delete operations to complete
+      const results = await Promise.all(deletePromises)
+
+      // Handle results
+      results.forEach(result => {
+        if (result.success) {
+          toast.success(`Task ${result.taskId} deleted successfully`)
+        } else {
+          console.error(`Error deleting task ${result.taskId}:`, result.error)
+          toast.error(`Failed to delete task ${result.taskId}`)
+        }
       })
 
-      // Handle 204 No Content response here
-      // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
-      if (response.status === 204) {
-        toast.success('Tasks deleted successfully')
-        setRefetchTrigger(Date.now())
-      } else {
-        toast.error('Error deleting tasks')
-      }
-    } catch (error) {
-      console.error('Error deleting tasks:', error)
+      // Refresh data or update UI as needed
+      setRefetchTrigger(Date.now())
 
-      // Handle errors here, e.g., show an error notification
-      toast.error('Error deleting tasks')
+      // Optionally clear selected taskIds after deletion
+      setSelectedTaskIds([])
+    } catch (error) {
+      // This catch block may not be necessary since individual errors are caught above
+      console.error('Unexpected error during task deletion:', error)
+      toast.error('An unexpected error occurred during task deletion')
     }
 
     setIsDeleteModalOpen(false)

@@ -38,5 +38,20 @@
     "Users": "Users",
     "Confirm Action": "Confirm Action",
     "Delete all selected": "Delete all selected",
-    "Cancel": "Cancel"
+    "Cancel": "Cancel",
+    "Owner": "Owner",
+    "Worker": "Worker",
+    "Received At": "Received At",
+    "Started At": "Started At",
+    "Completed At": "Completed At",
+    "Tasks": "Tasks",
+    "Task History": "Task History",
+    "Delete Tasks": "Delete Tasks",
+    "Enable Tasks": "Enable Tasks",
+    "Disable Tasks": "Disable Tasks",
+    "Task": "Task",
+    "Delete Task": "Delete Task",
+    "Enable Task": "Enable Task",
+    "Disable Task": "Disable Task",
+    "Task Management": "Task Management"
 }

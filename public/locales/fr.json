@@ -37,6 +37,21 @@
     "Is Verified": "Est vérifié",
     "Users": "Utilisateurs",
     "Confirm Action": "Confirmer l'action",
-    "Delete all selected?": "Supprimer tous les éléments sélectionnés ?",
-    "Cancel": "Annuler"
+    "Delete all selected?": "Supprimer tous les éléments sélectionnés?",
+    "Cancel": "Annuler",
+    "Owner": "Propriétaire",
+    "Worker": "Travailleur",
+    "Received At": "Reçu Le",
+    "Started At": "Commencé Le",
+    "Completed At": "Terminé Le",
+    "Tasks": "Tâches",
+    "Task History": "Historique des Tâches",
+    "Delete Tasks": "Supprimer les Tâches",
+    "Enable Tasks": "Activer les Tâches",
+    "Disable Tasks": "Désactiver les Tâches",
+    "Task": "Tâche",
+    "Delete Task": "Supprimer la Tâche",
+    "Enable Task": "Activer la Tâche",
+    "Disable Task": "Désactiver la Tâche",
+    "Task Management": "Gestion des Tâches"
 }

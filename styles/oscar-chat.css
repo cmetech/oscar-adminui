@@ -1,0 +1,102 @@
+/* If you want padding around the messages only */
+div .cs-message-list {
+  padding: 8px; /* Adjust the padding value as needed */
+}
+
+:root {
+  /* Light theme variables (default) */
+  --typing-indicator-color: #6d4700;
+  --border-color: 0px; /* Assuming you might want to change borders in dark mode */
+  --background-color-main: #e0e0e0;
+  --background-color-secondary: #ffffff;
+  --outgoing-message-bg-color: #fce282;
+  --typing-indicator-dot-bg-color: #6d4700;
+  --chat-window-border: 1px solid #ffffff; /* New variable for white border */
+  --chat-input-bg-color: #e0e0e0; /* New variable for chat input background */
+  --chat-input-text-color: #000; /* New variable for chat input text color */
+  --chat-window-border-radius: 10px; /* New variable for border radius */
+}
+
+[data-theme='dark'] {
+  /* Dark theme variables (default) */
+  --typing-indicator-color: #6d4700;
+  --border-color: 0px; /* Assuming you might want to change borders in dark mode */
+  --background-color-main: #fafafa;
+  --background-color-secondary: #252525;
+  --outgoing-message-bg-color: #fce282;
+  --typing-indicator-dot-bg-color: #6d4700;
+  --chat-window-border: 1px solid #767676; /* White border for dark theme as well */
+  --chat-input-bg-color: #e0e0e0; /* Dark theme chat input background */
+  --chat-input-text-color: #0c0c0c; /* Dark theme chat input text color */
+  --chat-window-border-radius: 10px; /* New variable for border radius */
+}
+
+/* Styles using CSS variables */
+div .cs-message-list__typing-indicator-container div {
+  color: var(--typing-indicator-color);
+}
+
+/* If you want padding around the entire inside of the chat container */
+div .cs-chat-container {
+  padding: 3px; /* Adjust the padding value as needed */
+}
+
+div .cs-main-container,
+div .cs-chat-container .cs-message-input {
+  border: var(--border-color);
+}
+
+/* Add border to chat window */
+div .cs-main-container,
+div .cs-chat-container {
+  border: var(--chat-window-border);
+  border-radius: var(--chat-window-border-radius); /* Apply rounded corners */
+}
+
+div .cs-message--incoming .cs-message__content,
+div .cs-chat-container .cs-message-input,
+div .ps__thumb-y,
+div .ps__rail-y:hover .ps__thumb-y,
+div .ps__rail-y:active .ps__thumb-y {
+  background-color: var(--background-color-main);
+}
+
+/* Separate background for chat input */
+div .cs-chat-container .cs-message-input {
+  background-color: var(--chat-input-bg-color);
+}
+
+/* Changing text color in the chat input area */
+div .cs-message-input__content-editor,
+div .cs-message-input__content-editor-wrapper {
+  color: var(--chat-input-text-color); /* Control text color */
+  background-color: var(--chat-input-bg-color); /* Ensure background is consistent */
+}
+
+div .cs-message-list,
+div .ps__rail-y:hover,
+div .ps .ps__rail-y:hover,
+div .ps__rail-y {
+  background-color: var(--background-color-secondary);
+}
+
+div .cs-message--outgoing .cs-message__content {
+  background-color: var(--outgoing-message-bg-color);
+}
+
+div .cs-typing-indicator__dot {
+  background-color: var(--typing-indicator-dot-bg-color);
+}
+
+/* Target the custom class for the message input */
+div .custom-message-input .cs-message-input__content-editor,
+div .custom-message-input .cs-message-input__content-editor-wrapper {
+  color: var(--chat-input-text-color); /* Dynamic text color based on theme */
+  background-color: var(--chat-input-bg-color); /* Dynamic background color */
+}
+
+/* Targeting the ::before pseudo-element for custom styling */
+div .custom-message-input .cs-message-input__content-editor::before {
+  color: var(--chat-input-text-color); /* Placeholder text color */
+  /* Add more styles as needed (e.g., margin, display, etc.) to match your design */
+}

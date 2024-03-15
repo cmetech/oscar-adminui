@@ -1,9 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput } from '@chatscope/chat-ui-kit-react'
 import axios from 'axios'
+import { styled, useTheme } from '@mui/material/styles'
 
 function ChatBot() {
   const [messages, setMessages] = useState([])
+
+  const theme = useTheme()
+
+  useEffect(() => {
+    // Toggle the data-theme attribute based on the MUI theme mode
+    document.documentElement.setAttribute('data-theme', theme.palette.mode)
+  }, [theme.palette.mode])
 
   const sendMessage = async text => {
     const messageId = Math.random().toString(36).substring(7) // Simple random ID generator
@@ -21,7 +29,7 @@ function ChatBot() {
   }
 
   return (
-    <div style={{ position: 'relative', height: '1000px' }}>
+    <div style={{ position: 'relative', height: '800px' }}>
       <MainContainer>
         <ChatContainer>
           <MessageList>
@@ -35,7 +43,13 @@ function ChatBot() {
               />
             ))}
           </MessageList>
-          <MessageInput placeholder='Type message here' onSend={sendMessage} />
+          <MessageInput
+            attachButton={false}
+            autoFocus
+            placeholder='Type message here'
+            onSend={sendMessage}
+            className='custom-message-input'
+          />
         </ChatContainer>
       </MainContainer>
     </div>

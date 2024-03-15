@@ -59,6 +59,7 @@ import 'src/iconify-bundle/icons-bundle-react'
 
 // ** Chat UI Kit Styles
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css'
+import '../../styles/oscar-chat.css'
 
 // ** Global css styles
 import '../../styles/globals.css'

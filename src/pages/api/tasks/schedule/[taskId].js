@@ -9,7 +9,7 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const response = await axios.post(
-        `${oscarConfig.MIDDLEWARE_API_URL}/tasks/run/${taskId}`,
+        `${oscarConfig.MIDDLEWARE_API_URL}/tasks/schedule/id/${taskId}`,
         {}, // Assuming the POST body is empty, adjust if necessary
         {
           headers: {

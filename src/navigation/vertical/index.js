@@ -98,7 +98,7 @@ const navigation = () => {
     {
       title: 'Oscar Chat',
       icon: 'mdi:frequently-asked-questions',
-      path: '#',
+      path: '/oscar',
       action: 'read',
       subject: 'all'
     }

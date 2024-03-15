@@ -68,7 +68,6 @@ import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
 import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import { setRef } from '@mui/material'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -127,6 +126,8 @@ const TasksList = props => {
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [disableDialog, setDisableDialog] = useState(false)
+  const [scheduleDialog, setScheduleDialog] = useState(false)
+  const [runDialog, setRunDialog] = useState(false)
   const [currentTask, setCurrentTask] = useState(null)
 
   const editmode = false
@@ -367,6 +368,30 @@ const TasksList = props => {
           <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
             <IconButton
               size='small'
+              title='Schedule Task'
+              aria-label='Schedule Task'
+              color='info'
+              onClick={() => {
+                setCurrentTask(row)
+                setScheduleDialog(true)
+              }}
+            >
+              <Icon icon='mdi:clock-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Run Task'
+              aria-label='Run Task'
+              color='warning'
+              onClick={() => {
+                setCurrentTask(row)
+                setRunDialog(true)
+              }}
+            >
+              <Icon icon='mdi:play-circle-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
               title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
               aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
               color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
@@ -380,6 +405,7 @@ const TasksList = props => {
             <IconButton
               size='small'
               title='Edit Task'
+              color='secondary'
               aria-label='Edit Task'
               onClick={() => {
                 setCurrentTask(row)
@@ -416,6 +442,14 @@ const TasksList = props => {
 
   const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
+  }
+
+  const handleScheduleDialogClose = () => {
+    setScheduleDialog(false)
+  }
+
+  const handleRunDialogClose = () => {
+    setRunDialog(false)
   }
 
   const EditDialog = () => {
@@ -609,6 +643,222 @@ const TasksList = props => {
         </DialogActions>
       </Dialog>
     )
+  }
+
+  const ScheduleDialog = () => {
+    return (
+      <Dialog
+        fullWidth
+        maxWidth='md'
+        scroll='body'
+        open={scheduleDialog}
+        onClose={handleScheduleDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby='form-dialog-title'
+      >
+        <DialogTitle id='form-dialog-title'>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {currentTask?.name?.toUpperCase() ?? ''}
+            </Typography>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {currentTask?.id ?? ''}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleScheduleDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+              </Box>
+              <Box>
+                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                  Please confirm that you want to schedule this task.
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleScheduleDialogSubmit} color='primary'>
+            Schedule
+          </Button>
+          <Button variant='outlined' onClick={handleScheduleDialogClose} color='secondary'>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const RunDialog = () => {
+    return (
+      <Dialog
+        fullWidth
+        maxWidth='md'
+        scroll='body'
+        open={runDialog}
+        onClose={handleRunDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby='form-dialog-title'
+      >
+        <DialogTitle id='form-dialog-title'>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {currentTask?.name?.toUpperCase() ?? ''}
+            </Typography>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {currentTask?.id ?? ''}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleRunDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+              </Box>
+              <Box>
+                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                  Please confirm that you want to run this task.
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
+            Run
+          </Button>
+          <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const handleScheduleDialogSubmit = async () => {
+    const taskId = currentTask?.id
+
+    if (!taskId) {
+      console.error('Task ID is undefined')
+      toast.error('Task ID is undefined or invalid')
+
+      return
+    }
+
+    const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
+
+    const headers = {
+      Accept: 'application/json',
+      Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+    }
+
+    // Determine the correct endpoint URL based on the task's current status
+    const endpoint = `/api/tasks/schedule/${taskId}`
+
+    try {
+      const response = await axios.post(
+        endpoint,
+        {}, // No body is required for these requests
+        {
+          headers
+        }
+      )
+
+      if (response.status === 200) {
+        // Show success message
+        toast.success(`Task Successfully Scheduled`)
+      } else {
+        // Handle unsuccessful update
+        toast.error(`Failed to Schedule Task`)
+      }
+    } catch (error) {
+      console.error(`Failed to Schedule Task`, error)
+      toast.error(`Failed to Schedule Task`)
+    }
+
+    // Close the dialog
+    setScheduleDialog(false)
+  }
+
+  const handleRunDialogSubmit = async () => {
+    const taskId = currentTask?.id
+
+    if (!taskId) {
+      console.error('Task ID is undefined')
+      toast.error('Task ID is undefined or invalid')
+
+      return
+    }
+
+    const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
+
+    const headers = {
+      Accept: 'application/json',
+      Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+    }
+
+    // Determine the correct endpoint URL based on the task's current status
+    const endpoint = `/api/tasks/run/${taskId}`
+
+    try {
+      const response = await axios.post(
+        endpoint,
+        {}, // No body is required for these requests
+        {
+          headers
+        }
+      )
+
+      if (response.status === 200) {
+        // Show success message
+        toast.success(`Task Successfully Run`)
+      } else {
+        // Handle unsuccessful update
+        toast.error(`Failed to Run Task`)
+      }
+    } catch (error) {
+      console.error(`Failed to Run Task`, error)
+      toast.error(`Failed to Run Task`)
+    }
+
+    // Close the dialog
+    setRunDialog(false)
   }
 
   const handleDisableDialogSubmit = async () => {
@@ -831,6 +1081,8 @@ const TasksList = props => {
             }
           }}
         />
+        <ScheduleDialog />
+        <RunDialog />
         <DisableDialog />
         <EditDialog />
         <DeleteDialog />

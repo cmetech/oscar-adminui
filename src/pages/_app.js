@@ -57,6 +57,9 @@ import 'prismjs/components/prism-tsx'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import 'src/iconify-bundle/icons-bundle-react'
 
+// ** Chat UI Kit Styles
+import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css'
+
 // ** Global css styles
 import '../../styles/globals.css'
 
@@ -127,7 +130,10 @@ const App = props => {
                       </AclGuard>
                     </Guard>
                     <ReactHotToast>
-                      <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+                      <Toaster
+                        position={settings.toastPosition}
+                        toastOptions={{ className: 'react-hot-toast', duration: 4000 }}
+                      />
                     </ReactHotToast>
                   </ThemeComponent>
                 )

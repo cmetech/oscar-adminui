@@ -5,12 +5,12 @@ div .cs-message-list {
 
 :root {
   /* Light theme variables (default) */
-  --typing-indicator-color: #6d4700;
+  --typing-indicator-color: #0d0d0d;
   --border-color: 0px; /* Assuming you might want to change borders in dark mode */
   --background-color-main: #e0e0e0;
   --background-color-secondary: #ffffff;
   --outgoing-message-bg-color: #fce282;
-  --typing-indicator-dot-bg-color: #6d4700;
+  --typing-indicator-dot-bg-color: #0d0d0d;
   --chat-window-border: 1px solid #ffffff; /* New variable for white border */
   --chat-input-bg-color: #e0e0e0; /* New variable for chat input background */
   --chat-input-text-color: #000; /* New variable for chat input text color */
@@ -19,12 +19,12 @@ div .cs-message-list {
 
 [data-theme='dark'] {
   /* Dark theme variables (default) */
-  --typing-indicator-color: #6d4700;
+  --typing-indicator-color: #fff;
   --border-color: 0px; /* Assuming you might want to change borders in dark mode */
   --background-color-main: #fafafa;
   --background-color-secondary: #0d0d0d;
   --outgoing-message-bg-color: #fce282;
-  --typing-indicator-dot-bg-color: #6d4700;
+  --typing-indicator-dot-bg-color: #fff;
   --chat-window-border: 1px solid #0c0c0c; /* White border for dark theme as well */
   --chat-input-bg-color: #e0e0e0; /* Dark theme chat input background */
   --chat-input-text-color: #0c0c0c; /* Dark theme chat input text color */
@@ -99,4 +99,21 @@ div .custom-message-input .cs-message-input__content-editor-wrapper {
 div .custom-message-input .cs-message-input__content-editor::before {
   color: var(--chat-input-text-color); /* Placeholder text color */
   /* Add more styles as needed (e.g., margin, display, etc.) to match your design */
+}
+
+/* Target individual messages within the message list for spacing */
+div .cs-message__content-wrapper > div {
+  margin-bottom: 16px; /* Adjust the space between messages */
+}
+
+/* If you manage to assign a class directly or want to ensure styles are applied specifically */
+.cs-message-list__typing-indicator-container .custom-typing-indicator {
+  color: var(--typing-indicator-color);
+  background-color: var(--background-color-secondary);
+  /* Additional specific styles here */
+}
+
+/* Targeting the text within the typing indicator, if needed */
+.cs-message-list__typing-indicator-container .custom-typing-indicator .cs-typing-indicator__content {
+  color: var(--typing-indicator-color); /* Ensuring the text color is applied */
 }

@@ -22,10 +22,10 @@ div .cs-message-list {
   --typing-indicator-color: #6d4700;
   --border-color: 0px; /* Assuming you might want to change borders in dark mode */
   --background-color-main: #fafafa;
-  --background-color-secondary: #252525;
+  --background-color-secondary: #0d0d0d;
   --outgoing-message-bg-color: #fce282;
   --typing-indicator-dot-bg-color: #6d4700;
-  --chat-window-border: 1px solid #767676; /* White border for dark theme as well */
+  --chat-window-border: 1px solid #0c0c0c; /* White border for dark theme as well */
   --chat-input-bg-color: #e0e0e0; /* Dark theme chat input background */
   --chat-input-text-color: #0c0c0c; /* Dark theme chat input text color */
   --chat-window-border-radius: 10px; /* New variable for border radius */

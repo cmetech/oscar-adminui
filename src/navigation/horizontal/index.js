@@ -89,18 +89,6 @@ const navigation = () => {
       path: '/administration/inventory',
       action: 'manage',
       subject: 'settings-nav'
-    },
-    {
-      sectionTitle: 'Ask Oscar',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Oscar Chat',
-      icon: 'mdi:frequently-asked-questions',
-      path: '#',
-      action: 'read',
-      subject: 'all'
     }
   ]
 }

@@ -74,27 +74,14 @@ const MenuFooter = () => {
         borderTop: theme => `1px solid ${theme.palette.divider}`
       }}
     >
-      {disablePopper ? null : (
-        <Popper open={open} anchorEl={anchorEl} placement={placement} transition>
-          {({ TransitionProps }) => (
-            <Fade {...TransitionProps} timeout={350}>
-              {navCollapsed ? (
-                <Paper sx={{ marginLeft: 3 }}>
-                  <Typography sx={{ p: 2 }}>The content of the Popper.</Typography>
-                </Paper>
-              ) : (
-                <Paper sx={{ marginLeft: 15 }}>
-                  <Typography sx={{ p: 2 }}>The content of the Popper.</Typography>
-                </Paper>
-              )}
-            </Fade>
-          )}
-        </Popper>
-      )}
       {navCollapsed ? (
-        <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' onClick={handleClick('right-end')} />
+        <Link href='/oscar'>
+          <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' style={{ cursor: 'pointer' }} />
+        </Link>
       ) : (
-        <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' onClick={handleClick('right-end')} />
+        <Link href='/oscar'>
+          <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' style={{ cursor: 'pointer' }} />
+        </Link>
       )}
     </Box>
   )

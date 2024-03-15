@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { MainContainer, ChatContainer, MessageList, Message, MessageInput } from '@chatscope/chat-ui-kit-react'
+import {
+  MainContainer,
+  ChatContainer,
+  MessageList,
+  Message,
+  MessageInput,
+  ConversationHeader,
+  Avatar
+} from '@chatscope/chat-ui-kit-react'
 import axios from 'axios'
 import { styled, useTheme } from '@mui/material/styles'
 
@@ -29,9 +37,13 @@ function ChatBot() {
   }
 
   return (
-    <div style={{ position: 'relative', height: '800px' }}>
+    <div style={{ position: 'relative', height: '1000px' }}>
       <MainContainer>
         <ChatContainer>
+          <ConversationHeader>
+            <Avatar src='/images/oscar.png' name='Oscar' />
+            <ConversationHeader.Content userName='OSCAR' info='ChatBot' />
+          </ConversationHeader>
           <MessageList>
             {messages.map(msg => (
               <Message
@@ -46,7 +58,7 @@ function ChatBot() {
           <MessageInput
             attachButton={false}
             autoFocus
-            placeholder='Type message here'
+            placeholder='Message OSCAR...'
             onSend={sendMessage}
             className='custom-message-input'
           />

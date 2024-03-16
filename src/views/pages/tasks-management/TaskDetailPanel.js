@@ -106,7 +106,7 @@ const TaskDetailPanel = ({ row }) => {
     prompts: { page: 0, pageSize: 5 }
   })
 
-  console.log('row', row)
+  // console.log('row', row)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)

@@ -53,5 +53,10 @@
     "Delete Task": "Delete Task",
     "Enable Task": "Enable Task",
     "Disable Task": "Disable Task",
-    "Task Management": "Task Management"
+    "Task Management": "Task Management",
+    "oscarThinking": "OSCAR is thinking...",
+    "userIsTyping": "{{userName}} is typing...",
+    "bothTyping": "OSCAR is thinking, {{userName}} is typing...",
+    "Message OSCAR": "Message OSCAR",
+    "clearChat": "Clear Chat"
 }

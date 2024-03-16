@@ -16,17 +16,20 @@ import { styled, useTheme } from '@mui/material/styles'
 import { useSession } from 'next-auth/react'
 import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
-import { set } from 'nprogress'
+import { useTranslation } from 'react-i18next'
+
+// ** Utils Import
+import { getInitials } from 'src/@core/utils/get-initials'
 
 const CustomTypingIndicator = ({ userIsTyping, oscarIsTyping, userName }) => {
+  const { t } = useTranslation()
+
   if (userIsTyping && oscarIsTyping) {
-    return (
-      <TypingIndicator content={`OSCAR is thinking, ${userName} is typing...`} className='custom-typing-indicator' />
-    )
+    return <TypingIndicator content={t('bothTyping', { userName })} className='custom-typing-indicator' />
   } else if (userIsTyping) {
-    return <TypingIndicator content={`${userName} is typing...`} className='custom-typing-indicator' />
+    return <TypingIndicator content={t('userIsTyping', { userName })} className='custom-typing-indicator' />
   } else if (oscarIsTyping) {
-    return <TypingIndicator content='OSCAR is thinking...' className='custom-typing-indicator' />
+    return <TypingIndicator content={t('oscarThinking')} className='custom-typing-indicator' />
   }
 
   return null
@@ -36,6 +39,8 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState(false)
   const [oscarIsTyping, setOscarIsTyping] = useState(false)
+
+  const { t } = useTranslation()
 
   // Add a ref to track whether the initial OSCAR message has been sent
   const initialMessageSentRef = useRef(false)
@@ -150,7 +155,7 @@ const ChatBot = () => {
             <Avatar src='/images/oscar.png' name='Oscar' status='available' />
             <ConversationHeader.Content userName='OSCAR' info='Ericsson Powered ChatBot' />
             <ConversationHeader.Actions>
-              <IconButton onClick={clearChat} title='Clear chat' color='error' size='medium'>
+              <IconButton onClick={clearChat} title={t('clearChat')} color='error' size='medium'>
                 <Icon icon='mdi:trash-can' />
               </IconButton>
             </ConversationHeader.Actions>
@@ -171,18 +176,25 @@ const ChatBot = () => {
                 }}
                 avatarPosition={msg.direction === 'incoming' ? 'cl' : 'cr'}
               >
-                <Avatar
-                  src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/${imageFileName}.png`}
-                  name={msg.direction === 'incoming' ? 'Oscar' : 'You'}
-                  status={msg.direction === 'incoming' ? 'available' : 'available'}
-                />
+                {msg.direction === 'incoming' || imageFileName !== '1' ? (
+                  <Avatar
+                    src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/${imageFileName}.png`}
+                    name={msg.direction === 'incoming' ? 'Oscar' : 'You'}
+                    status={msg.direction === 'incoming' ? 'available' : 'available'}
+                  />
+                ) : (
+                  <Avatar
+                    src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/1.png`} // This will show initials if `src` is not provided or image fails to load
+                    status={msg.direction === 'incoming' ? 'available' : 'available'}
+                  />
+                )}
               </Message>
             ))}
           </MessageList>
           <MessageInput
             attachButton={false}
             autoFocus
-            placeholder='Message OSCAR...'
+            placeholder={t('Message OSCAR')}
             onSend={sendMessage}
             className='custom-message-input'
             onChange={handleInputChange}

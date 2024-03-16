@@ -53,5 +53,10 @@
     "Delete Task": "Eliminar Tarea",
     "Enable Task": "Habilitar Tarea",
     "Disable Task": "Deshabilitar Tarea",
-    "Task Management": "Gestión de Tareas"
+    "Task Management": "Gestión de Tareas",
+    "oscarThinking": "OSCAR está pensando...",
+    "userIsTyping": "{{userName}} está escribiendo...",
+    "bothTyping": "OSCAR está pensando, {{userName}} está escribiendo...",
+    "Message OSCAR": "Mensaje OSCAR",
+    "clearChat": "Effacer le chat"
 }

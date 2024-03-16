@@ -91,7 +91,8 @@ const TaskDetailPanel = ({ row }) => {
     args: { items: [] },
     kwargs: { items: [] },
     metadata: { items: [] },
-    hosts: { items: [] }
+    hosts: { items: [] },
+    prompts: { items: [] }
   })
 
   const { t } = useTranslation()
@@ -101,8 +102,11 @@ const TaskDetailPanel = ({ row }) => {
     args: { page: 0, pageSize: 5 },
     kwargs: { page: 0, pageSize: 5 },
     metadata: { page: 0, pageSize: 5 },
-    hosts: { page: 0, pageSize: 5 }
+    hosts: { page: 0, pageSize: 5 },
+    prompts: { page: 0, pageSize: 5 }
   })
+
+  console.log('row', row)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -152,6 +156,13 @@ const TaskDetailPanel = ({ row }) => {
     host
   }))
 
+  // Preparing prompts for display
+  const promptsRows = row.prompts.map((prompt, index) => ({
+    id: index,
+    prompt: prompt.prompt, // Assuming 'prompt' is the field name in your data
+    default_value: prompt.default_value
+  }))
+
   // Common column definitions for args, kwargs, metadata, and hosts
   const commonColumns = [
     { field: 'key', headerName: t('Key'), flex: 1, minWidth: 150 },
@@ -175,6 +186,7 @@ const TaskDetailPanel = ({ row }) => {
             <Tab label={t('Metadata')} value='3' />
             <Tab label={t('Hosts')} value='4' />
             {row.schedule && <Tab label={t('Schedule')} value='schedule' />} {/* Conditionally add "Schedule" tab */}
+            {row.prompts && <Tab label={t('Prompts')} value='prompts' />} {/* Conditionally add "Prompts" tab */}
           </TabList>
         </Box>
         <TabPanel value='1'>
@@ -289,6 +301,36 @@ const TaskDetailPanel = ({ row }) => {
             {scheduleDetails.map(({ key, value }) => (
               <Typography key={key} variant='body1'>{`${key}: ${value}`}</Typography>
             ))}
+          </TabPanel>
+        )}
+        {row.prompts && (
+          <TabPanel value='prompts'>
+            <CustomDataGrid
+              rows={promptsRows}
+              columns={[
+                { field: 'prompt', headerName: t('Prompt'), flex: 1, minWidth: 150 },
+                { field: 'default_value', headerName: t('Default Value'), flex: 1, minWidth: 150 }
+              ]}
+              pageSize={paginationModel.prompts.pageSize}
+              page={paginationModel.prompts.page}
+              onPageChange={newPage => handlePaginationChange('prompts', { ...paginationModel.prompts, page: newPage })}
+              onPageSizeChange={newPageSize =>
+                handlePaginationChange('prompts', { ...paginationModel.prompts, pageSize: newPageSize })
+              }
+              filterModel={filterModel.prompts}
+              onFilterModelChange={model => handleFilterModelChange('prompts', model)}
+              rowsPerPageOptions={[5, 10, 25]}
+              autoHeight
+              components={{ Toolbar: CustomTaskToolbar }}
+              componentsProps={{
+                baseButton: {
+                  variant: 'outlined'
+                },
+                toolbar: {
+                  showQuickFilter: true
+                }
+              }}
+            />
           </TabPanel>
         )}
       </TabContext>

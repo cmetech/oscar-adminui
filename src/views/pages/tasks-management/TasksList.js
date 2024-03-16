@@ -66,6 +66,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
+import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
 import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 
@@ -746,18 +747,22 @@ const TasksList = props => {
           >
             <Icon icon='mdi:close' />
           </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to run this task.
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
+          {currentTask?.prompts?.length ? (
+            <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleUpdateDialogClose} />
+          ) : (
+            <Box sx={{ mb: 8, textAlign: 'center' }}>
+              <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+                <Box>
+                  <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                </Box>
+                <Box>
+                  <Typography variant='h5' justifyContent='center' alignContent='center'>
+                    Please confirm that you want to run this task.
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>

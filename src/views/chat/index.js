@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   MainContainer,
   ChatContainer,
@@ -20,11 +20,13 @@ import { set } from 'nprogress'
 
 const CustomTypingIndicator = ({ userIsTyping, oscarIsTyping, userName }) => {
   if (userIsTyping && oscarIsTyping) {
-    return <TypingIndicator content='Both are typing...' className='custom-typing-indicator' />
+    return (
+      <TypingIndicator content={`OSCAR is thinking, ${userName} is typing...`} className='custom-typing-indicator' />
+    )
   } else if (userIsTyping) {
     return <TypingIndicator content={`${userName} is typing...`} className='custom-typing-indicator' />
   } else if (oscarIsTyping) {
-    return <TypingIndicator content='OSCAR is typing...' className='custom-typing-indicator' />
+    return <TypingIndicator content='OSCAR is thinking...' className='custom-typing-indicator' />
   }
 
   return null
@@ -35,11 +37,60 @@ const ChatBot = () => {
   const [isTyping, setIsTyping] = useState(false)
   const [oscarIsTyping, setOscarIsTyping] = useState(false)
 
+  // Add a ref to track whether the initial OSCAR message has been sent
+  const initialMessageSentRef = useRef(false)
+
   const theme = useTheme()
   const { data: session } = useSession()
+
+  console.log('session', session)
+
   const userName = session?.user?.name || 'John Doe'
   const firstName = userName.split(' ')[0]
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
+
+  useEffect(() => {
+    const email = session?.user?.email
+    if (email) {
+      const storedMessagesKey = `chatMessages_${email}`
+      const storedMessages = localStorage.getItem(storedMessagesKey)
+
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages))
+        initialMessageSentRef.current = true // Ensure we don't reinitialize OSCAR's message if messages were loaded
+      } else {
+        initialMessageSentRef.current = false // Ensure OSCAR's message is sent if no messages are loaded
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.email]) // Dependency on `session` ensures it runs once the session info is available
+
+  useEffect(() => {
+    // Only proceed if no messages are present and the initial message hasn't been sent yet
+    if (messages.length === 0 && !initialMessageSentRef.current) {
+      setOscarIsTyping(true)
+
+      setTimeout(() => {
+        const initialMessage = {
+          id: Math.random().toString(36).substring(7),
+          text: "Hello! I'm OSCAR, your AI assistant. How can I help you today?",
+          direction: 'incoming'
+        }
+
+        setMessages([initialMessage])
+        setOscarIsTyping(false)
+        initialMessageSentRef.current = true // Mark that the initial message has been sent
+      }, 1000)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, initialMessageSentRef.current])
+
+  useEffect(() => {
+    if (session && session.user && session.user.email) {
+      // Use the user's email as part of the key to ensure user-specific storage
+      localStorage.setItem(`chatMessages_${session.user.email}`, JSON.stringify(messages))
+    }
+  }, [messages, session])
 
   useEffect(() => {
     // Toggle the data-theme attribute based on the MUI theme mode
@@ -65,6 +116,10 @@ const ChatBot = () => {
 
   const clearChat = () => {
     setMessages([])
+    if (session && session.user && session.user.email) {
+      localStorage.removeItem(`chatMessages_${session.user.email}`)
+    }
+    initialMessageSentRef.current = false // Reset the initial message sent flag
   }
 
   const sendMessage = async text => {
@@ -93,14 +148,13 @@ const ChatBot = () => {
         <ChatContainer>
           <ConversationHeader>
             <Avatar src='/images/oscar.png' name='Oscar' status='available' />
-            <ConversationHeader.Content userName='OSCAR' info='ChatBot' />
+            <ConversationHeader.Content userName='OSCAR' info='Ericsson Powered ChatBot' />
             <ConversationHeader.Actions>
               <IconButton onClick={clearChat} title='Clear chat' color='error' size='medium'>
                 <Icon icon='mdi:trash-can' />
               </IconButton>
             </ConversationHeader.Actions>
           </ConversationHeader>
-          <MessageSeparator as='h2' content='Monday, 23 December 2019' />
           <MessageList
             typingIndicator={
               <CustomTypingIndicator userIsTyping={isTyping} oscarIsTyping={oscarIsTyping} userName={firstName} />
@@ -111,8 +165,11 @@ const ChatBot = () => {
                 key={msg.id}
                 model={{
                   message: msg.text,
+                  sender: msg.direction === 'incoming' ? 'OSCAR' : firstName,
+                  sentTime: new Date(),
                   direction: msg.direction
                 }}
+                avatarPosition={msg.direction === 'incoming' ? 'cl' : 'cr'}
               >
                 <Avatar
                   src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/${imageFileName}.png`}

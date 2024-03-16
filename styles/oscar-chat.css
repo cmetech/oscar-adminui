@@ -7,12 +7,13 @@ div .cs-message-list {
   /* Light theme variables (default) */
   --typing-indicator-color: #0d0d0d;
   --border-color: 0px; /* Assuming you might want to change borders in dark mode */
-  --background-color-main: #e0e0e0;
+  --background-color-main: #e9f5f8;
   --background-color-secondary: #ffffff;
-  --outgoing-message-bg-color: #fce282;
+  --outgoing-message-bg-color: #fcf2bf;
   --typing-indicator-dot-bg-color: #0d0d0d;
   --chat-window-border: 1px solid #ffffff; /* New variable for white border */
-  --chat-input-bg-color: #e0e0e0; /* New variable for chat input background */
+  --chat-input-bg-color: #fff; /* New variable for chat input background */
+  --chat-input-wrapper-bg-color: #e9f5f8; /* chat input wrapper background */
   --chat-input-text-color: #000; /* New variable for chat input text color */
   --chat-window-border-radius: 10px; /* New variable for border radius */
 }
@@ -23,10 +24,11 @@ div .cs-message-list {
   --border-color: 0px; /* Assuming you might want to change borders in dark mode */
   --background-color-main: #fafafa;
   --background-color-secondary: #0d0d0d;
-  --outgoing-message-bg-color: #fce282;
+  --outgoing-message-bg-color: #fcf2bf;
   --typing-indicator-dot-bg-color: #fff;
   --chat-window-border: 1px solid #0c0c0c; /* White border for dark theme as well */
-  --chat-input-bg-color: #e0e0e0; /* Dark theme chat input background */
+  --chat-input-bg-color: #fafafa; /* Dark theme chat input background */
+  --chat-input-wrapper-bg-color: #e9f5f8; /* chat input wrapper background */
   --chat-input-text-color: #0c0c0c; /* Dark theme chat input text color */
   --chat-window-border-radius: 10px; /* New variable for border radius */
 }
@@ -66,11 +68,16 @@ div .cs-chat-container .cs-message-input {
   background-color: var(--chat-input-bg-color);
 }
 
+/* Separate background for chat input wrapper */
+div .cs-message-input__content-editor-wrapper,
+div .cs-message-input__content-editor {
+  background-color: var(--chat-input-wrapper-bg-color);
+}
+
 /* Changing text color in the chat input area */
 div .cs-message-input__content-editor,
 div .cs-message-input__content-editor-wrapper {
   color: var(--chat-input-text-color); /* Control text color */
-  background-color: var(--chat-input-bg-color); /* Ensure background is consistent */
 }
 
 div .cs-message-list,
@@ -92,7 +99,6 @@ div .cs-typing-indicator__dot {
 div .custom-message-input .cs-message-input__content-editor,
 div .custom-message-input .cs-message-input__content-editor-wrapper {
   color: var(--chat-input-text-color); /* Dynamic text color based on theme */
-  background-color: var(--chat-input-bg-color); /* Dynamic background color */
 }
 
 /* Targeting the ::before pseudo-element for custom styling */

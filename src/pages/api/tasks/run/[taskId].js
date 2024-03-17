@@ -7,7 +7,7 @@ async function handler(req, res) {
   const { taskId } = req.query
 
   if (req.method === 'POST') {
-    const prompts = req.body || {}
+    const prompts = req.body || []
 
     try {
       const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/tasks/run/${taskId}`, prompts, {

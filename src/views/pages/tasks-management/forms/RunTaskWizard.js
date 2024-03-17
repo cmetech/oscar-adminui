@@ -48,13 +48,6 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
-// Define initial state for the server form
-const initialFormState = {
-  prompt: '',
-  default_value: '',
-  value: ''
-}
-
 const steps = [
   {
     title: 'Prompt Information',
@@ -153,28 +146,85 @@ const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
   }
 }))
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+const generatePromptsValidationSchema = prompts => {
+  return yup.array().of(promptSchema).min(prompts.length, 'All prompts must be provided')
+}
+
+const promptSchema = yup.object().shape({
+  prompt: yup.string().required(), // Technically not validated but included for completeness
+  default_value: yup.string(), // Included for completeness; validation not needed
+  value: yup.string().required('Value is required') // User must provide a value or accept the default
+})
+
+const getInitialUserPromptValues = prompts => {
+  return prompts.reduce((acc, prompt, index) => {
+    acc[index] = prompt.default_value || ''
+
+    return acc
+  }, {})
+}
 
 const RunTaskWizard = ({ onClose, ...props }) => {
   // Destructure all props here
   const { currentTask, rows, setRows } = props
   const [activeStep, setActiveStep] = useState(0)
+  const [validationErrors, setValidationErrors] = useState({})
 
   // ** States
-  const [userPromptValues, setUserPromptValues] = useState(
-    currentTask.prompts?.reduce((acc, prompt, index) => {
-      acc[index] = prompt.default_value || ''
-
-      return acc
-    }, {}) || {}
-  )
+  const [userPromptValues, setUserPromptValues] = useState(getInitialUserPromptValues(currentTask.prompts))
 
   const theme = useTheme()
   const session = useSession()
 
+  const validateField = async (fieldName, value) => {
+    // Create a temporary object to hold the value being validated
+    const tempUserPromptValues = { ...userPromptValues, [fieldName]: value }
+
+    console.log('tempUserPromptValues', tempUserPromptValues)
+
+    console.log('Validating Field', fieldName, value)
+
+    // Attempt to validate the entire object with the updated field value
+    try {
+      await promptSchema.validateAt(fieldName, tempUserPromptValues)
+
+      console.log(`Validation succeeded for ${fieldName}  with value ${value}`)
+
+      // If validation succeeds, remove any existing error for this field
+      setValidationErrors(prevErrors => {
+        const updatedErrors = { ...prevErrors }
+        delete updatedErrors[fieldName]
+
+        return updatedErrors
+      })
+    } catch (error) {
+      // If validation fails, update the state with the new error message for this field
+      if (error instanceof yup.ValidationError) {
+        setValidationErrors(prevErrors => ({
+          ...prevErrors,
+          [fieldName]: error.message
+        }))
+      }
+    }
+  }
+
   const handlePromptInputChange = (e, index) => {
     const newValues = { ...userPromptValues, [index]: e.target.value }
     setUserPromptValues(newValues)
+  }
+
+  const handleReset = () => {
+    // Reset active step to the first step
+    setActiveStep(0)
+
+    // Reset user prompt values to initial state
+    const initialUserPromptValues = getInitialUserPromptValues(currentTask.prompts)
+    setUserPromptValues(initialUserPromptValues)
+
+    // Optionally reset validation errors if you're tracking them
+    setValidationErrors({})
+
+    // Any other state reset you might need
   }
 
   // Handle Stepper
@@ -185,7 +235,22 @@ const RunTaskWizard = ({ onClose, ...props }) => {
   const handleNext = async () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
+      // Assuming userPromptValues is an array of prompt values matching the structure expected by promptSchema
+      const validationSchema = generatePromptsValidationSchema(currentTask.prompts)
+
+      // Then, construct your payload as an array of objects:
+      const prompts = Object.keys(userPromptValues).map(index => ({
+        prompt: currentTask.prompts[index].prompt,
+        default_value: currentTask.prompts[index].default_value,
+        value: userPromptValues[index] // Assuming this directly holds the prompt value entered by the user
+      }))
+
       try {
+        await validationSchema.validate(prompts, { abortEarly: false })
+
+        // Clear any previous validation errors
+        setValidationErrors({})
+
         const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
 
         const headers = {
@@ -200,8 +265,10 @@ const RunTaskWizard = ({ onClose, ...props }) => {
           value: userPromptValues[index] || prompt.default_value // Use the user-provided value or fallback to the default value
         }))
 
+        console.log('Payload', payload)
+
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/tasks/run/${props.currentTask.id}`
+        const endpoint = `/api/tasks/run/${currentTask.id}`
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.data) {
@@ -211,8 +278,18 @@ const RunTaskWizard = ({ onClose, ...props }) => {
           onClose && onClose()
         }
       } catch (error) {
-        console.error('Task failed to execute', error)
-        toast.error('Error executing task')
+        if (error instanceof yup.ValidationError) {
+          const formattedErrors = error.inner.reduce((acc, curr) => {
+            acc[curr.path] = curr.message
+
+            return acc
+          }, {})
+          setValidationErrors(formattedErrors)
+          console.error('Validation errors', error.inner)
+        } else {
+          console.error('Task failed to execute', error)
+          toast.error('Error executing task')
+        }
       }
     }
   }
@@ -233,6 +310,8 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                     {prompt.prompt}
                   </Typography>
                   <TextfieldStyled
+                    error={!!validationErrors[`prompts[${index}].value`]}
+                    helperText={validationErrors[`prompts[${index}].value`] || ''}
                     required
                     id={`prompt-${index}`}
                     label='Value'
@@ -240,6 +319,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                     autoComplete='off'
                     defaultValue={prompt.default_value}
                     onChange={e => handlePromptInputChange(e, index)}
+                    onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
                   />
                 </Grid>
               ))}
@@ -255,10 +335,12 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                   <Typography variant='body1' gutterBottom>
                     {prompt.prompt}
                   </Typography>
-                  <TextField
+                  <TextfieldStyled
                     fullWidth
                     id={`prompt-review-${index}`}
                     label='Entered Value'
+                    variant='outlined'
+                    margin='dense'
                     InputProps={{ readOnly: true }}
                     value={userPromptValues[index] || prompt.default_value}
                   />

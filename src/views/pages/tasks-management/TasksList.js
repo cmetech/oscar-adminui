@@ -852,7 +852,7 @@ const TasksList = props => {
     try {
       const response = await axios.post(
         endpoint,
-        {}, // No body is required for these requests
+        [], // No body is required for these requests
         {
           headers
         }

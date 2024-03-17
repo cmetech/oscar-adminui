@@ -7,18 +7,16 @@ async function handler(req, res) {
   const { taskId } = req.query
 
   if (req.method === 'POST') {
+    const prompts = req.body || {}
+
     try {
-      const response = await axios.post(
-        `${oscarConfig.MIDDLEWARE_API_URL}/tasks/run/${taskId}`,
-        {}, // Assuming the POST body is empty, adjust if necessary
-        {
-          headers: {
-            'X-API-Key': oscarConfig.API_KEY, // Ensure you have this in your oscarConfig or fetch it from a secure place
-            'Content-Type': 'application/json'
-          },
-          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
-        }
-      )
+      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/tasks/run/${taskId}`, prompts, {
+        headers: {
+          'X-API-Key': oscarConfig.API_KEY, // Ensure you have this in your oscarConfig or fetch it from a secure place
+          'Content-Type': 'application/json'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+      })
 
       if (response?.data) {
         // console.log('export targets', response?.data)

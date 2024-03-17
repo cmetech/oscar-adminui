@@ -739,39 +739,47 @@ const TasksList = props => {
             </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleRunDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          {currentTask?.prompts?.length ? (
-            <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleUpdateDialogClose} />
-          ) : (
-            <Box sx={{ mb: 8, textAlign: 'center' }}>
-              <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-                <Box>
-                  <img src='/images/warning.png' alt='warning' width='64' height='64' />
-                </Box>
-                <Box>
-                  <Typography variant='h5' justifyContent='center' alignContent='center'>
-                    Please confirm that you want to run this task.
-                  </Typography>
-                </Box>
-              </Stack>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
-            Run
-          </Button>
-          <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
+        {currentTask?.prompts?.length ? (
+          <DialogContent>
+            <IconButton
+              size='small'
+              onClick={() => handleRunDialogClose()}
+              sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+            >
+              <Icon icon='mdi:close' />
+            </IconButton>
+            <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
+          </DialogContent>
+        ) : (
+          <>
+            <DialogContent>
+              <IconButton
+                size='small'
+                onClick={() => handleRunDialogClose()}
+                sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+              >
+                <Icon icon='mdi:close' />
+              </IconButton>
+              <Box sx={{ mb: 8, textAlign: 'center' }}>
+                <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+                  <Box>
+                    <Typography variant='h5' justifyContent='center' alignContent='center'>
+                      Please confirm that you want to run this task.
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
+                Run
+              </Button>
+              <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
+                Cancel
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     )
   }

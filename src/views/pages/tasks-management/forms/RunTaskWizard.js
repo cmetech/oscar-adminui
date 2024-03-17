@@ -49,36 +49,22 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 import * as yup from 'yup'
 
 // Define initial state for the server form
-const initialServerFormState = {
-  hostName: '',
-  componentName: '',
-  datacenterName: '',
-  environmentName: '',
-  status: 'ACTIVE',
-  metadata: [{ key: '', value: '' }],
-  networkInterfaces: [{ name: '', ip_address: '', label: '' }]
+const initialFormState = {
+  prompt: '',
+  default_value: '',
+  value: ''
 }
 
 const steps = [
   {
-    title: 'Server Information',
-    subtitle: 'Edit Server Information',
-    description: 'Edit the Hostname, Datacenter, and Environment details.'
+    title: 'Prompt Information',
+    subtitle: 'Enter User Inputs',
+    description: 'Task requires user inputs.'
   },
   {
-    title: 'Network Information',
-    subtitle: 'Edit Network Information',
-    description: 'Edit the Network details.'
-  },
-  {
-    title: 'Metadata Information',
-    subtitle: 'Edit Metadata Information',
-    description: 'Edit the Metadata details.'
-  },
-  {
-    title: 'Review',
-    subtitle: 'Review and Submit',
-    description: 'Review the Server details and submit.'
+    title: 'Review and Submit',
+    subtitle: 'Confirm the details',
+    description: 'Review and submit the task.'
   }
 ]
 
@@ -167,191 +153,36 @@ const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
   }
 }))
 
-const Section = ({ title, data }) => {
-  return (
-    <Fragment>
-      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-        {title.charAt(0).toUpperCase() + title.slice(1)}
-      </Typography>
-      {data.map((item, index) => (
-        <Grid container spacing={2} key={`${title}-${index}`}>
-          {Object.entries(item).map(([itemKey, itemValue]) => (
-            <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
-              <TextField
-                fullWidth
-                label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                value={itemValue.toString()}
-                InputProps={{ readOnly: true }}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          ))}
-        </Grid>
-      ))}
-    </Fragment>
-  )
-}
-
-const ReviewAndSubmitSection = ({ serverForm }) => {
-  return (
-    <Fragment>
-      {Object.entries(serverForm).map(([key, value]) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // For nested objects (excluding arrays), recursively render sections
-          return <ReviewAndSubmitSection serverForm={value} key={key} />
-        } else if (Array.isArray(value)) {
-          return <Section title={key} data={value} key={key} />
-        } else {
-          // For simple key-value pairs
-          return (
-            <Grid container spacing={2} key={key}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value.toString()}
-                  InputProps={{ readOnly: true }}
-                  variant='outlined'
-                  margin='normal'
-                />
-              </Grid>
-            </Grid>
-          )
-        }
-      })}
-    </Fragment>
-  )
-}
-
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
 const RunTaskWizard = ({ onClose, ...props }) => {
   // Destructure all props here
-  const { currentServer, rows, setRows } = props
+  const { currentTask, rows, setRows } = props
+  const [activeStep, setActiveStep] = useState(0)
 
   // ** States
-  const [serverForm, setServerForm] = useState(initialServerFormState)
-  const [activeStep, setActiveStep] = useState(0)
-  const [resetFormFields, setResetFormFields] = useState(false)
-  const [components, setComponents] = useState([])
-  const [datacenters, setDatacenters] = useState([])
-  const [environments, setEnvironments] = useState([])
+  const [userPromptValues, setUserPromptValues] = useState(
+    currentTask.prompts?.reduce((acc, prompt, index) => {
+      acc[index] = prompt.default_value || ''
+
+      return acc
+    }, {}) || {}
+  )
 
   const theme = useTheme()
   const session = useSession()
 
-  // Use useEffect to initialize the form with currentServer data
-  useEffect(() => {
-    // Check if currentServer exists and is not empty
-    if (currentServer && Object.keys(currentServer).length > 0) {
-      const updatedServerForm = {
-        hostName: currentServer.hostname.toUpperCase() || '',
-        componentName: currentServer.component_name.toUpperCase() || '',
-        datacenterName: currentServer.datacenter_name.toUpperCase() || '',
-        environmentName: currentServer.environment_name.toUpperCase() || '',
-        status: currentServer.status.toUpperCase() || 'ACTIVE',
-        metadata: currentServer.metadata || [{ key: '', value: '' }],
-        networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
-      }
-      setServerForm(updatedServerForm)
-    }
-  }, [currentServer])
-
-  useEffect(() => {
-    const fetchDatacenters = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/datacenters')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const datacenterNames = data.map(datacenter => datacenter.name.toUpperCase())
-        setDatacenters(datacenterNames)
-      } catch (error) {
-        console.error('Failed to fetch datacenters:', error)
-      }
-    }
-
-    const fetchEnviroments = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/environments')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const environmentNames = data.map(environment => environment.name.toUpperCase())
-        setEnvironments(environmentNames)
-      } catch (error) {
-        console.error('Failed to fetch environments:', error)
-      }
-    }
-
-    const fetchComponents = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/components')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const componentNames = data.map(component => component.name.toUpperCase())
-        setComponents(componentNames)
-      } catch (error) {
-        console.error('Failed to fetch components:', error)
-      }
-    }
-
-    fetchDatacenters()
-    fetchEnviroments()
-    fetchComponents()
-  }, []) // Empty dependency array means this effect runs once on mount
-
-  // Function to handle form field changes
-  const handleFormChange = (event, index, section) => {
-    const { name, value } = event.target
-
-    // Upper case the value being entered
-    const upperCasedValue = value.toUpperCase()
-
-    if (section) {
-      // Handle changes for dynamic sections (metadata or networkInterfaces)
-      const updatedSection = [...serverForm[section]]
-      updatedSection[index][name] = upperCasedValue
-      setServerForm({ ...serverForm, [section]: updatedSection })
-    } else {
-      // Handle changes for static fields
-      setServerForm({ ...serverForm, [name]: upperCasedValue })
-    }
-  }
-
-  // Function to add a new entry to a dynamic section
-  const addSectionEntry = section => {
-    const newEntry = section === 'metadata' ? { key: '', value: '' } : { name: '', ip_address: '', label: '' }
-    const updatedSection = [...serverForm[section], newEntry]
-    setServerForm({ ...serverForm, [section]: updatedSection })
-  }
-
-  // Function to remove an entry from a dynamic section
-  const removeSectionEntry = (section, index) => {
-    const updatedSection = [...serverForm[section]]
-    updatedSection.splice(index, 1)
-    setServerForm({ ...serverForm, [section]: updatedSection })
+  const handlePromptInputChange = (e, index) => {
+    const newValues = { ...userPromptValues, [index]: e.target.value }
+    setUserPromptValues(newValues)
   }
 
   // Handle Stepper
   const handleBack = () => {
-    if (activeStep === 2 || activeStep === 3) {
-      // When navigating back from Metadata Info
-      setResetFormFields(prev => !prev) // Toggle reset state
-    }
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
   const handleNext = async () => {
-    if (activeStep === 1 || activeStep === 2) {
-      // Assuming step 1 is Network Info and step 2 is Metadata Info
-      setResetFormFields(prev => !prev) // Toggle reset state to force UI update
-    }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
@@ -362,134 +193,28 @@ const RunTaskWizard = ({ onClose, ...props }) => {
           Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
         }
 
-        const payload = {
-          hostname: serverForm.hostName,
-          datacenter_name: serverForm.datacenterName,
-          environment_name: serverForm.environmentName,
-          component_name: serverForm.componentName,
-          metadata: serverForm.metadata,
-          network_interfaces: serverForm.networkInterfaces,
-          ip_address: serverForm.networkInterfaces[0].ip_address,
-          status: serverForm.status
-        }
+        // Build the payload
+        const payload = currentTask.prompts.map((prompt, index) => ({
+          prompt: prompt.prompt,
+          default_value: prompt.default_value,
+          value: userPromptValues[index] || prompt.default_value // Use the user-provided value or fallback to the default value
+        }))
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/inventory/servers/${props.currentServer.id}`
-        const response = await axios.patch(endpoint, payload, { headers })
+        const endpoint = `/api/tasks/run/${props.currentTask.id}`
+        const response = await axios.post(endpoint, payload, { headers })
 
         if (response.data) {
-          const updatedServer = response.data
-
-          const updatedRows = props.rows.map(row => {
-            if (row.id === updatedServer.id) {
-              return updatedServer
-            }
-
-            return row
-          })
-
-          props.setRows(updatedRows)
-
-          toast.success('Server details updated successfully')
+          toast.success('Task successfully executed')
 
           // Call onClose to close the modal
           onClose && onClose()
         }
       } catch (error) {
-        console.error('Error updating server details', error)
-        toast.error('Error updating server details')
+        console.error('Task failed to execute', error)
+        toast.error('Error executing task')
       }
     }
-  }
-
-  const handleReset = () => {
-    if (currentServer && Object.keys(currentServer).length > 0) {
-      const resetServerForm = {
-        hostName: currentServer.hostname || '',
-        componentName: currentServer.component_name || '',
-        datacenterName: currentServer.datacenter_name || '',
-        environmentName: currentServer.environment_name || '',
-        status: currentServer.status || 'Active',
-        metadata: currentServer.metadata || [{ key: '', value: '' }],
-        networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
-      }
-      setServerForm(resetServerForm)
-    } else {
-      setServerForm(initialServerFormState) // Fallback to initial state if currentServer is not available
-    }
-    setResetFormFields(false)
-    setActiveStep(0)
-  }
-
-  // Render form fields for metadata and network interfaces
-  const renderDynamicFormSection = section => {
-    return serverForm[section].map((entry, index) => (
-      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-        <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={section === 'metadata' ? 5 : 4}>
-            <TextfieldStyled
-              key={`field1-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'metadata' ? 'Key' : 'Name'}
-              name={section === 'metadata' ? 'key' : 'name'}
-              value={entry.key || entry.name}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
-          <Grid item xs={section === 'metadata' ? 5 : 3}>
-            <TextfieldStyled
-              key={`field2-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'metadata' ? 'Value' : 'IP Address'}
-              name={section === 'metadata' ? 'value' : 'ip_address'}
-              value={entry.value || entry.ip_address}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
-          {/* Conditional TextField for Label only in networkInterfaces */}
-          {section === 'networkInterfaces' && (
-            <Grid item xs={3}>
-              <TextfieldStyled
-                key={`label-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label='Label'
-                name='label'
-                value={entry.label}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
-          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton
-              onClick={() => addSectionEntry(section)}
-              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-            >
-              <Icon icon='mdi:plus-circle-outline' />
-            </IconButton>
-            {serverForm[section].length > 1 && (
-              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                <Icon icon='mdi:minus-circle-outline' />
-              </IconButton>
-            )}
-          </Grid>
-        </Grid>
-      </Box>
-    ))
-  }
-
-  // Handle Confirm Password
-  const handleConfirmChange = prop => event => {
-    setState({ ...state, [prop]: event.target.value })
-  }
-
-  const handleClickShowConfirmPassword = () => {
-    setState({ ...state, showPassword2: !state.showPassword2 })
   }
 
   const handleMouseDownConfirmPassword = event => {
@@ -501,158 +226,47 @@ const RunTaskWizard = ({ onClose, ...props }) => {
       case 0:
         return (
           <Fragment>
-            <Typography variant='h6' gutterBottom>
-              Server Information
-            </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextfieldStyled
-                  required
-                  id='hostName'
-                  name='hostName'
-                  label='Host Name'
-                  fullWidth
-                  autoComplete='off'
-                  value={serverForm.hostName}
-                  onChange={handleFormChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  autoHighlight
-                  id='componentName-autocomplete'
-                  options={components}
-                  value={serverForm.componentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Choose Component' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='datacenterName-autocomplete'
-                  options={datacenters}
-                  value={serverForm.datacenterName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='environmentName-autocomplete'
-                  options={environments}
-                  value={serverForm.environmentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextfieldStyled
-                  id='status'
-                  name='status'
-                  label='Status'
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true
-                  }}
-                  value={serverForm.status}
-                  onChange={handleFormChange}
-                >
-                  <option value='Active'>Active</option>
-                  <option value='Inactive'>Inactive</option>
-                </TextfieldStyled>
-              </Grid>
+              {currentTask.prompts.map((prompt, index) => (
+                <Grid item xs={12} key={index}>
+                  <Typography variant='body1' gutterBottom>
+                    {prompt.prompt}
+                  </Typography>
+                  <TextfieldStyled
+                    required
+                    id={`prompt-${index}`}
+                    label='Value'
+                    fullWidth
+                    autoComplete='off'
+                    defaultValue={prompt.default_value}
+                    onChange={e => handlePromptInputChange(e, index)}
+                  />
+                </Grid>
+              ))}
             </Grid>
           </Fragment>
         )
       case 1:
         return (
           <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('networkInterfaces')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('networkInterfaces')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Network Interface
-                </Button>
-              </Box>
-            </Stack>
+            <Grid container spacing={3}>
+              {currentTask.prompts.map((prompt, index) => (
+                <Grid item xs={12} key={index}>
+                  <Typography variant='body1' gutterBottom>
+                    {prompt.prompt}
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    id={`prompt-review-${index}`}
+                    label='Entered Value'
+                    InputProps={{ readOnly: true }}
+                    value={userPromptValues[index] || prompt.default_value}
+                  />
+                </Grid>
+              ))}
+            </Grid>
           </Fragment>
         )
-      case 2:
-        return (
-          <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('metadata')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('metadata')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Metadata
-                </Button>
-              </Box>
-            </Stack>
-          </Fragment>
-        )
-      case 3:
-        return <ReviewAndSubmitSection serverForm={serverForm} />
       default:
         return 'Unknown Step'
     }
@@ -662,8 +276,23 @@ const RunTaskWizard = ({ onClose, ...props }) => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>Server details have been submitted.</Typography>
-          <ReviewAndSubmitSection serverForm={serverForm} />
+          <Typography>Task has been executed.</Typography>
+          <Grid container spacing={3}>
+            {currentTask.prompts.map((prompt, index) => (
+              <Grid item xs={12} key={index}>
+                <Typography variant='body1' gutterBottom>
+                  {prompt.prompt}
+                </Typography>
+                <TextField
+                  fullWidth
+                  id={`prompt-review-${index}`}
+                  label='Entered Value'
+                  InputProps={{ readOnly: true }}
+                  value={userPromptValues[index] || prompt.default_value}
+                />
+              </Grid>
+            ))}
+          </Grid>
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
             <Button size='large' variant='contained' onClick={handleReset}>
               Reset
@@ -695,7 +324,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                 Back
               </Button>
               <Button size='large' variant='contained' onClick={handleNext}>
-                {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+                {activeStep === steps.length - 1 ? 'Run' : 'Next'}
               </Button>
             </Grid>
           </Grid>

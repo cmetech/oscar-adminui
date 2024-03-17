@@ -31,6 +31,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
+import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -175,13 +176,13 @@ const RunTaskWizard = ({ onClose, ...props }) => {
 
   const theme = useTheme()
   const session = useSession()
+  const { t } = useTranslation()
 
   const validateField = async (fieldName, value) => {
     // Create a temporary object to hold the value being validated
     const tempUserPromptValues = { ...userPromptValues, [fieldName]: value }
 
     console.log('tempUserPromptValues', tempUserPromptValues)
-
     console.log('Validating Field', fieldName, value)
 
     // Attempt to validate the entire object with the updated field value

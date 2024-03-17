@@ -58,5 +58,11 @@
     "userIsTyping": "{{userName}} is typing...",
     "bothTyping": "OSCAR is thinking, {{userName}} is typing...",
     "Message OSCAR": "Message OSCAR",
-    "clearChat": "Clear Chat"
+    "clearChat": "Clear Chat",
+    "promptStep1_Title": "Prompt Information",
+    "promptStep1_SubTitle": "Enter User Inputs",
+    "promptStep1_Description": "Task requires user inputs.",
+    "promptStep2_Title": "Review and Submit",
+    "promptStep2_SubTitle": "Confirm the details",
+    "promptStep2_Description": "Review and submit the task."
 }

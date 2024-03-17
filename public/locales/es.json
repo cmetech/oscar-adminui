@@ -58,5 +58,11 @@
     "userIsTyping": "{{userName}} está escribiendo...",
     "bothTyping": "OSCAR está pensando, {{userName}} está escribiendo...",
     "Message OSCAR": "Mensaje OSCAR",
-    "clearChat": "Effacer le chat"
+    "clearChat": "Effacer le chat",
+    "promptStep1_Title": "Información de la solicitud",
+    "promptStep1_SubTitle": "Ingrese las entradas de usuario",
+    "promptStep1_Description": "La tarea requiere entradas de usuario.",
+    "promptStep2_Title": "Revisar y enviar",
+    "promptStep2_SubTitle": "Confirmar los detalles",
+    "promptStep2_Description": "Revise y envíe la tarea."
 }

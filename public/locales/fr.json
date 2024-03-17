@@ -58,5 +58,11 @@
     "userIsTyping": "{{userName}} est en train de taper...",
     "bothTyping": "OSCAR réfléchit, {{userName}} est en train de taper...",
     "Message OSCAR": "Message OSCAR",
-    "clearChat": "Borrar chat"
+    "clearChat": "Borrar chat",
+    "promptStep1_Title": "Informations sur l'invite",
+    "promptStep1_SubTitle": "Entrez les saisies utilisateur",
+    "promptStep1_Description": "La tâche nécessite des saisies utilisateur.",
+    "promptStep2_Title": "Réviser et soumettre",
+    "promptStep2_SubTitle": "Confirmer les détails",
+    "promptStep2_Description": "Revoir et soumettre la tâche."
 }

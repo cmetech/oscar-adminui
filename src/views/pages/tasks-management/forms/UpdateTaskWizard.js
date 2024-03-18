@@ -426,6 +426,9 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 }
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// FIXME: Having issue adding IP Address, not able to write in fields
+// FIXME: Need to fix the Schedule section, so user can enter in schedule details
+// FIXME: Need to first update the config, then if successful, re-register the task, and schedule
 
 const UpdateTaskWizard = ({ onClose, ...props }) => {
   // Destructure all props here

@@ -65,10 +65,10 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
 import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
+import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -457,7 +457,7 @@ const TasksList = props => {
     return (
       <Dialog
         fullWidth
-        maxWidth='md'
+        maxWidth='lg'
         scroll='body'
         open={editDialog}
         onClose={handleUpdateDialogClose}
@@ -498,7 +498,7 @@ const TasksList = props => {
             <Typography variant='body2'>Updates to task information will be effective immediately.</Typography>
           </Box>
           {currentTask && (
-            <UpdateServerWizard
+            <UpdateTaskWizard
               currentTask={currentTask}
               rows={rows}
               setRows={setRows}

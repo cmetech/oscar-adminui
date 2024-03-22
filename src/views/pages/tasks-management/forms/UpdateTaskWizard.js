@@ -575,6 +575,10 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     const name = target.name
     let value = target.value
 
+    if (typeof value === 'string') {
+      value = value.toLowerCase()
+    }
+
     setTaskForm(prevForm => {
       const newForm = { ...prevForm }
 

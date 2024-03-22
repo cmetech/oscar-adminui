@@ -2,6 +2,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -39,6 +40,7 @@ import Icon from 'src/@core/components/icon'
 // ** Custom Components Imports
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 import { useTheme, styled } from '@mui/material/styles'
+import { refetchTaskTriggerAtom } from 'src/lib/atoms'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -441,6 +443,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
   const [selectedComponents, setSelectedComponents] = useState([])
   const [cronValue, setCronValue] = useState('')
   const [cronError, setCronError] = useState()
+  const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -694,6 +697,8 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
               console.log('Task successfully configured and registered')
               toast.success('Task successfully configured and registered')
+
+              setRefetchTrigger(Date.now())
             } else {
               console.error('Failed to register task, configuration updated successfully')
               toast.error('Failed to register task, configuration updated successfully')

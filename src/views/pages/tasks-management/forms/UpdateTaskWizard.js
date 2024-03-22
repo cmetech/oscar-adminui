@@ -73,6 +73,7 @@ const initialTaskFormState = {
   },
   args: [{ value: '' }],
   kwargs: [{ key: '', value: '' }],
+  metadata: [{ key: '', value: '' }],
   prompts: [{ prompt: '', default_value: '', value: '' }],
   hosts: [{ ip_address: '' }],
   datacenter: '',
@@ -94,12 +95,7 @@ const steps = [
   {
     title: 'Arguments',
     subtitle: 'Positional',
-    description: 'Edit the Task Positional Arguments details.'
-  },
-  {
-    title: 'Arguments',
-    subtitle: 'Keyword',
-    description: 'Edit the Task Keyword Arguments details.'
+    description: 'Edit the Task Positional and Keyword Argument details.'
   },
   {
     title: 'Metadata',
@@ -426,7 +422,6 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 }
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
-// FIXME: Having issue adding IP Address, not able to write in fields
 // FIXME: Need to fix the Schedule section, so user can enter in schedule details
 // FIXME: Need to first update the config, then if successful, re-register the task, and schedule
 
@@ -570,54 +565,47 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
   // Function to handle form field changes
   // Function to handle form field changes for dynamic sections
+
   const handleFormChange = (event, index, section) => {
-    let name, value
+    // Handling both synthetic events and direct value assignments from Autocomplete
+    const target = event.target || event
+    const name = target.name
+    let value = target.value
 
-    // Check if the event is synthetic from Autocomplete or a standard event
-    if (event.target) {
-      ;({ name, value } = event.target)
-    } else {
-      // Direct value assignment from Autocomplete
-      name = event.name
-      value = event.value
-    }
+    setTaskForm(prevForm => {
+      const newForm = { ...prevForm }
 
-    if (section) {
-      // For dynamic sections with arrays
-      const updatedSection = [...taskForm[section]]
+      if (section) {
+        // Clone the array to avoid direct state mutation
+        const updatedSection = [...newForm[section]]
 
-      if (['kwargs', 'metadata', 'prompts'].includes(section)) {
-        // For sections with key-value pairs
-        updatedSection[index][name] = value
-      } else if (section === 'args' || section === 'hosts') {
-        // For sections with single value entries
-        updatedSection[index] = { ...updatedSection[index], value: value }
-      }
+        // Determine how to update based on the section type
+        if (['args', 'hosts'].includes(section)) {
+          // Sections with single value entries
+          updatedSection[index] = { ...updatedSection[index], [name]: value }
+        } else if (['kwargs', 'metadata', 'prompts'].includes(section)) {
+          // Sections with key-value pairs (or additional fields for 'prompts')
+          updatedSection[index] = { ...updatedSection[index], [name]: value }
+        }
 
-      // Update state with the modified section
-      setTaskForm({ ...taskForm, [section]: updatedSection })
-    } else {
-      // Special handling for Autocomplete components with multiple selections
-      if (Array.isArray(value)) {
-        setTaskForm({ ...taskForm, [name]: value })
-      }
-
-      // For top-level fields or nested objects that aren't arrays
-      if (name?.includes('.')) {
-        // Handling nested objects, e.g., schedule.year
-        const keys = name.split('.')
-        setTaskForm({
-          ...taskForm,
-          [keys[0]]: {
-            ...taskForm[keys[0]],
+        newForm[section] = updatedSection
+      } else {
+        // Directly update top-level fields or handle nested updates
+        if (name.includes('.')) {
+          // Nested object updates, e.g., "schedule.year"
+          const keys = name.split('.')
+          newForm[keys[0]] = {
+            ...newForm[keys[0]],
             [keys[1]]: value
           }
-        })
-      } else {
-        // Top-level fields
-        setTaskForm(prevForm => ({ ...prevForm, [name]: value }))
+        } else {
+          // Top-level field updates
+          newForm[name] = value
+        }
       }
-    }
+
+      return newForm
+    })
   }
 
   // Function to add a new entry to a dynamic section
@@ -630,8 +618,9 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         newEntry = { key: '', value: '' }
         break
       case 'args':
+        newEntry = { value: '' }
       case 'hosts':
-        newEntry = { value: '' } // Adjust if your hosts have a different structure
+        newEntry = { ip_address: '' } // Adjust if your hosts have a different structure
         break
       case 'prompts':
         newEntry = { prompt: '', default_value: '', value: '' }
@@ -684,26 +673,35 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
         }
 
-        console.log('Payload:', payload)
+        // console.log('Payload:', payload)
 
         // Update the endpoint to point to your Next.js API route
         const endpoint = `/api/tasks/config/${currentTask.name}`
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.data) {
-          const updateTask = response.data?.data
+          const { task_name } = response.data
 
-          const updatedRows = props.rows.map(row => {
-            if (row.id === updateTask.id) {
-              return updateTask
+          if (task_name) {
+            console.log('Task configuration successfully updated for ', task_name)
+
+            // Register Task
+            const registerTaskEndpoint = `/api/tasks/register/${task_name}`
+            const registerTaskResponse = await axios.post(registerTaskEndpoint, {}, { headers })
+
+            if (registerTaskResponse.data) {
+              // Trigger a refetch of the tasks list
+
+              console.log('Task successfully configured and registered')
+              toast.success('Task successfully configured and registered')
+            } else {
+              console.error('Failed to register task, configuration updated successfully')
+              toast.error('Failed to register task, configuration updated successfully')
             }
-
-            return row
-          })
-
-          props.setRows(updatedRows)
-
-          toast.success(response.data.message)
+          } else {
+            console.error('Failed to update task configuration')
+            toast.error('Failed to update task configuration')
+          }
 
           // Call onClose to close the modal
           onClose && onClose()
@@ -762,6 +760,12 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     }
 
     const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+
+    // console.log('taskForm:', taskForm)
+    // console.log('section:', section)
+    // console.log('keyLabel:', keyLabel)
+    // console.log('valueLabel:', valueLabel)
+    // console.log('defaultValueLabel:', defaultValueLabel)
 
     return taskForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
@@ -837,7 +841,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           {section === 'hosts' && (
             <Grid item xs={8}>
               <TextfieldStyled
-                key={`host-${index}`}
+                key={`ipAddress-${section}-${index}`}
                 fullWidth
                 label={valueLabel}
                 name='ip_address'
@@ -1002,52 +1006,58 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
       case 2:
         return (
           <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('args')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('args')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Positional Arguments
-                </Button>
-              </Box>
-            </Stack>
+            <Grid container spacing={3} alignItems='flex-start'>
+              <Grid item xs={12} sm={6}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Positional Arguments
+                </Typography>
+                {renderDynamicFormSection('args')}
+                <Box mt={2}>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('args')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                  >
+                    Add Argument
+                  </Button>
+                </Box>
+              </Grid>
+              <Grid item>
+                <Divider orientation='vertical' flexItem />
+              </Grid>
+              <Grid item xs={12} sm={5}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Keyword Arguments
+                </Typography>
+                {renderDynamicFormSection('kwargs')}
+                <Box>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('kwargs')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                  >
+                    Add Keyword Arguments
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
           </Fragment>
         )
       case 3:
-        return (
-          <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('kwargs')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('kwargs')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Keyword Arguments
-                </Button>
-              </Box>
-            </Stack>
-          </Fragment>
-        )
-      case 4:
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
@@ -1071,7 +1081,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
             </Stack>
           </Fragment>
         )
-      case 5:
+      case 4:
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
@@ -1095,7 +1105,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
             </Stack>
           </Fragment>
         )
-      case 6:
+      case 5:
         return (
           <Fragment>
             <Grid container spacing={3} alignItems='center'>
@@ -1193,7 +1203,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
             </Box>
           </Fragment>
         )
-      case 7:
+      case 6:
         return <ReviewAndSubmitSection taskForm={taskForm} />
       default:
         return 'Unknown Step'

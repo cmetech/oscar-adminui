@@ -7,10 +7,11 @@ async function handler(req, res) {
   const { taskName } = req.query
 
   if (req.method === 'POST') {
-    const payload = req.body
+    // const payload = req.body
+    const payload = {}
 
     try {
-      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/tasks/config/${taskName}`, payload, {
+      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/tasks/register/${taskName}`, payload, {
         headers: {
           'X-API-Key': oscarConfig.API_KEY, // Ensure this key exists in your oscarConfig
           'Content-Type': 'application/json'
@@ -19,12 +20,14 @@ async function handler(req, res) {
       })
 
       if (response?.data) {
-        res.status(200).json(response.data)
+        res.status(200).json({
+          message: 'Task registeration successful for ' + taskName
+        })
       } else {
         res.status(500).json({ message: 'No response - An error occurred' })
       }
     } catch (error) {
-      console.error(`Error updating task configuration for ${taskName}:`, error)
+      console.error(`Error with task registeration for ${taskName}:`, error)
       res.status(error.response?.status || 500).json({ message: error.message })
     }
   } else {

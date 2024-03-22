@@ -16,7 +16,7 @@ async function handler(req, res) {
       })
 
       if (response?.data) {
-        console.log('export targets', response?.data)
+        // console.log('export targets', response?.data)
         const dataAsc = response.data.sort((a, b) => (a[column] < b[column] ? -1 : 1))
         const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
 

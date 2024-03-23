@@ -42,7 +42,7 @@ const UserFooterContent = props => {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>
           <Stack direction='row' spacing={3}>
             <Button variant='contained' color='primary'>
-              <StyledLink href='/support'>{t('Academy')}</StyledLink>
+              <StyledLink href='/oscar/docs'>{t('Academy')}</StyledLink>
             </Button>
             <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Feedback')}</StyledLink>

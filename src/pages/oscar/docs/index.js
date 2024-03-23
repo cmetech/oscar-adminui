@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
+import { styled, useTheme } from '@mui/material/styles'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
@@ -18,6 +19,7 @@ const ResponsiveMkDocsEmbed = ({ src }) => {
       }}
     >
       <iframe
+        key={src}
         src={src}
         title='MkDocs Site'
         style={{
@@ -31,10 +33,12 @@ const ResponsiveMkDocsEmbed = ({ src }) => {
 }
 
 const DocsPage = () => {
+  const theme = useTheme()
+
   return (
     <Container maxWidth='false' disableGutters={true} sx={{ p: 0, m: 0, height: '100vh', width: '100vw' }}>
       {/* Other components can go here */}
-      <ResponsiveMkDocsEmbed src='http://localhost:8005' />
+      <ResponsiveMkDocsEmbed src={`http://localhost:8005?theme=${theme.palette.mode}`} />
       {/* More components */}
     </Container>
   )

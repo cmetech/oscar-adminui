@@ -35,6 +35,7 @@ import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import { LocalizationProvider } from '@mui/x-date-pickers-pro'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 import { AdapterDateFns } from '@mui/x-date-pickers-pro/AdapterDateFns'
+import moment from 'moment-timezone'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -210,6 +211,14 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
   const [showDocumentation, setShowDocumentation] = useState(false)
   const toggleDocumentation = () => setShowDocumentation(!showDocumentation)
 
+  // Get list of timezones from moment-timezone
+  const timezones = moment.tz.names()
+
+  // Handler for timezone change in Autocomplete
+  const handleTimezoneChange = (event, newValue) => {
+    handleFormChange({ target: { name: 'schedule.timezone', value: newValue } }, null, 'schedule')
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Fragment>
@@ -371,13 +380,17 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextfieldStyled
+            <AutocompleteStyled
               id='timezone'
-              name='schedule.timezone'
-              label='Timezone'
-              fullWidth
+              options={timezones}
+              getOptionLabel={option => option} // The option is already a string, but you can format it if needed
+              renderInput={params => <TextfieldStyled {...params} label='Timezone' />}
               value={taskForm.schedule.timezone}
-              onChange={e => handleFormChange(e, null, 'schedule')}
+              onChange={handleTimezoneChange}
+              autoComplete // Enable autocomplete behavior
+              includeInputInList // Include the input value in the list of options
+              freeSolo // Allow arbitrary input values
+              clearOnBlur // Clear input on blur if not selected from the list
             />
           </Grid>
           {/* <Grid item xs={12} sm={6}>

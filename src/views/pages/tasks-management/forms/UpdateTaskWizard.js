@@ -95,7 +95,7 @@ const steps = [
   {
     title: 'Schedule',
     subtitle: 'Details',
-    description: 'Edit the Schedule details.'
+    description: 'Edit the Schedule details. Click on Show Schedule Instructions below for more information.'
   },
   {
     title: 'Arguments',

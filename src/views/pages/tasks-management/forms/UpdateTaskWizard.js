@@ -32,6 +32,9 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
+import { LocalizationProvider } from '@mui/x-date-pickers-pro'
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { AdapterDateFns } from '@mui/x-date-pickers-pro/AdapterDateFns'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -202,6 +205,197 @@ const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
     }
   }
 }))
+
+const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }) => {
+  const [showDocumentation, setShowDocumentation] = useState(false)
+  const toggleDocumentation = () => setShowDocumentation(!showDocumentation)
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Fragment>
+        <Grid container direction='column' spacing={2}>
+          {/* Clickable Text to Toggle Visibility */}
+          <Grid
+            item
+            style={{
+              cursor: 'pointer',
+              paddingLeft: '27px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <IconButton onClick={toggleDocumentation}>
+              {showDocumentation ? <Icon icon='mdi:expand-less' /> : <Icon icon='mdi:expand-more' />}
+            </IconButton>
+            <Typography variant='body1' onClick={toggleDocumentation}>
+              {showDocumentation ? 'Hide Schedule Instructions' : 'Show Schedule Instructions'}
+            </Typography>
+          </Grid>
+          {showDocumentation && (
+            <Grid container spacing={2} style={{ padding: '16px' }}>
+              <Grid item>
+                <Typography variant='body2' gutterBottom>
+                  <strong>Schedule your task</strong> with precision using flexible cron-style expressions. This section
+                  allows you to define when and how often your task should run, similar to scheduling jobs in UNIX-like
+                  systems.
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant='body2' gutterBottom>
+                  Define <strong>start and end dates</strong> to control the active period of your task schedule. Input
+                  dates in ISO 8601 format or select them using the provided date pickers.
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant='body2' gutterBottom>
+                  Not all fields are mandatory. Specify only the ones you need. Unspecified fields default to their
+                  broadest setting, allowing the task to run more frequently. For instance, leaving the{' '}
+                  <strong>day</strong> field empty schedules the task to run every day of the month.
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant='body2' gutterBottom>
+                  Use the <strong>Expression Types</strong> below to refine your schedule:
+                  <ul>
+                    <li>
+                      <strong>*</strong> - Run at every possible time/value.
+                    </li>
+                    <li>
+                      <strong>*/a</strong> - Run at every <em>a</em> interval.
+                    </li>
+                    <li>
+                      <strong>a-b</strong> - Run within a range from <em>a</em> to <em>b</em>.
+                    </li>
+                    <li>
+                      <strong>a-b/c</strong> - Run within a range at every <em>c</em> interval.
+                    </li>
+                    <li>And more, including combinations of expressions separated by commas.</li>
+                  </ul>
+                </Typography>
+              </Grid>
+              <Grid item marginBottom={4}>
+                <Typography variant='body2' gutterBottom>
+                  Abbreviated English month names (<strong>jan</strong> – <strong>dec</strong>) and weekday names (
+                  <strong>mon</strong> – <strong>sun</strong>) are also supported.
+                </Typography>
+              </Grid>
+            </Grid>
+          )}
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='year'
+              name='schedule.year'
+              label='Year'
+              fullWidth
+              value={taskForm.schedule.year}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='month'
+              name='schedule.month'
+              label='Month'
+              fullWidth
+              value={taskForm.schedule.month}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='day'
+              name='schedule.day'
+              label='Day'
+              fullWidth
+              value={taskForm.schedule.day}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='hour'
+              name='schedule.hour'
+              label='Hour'
+              fullWidth
+              value={taskForm.schedule.hour}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='minute'
+              name='schedule.minute'
+              label='Minute'
+              fullWidth
+              value={taskForm.schedule.minute}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextfieldStyled
+              id='second'
+              name='schedule.second'
+              label='Second'
+              fullWidth
+              value={taskForm.schedule.second}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          {/* <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            id='day_of_week'
+            name='schedule.day_of_week'
+            label='Day of Week'
+            fullWidth
+            value={taskForm.schedule.day_of_week}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid> */}
+          <Grid item xs={12} sm={6}>
+            <DateRangePicker
+              localeText={{ start: 'Start Date', end: 'End Date' }}
+              value={dateRange}
+              onChange={newValue => {
+                setDateRange(newValue)
+              }}
+              renderInput={(startProps, endProps) => (
+                <Fragment>
+                  <TextfieldStyled {...startProps} />
+                  <Box sx={{ mx: 2 }}> to </Box>
+                  <TextfieldStyled {...endProps} />
+                </Fragment>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextfieldStyled
+              id='timezone'
+              name='schedule.timezone'
+              label='Timezone'
+              fullWidth
+              value={taskForm.schedule.timezone}
+              onChange={e => handleFormChange(e, null, 'schedule')}
+            />
+          </Grid>
+          {/* <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            id='jitter'
+            name='schedule.jitter'
+            label='Jitter (seconds)'
+            type='number'
+            fullWidth
+            value={taskForm.schedule.jitter}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid> */}
+        </Grid>
+      </Fragment>
+    </LocalizationProvider>
+  )
+}
 
 const Section = ({ title, data }) => {
   return (
@@ -410,9 +604,41 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
     </Grid>
   )
 
+  const renderScheduleSection = schedule => (
+    <Fragment>
+      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+        Schedule Information
+      </Typography>
+      <Grid container spacing={2}>
+        {Object.entries(schedule).map(([key, value], index) => {
+          // Format the key to be more readable
+          const label = key
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+          const formattedValue = typeof value === 'object' && value !== null ? value.toLocaleString() : value
+
+          return (
+            <Grid item xs={12} sm={6} key={`schedule-${index}`}>
+              <TextfieldStyled
+                fullWidth
+                label={label}
+                value={formattedValue || 'N/A'}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )
+        })}
+      </Grid>
+    </Fragment>
+  )
+
   return (
     <Fragment>
       {renderGeneralSection(taskForm)}
+      {taskForm.schedule && renderScheduleSection(taskForm.schedule)}
       {taskForm.args && renderArgsSection(taskForm.args)}
       {taskForm.kwargs && <Section title='Keyword Arguments' data={taskForm.kwargs} />}
       {taskForm.prompts && renderPromptsSection(taskForm.prompts)}
@@ -444,8 +670,17 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
   const [cronError, setCronError] = useState()
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
+  // Separate state for date range picker
+  const [dateRange, setDateRange] = useState([null, null])
+
   const theme = useTheme()
   const session = useSession()
+
+  // When dateRange updates, update taskForm
+  useEffect(() => {
+    handleFormChange({ target: { name: 'schedule.start_date', value: dateRange[0] } }, null, null)
+    handleFormChange({ target: { name: 'schedule.end_date', value: dateRange[1] } }, null, null)
+  }, [dateRange])
 
   // Use useEffect to initialize the form with currentServer data
   useEffect(() => {
@@ -574,7 +809,11 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     const name = target.name
     let value = target.value
 
-    if (typeof value === 'string') {
+    // Convert string values to lowercase, except for specific fields
+    if (
+      typeof value === 'string' &&
+      !['schedule.start_date', 'schedule.end_date', 'schedule.timezone'].includes(name)
+    ) {
       value = value.toLowerCase()
     }
 
@@ -582,27 +821,24 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
       const newForm = { ...prevForm }
 
       if (section) {
-        // Clone the array to avoid direct state mutation
-        const updatedSection = [...newForm[section]]
-
-        // Determine how to update based on the section type
-        if (['args', 'hosts'].includes(section)) {
-          // Sections with single value entries
+        // Check if the section is an array or an object
+        if (Array.isArray(newForm[section])) {
+          // For array sections, clone the array and update the specific index
+          const updatedSection = [...newForm[section]]
           updatedSection[index] = { ...updatedSection[index], [name]: value }
-        } else if (['kwargs', 'metadata', 'prompts'].includes(section)) {
-          // Sections with key-value pairs (or additional fields for 'prompts')
-          updatedSection[index] = { ...updatedSection[index], [name]: value }
+          newForm[section] = updatedSection
+        } else if (typeof newForm[section] === 'object') {
+          // For object sections like 'schedule', update directly
+          newForm[section] = { ...newForm[section], [name]: value }
         }
-
-        newForm[section] = updatedSection
       } else {
         // Directly update top-level fields or handle nested updates
         if (name.includes('.')) {
           // Nested object updates, e.g., "schedule.year"
-          const keys = name.split('.')
-          newForm[keys[0]] = {
-            ...newForm[keys[0]],
-            [keys[1]]: value
+          const [sectionName, fieldName] = name.split('.')
+          newForm[sectionName] = {
+            ...newForm[sectionName],
+            [fieldName]: value
           }
         } else {
           // Top-level field updates
@@ -990,18 +1226,12 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         )
       case 1:
         return (
-          <Fragment>
-            <Typography variant='h6' gutterBottom>
-              Schedule Information
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <div>
-                  <p>TBD</p>
-                </div>
-              </Grid>
-            </Grid>
-          </Fragment>
+          <ScheduleSection
+            taskForm={taskForm}
+            handleFormChange={handleFormChange}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
         )
       case 2:
         return (

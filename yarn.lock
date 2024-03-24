@@ -5404,11 +5404,6 @@ react-is@^18.0.0, react-is@^18.2.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.2.0.tgz#199431eeaaa2e09f86427efbb4f1473edb47609b"
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
-react-js-cron@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/react-js-cron/-/react-js-cron-5.0.1.tgz#7228652679c4bf3bb8ecf44c08b7d92f6975741a"
-  integrity sha512-qHUb/qWeMvXklGW6/hLtH9CjboRU7pu2hHxGGErUDTjHDOLn/b6CZHvVsx/e3ak+UObwf4Y0BHSQJzpn1JpvvA==
-
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"

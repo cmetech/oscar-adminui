@@ -32,7 +32,6 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
-import { Cron } from 'react-js-cron'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -998,15 +997,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <div>
-                  <Cron
-                    value={cronValue}
-                    onChange={setCronValue}
-                    onError={cronError}
-                    className='oscar-cron'
-                    clearButtonProps={{
-                      type: 'default'
-                    }}
-                  />
+                  <p>TBD</p>
                 </div>
               </Grid>
             </Grid>

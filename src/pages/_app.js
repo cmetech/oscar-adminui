@@ -63,7 +63,6 @@ import '../../styles/oscar-chat.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
-import 'react-js-cron/dist/styles.css'
 
 const clientSideEmotionCache = createEmotionCache()
 const queryClient = new QueryClient()

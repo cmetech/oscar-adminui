@@ -662,7 +662,6 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 }
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
-// FIXME: Need to fix the Schedule section, so user can enter in schedule details
 // FIXME: Need to first update the config [DONE], then if successful, re-register the task [DONE], and schedule
 
 const UpdateTaskWizard = ({ onClose, ...props }) => {

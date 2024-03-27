@@ -945,11 +945,45 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
             if (registerTaskResponse.data) {
               // Trigger a refetch of the tasks list
+              // TODO: Query Task By Name /query
+              const queryTaskEndpoint = `/api/tasks/query/${task_name}`
+              const queryTaskResponse = await axios.post(queryTaskEndpoint, {}, { headers })
 
-              console.log('Task successfully configured and registered')
-              toast.success('Task successfully configured and registered')
+              if (queryTaskResponse.data && queryTaskResponse.status === 200) {
+                // console.log(queryTaskResponse.data)
+                const taskDetails = queryTaskResponse.data[0]
 
-              setRefetchTrigger(Date.now())
+                // Attempt to schedule tasks
+                // Check if the task is not disabled
+                if (taskDetails && taskDetails.status?.toLowerCase() !== 'disabled') {
+                  // Trigger scheduling for the task
+                  const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}` // Make sure to use the correct property for the task ID
+                  try {
+                    const scheduleResponse = await axios.post(scheduleTaskEndpoint, {}, { headers })
+
+                    if (scheduleResponse.status === 200) {
+                      console.log(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
+                      toast.success(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
+                    } else {
+                      console.error(`Failed to schedule task ${taskDetails.name}.`)
+                      toast.error(`Failed to schedule task ${taskDetails.name}.`)
+                    }
+                  } catch (error) {
+                    console.error(`Error scheduling task ${taskDetails.name}:`, error)
+                    toast.error(`Error scheduling task ${taskDetails.name}.`)
+                  }
+                } else {
+                  console.log(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
+
+                  // Optionally, show a message indicating the task is disabled and won't be scheduled
+                  toast.error(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
+                }
+
+                setRefetchTrigger(Date.now())
+              } else {
+                console.error('Task successfully configured and registered, Failed to query updated task details')
+                toast.error('Task successfully configured and registered, Failed to query updated task details')
+              }
             } else {
               console.error('Failed to register task, configuration updated successfully')
               toast.error('Failed to register task, configuration updated successfully')

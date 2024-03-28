@@ -296,7 +296,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='year'
-              name='schedule.year'
+              name='year'
               label='Year'
               fullWidth
               value={taskForm.schedule.year}
@@ -306,7 +306,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='month'
-              name='schedule.month'
+              name='month'
               label='Month'
               fullWidth
               value={taskForm.schedule.month}
@@ -316,7 +316,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='day'
-              name='schedule.day'
+              name='day'
               label='Day'
               fullWidth
               value={taskForm.schedule.day}
@@ -326,7 +326,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='hour'
-              name='schedule.hour'
+              name='hour'
               label='Hour'
               fullWidth
               value={taskForm.schedule.hour}
@@ -336,7 +336,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='minute'
-              name='schedule.minute'
+              name='minute'
               label='Minute'
               fullWidth
               value={taskForm.schedule.minute}
@@ -346,7 +346,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           <Grid item xs={12} sm={2}>
             <TextfieldStyled
               id='second'
-              name='schedule.second'
+              name='second'
               label='Second'
               fullWidth
               value={taskForm.schedule.second}
@@ -356,7 +356,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
           {/* <Grid item xs={12} sm={6}>
           <TextfieldStyled
             id='day_of_week'
-            name='schedule.day_of_week'
+            name='day_of_week'
             label='Day of Week'
             fullWidth
             value={taskForm.schedule.day_of_week}
@@ -662,7 +662,6 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 }
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
-// FIXME: Need to first update the config [DONE], then if successful, re-register the task [DONE], and schedule
 
 const UpdateTaskWizard = ({ onClose, ...props }) => {
   // Destructure all props here
@@ -831,6 +830,8 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
     setTaskForm(prevForm => {
       const newForm = { ...prevForm }
+
+      // console.log('Updating taskForm with: ', newForm)
 
       if (section) {
         // Check if the section is an array or an object
@@ -1216,7 +1217,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   label='Task Owner'
                   fullWidth
                   autoComplete='off'
-                  value={taskForm.owner}
+                  value={taskForm.owner.toUpperCase()}
                   onChange={handleFormChange}
                 />
               </Grid>
@@ -1228,7 +1229,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   label='Organization'
                   fullWidth
                   autoComplete='off'
-                  value={taskForm.organization}
+                  value={taskForm.organization.toUpperCase()}
                   onChange={handleFormChange}
                 />
               </Grid>

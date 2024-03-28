@@ -198,6 +198,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
           </MenuItem>
         )}
         <MenuItem
+          disabled
           sx={{ p: 0 }}
           onClick={() => {
             onExport()

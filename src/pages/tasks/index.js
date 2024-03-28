@@ -4,6 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
+import dayjs from 'dayjs'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -53,6 +54,7 @@ import Icon from 'src/@core/components/icon'
 // ** Views
 import TasksList from 'src/views/pages/tasks-management/TasksList'
 import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -91,6 +93,17 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     [theme.breakpoints.up('md')]: {
       minWidth: 130
+    }
+  }
+}))
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))
@@ -597,6 +610,69 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   )
 }
 
+const getMonthWeekday = (monthIndex, weekdayIndex, dayRank) => {
+  // Helper to find the nth weekday in a given month.
+  // For example, Find the 3rd Monday in January.
+  const today = dayjs()
+  const firstDayOfMonth = today.month(monthIndex).startOf('month')
+  const weekDay = firstDayOfMonth.day() // 0 (Sunday) to 6 (Saturday)
+
+  const deltaToFirstValidWeekDayInMonth = (weekDay > weekdayIndex ? 7 : 0) + weekdayIndex - weekDay
+
+  return firstDayOfMonth.add((dayRank - 1) * 7 + deltaToFirstValidWeekDayInMonth, 'day')
+}
+
+const shortcutsItems = [
+  {
+    label: "New Year's Day",
+    getValue: () => {
+      // (January 1)
+      const today = dayjs()
+
+      return today.month(0).date(1)
+    }
+  },
+  {
+    label: 'Birthday of MLK Jr.',
+    getValue: () => {
+      // (third Monday in January)
+      return getMonthWeekday(0, 1, 3)
+    }
+  },
+  {
+    label: 'Independence Day',
+    getValue: () => {
+      // (July 4)
+      const today = dayjs()
+
+      return today.month(6).date(4)
+    }
+  },
+  {
+    label: 'Labor Day',
+    getValue: () => {
+      // (first Monday in September)
+      return getMonthWeekday(8, 1, 1)
+    }
+  },
+  {
+    label: 'Thanksgiving Day',
+    getValue: () => {
+      // (fourth Thursday in November)
+      return getMonthWeekday(10, 4, 4)
+    }
+  },
+  {
+    label: 'Christmas Day',
+    getValue: () => {
+      // (December 25)
+      const today = dayjs()
+
+      return today.month(11).date(25)
+    }
+  }
+]
+
 const TasksManager = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -618,6 +694,8 @@ const TasksManager = () => {
   const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+
+  const [dateRange, setDateRange] = useState([null, null])
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -851,6 +929,29 @@ const TasksManager = () => {
                 {getDynamicText(value)}
               </Button>
             )}
+            {value === '2' && (
+              <DateRangePicker
+                localeText={{ start: 'Start Date', end: 'End Date' }}
+                value={dateRange}
+                onChange={newValue => {
+                  // console.log('Date range:', newValue)
+                  setDateRange(newValue)
+                }}
+                renderInput={(startProps, endProps) => (
+                  <Fragment>
+                    <TextfieldStyled {...startProps} />
+                    <Box sx={{ mx: 2 }}> to </Box>
+                    <TextfieldStyled {...endProps} />
+                  </Fragment>
+                )}
+
+                // slotProps={{
+                //   shortcuts: {
+                //     items: shortcutsItems
+                //   }
+                // }}
+              />
+            )}
             <MoreActionsDropdown
               onDelete={handleDelete}
               onExport={handleExport}
@@ -879,7 +980,7 @@ const TasksManager = () => {
             <TasksList set_total={setTaskTotal} total={taskTotal} />
           </TabPanel>
           <TabPanel value='2'>
-            <TaskHistoryList />
+            <TaskHistoryList dateRange={dateRange} />
           </TabPanel>
         </TabContext>
       </Grid>

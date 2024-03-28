@@ -47,6 +47,10 @@ import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// ** Date Calender Provider
+import { LocalizationProvider } from '@mui/x-date-pickers-pro'
+import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
+
 // ** Prismjs Styles
 import 'prismjs'
 import 'prismjs/themes/prism-tomorrow.css'
@@ -119,29 +123,31 @@ const App = props => {
       </Head>
 
       <SessionProvider session={pageProps.session}>
-        <QueryClientProvider client={queryClient}>
-          <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-            <SettingsConsumer>
-              {({ settings }) => {
-                return (
-                  <ThemeComponent settings={settings}>
-                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                      <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                        {getLayout(<Component {...pageProps} />)}
-                      </AclGuard>
-                    </Guard>
-                    <ReactHotToast>
-                      <Toaster
-                        position={settings.toastPosition}
-                        toastOptions={{ className: 'react-hot-toast', duration: 4000 }}
-                      />
-                    </ReactHotToast>
-                  </ThemeComponent>
-                )
-              }}
-            </SettingsConsumer>
-          </SettingsProvider>
-        </QueryClientProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <QueryClientProvider client={queryClient}>
+            <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+              <SettingsConsumer>
+                {({ settings }) => {
+                  return (
+                    <ThemeComponent settings={settings}>
+                      <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                        <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                          {getLayout(<Component {...pageProps} />)}
+                        </AclGuard>
+                      </Guard>
+                      <ReactHotToast>
+                        <Toaster
+                          position={settings.toastPosition}
+                          toastOptions={{ className: 'react-hot-toast', duration: 4000 }}
+                        />
+                      </ReactHotToast>
+                    </ThemeComponent>
+                  )
+                }}
+              </SettingsConsumer>
+            </SettingsProvider>
+          </QueryClientProvider>
+        </LocalizationProvider>
       </SessionProvider>
     </CacheProvider>
   )

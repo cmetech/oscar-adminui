@@ -498,6 +498,8 @@ const TaskHistoryList = props => {
     async (sort, q, column) => {
       let data = []
 
+      console.log(props.dateRange)
+
       setLoading(true)
       await axios
         .get('/api/tasks/history', {
@@ -517,7 +519,7 @@ const TaskHistoryList = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setServers]
+    [paginationModel.page, paginationModel.pageSize, setServers, props.dateRange]
   )
 
   useEffect(() => {

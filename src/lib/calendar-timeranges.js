@@ -16,6 +16,8 @@ import {
   formatRFC3339
 } from 'date-fns'
 
+import dayjs from 'dayjs'
+
 import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 
 export const predefinedRanges = [
@@ -70,3 +72,66 @@ export const predefinedRanges = [
     appearance: 'default'
   }
 ]
+
+export const predefinedRangesDayjs = [
+  {
+    label: 'Today',
+    getValue: () => {
+      // (January 1)
+      const startOfDay = dayjs().startOf('day')
+      const endOfDay = dayjs().endOf('day')
+
+      return [startOfDay, endOfDay]
+    }
+  },
+  {
+    label: 'Last 24hrs',
+    getValue: () => {
+      // (January 1)
+      const startOfDay = dayjs().subtract(1, 'day').startOf('day')
+      const endOfDay = dayjs().endOf('day')
+
+      return [startOfDay, endOfDay]
+    }
+  },
+  {
+    label: 'Yesterday',
+    getValue: () => {
+      // (January 1)
+      const startOfDay = dayjs().subtract(1, 'day').startOf('day')
+      const endOfDay = dayjs().subtract(1, 'day').endOf('day')
+
+      return [startOfDay, endOfDay]
+    }
+  },
+  {
+    label: 'This week',
+    getValue: () => {
+      const startOfWeek = dayjs().startOf('week')
+      const endOfWeek = dayjs().endOf('week')
+
+      return [startOfWeek, endOfWeek]
+    }
+  },
+  {
+    label: 'Last 7 days',
+    getValue: () => {
+      const startOfLastWeek = dayjs().subtract(7, 'day')
+      const endOfLastWeek = dayjs()
+
+      return [startOfLastWeek, endOfLastWeek]
+    }
+  }
+]
+
+const getMonthWeekday = (monthIndex, weekdayIndex, dayRank) => {
+  // Helper to find the nth weekday in a given month.
+  // For example, Find the 3rd Monday in January.
+  const today = dayjs()
+  const firstDayOfMonth = today.month(monthIndex).startOf('month')
+  const weekDay = firstDayOfMonth.day() // 0 (Sunday) to 6 (Saturday)
+
+  const deltaToFirstValidWeekDayInMonth = (weekDay > weekdayIndex ? 7 : 0) + weekdayIndex - weekDay
+
+  return firstDayOfMonth.add((dayRank - 1) * 7 + deltaToFirstValidWeekDayInMonth, 'day')
+}

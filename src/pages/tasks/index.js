@@ -4,7 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import dayjs from 'dayjs'
+import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -610,69 +610,6 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   )
 }
 
-const getMonthWeekday = (monthIndex, weekdayIndex, dayRank) => {
-  // Helper to find the nth weekday in a given month.
-  // For example, Find the 3rd Monday in January.
-  const today = dayjs()
-  const firstDayOfMonth = today.month(monthIndex).startOf('month')
-  const weekDay = firstDayOfMonth.day() // 0 (Sunday) to 6 (Saturday)
-
-  const deltaToFirstValidWeekDayInMonth = (weekDay > weekdayIndex ? 7 : 0) + weekdayIndex - weekDay
-
-  return firstDayOfMonth.add((dayRank - 1) * 7 + deltaToFirstValidWeekDayInMonth, 'day')
-}
-
-const shortcutsItems = [
-  {
-    label: "New Year's Day",
-    getValue: () => {
-      // (January 1)
-      const today = dayjs()
-
-      return today.month(0).date(1)
-    }
-  },
-  {
-    label: 'Birthday of MLK Jr.',
-    getValue: () => {
-      // (third Monday in January)
-      return getMonthWeekday(0, 1, 3)
-    }
-  },
-  {
-    label: 'Independence Day',
-    getValue: () => {
-      // (July 4)
-      const today = dayjs()
-
-      return today.month(6).date(4)
-    }
-  },
-  {
-    label: 'Labor Day',
-    getValue: () => {
-      // (first Monday in September)
-      return getMonthWeekday(8, 1, 1)
-    }
-  },
-  {
-    label: 'Thanksgiving Day',
-    getValue: () => {
-      // (fourth Thursday in November)
-      return getMonthWeekday(10, 4, 4)
-    }
-  },
-  {
-    label: 'Christmas Day',
-    getValue: () => {
-      // (December 25)
-      const today = dayjs()
-
-      return today.month(11).date(25)
-    }
-  }
-]
-
 const TasksManager = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -946,12 +883,11 @@ const TasksManager = () => {
                     <TextfieldStyled {...endProps} />
                   </Fragment>
                 )}
-
-                // slotProps={{
-                //   shortcuts: {
-                //     items: shortcutsItems
-                //   }
-                // }}
+                slotProps={{
+                  shortcuts: {
+                    items: predefinedRangesDayjs
+                  }
+                }}
               />
             )}
             <MoreActionsDropdown

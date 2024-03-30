@@ -27,7 +27,7 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts & Incidents',
+      title: 'Alerts & Events',
       icon: 'mdi:bell-alert',
       path: '/services',
       action: 'read',
@@ -36,28 +36,28 @@ const navigation = () => {
     {
       title: 'Availability',
       icon: 'mdi:list-status',
-      path: '/services',
+      path: '/services/availability',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'Capacity',
       icon: 'mdi:thermometer-check',
-      path: '/services',
+      path: '/services/capacity',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'Performance',
       icon: 'mdi:chart-areaspline-variant',
-      path: '/services',
+      path: '/services/performance',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'SLA',
       icon: 'mdi:check-decagram',
-      path: '/services'
+      path: '/services/sla'
     },
     {
       sectionTitle: 'AI/Automation',
@@ -65,7 +65,7 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Tasks',
+      title: 'Automations',
       path: '/tasks',
       icon: 'mdi:arrow-decision-auto',
       action: 'read',

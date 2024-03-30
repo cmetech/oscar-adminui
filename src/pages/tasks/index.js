@@ -55,6 +55,7 @@ import Icon from 'src/@core/components/icon'
 import TasksList from 'src/views/pages/tasks-management/TasksList'
 import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -868,22 +869,26 @@ const TasksManager = () => {
             )}
             {value === '2' && (
               <DateRangePicker
-                localeText={{ start: 'Start Date', end: 'End Date' }}
+                calendars={2}
                 value={dateRange}
                 disableFuture
-                views={['year', 'month', 'day']}
+                views={['day', 'hours']}
+                timeSteps={{ minute: 15 }}
+                viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
                   // console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
-                renderInput={(startProps, endProps) => (
-                  <Fragment>
-                    <TextfieldStyled {...startProps} />
-                    <Box sx={{ mx: 2 }}> to </Box>
-                    <TextfieldStyled {...endProps} />
-                  </Fragment>
-                )}
                 slotProps={{
+                  field: { dateSeparator: 'to' },
+                  textField: ({ position }) => ({
+                    size: 'small',
+                    color: position === 'start' ? 'secondary' : 'secondary',
+                    focused: true,
+                    InputProps: {
+                      endAdornment: <Icon icon='mdi:calendar' />
+                    }
+                  }),
                   shortcuts: {
                     items: predefinedRangesDayjs
                   }

@@ -933,6 +933,8 @@ const TasksManager = () => {
               <DateRangePicker
                 localeText={{ start: 'Start Date', end: 'End Date' }}
                 value={dateRange}
+                disableFuture
+                views={['year', 'month', 'day']}
                 onChange={newValue => {
                   // console.log('Date range:', newValue)
                   setDateRange(newValue)

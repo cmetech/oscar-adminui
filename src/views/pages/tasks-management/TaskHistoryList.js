@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import themeConfig from 'src/configs/themeConfig'
 import { styled, useTheme } from '@mui/material/styles'
 import { atom, useAtom, useSetAtom } from 'jotai'
+import { formatISO } from 'date-fns'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -125,16 +126,7 @@ const TaskHistoryList = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
-  const [serverIds, setServerIds] = useAtom(serverIdsAtom)
-  const [servers, setServers] = useAtom(serverIdsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
-
-  // ** Dialog
-  const [editDialog, setEditDialog] = useState(false)
-  const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentServer, setCurrentServer] = useState(null)
-
-  const editmode = false
 
   const getDetailPanelContent = useCallback(({ row }) => <TaskHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -148,7 +140,6 @@ const TaskHistoryList = props => {
     {
       flex: 0.02,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -177,7 +168,6 @@ const TaskHistoryList = props => {
     {
       flex: 0.02,
       field: 'worker',
-      editable: editmode,
       headerName: t('Worker'),
       renderCell: params => {
         const { row } = params
@@ -206,7 +196,6 @@ const TaskHistoryList = props => {
     {
       flex: 0.015,
       field: 'status',
-      editable: editmode,
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -246,7 +235,6 @@ const TaskHistoryList = props => {
       flex: 0.015,
       minWidth: 60,
       field: 'received',
-      editable: editmode,
       headerName: t('Received At'),
       renderCell: params => {
         const { row } = params
@@ -274,7 +262,6 @@ const TaskHistoryList = props => {
       flex: 0.015,
       minWidth: 60,
       field: 'started',
-      editable: editmode,
       headerName: t('Started At'),
       renderCell: params => {
         const { row } = params
@@ -302,7 +289,6 @@ const TaskHistoryList = props => {
       flex: 0.015,
       minWidth: 60,
       field: 'completed',
-      editable: editmode,
       headerName: t('Completed At'),
       renderCell: params => {
         const { row } = params
@@ -328,212 +314,71 @@ const TaskHistoryList = props => {
     }
   ]
 
-  const handleUpdateDialogClose = () => {
-    setEditDialog(false)
-  }
-
-  const handleDisableDialogClose = () => {
-    setDeactivateDialog(false)
-  }
-
-  const handleDeleteDialogClose = () => {
-    setDeleteDialog(false)
-  }
-
-  const EditDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={editDialog}
-        onClose={handleUpdateDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentServer?.hostname?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentServer?.id ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleUpdateDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Server Information
-            </Typography>
-            <Typography variant='body2'>Updates to server information will be effective immediately.</Typography>
-          </Box>
-          {currentServer && (
-            <UpdateServerWizard
-              currentServer={currentServer}
-              rows={rows}
-              setRows={setRows}
-              onClose={handleUpdateDialogClose}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  const DeleteDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={deleteDialog}
-        onClose={handleDeleteDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentServer?.hostname?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentServer?.id ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this server.
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
-          </Button>
-          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }
-
-  const handleDeleteDialogSubmit = async () => {
-    try {
-      const apiToken = session?.data?.user?.apiToken
-
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-      }
-
-      const endpoint = `/api/inventory/servers/${currentServer.id}`
-      const response = await axios.delete(endpoint, { headers })
-
-      if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentServer.id)
-
-        setRows(updatedRows)
-        setDeleteDialog(false)
-
-        // props.set_total(props.total - 1)
-
-        setRefetchTrigger(Date.now())
-
-        toast.success('Successfully deleted Server')
-      }
-    } catch (error) {
-      console.error('Failed to delete Server', error)
-      toast.error('Failed to delete Server')
-    }
-  }
-
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, q, column) => {
+    async () => {
       let data = []
 
-      console.log(props.dateRange)
+      // Default start and end times to the last 24 hours if not defined
+      const [startDate, endDate] = props.dateRange || []
+
+      // Assuming props.dateRange contains Date objects or is undefined
+      const startTime =
+        props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
+
+      console.log('Start Time:', startTime)
+      console.log('End Time:', endTime)
+      console.log('Search Value:', searchValue)
+      console.log('Sort:', sort)
+      console.log('Sort Column:', sortColumn)
+      console.log('Page:', paginationModel.page)
+      console.log('Page Size:', paginationModel.pageSize)
 
       setLoading(true)
       await axios
         .get('/api/tasks/history', {
           params: {
-            q,
-            sort,
-            column
+            q: searchValue,
+            sort: sort,
+            column: sortColumn,
+            skip: paginationModel.page + 1,
+            limit: paginationModel.pageSize,
+            start_time: startTime,
+            end_time: endTime
           }
         })
         .then(res => {
-          setRowCount(res.data.total)
-          data = res.data.rows
-          setServers(data)
+          console.log('total_pages', res.data.total_pages)
+          console.log('total_records', res.data.total_records)
+
+          setRowCount(res.data.total_records || 0)
+          setRows(res.data.records || [])
         })
 
-      await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
+      // await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setServers, props.dateRange]
+    [paginationModel.page, paginationModel.pageSize, sort, sortColumn, props.dateRange]
   )
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
-  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+    fetchData()
+  }, [refetchTrigger, fetchData])
 
   const handleSortModel = newModel => {
     if (newModel.length) {
       setSort(newModel[0].sort)
       setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, searchValue, newModel[0].field)
+      setSearchValue(searchValue)
+      fetchData()
     } else {
-      setSort('asc')
-      setSortColumn('name')
+      setSort('desc')
+      setSortColumn('succeeded')
     }
   }
 
@@ -543,7 +388,7 @@ const TaskHistoryList = props => {
 
   const handleSearch = value => {
     setSearchValue(value)
-    fetchData(sort, value, sortColumn)
+    fetchData()
   }
 
   const handleRowSelection = newRowSelectionModel => {
@@ -558,9 +403,6 @@ const TaskHistoryList = props => {
 
     // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
-
-    // Update the Jotai atom with the new selection model
-    setServerIds(newRowSelectionModel)
   }
 
   return (
@@ -591,8 +433,9 @@ const TaskHistoryList = props => {
           paginationMode='server'
           paginationModel={paginationModel}
           onSortModelChange={handleSortModel}
-          pageSizeOptions={[10, 25, 50]}
+          pageSizeOptions={[5, 10, 25, 50]}
           onPageChange={newPage => setPaginationModel(oldModel => ({ ...oldModel, page: newPage }))}
+          onPageSizeChange={newPageSize => setPaginationModel(oldModel => ({ ...oldModel, pageSize: newPageSize }))}
           onPaginationModelChange={setPaginationModel}
           components={{ Toolbar: ServerSideToolbar }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
@@ -622,8 +465,6 @@ const TaskHistoryList = props => {
             }
           }}
         />
-        <EditDialog />
-        <DeleteDialog />
       </Card>
     </Box>
   )

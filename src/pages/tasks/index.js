@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
+import dayjs from 'dayjs'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -64,6 +65,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AddTaskWizard from 'src/views/pages/tasks-management/forms/AddTaskWizard'
 import toast from 'react-hot-toast'
 import { useAtom } from 'jotai'
+import { da } from 'date-fns/locale'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -870,7 +872,9 @@ const TasksManager = () => {
             {value === '2' && (
               <DateRangePicker
                 calendars={2}
+                closeOnSelect={false}
                 value={dateRange}
+                defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
                 disableFuture
                 views={['day', 'hours']}
                 timeSteps={{ minute: 15 }}
@@ -892,6 +896,10 @@ const TasksManager = () => {
                   shortcuts: {
                     items: predefinedRangesDayjs
                   }
+
+                  // actionBar: {
+                  //   actions: ['cancel', 'accept']
+                  // }
                 }}
               />
             )}

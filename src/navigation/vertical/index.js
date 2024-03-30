@@ -89,6 +89,13 @@ const navigation = () => {
       path: '/administration/inventory',
       action: 'manage',
       subject: 'settings-nav'
+    },
+    {
+      title: 'Services',
+      icon: 'mdi:cog',
+      path: '/administration/services',
+      action: 'manage',
+      subject: 'settings-nav'
     }
   ]
 }

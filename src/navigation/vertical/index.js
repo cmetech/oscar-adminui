@@ -92,7 +92,7 @@ const navigation = () => {
     },
     {
       title: 'Services',
-      icon: 'mdi:cog',
+      icon: 'mdi:service-toolbox',
       path: '/administration/services',
       action: 'manage',
       subject: 'settings-nav'

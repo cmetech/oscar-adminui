@@ -330,13 +330,13 @@ const TaskHistoryList = props => {
         props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
       const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
 
-      console.log('Start Time:', startTime)
-      console.log('End Time:', endTime)
-      console.log('Search Value:', searchValue)
-      console.log('Sort:', sort)
-      console.log('Sort Column:', sortColumn)
-      console.log('Page:', paginationModel.page)
-      console.log('Page Size:', paginationModel.pageSize)
+      // console.log('Start Time:', startTime)
+      // console.log('End Time:', endTime)
+      // console.log('Search Value:', searchValue)
+      // console.log('Sort:', sort)
+      // console.log('Sort Column:', sortColumn)
+      // console.log('Page:', paginationModel.page)
+      // console.log('Page Size:', paginationModel.pageSize)
 
       setLoading(true)
       await axios
@@ -352,8 +352,8 @@ const TaskHistoryList = props => {
           }
         })
         .then(res => {
-          console.log('total_pages', res.data.total_pages)
-          console.log('total_records', res.data.total_records)
+          // console.log('total_pages', res.data.total_pages)
+          // console.log('total_records', res.data.total_records)
 
           setRowCount(res.data.total_records || 0)
           setRows(res.data.records || [])

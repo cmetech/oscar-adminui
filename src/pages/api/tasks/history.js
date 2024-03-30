@@ -9,14 +9,14 @@ async function handler(req, res) {
     const { q = '', column = '', sort = '', type, start_time, end_time, skip = '1', limit = '100' } = query
     const queryLowered = q.toLowerCase()
 
-    console.log('start_time', start_time)
-    console.log('end_time', end_time)
-    console.log('skip', skip)
-    console.log('limit', limit)
-    console.log('column', column)
-    console.log('sort', sort)
-    console.log('type', type)
-    console.log('query', q)
+    // console.log('start_time', start_time)
+    // console.log('end_time', end_time)
+    // console.log('skip', skip)
+    // console.log('limit', limit)
+    // console.log('column', column)
+    // console.log('sort', sort)
+    // console.log('type', type)
+    // console.log('query', q)
 
     try {
       // Construct the request URL with query parameters
@@ -38,8 +38,8 @@ async function handler(req, res) {
       if (response?.data) {
         // console.log('response', response?.data)
 
-        console.log('total_pages', response.data.total_pages)
-        console.log('total_records', response.data.total_records)
+        // console.log('total_pages', response.data.total_pages)
+        // console.log('total_records', response.data.total_records)
 
         // const dataAsc = response.data.records.sort((a, b) => (a[column] < b[column] ? -1 : 1))
         // const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()

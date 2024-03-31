@@ -567,7 +567,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
   const dynamicFields = () => {
     switch (tab) {
-      case '1': // Datacenters
+      case '1':
         return <AddTaskWizard onSuccess={handleSuccess} />
 
       // Add cases for other tabs with different fields
@@ -862,6 +862,7 @@ const TasksManager = () => {
               <Fragment>
                 <Button
                   variant='contained'
+                  disabled
                   color='secondary'
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}

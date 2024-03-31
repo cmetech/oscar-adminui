@@ -1020,8 +1020,24 @@ const TasksList = props => {
     fetchData(sort, value, sortColumn)
   }
 
-  const handleRegisterTasks = () => {
+  const handleRegisterTasks = async () => {
     console.log('Registering Tasks')
+    try {
+      const response = await axios.post('/api/tasks/register', {})
+
+      // Handle success response
+      console.log('Tasks successfully registered:', response.data)
+
+      // Optionally, use a UI notification library to inform the user
+      // For example, if you're using react-hot-toast
+      toast.success('Tasks successfully registered')
+    } catch (error) {
+      console.error('Error registering tasks:', error)
+
+      // Handle error response
+      // Optionally, use a UI notification library to inform the user about the error
+      toast.error('Failed to register tasks')
+    }
   }
 
   const handleRowSelection = newRowSelectionModel => {

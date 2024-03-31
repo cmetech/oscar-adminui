@@ -1234,7 +1234,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   fullWidth
                   label='Description'
                   name='description'
-                  autocomplete='off'
+                  autoComplete='off'
                   value={taskForm.description || 'N/A'}
                   onChange={handleFormChange}
                   multiline

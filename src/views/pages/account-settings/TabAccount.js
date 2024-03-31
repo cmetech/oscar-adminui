@@ -152,6 +152,9 @@ const stateOptions = Object.values(StateEnum)
 const countryOptions = Object.values(CountryEnum)
 const languageOptions = Object.values(LanguageEnum)
 
+// FIXME: Language field is not updating
+// FIXME: Test and fix the change password
+
 const TabAccount = () => {
   const session = useSession()
   const userFullName = session?.data?.user?.name || 'John Doe'

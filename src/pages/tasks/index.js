@@ -160,7 +160,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
 
   return (
     <Fragment>
-      <IconButton color='warning' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
+      <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
         <Icon icon='mdi:menu' />
       </IconButton>
       <Menu
@@ -859,15 +859,25 @@ const TasksManager = () => {
           <Typography variant='h4'>{t('Task Management')}</Typography>
           <Box display='flex' alignItems='center'>
             {value === '1' && (
-              <Button
-                variant='contained'
-                color='warning'
-                sx={{ marginRight: 1 }}
-                startIcon={<Icon icon='mdi:plus' />}
-                onClick={handleOpenModal}
-              >
-                {getDynamicText(value)}
-              </Button>
+              <Fragment>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  sx={{ marginRight: 1 }}
+                  startIcon={<Icon icon='mdi:plus' />}
+                  onClick={handleOpenModal}
+                >
+                  {getDynamicText(value)}
+                </Button>
+                <MoreActionsDropdown
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  onEnable={handleEnable}
+                  onDisable={handleDisable}
+                  onUpload={handleUpload}
+                  tabValue={value}
+                />
+              </Fragment>
             )}
             {value === '2' && (
               <DateRangePicker
@@ -903,14 +913,6 @@ const TasksManager = () => {
                 }}
               />
             )}
-            <MoreActionsDropdown
-              onDelete={handleDelete}
-              onExport={handleExport}
-              onEnable={handleEnable}
-              onDisable={handleDisable}
-              onUpload={handleUpload}
-              tabValue={value}
-            />
           </Box>
         </Box>
         <TabContext value={value}>

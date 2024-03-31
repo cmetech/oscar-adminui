@@ -69,7 +69,8 @@ import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import TaskHistoryDetailPanel from 'src/views/pages/tasks-management/TaskHistoryDetailPanel'
 import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
-import { setRef } from '@mui/material'
+import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
+import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -437,7 +438,11 @@ const TaskHistoryList = props => {
           onPageChange={newPage => setPaginationModel(oldModel => ({ ...oldModel, page: newPage }))}
           onPageSizeChange={newPageSize => setPaginationModel(oldModel => ({ ...oldModel, pageSize: newPageSize }))}
           onPaginationModelChange={setPaginationModel}
-          components={{ Toolbar: ServerSideToolbar }}
+          components={{
+            Toolbar: ServerSideToolbar,
+            NoRowsOverlay: () => <NoRowsOverlay message='No Tasks History Found' />,
+            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
           getDetailPanelHeight={getDetailPanelHeight}

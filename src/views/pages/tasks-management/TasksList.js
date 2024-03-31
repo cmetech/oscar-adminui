@@ -69,6 +69,8 @@ import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
 import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
+import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
+import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -1018,6 +1020,10 @@ const TasksList = props => {
     fetchData(sort, value, sortColumn)
   }
 
+  const handleRegisterTasks = () => {
+    console.log('Registering Tasks')
+  }
+
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
@@ -1066,7 +1072,13 @@ const TasksList = props => {
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
           onPaginationModelChange={setPaginationModel}
-          components={{ Toolbar: ServerSideToolbar }}
+          components={{
+            Toolbar: ServerSideToolbar,
+            NoRowsOverlay: () => (
+              <NoRowsOverlay message='No Tasks Found' buttonText='Register Tasks' onButtonClick={handleRegisterTasks} />
+            ),
+            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
           getDetailPanelHeight={getDetailPanelHeight}

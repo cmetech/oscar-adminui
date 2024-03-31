@@ -96,6 +96,9 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
+// TODO: Test with no Tasks to see if the NoRowsOverlay is displayed with the Register Tasks button
+// FIXME: Deleting all tasks works, but I am reloading the tasks automatically, I should now use the Overlay Register Tasks button
+
 const TasksList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)

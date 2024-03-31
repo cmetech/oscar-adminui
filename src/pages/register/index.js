@@ -83,19 +83,47 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
   }
 }))
 
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  }
+}))
+
 const schema = yup.object().shape({
   firstname: yup.string().max(20).required(),
   lastname: yup.string().max(20).required(),
   username: yup.string().max(20).required(),
+  phone_number: yup.string().max(20),
+  organization: yup.string().max(50),
   email: yup.string().email().required(),
   password: yup.string().min(5).required()
 })
 
 const defaultValues = {
-  username: 'Enter Username',
-  firstname: 'Enter First Name',
-  lastname: 'Enter Last Name',
-  email: 'user@email.com'
+  username: '',
+  firstname: '',
+  lastname: '',
+  phone_number: '',
+  organization: '',
+  address: '',
+  city: '',
+  state: '',
+  zip: '',
+  country: '',
+  language: 'en',
+  timezone: '',
+  email: ''
 }
 
 const RegisterPage = () => {
@@ -130,6 +158,14 @@ const RegisterPage = () => {
         username: data.username,
         first_name: data.firstname,
         last_name: data.lastname,
+        phone_number: data.phone_number ? data.phone_number : '',
+        organization: data.organization ? data.organization : '',
+        address: data.address ? data.address : '',
+        city: data.city ? data.city : '',
+        state: data.state ? data.state : '',
+        postal_code: data.zip ? data.zip : '',
+        language: data.language ? data.language : 'en',
+        timezone: data.timezone ? data.timezone : 'UTC',
         email: data.email,
         password: data.password,
         is_active: 1,
@@ -211,7 +247,7 @@ const RegisterPage = () => {
                   <Typography variant='h5' sx={{ fontWeight: 600, mb: 1.5 }}>
                     Adventure starts here 🚀
                   </Typography>
-                  <Typography variant='body2'>Make your app management easy and fun!</Typography>
+                  <Typography variant='body2'>Please provide account details</Typography>
                 </Box>
                 <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
                   <FormControl fullWidth sx={{ mb: 4 }}>
@@ -220,7 +256,7 @@ const RegisterPage = () => {
                       control={control}
                       rules={{ required: true }}
                       render={({ field: { value, onChange, onBlur } }) => (
-                        <TextField
+                        <TextfieldStyled
                           autoFocus
                           label='Username'
                           value={value}
@@ -241,7 +277,7 @@ const RegisterPage = () => {
                       control={control}
                       rules={{ required: true }}
                       render={({ field: { value, onChange, onBlur } }) => (
-                        <TextField
+                        <TextfieldStyled
                           autoFocus
                           label='First Name'
                           value={value}
@@ -262,7 +298,7 @@ const RegisterPage = () => {
                       control={control}
                       rules={{ required: true }}
                       render={({ field: { value, onChange, onBlur } }) => (
-                        <TextField
+                        <TextfieldStyled
                           autoFocus
                           label='Last Name'
                           value={value}
@@ -279,11 +315,53 @@ const RegisterPage = () => {
                   </FormControl>
                   <FormControl fullWidth sx={{ mb: 4 }}>
                     <Controller
+                      name='phone_number'
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field: { value, onChange, onBlur } }) => (
+                        <TextfieldStyled
+                          autoFocus
+                          label='Phone Number'
+                          value={value}
+                          onBlur={onBlur}
+                          onChange={onChange}
+                          error={Boolean(errors.phone_number)}
+                          placeholder='Enter Phone Number'
+                        />
+                      )}
+                    />
+                    {errors.phone_number && (
+                      <FormHelperText sx={{ color: 'error.main' }}>{errors.phone_number.message}</FormHelperText>
+                    )}
+                  </FormControl>
+                  <FormControl fullWidth sx={{ mb: 4 }}>
+                    <Controller
+                      name='organization'
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field: { value, onChange, onBlur } }) => (
+                        <TextfieldStyled
+                          autoFocus
+                          label='Organization'
+                          value={value}
+                          onBlur={onBlur}
+                          onChange={onChange}
+                          error={Boolean(errors.phone_number)}
+                          placeholder='Enter Organization'
+                        />
+                      )}
+                    />
+                    {errors.organization && (
+                      <FormHelperText sx={{ color: 'error.main' }}>{errors.organization.message}</FormHelperText>
+                    )}
+                  </FormControl>
+                  <FormControl fullWidth sx={{ mb: 4 }}>
+                    <Controller
                       name='email'
                       control={control}
                       rules={{ required: true }}
                       render={({ field: { value, onChange, onBlur } }) => (
-                        <TextField
+                        <TextfieldStyled
                           autoFocus
                           label='Email'
                           value={value}
@@ -299,9 +377,9 @@ const RegisterPage = () => {
                     )}
                   </FormControl>
                   <FormControl fullWidth>
-                    <InputLabel htmlFor='auth-register-password' error={Boolean(errors.password)}>
+                    <InputLabelStyled htmlFor='auth-register-password' error={Boolean(errors.password)}>
                       Password
-                    </InputLabel>
+                    </InputLabelStyled>
                     <Controller
                       name='password'
                       control={control}

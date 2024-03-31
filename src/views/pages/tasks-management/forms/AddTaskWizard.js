@@ -657,7 +657,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
   )
 }
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// TODO: Test and complete the AddTaskWizard component
 
 const AddTaskWizard = ({ onClose }) => {
   // ** States

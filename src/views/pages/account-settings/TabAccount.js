@@ -153,7 +153,6 @@ const countryOptions = Object.values(CountryEnum)
 const languageOptions = Object.values(LanguageEnum)
 
 // FIXME: Language field is not updating
-// FIXME: Test and fix the change password
 
 const TabAccount = () => {
   const session = useSession()
@@ -265,6 +264,7 @@ const TabAccount = () => {
       is_active: formData.is_active,
       is_superuser: formData.is_superuser,
       is_verified: formData.is_verified,
+      language: formData.language || 'English', // Make sure this is fetched and set initially
       email: formData.email // Make sure this is fetched and set initially
       // Any other fields you wish to preserve but not change
     }

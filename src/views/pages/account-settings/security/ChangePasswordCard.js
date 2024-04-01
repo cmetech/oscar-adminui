@@ -1,5 +1,7 @@
 // ** React Imports
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import axios from 'axios'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -15,6 +17,8 @@ import FormControl from '@mui/material/FormControl'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormHelperText from '@mui/material/FormHelperText'
+import { styled } from '@mui/material/styles'
+import TextField from '@mui/material/TextField'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -25,6 +29,40 @@ import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
+// Replace 'defaultBorderColor' with your default border color.
+
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  }
+}))
+
+const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
+  // Style the border color
+  // '& .MuiOutlinedInput-notchedOutline': {
+  //   borderColor: 'inherit' // Replace with your default border color
+  // },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'inherit' // Replace with your hover state border color
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // Border color when focused
+  }
+
+  // You can add more styles here for other parts of the input
+}))
+
 const defaultValues = {
   newPassword: '',
   currentPassword: '',
@@ -32,7 +70,7 @@ const defaultValues = {
 }
 
 const schema = yup.object().shape({
-  currentPassword: yup.string().min(8).required(),
+  currentPassword: yup.string().min(3).required(),
   newPassword: yup
     .string()
     .min(8)
@@ -48,6 +86,12 @@ const schema = yup.object().shape({
 })
 
 const ChangePasswordCard = () => {
+  const session = useSession()
+
+  console.log(session)
+
+  const apiToken = session?.data?.user?.apiToken
+
   // ** States
   const [values, setValues] = useState({
     showNewPassword: false,
@@ -87,9 +131,26 @@ const ChangePasswordCard = () => {
     event.preventDefault()
   }
 
-  const onPasswordFormSubmit = () => {
-    toast.success('Password Changed Successfully')
-    reset(defaultValues)
+  const onPasswordFormSubmit = async data => {
+    // ** API call to update password
+    const submitData = {
+      password: data.confirmNewPassword
+    }
+
+    try {
+      await axios.patch('/api/users/me', submitData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiToken}` // Make sure apiToken is correctly retrieved from session
+        }
+      })
+
+      toast.success('Password updated successfully') // Notify user of success
+      // Implement any additional logic needed after successful update
+    } catch (error) {
+      console.error('Failed to update password:', error)
+      toast.error('Failed to update password') // Notify user of failure
+    }
   }
 
   return (
@@ -100,15 +161,15 @@ const ChangePasswordCard = () => {
           <Grid container spacing={5}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor='input-current-password' error={Boolean(errors.currentPassword)}>
+                <InputLabelStyled htmlFor='input-current-password' error={Boolean(errors.currentPassword)}>
                   Current Password
-                </InputLabel>
+                </InputLabelStyled>
                 <Controller
                   name='currentPassword'
                   control={control}
                   rules={{ required: true }}
                   render={({ field: { value, onChange } }) => (
-                    <OutlinedInput
+                    <OutlinedInputStyled
                       value={value}
                       label='Current Password'
                       onChange={onChange}
@@ -138,15 +199,15 @@ const ChangePasswordCard = () => {
           <Grid container spacing={5} sx={{ mt: 0 }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor='input-new-password' error={Boolean(errors.newPassword)}>
+                <InputLabelStyled htmlFor='input-new-password' error={Boolean(errors.newPassword)}>
                   New Password
-                </InputLabel>
+                </InputLabelStyled>
                 <Controller
                   name='newPassword'
                   control={control}
                   rules={{ required: true }}
                   render={({ field: { value, onChange } }) => (
-                    <OutlinedInput
+                    <OutlinedInputStyled
                       value={value}
                       label='New Password'
                       onChange={onChange}
@@ -174,15 +235,15 @@ const ChangePasswordCard = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor='input-confirm-new-password' error={Boolean(errors.confirmNewPassword)}>
+                <InputLabelStyled htmlFor='input-confirm-new-password' error={Boolean(errors.confirmNewPassword)}>
                   Confirm New Password
-                </InputLabel>
+                </InputLabelStyled>
                 <Controller
                   name='confirmNewPassword'
                   control={control}
                   rules={{ required: true }}
                   render={({ field: { value, onChange } }) => (
-                    <OutlinedInput
+                    <OutlinedInputStyled
                       value={value}
                       label='Confirm New Password'
                       onChange={onChange}

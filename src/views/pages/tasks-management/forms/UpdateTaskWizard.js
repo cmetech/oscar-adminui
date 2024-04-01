@@ -80,6 +80,8 @@ const initialTaskFormState = {
   prompts: [{ prompt: '', default_value: '', value: '' }],
   hosts: [{ ip_address: '' }],
   datacenter: '',
+  promptForCredentials: false,
+  promptForAPIKey: false,
   environments: [],
   components: []
 }
@@ -533,6 +535,32 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
       <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
         Prompts
       </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <FormControlLabel
+            control={
+              <CheckboxStyled
+                checked={taskForm.promptForCredentials}
+                InputProps={{ readOnly: true }}
+                name='promptForCredentials'
+              />
+            }
+            label='Prompt for Credentials?'
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <FormControlLabel
+            control={
+              <CheckboxStyled
+                checked={taskForm.promptForAPIKey}
+                InputProps={{ readOnly: true }}
+                name='promptForAPIKey'
+              />
+            }
+            label='Prompt for APIKey?'
+          />
+        </Grid>
+      </Grid>
       {prompts.map((prompt, index) => (
         <Grid container spacing={2} key={`prompt-${index}`}>
           <Grid item xs={12} sm={6}>
@@ -823,7 +851,12 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     // Handling both synthetic events and direct value assignments from Autocomplete
     const target = event.target || event
     const name = target.name
+    const type = target?.type || 'text'
     let value = target.value
+
+    if (type === 'checkbox') {
+      value = target.checked
+    }
 
     // Convert string values to lowercase, except for specific fields
     if (
@@ -1027,7 +1060,9 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         hosts: currentTask.hosts.map(host => ({ ip_address: host })) || [],
         datacenter: currentTask.datacenter || '',
         environments: currentTask.environments.map(environment => ({ value: environment })) || [],
-        components: currentTask.components.map(component => ({ value: component })) || []
+        components: currentTask.components.map(component => ({ value: component })) || [],
+        promptForCredentials: currentTask.promptForCredentials || false,
+        promptForAPIKey: currentTask.promptForAPIKey || false
       }
       setTaskForm(resetTaskForm)
     } else {
@@ -1366,6 +1401,50 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
       case 4:
         return (
           <Fragment>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <FormControlLabel
+                  control={
+                    <CheckboxStyled
+                      checked={taskForm.promptForCredentials}
+                      onChange={() =>
+                        handleFormChange({
+                          target: { name: 'promptForCredentials', value: !taskForm.promptForCredentials }
+                        })
+                      }
+                      name='promptForCredentials'
+                    />
+                  }
+                  label='Prompt for Credentials?'
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControlLabel
+                  control={
+                    <CheckboxStyled
+                      checked={taskForm.promptForAPIKey}
+                      onChange={() =>
+                        handleFormChange({ target: { name: 'promptForAPIKey', value: !taskForm.promptForAPIKey } })
+                      }
+                      name='promptForAPIKey'
+                    />
+                  }
+                  label='Prompt for APIKey?'
+                />
+              </Grid>
+            </Grid>
+            {/* <Divider
+              style={{
+                marginLeft: '5px',
+                marginTop: '10px',
+                marginBottom: '10px',
+                marginRight: '5px',
+                width: '100%',
+                borderWidth: '1px',
+                borderColor: 'black'
+              }}
+              variant='fullWidth'
+            /> */}
             <Stack direction='column' spacing={1}>
               {renderDynamicFormSection('prompts')}
               <Box>

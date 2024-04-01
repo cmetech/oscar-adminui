@@ -276,6 +276,15 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
                   <li>
                     <strong>a-b/c</strong> - Run within a range at every <em>c</em> interval.
                   </li>
+                  <li>
+                    <strong>xth y</strong> - Run on the <em>x</em>-th occurrence of weekday <em>y</em> within the month.
+                  </li>
+                  <li>
+                    <strong>last x</strong> - Run on the last occurrence of weekday <em>x</em> within the month.
+                  </li>
+                  <li>
+                    <strong>last</strong> - Run on the last day of the month.
+                  </li>
                   <li>And more, including combinations of expressions separated by commas.</li>
                 </ul>
               </Typography>

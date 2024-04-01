@@ -155,7 +155,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
 
   return (
     <Fragment>
-      <IconButton color='warning' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
+      <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
         <Icon icon='mdi:menu' />
       </IconButton>
       <Menu
@@ -670,7 +670,7 @@ const Settings = () => {
           <Box display='flex' alignItems='center'>
             <Button
               variant='contained'
-              color='warning'
+              color='secondary'
               sx={{ marginRight: 1 }}
               startIcon={<Icon icon='mdi:plus' />}
               onClick={handleOpenModal}

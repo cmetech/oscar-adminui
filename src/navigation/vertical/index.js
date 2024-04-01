@@ -77,13 +77,6 @@ const navigation = () => {
       subject: 'admin-section'
     },
     {
-      title: 'Users',
-      icon: 'mdi:account-multiple',
-      path: '/administration/users',
-      action: 'manage',
-      subject: 'settings-nav'
-    },
-    {
       title: 'Inventory',
       icon: 'mdi:server',
       path: '/administration/inventory',
@@ -94,6 +87,13 @@ const navigation = () => {
       title: 'Services',
       icon: 'mdi:service-toolbox',
       path: '/administration/services',
+      action: 'manage',
+      subject: 'settings-nav'
+    },
+    {
+      title: 'Users',
+      icon: 'mdi:account-multiple',
+      path: '/administration/users',
       action: 'manage',
       subject: 'settings-nav'
     }

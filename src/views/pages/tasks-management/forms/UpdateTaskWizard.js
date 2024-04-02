@@ -726,10 +726,23 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     handleFormChange({ target: { name: 'schedule.end_date', value: dateRange[1] } }, null, null)
   }, [dateRange])
 
-  // Use useEffect to initialize the form with currentServer data
+  // Use useEffect to initialize the form with currentTask data
   useEffect(() => {
     // Check if currentTask exists and is not empty
     if (currentTask && Object.keys(currentTask).length > 0) {
+      let promptForCredentials = false
+      let promptForAPIKey = false
+
+      // Check directly in the object form of metadata before it's converted into an array
+      if (currentTask?.metadata && currentTask.metadata['credentials'] === '1') {
+        promptForCredentials = true
+      }
+
+      if (currentTask?.metadata && currentTask.metadata['api_key'] === '1') {
+        promptForAPIKey = true
+      }
+
+      // Initialize the taskForm with the currentTask schedule data
       const { schedule = {} } = currentTask
 
       // Destructuring to exclude fields you don't need, rest will contain only needed fields
@@ -761,7 +774,9 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         hosts: currentTask.hosts?.map(host => ({ ip_address: host })) || [],
         datacenter: currentTask.datacenter || '',
         environments: currentTask.environments?.map(environment => ({ value: environment })) || [],
-        components: currentTask.components?.map(component => ({ value: component })) || []
+        components: currentTask.components?.map(component => ({ value: component })) || [],
+        promptForCredentials,
+        promptForAPIKey
       }
       setTaskForm(updatedTaskForm)
     }
@@ -1044,6 +1059,18 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
   const handleReset = () => {
     if (currentTask && Object.keys(currentTask).length > 0) {
+      let promptForCredentials = false
+      let promptForAPIKey = false
+
+      // Check directly in the object form of metadata before it's converted into an array
+      if (currentTask?.metadata && currentTask.metadata['credentials'] === '1') {
+        promptForCredentials = true
+      }
+
+      if (currentTask?.metadata && currentTask.metadata['api_key'] === '1') {
+        promptForAPIKey = true
+      }
+
       const resetTaskForm = {
         ...initialTaskFormState,
         name: currentTask.name || '',
@@ -1061,8 +1088,8 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         datacenter: currentTask.datacenter || '',
         environments: currentTask.environments.map(environment => ({ value: environment })) || [],
         components: currentTask.components.map(component => ({ value: component })) || [],
-        promptForCredentials: currentTask.promptForCredentials || false,
-        promptForAPIKey: currentTask.promptForAPIKey || false
+        promptForCredentials,
+        promptForAPIKey
       }
       setTaskForm(resetTaskForm)
     } else {

@@ -1,0 +1,186 @@
+import React, { useState } from 'react'
+import Tab from '@mui/material/Tab'
+import TabContext from '@mui/lab/TabContext'
+import TabPanel from '@mui/lab/TabPanel'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { CustomDataGrid, TabList } from 'src/lib/styled-components'
+import { useTranslation } from 'react-i18next'
+import { parseISO, format } from 'date-fns'
+import formatDistance from 'date-fns/formatDistance'
+
+const AlertDetailPanel = props => {
+  const [value, setValue] = useState('1')
+  const { row } = props
+  const { t } = useTranslation()
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue)
+  }
+
+  // Helper function to find the value for a specific label or annotation by name
+  const findValueByName = (arr, name) => arr.find(item => item.name === name)?.value || 'N/A';
+
+  // Define columns for network interfaces DataGrid
+  const alertColumns = [
+    {
+      field: 'id',
+      headerName: t('ID'),
+      flex: 0.035,
+      minWidth: 150,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.id.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      field: 'status',
+      headerName: t('Status'),
+      flex: 0.025,
+      minWidth: 150,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.status.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      field: 'startsAt',
+      headerName: t('Start Time'),
+      flex: 0.025,
+      minWidth: 150,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.startsAt}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      field: 'endsAt',
+      headerName: t('End Time'),
+      flex: 0.025,
+      minWidth: 150,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.endsAt.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      field: 'summary',
+      headerName: t('Summary'),
+      flex: 0.025,
+      minWidth: 150,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.summary.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+        field: 'severity',
+        headerName: t('Severity'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                  {row.severity.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+    },
+    {
+        field: 'alertname',
+        headerName: t('Alert Name'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                  {row.alertname.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+    }
+
+  ]
+
+
+  return (
+    <Box sx={{ m: 5 }}>
+      <TabContext value={value}>
+        <TabList onChange={handleChange} aria-label='Alert Details'>
+          <Tab label={t('Alerts')} value='1' />
+        </TabList>
+        <TabPanel value='1'>
+          <CustomDataGrid
+            rows={row.alerts.map((ni, index) => ({
+              id: index,
+              ...ni
+            }))}
+            columns={alertColumns}
+            pageSize={5}
+            rowsPerPageOptions={[5]}
+            autoHeight
+          />
+        </TabPanel>
+      </TabContext>
+    </Box>
+  )
+}
+
+export default AlertDetailPanel

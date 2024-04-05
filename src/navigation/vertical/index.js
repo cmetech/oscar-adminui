@@ -29,7 +29,7 @@ const navigation = () => {
     {
       title: 'Alerts & Incidents',
       icon: 'mdi:bell-alert',
-      path: '/services',
+      path: '/alertmanager',
       action: 'read',
       subject: 'all'
     },

@@ -4,6 +4,8 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
+import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
+import dayjs from 'dayjs'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -53,6 +55,8 @@ import Icon from 'src/@core/components/icon'
 // ** Views
 import TasksList from 'src/views/pages/tasks-management/TasksList'
 import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -61,6 +65,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AddTaskWizard from 'src/views/pages/tasks-management/forms/AddTaskWizard'
 import toast from 'react-hot-toast'
 import { useAtom } from 'jotai'
+import { da } from 'date-fns/locale'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -91,6 +96,17 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     [theme.breakpoints.up('md')]: {
       minWidth: 130
+    }
+  }
+}))
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))
@@ -144,7 +160,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
 
   return (
     <Fragment>
-      <IconButton color='warning' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
+      <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
         <Icon icon='mdi:menu' />
       </IconButton>
       <Menu
@@ -551,7 +567,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
   const dynamicFields = () => {
     switch (tab) {
-      case '1': // Datacenters
+      case '1':
         return <AddTaskWizard onSuccess={handleSuccess} />
 
       // Add cases for other tabs with different fields
@@ -618,6 +634,8 @@ const TasksManager = () => {
   const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+
+  const [dateRange, setDateRange] = useState([null, null])
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -841,24 +859,61 @@ const TasksManager = () => {
           <Typography variant='h4'>{t('Task Management')}</Typography>
           <Box display='flex' alignItems='center'>
             {value === '1' && (
-              <Button
-                variant='contained'
-                color='warning'
-                sx={{ marginRight: 1 }}
-                startIcon={<Icon icon='mdi:plus' />}
-                onClick={handleOpenModal}
-              >
-                {getDynamicText(value)}
-              </Button>
+              <Fragment>
+                <Button
+                  variant='contained'
+                  disabled
+                  color='secondary'
+                  sx={{ marginRight: 1 }}
+                  startIcon={<Icon icon='mdi:plus' />}
+                  onClick={handleOpenModal}
+                >
+                  {getDynamicText(value)}
+                </Button>
+                <MoreActionsDropdown
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  onEnable={handleEnable}
+                  onDisable={handleDisable}
+                  onUpload={handleUpload}
+                  tabValue={value}
+                />
+              </Fragment>
             )}
-            <MoreActionsDropdown
-              onDelete={handleDelete}
-              onExport={handleExport}
-              onEnable={handleEnable}
-              onDisable={handleDisable}
-              onUpload={handleUpload}
-              tabValue={value}
-            />
+            {value === '2' && (
+              <DateRangePicker
+                calendars={2}
+                closeOnSelect={false}
+                value={dateRange}
+                defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
+                disableFuture
+                views={['day', 'hours']}
+                timeSteps={{ minute: 15 }}
+                viewRenderers={{ hours: renderDigitalClockTimeView }}
+                onChange={newValue => {
+                  // console.log('Date range:', newValue)
+                  setDateRange(newValue)
+                }}
+                slotProps={{
+                  field: { dateSeparator: 'to' },
+                  textField: ({ position }) => ({
+                    size: 'small',
+                    color: position === 'start' ? 'secondary' : 'secondary',
+                    focused: true,
+                    InputProps: {
+                      endAdornment: <Icon icon='mdi:calendar' />
+                    }
+                  }),
+                  shortcuts: {
+                    items: predefinedRangesDayjs
+                  }
+
+                  // actionBar: {
+                  //   actions: ['cancel', 'accept']
+                  // }
+                }}
+              />
+            )}
           </Box>
         </Box>
         <TabContext value={value}>
@@ -879,7 +934,7 @@ const TasksManager = () => {
             <TasksList set_total={setTaskTotal} total={taskTotal} />
           </TabPanel>
           <TabPanel value='2'>
-            <TaskHistoryList />
+            <TaskHistoryList dateRange={dateRange} />
           </TabPanel>
         </TabContext>
       </Grid>

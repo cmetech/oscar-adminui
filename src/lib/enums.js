@@ -60,3 +60,13 @@ export const TimezoneEnum = {
   US_ALASKA: 'US/Alaska',
   US_HAWAII: 'US/Hawaii'
 }
+
+export const CountryEnum = {
+  UNITED_STATES: 'United States'
+}
+
+export const LanguageEnum = {
+  ENGLISH: 'English',
+  SPANISH: 'Spanish',
+  FRENCH: 'French'
+}

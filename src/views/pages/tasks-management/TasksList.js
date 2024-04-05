@@ -69,6 +69,8 @@ import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
 import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
 import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
+import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
+import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -93,6 +95,9 @@ const StyledLink = styled(Link)(({ theme }) => ({
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
   }
 }))
+
+// TODO: Test with no Tasks to see if the NoRowsOverlay is displayed with the Register Tasks button
+// FIXME: Deleting all tasks works, but I am reloading the tasks automatically, I should now use the Overlay Register Tasks button
 
 const TasksList = props => {
   // ** Hooks
@@ -1018,6 +1023,26 @@ const TasksList = props => {
     fetchData(sort, value, sortColumn)
   }
 
+  const handleRegisterTasks = async () => {
+    console.log('Registering Tasks')
+    try {
+      const response = await axios.post('/api/tasks/register', {})
+
+      // Handle success response
+      console.log('Tasks successfully registered:', response.data)
+
+      // Optionally, use a UI notification library to inform the user
+      // For example, if you're using react-hot-toast
+      toast.success('Tasks successfully registered')
+    } catch (error) {
+      console.error('Error registering tasks:', error)
+
+      // Handle error response
+      // Optionally, use a UI notification library to inform the user about the error
+      toast.error('Failed to register tasks')
+    }
+  }
+
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
@@ -1066,7 +1091,13 @@ const TasksList = props => {
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
           onPaginationModelChange={setPaginationModel}
-          components={{ Toolbar: ServerSideToolbar }}
+          components={{
+            Toolbar: ServerSideToolbar,
+            NoRowsOverlay: () => (
+              <NoRowsOverlay message='No Tasks Found' buttonText='Register Tasks' onButtonClick={handleRegisterTasks} />
+            ),
+            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
           getDetailPanelHeight={getDetailPanelHeight}

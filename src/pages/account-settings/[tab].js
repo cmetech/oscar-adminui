@@ -23,4 +23,9 @@ export const getStaticProps = async ({ params }) => {
   }
 }
 
+AccountSettingsTab.acl = {
+  action: 'read',
+  subject: 'accountsettings-page'
+}
+
 export default AccountSettingsTab

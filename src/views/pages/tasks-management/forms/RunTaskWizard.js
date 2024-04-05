@@ -259,6 +259,8 @@ const RunTaskWizard = ({ onClose, ...props }) => {
           Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
         }
 
+        // TODO: Allow for Hosts to be provided to override the default host
+
         // Build the payload
         const payload = currentTask.prompts.map((prompt, index) => ({
           prompt: prompt.prompt,

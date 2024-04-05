@@ -26,6 +26,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import FormHelperText from '@mui/material/FormHelperText'
 import FormGroup from '@mui/material/FormGroup'
 import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -57,7 +58,7 @@ const initialServerFormState = {
   componentName: '',
   datacenterName: '',
   environmentName: '',
-  status: 'Active',
+  status: 'ACTIVE',
   metadata: [{ key: '', value: '' }],
   networkInterfaces: [{ name: '', ip_address: '', label: '' }]
 }
@@ -175,12 +176,19 @@ const validationSchema = yup.object({
   datacenterName: yup.string().required('Datacenter Name is required'),
   environmentName: yup.string().required('Environment Name is required'),
   status: yup.string().required('Status is required'),
-  metadata: yup.array().of(
-    yup.object().shape({
-      key: yup.string().required('Key is required'),
-      value: yup.string().required('Value is required')
-    })
-  ),
+  metadata: yup
+    .array()
+    .of(
+      yup.object().shape({
+        key: yup.string(),
+        value: yup.string()
+      })
+    )
+    .test(
+      'metadata-key-value-pair',
+      'Both key and value are required in metadata if either is provided',
+      (metadata = []) => metadata.every(md => (!md.key && !md.value) || (md.key && md.value))
+    ),
   networkInterfaces: yup.array().of(
     yup.object().shape({
       name: yup.string().required('Name is required'),
@@ -196,7 +204,7 @@ const validationSchema = yup.object({
   )
 })
 
-const Section = ({ title, data }) => {
+const Section = ({ title, data, formErrors }) => {
   return (
     <Fragment>
       <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
@@ -204,35 +212,49 @@ const Section = ({ title, data }) => {
       </Typography>
       {data.map((item, index) => (
         <Grid container spacing={2} key={`${title}-${index}`}>
-          {Object.entries(item).map(([itemKey, itemValue]) => (
-            <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
-              <TextfieldStyled
-                fullWidth
-                label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                value={itemValue.toString()}
-                InputProps={{ readOnly: true }}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          ))}
+          {Object.entries(item).map(([itemKey, itemValue]) => {
+            // Construct the fieldPath for accessing the error, matching how it's stored in formErrors
+            console.log('Title:', title + ' Index:', index + ' ItemKey:', itemKey + ' ItemValue:', itemValue)
+            const errorKey = `${title}[${index}].${itemKey}`
+            const errorMessage = formErrors?.[errorKey] ?? '' // Access the specific error message
+
+            return (
+              <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
+                <TextfieldStyled
+                  fullWidth
+                  label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
+                  value={itemValue.toString()}
+                  InputProps={{ readOnly: true }}
+                  variant='outlined'
+                  margin='normal'
+                  error={Boolean(errorMessage)}
+                  helperText={errorMessage}
+                />
+              </Grid>
+            )
+          })}
         </Grid>
       ))}
     </Fragment>
   )
 }
 
-const ReviewAndSubmitSection = ({ serverForm }) => {
+const ReviewAndSubmitSection = ({ serverForm, formErrors }) => {
   return (
     <Fragment>
       {Object.entries(serverForm).map(([key, value]) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           // For nested objects (excluding arrays), recursively render sections
-          return <ReviewAndSubmitSection serverForm={value} key={key} />
+          return <ReviewAndSubmitSection serverForm={value} formErrors={formErrors} key={key} />
         } else if (Array.isArray(value)) {
-          return <Section title={key} data={value} key={key} />
+          const sectionErrors = formErrors?.[key] || {}
+
+          return <Section title={key} data={value} formErrors={sectionErrors} key={key} />
         } else {
           // For simple key-value pairs
+          // Directly access the error message using the key for non-array, non-object fields
+          const errorMessage = formErrors?.[key] ?? ''
+
           return (
             <Grid container spacing={2} key={key}>
               <Grid item xs={12} sm={6}>
@@ -243,6 +265,8 @@ const ReviewAndSubmitSection = ({ serverForm }) => {
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
+                  error={Boolean(errorMessage)}
+                  helperText={errorMessage}
                 />
               </Grid>
             </Grid>
@@ -271,6 +295,10 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
   const theme = useTheme()
   const session = useSession()
+
+  useEffect(() => {
+    console.log('Current FormErrors:', formErrors)
+  }, [formErrors])
 
   useEffect(() => {
     const fetchDatacenters = async () => {
@@ -337,19 +365,27 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
       // If validation is successful, clear any existing error for the field
       // This might need to be adjusted to handle errors for specific array indices
-      setFormErrors(prevErrors => ({
-        ...prevErrors,
-        [fieldPath]: ''
-      }))
+      setFormErrors(prevErrors => {
+        return {
+          ...prevErrors,
+          [fieldPath]: ''
+        }
+      })
     } catch (error) {
       console.log(`Validation Error for: ${fieldPath}, Message: ${error.message}`)
 
       // If validation fails, set the error message for the field
       // Adjust this to handle array fields correctly
-      setFormErrors(prevErrors => ({
-        ...prevErrors,
-        [fieldPath]: error.message
-      }))
+      setFormErrors(prevErrors => {
+        if (error && error?.message) {
+          console.log(`Setting error for key: ${fieldPath}`, error.message)
+        }
+
+        return {
+          ...prevErrors,
+          [fieldPath]: error.message
+        }
+      })
     }
   }
 
@@ -632,6 +668,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
+                  freeSolo
                   autoHighlight
                   id='componentName-autocomplete'
                   options={components}
@@ -709,10 +746,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                   <SelectStyled
                     labelId='status-select-label'
                     id='status-simple-select'
-                    value={serverForm.status.toUpperCase()}
+                    value={serverForm.status}
                     label='Status'
                     onChange={handleFormChange}
-                    onBlur={e => validateField(e.target.name, e.target.value)}
                     name='status'
                     error={!!formErrors.status}
                     helperText={formErrors.status || ''}

@@ -2,7 +2,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
-import { useAtom } from 'jotai'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -32,6 +32,8 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import moment from 'moment-timezone'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -39,6 +41,7 @@ import Icon from 'src/@core/components/icon'
 // ** Custom Components Imports
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 import { useTheme, styled } from '@mui/material/styles'
+import { refetchTaskTriggerAtom } from 'src/lib/atoms'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -48,39 +51,73 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
-
-import { serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { current } from '@reduxjs/toolkit'
 
 // Define initial state for the server form
-const initialServerFormState = {
-  hostName: '',
-  componentName: '',
-  datacenterName: '',
-  environmentName: '',
-  status: 'Active',
+const initialTaskFormState = {
+  name: '',
+  type: '',
+  status: 'enabled',
+  owner: '',
+  organization: '',
+  description: '',
+  schedule: {
+    year: '',
+    month: '',
+    day: '',
+    day_of_week: '',
+    hour: '',
+    minute: '',
+    second: '',
+    start_date: '',
+    end_date: '',
+    timezone: '',
+    jitter: 0
+  },
+  args: [{ value: '' }],
+  kwargs: [{ key: '', value: '' }],
   metadata: [{ key: '', value: '' }],
-  networkInterfaces: [{ name: '', ip_address: '', label: '' }]
+  prompts: [{ prompt: '', default_value: '', value: '' }],
+  hosts: [{ ip_address: '' }],
+  datacenter: '',
+  environments: [],
+  components: []
 }
 
 const steps = [
   {
-    title: 'Server Information',
-    subtitle: 'Add Server Information',
-    description: 'Add the Hostname, Datacenter, and Environment details.'
+    title: 'General',
+    subtitle: 'Information',
+    description: 'Edit the Task details.'
   },
   {
-    title: 'Network Information',
-    subtitle: 'Add Network Information',
-    description: 'Add the Network details.'
+    title: 'Schedule',
+    subtitle: 'Details',
+    description: 'Edit the Schedule details. Click on Show Schedule Instructions below for more information.'
   },
   {
-    title: 'Metadata Information',
-    subtitle: 'Add Metadata Information',
-    description: 'Add the Metadata details.'
+    title: 'Arguments',
+    subtitle: 'Positional',
+    description: 'Edit the Task Positional and Keyword Argument details.'
+  },
+  {
+    title: 'Metadata',
+    subtitle: 'Information',
+    description: 'Edit the Task Metadata Arguments details.'
+  },
+  {
+    title: 'Prompts',
+    subtitle: 'Details',
+    description: 'Edit the Prompts details.'
+  },
+  {
+    title: 'Targets',
+    subtitle: 'Remote Host Information',
+    description: 'Provide the Host target details.'
   },
   {
     title: 'Review',
-    subtitle: 'Review and Submit',
+    subtitle: 'Summary',
     description: 'Review the Server details and submit.'
   }
 ]
@@ -115,23 +152,12 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 }))
 
 const SelectStyled = styled(Select)(({ theme }) => ({
-  '&.MuiOutlinedInput-root': {
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  '& .MuiOutlinedInput-root': {
+    fieldset: {
+      borderColor: 'inherit' // default border color
     },
     '&.Mui-focused fieldset': {
       borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // border color when focused
-    }
-  }
-}))
-
-const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
-  '& .MuiInputLabel-outlined.Mui-focused': {
-    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
-  },
-  '& .MuiOutlinedInput-root': {
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))
@@ -168,33 +194,217 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
-// Define validation schema for the form
-const validationSchema = yup.object({
-  hostName: yup.string().required('Host Name is required'),
-  componentName: yup.string().required('Component Name is required'),
-  datacenterName: yup.string().required('Datacenter Name is required'),
-  environmentName: yup.string().required('Environment Name is required'),
-  status: yup.string().required('Status is required'),
-  metadata: yup.array().of(
-    yup.object().shape({
-      key: yup.string().required('Key is required'),
-      value: yup.string().required('Value is required')
-    })
-  ),
-  networkInterfaces: yup.array().of(
-    yup.object().shape({
-      name: yup.string().required('Name is required'),
-      ip_address: yup
-        .string()
-        .required('IP Address is required')
-        .matches(
-          /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-          'Invalid IP address format'
-        ),
-      label: yup.string().required('Label is required')
-    })
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
+const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }) => {
+  const [showDocumentation, setShowDocumentation] = useState(false)
+  const toggleDocumentation = () => setShowDocumentation(!showDocumentation)
+
+  // Get list of timezones from moment-timezone
+  const timezones = moment.tz.names()
+
+  // Handler for timezone change in Autocomplete
+  const handleTimezoneChange = (event, newValue) => {
+    handleFormChange({ target: { name: 'schedule.timezone', value: newValue } }, null, 'schedule')
+  }
+
+  return (
+    <Fragment>
+      <Grid container direction='column' spacing={2}>
+        {/* Clickable Text to Toggle Visibility */}
+        <Grid
+          item
+          style={{
+            cursor: 'pointer',
+            paddingLeft: '27px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <IconButton onClick={toggleDocumentation}>
+            {showDocumentation ? <Icon icon='mdi:expand-less' /> : <Icon icon='mdi:expand-more' />}
+          </IconButton>
+          <Typography variant='body1' onClick={toggleDocumentation}>
+            {showDocumentation ? 'Hide Schedule Instructions' : 'Show Schedule Instructions'}
+          </Typography>
+        </Grid>
+        {showDocumentation && (
+          <Grid container spacing={2} style={{ padding: '16px' }}>
+            <Grid item>
+              <Typography variant='body2' gutterBottom>
+                <strong>Schedule your task</strong> with precision using flexible cron-style expressions. This section
+                allows you to define when and how often your task should run, similar to scheduling jobs in UNIX-like
+                systems.
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Typography variant='body2' gutterBottom>
+                Define <strong>start and end dates</strong> to control the active period of your task schedule. Input
+                dates in ISO 8601 format or select them using the provided date pickers.
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Typography variant='body2' gutterBottom>
+                Not all fields are mandatory. Specify only the ones you need. Unspecified fields default to their
+                broadest setting, allowing the task to run more frequently. For instance, leaving the{' '}
+                <strong>day</strong> field empty schedules the task to run every day of the month.
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Typography variant='body2' gutterBottom>
+                Use the <strong>Expression Types</strong> below to refine your schedule:
+                <ul>
+                  <li>
+                    <strong>*</strong> - Run at every possible time/value.
+                  </li>
+                  <li>
+                    <strong>*/a</strong> - Run at every <em>a</em> interval.
+                  </li>
+                  <li>
+                    <strong>a-b</strong> - Run within a range from <em>a</em> to <em>b</em>.
+                  </li>
+                  <li>
+                    <strong>a-b/c</strong> - Run within a range at every <em>c</em> interval.
+                  </li>
+                  <li>And more, including combinations of expressions separated by commas.</li>
+                </ul>
+              </Typography>
+            </Grid>
+            <Grid item marginBottom={4}>
+              <Typography variant='body2' gutterBottom>
+                Abbreviated English month names (<strong>jan</strong> – <strong>dec</strong>) and weekday names (
+                <strong>mon</strong> – <strong>sun</strong>) are also supported.
+              </Typography>
+            </Grid>
+          </Grid>
+        )}
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='year'
+            name='year'
+            label='Year'
+            fullWidth
+            value={taskForm.schedule.year}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='month'
+            name='month'
+            label='Month'
+            fullWidth
+            value={taskForm.schedule.month}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='day'
+            name='day'
+            label='Day'
+            fullWidth
+            value={taskForm.schedule.day}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='hour'
+            name='hour'
+            label='Hour'
+            fullWidth
+            value={taskForm.schedule.hour}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='minute'
+            name='minute'
+            label='Minute'
+            fullWidth
+            value={taskForm.schedule.minute}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <TextfieldStyled
+            id='second'
+            name='second'
+            label='Second'
+            fullWidth
+            value={taskForm.schedule.second}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid>
+        {/* <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            id='day_of_week'
+            name='day_of_week'
+            label='Day of Week'
+            fullWidth
+            value={taskForm.schedule.day_of_week}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid> */}
+        <Grid item xs={12} sm={6}>
+          <DateRangePicker
+            localeText={{ start: 'Start Date', end: 'End Date' }}
+            value={dateRange}
+            onChange={newValue => {
+              setDateRange(newValue)
+            }}
+            renderInput={(startProps, endProps) => (
+              <Fragment>
+                <TextfieldStyled {...startProps} />
+                <Box sx={{ mx: 2 }}> to </Box>
+                <TextfieldStyled {...endProps} />
+              </Fragment>
+            )}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <AutocompleteStyled
+            id='timezone'
+            options={timezones}
+            getOptionLabel={option => option} // The option is already a string, but you can format it if needed
+            renderInput={params => <TextfieldStyled {...params} label='Timezone' />}
+            value={taskForm.schedule.timezone}
+            onChange={handleTimezoneChange}
+            autoComplete // Enable autocomplete behavior
+            includeInputInList // Include the input value in the list of options
+            freeSolo // Allow arbitrary input values
+            clearOnBlur // Clear input on blur if not selected from the list
+          />
+        </Grid>
+        {/* <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            id='jitter'
+            name='schedule.jitter'
+            label='Jitter (seconds)'
+            type='number'
+            fullWidth
+            value={taskForm.schedule.jitter}
+            onChange={e => handleFormChange(e, null, 'schedule')}
+          />
+        </Grid> */}
+      </Grid>
+    </Fragment>
   )
-})
+}
 
 const Section = ({ title, data }) => {
   return (
@@ -222,55 +432,259 @@ const Section = ({ title, data }) => {
   )
 }
 
-const ReviewAndSubmitSection = ({ serverForm }) => {
-  return (
+const ReviewAndSubmitSection = ({ taskForm }) => {
+  const renderGeneralSection = taskForm => (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+          General Information
+        </Typography>
+      </Grid>
+      {/* List all general fields here */}
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Task Name'
+          value={taskForm.name || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Task Type'
+          value={taskForm.type || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Owner'
+          value={taskForm.owner || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Organization'
+          value={taskForm.organization || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextfieldStyled
+          fullWidth
+          label='Description'
+          value={taskForm.description || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+          multiline
+          rows={2}
+        />
+      </Grid>
+      {/* Add other general fields as needed */}
+    </Grid>
+  )
+
+  const renderArgsSection = args => (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+          Positional Arguments
+        </Typography>
+      </Grid>
+      {args.map((arg, index) => (
+        <Grid item xs={6} key={`arg-${index}`}>
+          <TextfieldStyled
+            fullWidth
+            label={`Arg ${index + 1}`}
+            value={arg.value ? arg.value.toString() : 'N/A'}
+            InputProps={{ readOnly: true }}
+            variant='outlined'
+            margin='normal'
+          />
+        </Grid>
+      ))}
+    </Grid>
+  )
+
+  const renderPromptsSection = prompts => (
     <Fragment>
-      {Object.entries(serverForm).map(([key, value]) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // For nested objects (excluding arrays), recursively render sections
-          return <ReviewAndSubmitSection serverForm={value} key={key} />
-        } else if (Array.isArray(value)) {
-          return <Section title={key} data={value} key={key} />
-        } else {
-          // For simple key-value pairs
+      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+        Prompts
+      </Typography>
+      {prompts.map((prompt, index) => (
+        <Grid container spacing={2} key={`prompt-${index}`}>
+          <Grid item xs={12} sm={6}>
+            <TextfieldStyled
+              fullWidth
+              label='Prompt'
+              value={prompt.prompt || 'N/A'}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextfieldStyled
+              fullWidth
+              label='Default Value'
+              value={prompt.default_value || 'N/A'}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextfieldStyled
+              fullWidth
+              label='Value'
+              value={prompt.value || 'N/A'}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+        </Grid>
+      ))}
+    </Fragment>
+  )
+
+  const renderHostSection = hosts => (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+          Hosts
+        </Typography>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Datacenter'
+          value={taskForm.datacenter || 'N/A'}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Environments'
+          value={taskForm.environments.join(', ') || 'N/A'} // Join the array values into a string
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Components'
+          value={taskForm.components.join(', ') || 'N/A'} // Join the array values into a string
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
+      {hosts.map((host, index) => (
+        <Grid item xs={6} key={`arg-${index}`}>
+          <TextfieldStyled
+            fullWidth
+            label={`Host ${index + 1}`}
+            value={host.ip_address ? host.ip_address.toString() : 'N/A'}
+            InputProps={{ readOnly: true }}
+            variant='outlined'
+            margin='normal'
+          />
+        </Grid>
+      ))}
+    </Grid>
+  )
+
+  const renderScheduleSection = schedule => (
+    <Fragment>
+      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+        Schedule Information
+      </Typography>
+      <Grid container spacing={2}>
+        {Object.entries(schedule).map(([key, value], index) => {
+          // Format the key to be more readable
+          const label = key
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+          const formattedValue = typeof value === 'object' && value !== null ? value.toLocaleString() : value
+
           return (
-            <Grid container spacing={2} key={key}>
-              <Grid item xs={12} sm={6}>
-                <TextfieldStyled
-                  fullWidth
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value.toString()}
-                  InputProps={{ readOnly: true }}
-                  variant='outlined'
-                  margin='normal'
-                />
-              </Grid>
+            <Grid item xs={12} sm={6} key={`schedule-${index}`}>
+              <TextfieldStyled
+                fullWidth
+                label={label}
+                value={formattedValue || 'N/A'}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
             </Grid>
           )
-        }
-      })}
+        })}
+      </Grid>
+    </Fragment>
+  )
+
+  return (
+    <Fragment>
+      {renderGeneralSection(taskForm)}
+      {taskForm.schedule && renderScheduleSection(taskForm.schedule)}
+      {taskForm.args && renderArgsSection(taskForm.args)}
+      {taskForm.kwargs && <Section title='Keyword Arguments' data={taskForm.kwargs} />}
+      {taskForm.prompts && renderPromptsSection(taskForm.prompts)}
+      {taskForm.metadata && <Section title='Metadata' data={taskForm.metadata} />}
+      {taskForm.hosts && renderHostSection(taskForm.hosts)}
     </Fragment>
   )
 }
 
-// Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
+// TODO: Test and complete the AddTaskWizard component
 
-const AddTaskWizard = ({ onSuccess, ...props }) => {
+const AddTaskWizard = ({ onClose }) => {
   // ** States
-  const [serverForm, setServerForm] = useState(initialServerFormState)
+  const [taskForm, setTaskForm] = useState(initialTaskFormState)
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
   const [components, setComponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
-  const [isEnvironmentEnabled, setIsEnvironmentEnabled] = useState(false)
-  const [filteredEnvironments, setFilteredEnvironments] = useState([])
-  const [formErrors, setFormErrors] = useState({})
-  const [, setServers] = useAtom(serversAtom)
-  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [selectedDatacenter, setSelectedDatacenter] = useState('')
+  const [selectedEnvironments, setSelectedEnvironments] = useState([])
+  const [selectedComponents, setSelectedComponents] = useState([])
+  const [cronValue, setCronValue] = useState('')
+  const [cronError, setCronError] = useState()
+  const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+
+  // Separate state for date range picker
+  const [dateRange, setDateRange] = useState([null, null])
 
   const theme = useTheme()
   const session = useSession()
+
+  // When dateRange updates, update taskForm
+  useEffect(() => {
+    handleFormChange({ target: { name: 'schedule.start_date', value: dateRange[0] } }, null, null)
+    handleFormChange({ target: { name: 'schedule.end_date', value: dateRange[1] } }, null, null)
+  }, [dateRange])
 
   useEffect(() => {
     const fetchDatacenters = async () => {
@@ -318,132 +732,120 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
     fetchDatacenters()
 
     // fetchEnviroments()
-    fetchComponents()
+    // fetchComponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
-  const validateField = async (fieldName, value, index, section) => {
-    // Construct the correct path for nested fields
-    const fieldPath = section ? `${section}[${index}].${fieldName}` : fieldName
-
-    console.log(`Validating Field: ${fieldPath} with Value: ${value}`)
-
-    try {
-      // Adjust the context object based on whether we're validating a section or a top-level field
-      const contextObject = section ? { [section]: serverForm[section] } : serverForm
-
-      await validationSchema.validateAt(fieldPath, contextObject)
-
-      console.log(`Validation Success for: ${fieldPath}`)
-
-      // If validation is successful, clear any existing error for the field
-      // This might need to be adjusted to handle errors for specific array indices
-      setFormErrors(prevErrors => ({
-        ...prevErrors,
-        [fieldPath]: ''
-      }))
-    } catch (error) {
-      console.log(`Validation Error for: ${fieldPath}, Message: ${error.message}`)
-
-      // If validation fails, set the error message for the field
-      // Adjust this to handle array fields correctly
-      setFormErrors(prevErrors => ({
-        ...prevErrors,
-        [fieldPath]: error.message
-      }))
-    }
-  }
-
-  const validateForm = async () => {
-    try {
-      // Assuming serverForm is the state holding your form data
-      // and validationSchema is your Yup schema
-      await validationSchema.validate(serverForm, { abortEarly: false })
-
-      // If validation is successful, clear errors
-      setFormErrors({})
-
-      return true
-    } catch (yupError) {
-      if (yupError instanceof yup.ValidationError) {
-        // Log the entire error
-        console.log('Validation Error:', yupError)
-
-        // Log detailed info about each validation error
-        yupError.inner.forEach(error => {
-          console.log(`Field: ${error.path}, Error: ${error.message}`)
-        })
-
-        // Transform the validation errors to a more manageable structure
-        // and set them to state or handle them as needed
-        const transformedErrors = yupError.inner.reduce(
-          (acc, currentError) => ({
-            ...acc,
-            [currentError.path]: currentError.message
-          }),
-          {}
-        )
-
-        setFormErrors(transformedErrors)
-      } else {
-        // Handle other types of errors (e.g., network errors)
-        console.error('An unexpected error occurred:', yupError)
-      }
-
-      return false
-    }
-  }
-
-  // Function to handle form field changes
-  const handleFormChange = async (event, index, section) => {
-    const { name, value } = event.target
-
-    // Upper case the value being entered
-    const upperCasedValue = value?.toUpperCase()
-
-    if (section) {
-      // Handle changes for dynamic sections (metadata or networkInterfaces)
-      const updatedSection = [...serverForm[section]]
-      updatedSection[index][name] = upperCasedValue
-      setServerForm({ ...serverForm, [section]: updatedSection })
-    } else {
-      console.log(`Updating ${name} to ${value}`)
-
-      // Handle changes for static fields
-      setServerForm({ ...serverForm, [name]: upperCasedValue })
-
-      // Validate the field after the value has been updated
-      validateField(name, upperCasedValue)
-    }
-
-    if (name === 'datacenterName') {
-      setIsEnvironmentEnabled(false) // Disable environment field initially
-      setFilteredEnvironments([]) // Reset filtered environments
-
-      try {
-        const response = await axios.get(`/api/inventory/environments?datacenter_name=${upperCasedValue}`)
+  useEffect(() => {
+    // Fetch environments based on selected datacenter
+    const fetchEnvironments = async () => {
+      if (taskForm.datacenter) {
+        const response = await axios.get(`/api/inventory/environments?datacenter_name=${taskForm.datacenter}`)
         const data = response.data.rows
         const environmentNames = data.map(env => env.name.toUpperCase())
-        setFilteredEnvironments(environmentNames)
-        setIsEnvironmentEnabled(true) // Enable environment field after fetching
-      } catch (error) {
-        console.error('Failed to fetch environments for the selected datacenter:', error)
-        toast.error('Failed to fetch environments')
+        setEnvironments(environmentNames)
       }
     }
+    fetchEnvironments()
+  }, [taskForm.datacenter])
+
+  useEffect(() => {
+    // Fetch components based on selected environment
+    const fetchComponents = async () => {
+      if (taskForm.environments.length > 0) {
+        const response = await axios.get('/api/inventory/components')
+        const data = response.data.rows
+
+        // Iterate over the data array and extract the name value from each object
+        const componentNames = data.map(component => component.name.toUpperCase())
+        setComponents(componentNames)
+      }
+    }
+    fetchComponents()
+  }, [taskForm.environments])
+
+  // Function to handle form field changes
+  // Function to handle form field changes for dynamic sections
+
+  const handleFormChange = (event, index, section) => {
+    // Handling both synthetic events and direct value assignments from Autocomplete
+    const target = event.target || event
+    const name = target.name
+    let value = target.value
+
+    // Convert string values to lowercase, except for specific fields
+    if (
+      typeof value === 'string' &&
+      !['schedule.start_date', 'schedule.end_date', 'schedule.timezone'].includes(name)
+    ) {
+      value = value.toLowerCase()
+    }
+
+    setTaskForm(prevForm => {
+      const newForm = { ...prevForm }
+
+      // console.log('Updating taskForm with: ', newForm)
+
+      if (section) {
+        // Check if the section is an array or an object
+        if (Array.isArray(newForm[section])) {
+          // For array sections, clone the array and update the specific index
+          const updatedSection = [...newForm[section]]
+          updatedSection[index] = { ...updatedSection[index], [name]: value }
+          newForm[section] = updatedSection
+        } else if (typeof newForm[section] === 'object') {
+          // For object sections like 'schedule', update directly
+          newForm[section] = { ...newForm[section], [name]: value }
+        }
+      } else {
+        // Directly update top-level fields or handle nested updates
+        if (name.includes('.')) {
+          // Nested object updates, e.g., "schedule.year"
+          const [sectionName, fieldName] = name.split('.')
+          newForm[sectionName] = {
+            ...newForm[sectionName],
+            [fieldName]: value
+          }
+        } else {
+          // Top-level field updates
+          newForm[name] = value
+        }
+      }
+
+      return newForm
+    })
   }
 
   // Function to add a new entry to a dynamic section
+  // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'metadata' ? { key: '', value: '' } : { name: '', ip_address: '', label: '' }
-    const updatedSection = [...serverForm[section], newEntry]
-    setServerForm({ ...serverForm, [section]: updatedSection })
+    let newEntry
+    switch (section) {
+      case 'kwargs':
+      case 'metadata':
+        newEntry = { key: '', value: '' }
+        break
+      case 'args':
+        newEntry = { value: '' }
+      case 'hosts':
+        newEntry = { ip_address: '' } // Adjust if your hosts have a different structure
+        break
+      case 'prompts':
+        newEntry = { prompt: '', default_value: '', value: '' }
+        break
+      default:
+        newEntry = {} // Default case, should not be reached
+    }
+
+    const updatedSection = [...taskForm[section], newEntry]
+    setTaskForm({ ...taskForm, [section]: updatedSection })
   }
 
   // Function to remove an entry from a dynamic section
+  // Function to remove an entry from a dynamic section
   const removeSectionEntry = (section, index) => {
-    const updatedSection = [...serverForm[section]]
+    const updatedSection = [...taskForm[section]]
     updatedSection.splice(index, 1)
-    setServerForm({ ...serverForm, [section]: updatedSection })
+    setTaskForm({ ...taskForm, [section]: updatedSection })
   }
 
   // Handle Stepper
@@ -462,14 +864,6 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
     }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
-      // Validate the form before proceeding to the next step or submitting
-      const isValid = await validateForm()
-      if (!isValid) {
-        console.log('Form validation failed')
-
-        return // Stop the submission or the next step if the validation fails
-      }
-
       try {
         const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
 
@@ -479,125 +873,222 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
         }
 
         const payload = {
-          hostname: serverForm.hostName,
-          datacenter_name: serverForm.datacenterName,
-          environment_name: serverForm.environmentName,
-          component_name: serverForm.componentName,
-          metadata: serverForm.metadata,
-          network_interfaces: serverForm.networkInterfaces,
-          ip_address: serverForm.networkInterfaces[0].ip_address,
-          status: serverForm.status
+          ...taskForm,
+          args: taskForm.args.map(arg => arg.value),
+          hosts: taskForm.hosts.map(host => host.ip_address),
+          kwargs: Object.fromEntries(taskForm.kwargs.map(({ key, value }) => [key, value])),
+          metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
         }
 
-        console.log('Submitting server details', payload)
+        // console.log('Payload:', payload)
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = '/api/inventory/servers'
+        const endpoint = `/api/tasks/config/${taskForm.name}`
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.status === 201 && response.data) {
-          toast.success('Server details added successfully')
-          setRefetchTrigger(Date.now())
+        if (response.data) {
+          const { task_name } = response.data
 
-          // Call the onSuccess callback after successful submission
-          onSuccess()
+          if (task_name) {
+            console.log('Task configuration successfully updated for ', task_name)
+
+            // Register Task
+            const registerTaskEndpoint = `/api/tasks/register/${task_name}`
+            const registerTaskResponse = await axios.post(registerTaskEndpoint, {}, { headers })
+
+            if (registerTaskResponse.data) {
+              // Trigger a refetch of the tasks list
+              // TODO: Query Task By Name /query
+              const queryTaskEndpoint = `/api/tasks/query/${task_name}`
+              const queryTaskResponse = await axios.post(queryTaskEndpoint, {}, { headers })
+
+              if (queryTaskResponse.data && queryTaskResponse.status === 200) {
+                // console.log(queryTaskResponse.data)
+                const taskDetails = queryTaskResponse.data[0]
+
+                // Attempt to schedule tasks
+                // Check if the task is not disabled
+                if (taskDetails && taskDetails.status?.toLowerCase() !== 'disabled') {
+                  // Trigger scheduling for the task
+                  const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}` // Make sure to use the correct property for the task ID
+                  try {
+                    const scheduleResponse = await axios.post(scheduleTaskEndpoint, {}, { headers })
+
+                    if (scheduleResponse.status === 200) {
+                      console.log(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
+                      toast.success(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
+                    } else {
+                      console.error(`Failed to schedule task ${taskDetails.name}.`)
+                      toast.error(`Failed to schedule task ${taskDetails.name}.`)
+                    }
+                  } catch (error) {
+                    console.error(`Error scheduling task ${taskDetails.name}:`, error)
+                    toast.error(`Error scheduling task ${taskDetails.name}.`)
+                  }
+                } else {
+                  console.log(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
+
+                  // Optionally, show a message indicating the task is disabled and won't be scheduled
+                  toast.error(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
+                }
+
+                setRefetchTrigger(Date.now())
+              } else {
+                console.error('Task successfully configured and registered, Failed to query updated task details')
+                toast.error('Task successfully configured and registered, Failed to query updated task details')
+              }
+            } else {
+              console.error('Failed to register task, configuration updated successfully')
+              toast.error('Failed to register task, configuration updated successfully')
+            }
+          } else {
+            console.error('Failed to update task configuration')
+            toast.error('Failed to update task configuration')
+          }
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
-        console.error('Error adding server details', error)
-        toast.error('Error adding server details')
+        console.error('Error updating task details', error)
+        toast.error('Error updating task details')
       }
     }
   }
 
   const handleReset = () => {
-    setServerForm(initialServerFormState)
+    setTaskForm(initialTaskFormState) // Fallback to initial state if currentServer is not available
     setResetFormFields(false)
     setActiveStep(0)
   }
 
-  // Render form fields for metadata and network interfaces
   const renderDynamicFormSection = section => {
-    return serverForm[section].map((entry, index) => {
-      const errorKeyBase = section === 'metadata' ? 'value' : 'ip_address'
-      const errorKey = `${section}[${index}].${errorKeyBase}`
+    // Determine field labels based on section type
+    const getFieldLabels = section => {
+      switch (section) {
+        case 'kwargs':
+        case 'metadata':
+          return { keyLabel: 'Key', valueLabel: 'Value' }
+        case 'args':
+          return { valueLabel: 'Value' }
+        case 'hosts':
+          return { valueLabel: 'IP Address' }
+        case 'prompts':
+          return { keyLabel: 'Prompt', valueLabel: 'Value', defaultValueLabel: 'Default Value' }
+        default:
+          return { keyLabel: 'Key', valueLabel: 'Value' }
+      }
+    }
 
-      return (
-        <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-          <Grid container spacing={3} alignItems='center'>
-            <Grid item xs={section === 'metadata' ? 5 : 4}>
+    const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+
+    // console.log('taskForm:', taskForm)
+    // console.log('section:', section)
+    // console.log('keyLabel:', keyLabel)
+    // console.log('valueLabel:', valueLabel)
+    // console.log('defaultValueLabel:', defaultValueLabel)
+
+    return taskForm[section].map((entry, index) => (
+      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
+        <Grid container spacing={3} alignItems='center'>
+          {['kwargs', 'metadata'].includes(section) && (
+            <Grid item xs={4}>
               <TextfieldStyled
-                key={`field1-${section}-${index}-${resetFormFields}`}
+                key={`key-${section}-${index}`}
                 fullWidth
-                label={section === 'metadata' ? 'Key' : 'Name'}
-                name={section === 'metadata' ? 'key' : 'name'}
-                value={entry.key || entry.name}
+                label={keyLabel}
+                name='key'
+                value={entry.key?.toUpperCase() || ''}
                 onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
                 margin='normal'
-                error={!!formErrors[errorKey]}
-                helperText={formErrors[errorKey] || ''}
               />
             </Grid>
-            <Grid item xs={section === 'metadata' ? 5 : 3}>
+          )}
+          {['kwargs', 'metadata', 'args'].includes(section) && (
+            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 4 : 6}>
               <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
+                key={`value-${section}-${index}`}
                 fullWidth
-                label={section === 'metadata' ? 'Value' : 'IP Address'}
-                name={section === 'metadata' ? 'value' : 'ip_address'}
-                value={entry.value || entry.ip_address}
+                label={valueLabel}
+                name='value'
+                value={entry.value?.toUpperCase() || ''}
                 onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
                 margin='normal'
-                error={!!formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`]}
-                helperText={formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`] || ''}
               />
             </Grid>
-            {/* Conditional TextField for Label only in networkInterfaces */}
-            {section === 'networkInterfaces' && (
-              <Grid item xs={3}>
+          )}
+          {section === 'prompts' && (
+            <Fragment>
+              <Grid item xs={4}>
                 <TextfieldStyled
-                  key={`label-${section}-${index}-${resetFormFields}`}
+                  key={`key-${section}-${index}`}
                   fullWidth
-                  label='Label'
-                  name='label'
-                  value={entry.label}
+                  label={keyLabel}
+                  name='prompt'
+                  value={entry.prompt?.toUpperCase() || ''}
                   onChange={e => handleFormChange(e, index, section)}
-                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                   variant='outlined'
                   margin='normal'
-                  error={!!formErrors[`networkInterfaces[${index}].label`]}
-                  helperText={formErrors[`networkInterfaces[${index}].label`] || ''}
                 />
               </Grid>
-            )}
-            <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-              <IconButton
-                onClick={() => addSectionEntry(section)}
-                style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-              >
-                <Icon icon='mdi:plus-circle-outline' />
-              </IconButton>
-              {serverForm[section].length > 1 && (
-                <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                  <Icon icon='mdi:minus-circle-outline' />
-                </IconButton>
-              )}
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`value-${section}-${index}`}
+                  fullWidth
+                  label={valueLabel}
+                  name='value'
+                  value={entry.value?.toUpperCase() || ''}
+                  onChange={e => handleFormChange(e, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`defaultValue-${section}-${index}`}
+                  fullWidth
+                  label={defaultValueLabel}
+                  name='default_value'
+                  value={entry.default_value?.toUpperCase() || ''}
+                  onChange={e => handleFormChange(e, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                />
+              </Grid>
+            </Fragment>
+          )}
+          {section === 'hosts' && (
+            <Grid item xs={8}>
+              <TextfieldStyled
+                key={`ipAddress-${section}-${index}`}
+                fullWidth
+                label={valueLabel}
+                name='ip_address'
+                value={entry.ip_address || ''} // Ensure you're using the correct property name here
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
             </Grid>
+          )}
+          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            <IconButton
+              onClick={() => addSectionEntry(section)}
+              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+            >
+              <Icon icon='mdi:plus-circle-outline' />
+            </IconButton>
+            {taskForm[section].length > 1 && (
+              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                <Icon icon='mdi:minus-circle-outline' />
+              </IconButton>
+            )}
           </Grid>
-        </Box>
-      )
-    })
-  }
-
-  // Handle Confirm Password
-  const handleConfirmChange = prop => event => {
-    setState({ ...state, [prop]: event.target.value })
-  }
-
-  const handleClickShowConfirmPassword = () => {
-    setState({ ...state, showPassword2: !state.showPassword2 })
+        </Grid>
+      </Box>
+    ))
   }
 
   const handleMouseDownConfirmPassword = event => {
@@ -610,47 +1101,19 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
         return (
           <Fragment>
             <Typography variant='h6' gutterBottom>
-              Server Information
+              Task Information
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <CustomToolTip title='The hostname of the server' placement='top'>
-                  <TextfieldStyled
-                    required
-                    id='hostName'
-                    name='hostName'
-                    label='Host Name'
-                    fullWidth
-                    autoComplete='off'
-                    value={serverForm.hostName}
-                    onChange={handleFormChange}
-                    onBlur={e => validateField(e.target.name, e.target.value)}
-                    error={!!formErrors.hostName}
-                    helperText={formErrors.hostName || ''}
-                  />
-                </CustomToolTip>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  autoHighlight
-                  id='componentName-autocomplete'
-                  options={components}
-                  value={serverForm.componentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
-                  )}
-                  error={!!formErrors.componentName}
-                  helperText={formErrors.componentName || ''}
+                <TextfieldStyled
+                  required
+                  id='name'
+                  name='name'
+                  label='Task Name'
+                  fullWidth
+                  autoComplete='off'
+                  value={taskForm.name.toUpperCase()}
+                  onChange={handleFormChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -659,97 +1122,149 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
                   clearOnBlur
                   selectOnFocus
                   handleHomeEndKeys
-                  id='datacenterName-autocomplete'
-                  options={datacenters}
-                  value={serverForm.datacenterName}
+                  id='tasktype-autocomplete'
+                  options={['INVOKE', 'FABRIC', 'RUNBOOK', 'SCRIPT']}
+                  value={taskForm.type.toUpperCase()}
                   onChange={(event, newValue) => {
                     // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                    handleFormChange({ target: { name: 'type', value: newValue } }, null, null)
                   }}
                   onInputChange={(event, newInputValue) => {
                     if (event) {
-                      handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
+                      handleFormChange({ target: { name: 'type', value: newInputValue } }, null, null)
                     }
                   }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
-                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled {...params} label='Task Type' fullWidth required autoComplete='off' />
                   )}
-                  error={!!formErrors.datacenterName}
-                  helperText={formErrors.datacenterName || ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='environmentName-autocomplete'
-                  options={isEnvironmentEnabled ? filteredEnvironments : []}
-                  value={serverForm.environmentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
-                  )}
+                <TextfieldStyled
+                  required
+                  id='owner'
+                  name='owner'
+                  label='Task Owner'
+                  fullWidth
+                  autoComplete='off'
+                  value={taskForm.owner.toUpperCase()}
+                  onChange={handleFormChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextfieldStyled
+                  required
+                  id='organization'
+                  name='organization'
+                  label='Organization'
+                  fullWidth
+                  autoComplete='off'
+                  value={taskForm.organization.toUpperCase()}
+                  onChange={handleFormChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextfieldStyled
+                  fullWidth
+                  label='Description'
+                  name='description'
+                  autoComplete='off'
+                  value={taskForm.description || 'N/A'}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={2}
                 />
               </Grid>
               <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <InputLabelStyled id='status-select-label'>Status</InputLabelStyled>
-                  <SelectStyled
-                    labelId='status-select-label'
-                    id='status-simple-select'
-                    value={serverForm.status.toUpperCase()}
-                    label='Status'
-                    onChange={handleFormChange}
-                    onBlur={e => validateField(e.target.name, e.target.value)}
-                    name='status'
-                    error={!!formErrors.status}
-                    helperText={formErrors.status || ''}
-                  >
-                    <MenuItem value={'ACTIVE'}>ACTIVE</MenuItem>
-                    <MenuItem value={'INACTIVE'}>INACTIVE</MenuItem>
-                  </SelectStyled>
-                </FormControl>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='taskstatus-autocomplete'
+                  options={['ENABLED', 'DISABLED']}
+                  value={taskForm.status.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'status', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'status', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Task Status' fullWidth required autoComplete='off' />
+                  )}
+                />
               </Grid>
             </Grid>
           </Fragment>
         )
       case 1:
         return (
-          <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('networkInterfaces')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('networkInterfaces')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Network Interface
-                </Button>
-              </Box>
-            </Stack>
-          </Fragment>
+          <ScheduleSection
+            taskForm={taskForm}
+            handleFormChange={handleFormChange}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
         )
       case 2:
+        return (
+          <Fragment>
+            <Grid container spacing={3} alignItems='flex-start'>
+              <Grid item xs={12} sm={6}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Positional Arguments
+                </Typography>
+                {renderDynamicFormSection('args')}
+                <Box mt={2}>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('args')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                  >
+                    Add Argument
+                  </Button>
+                </Box>
+              </Grid>
+              <Grid item>
+                <Divider orientation='vertical' flexItem />
+              </Grid>
+              <Grid item xs={12} sm={5}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Keyword Arguments
+                </Typography>
+                {renderDynamicFormSection('kwargs')}
+                <Box>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('kwargs')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                  >
+                    Add Keyword Arguments
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 3:
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
@@ -765,7 +1280,7 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
                     />
                   }
                   onClick={() => addSectionEntry('metadata')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                 >
                   Add Metadata
                 </Button>
@@ -773,8 +1288,130 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
             </Stack>
           </Fragment>
         )
-      case 3:
-        return <ReviewAndSubmitSection serverForm={serverForm} />
+      case 4:
+        return (
+          <Fragment>
+            <Stack direction='column' spacing={1}>
+              {renderDynamicFormSection('prompts')}
+              <Box>
+                <Button
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
+                  onClick={() => addSectionEntry('prompts')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                >
+                  Add Prompts
+                </Button>
+              </Box>
+            </Stack>
+          </Fragment>
+        )
+      case 5:
+        return (
+          <Fragment>
+            <Grid container spacing={3} alignItems='center'>
+              {/* Datacenter */}
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth>
+                  <InputLabelStyled>Datacenter</InputLabelStyled>
+                  <SelectStyled
+                    value={taskForm.datacenter.toUpperCase()}
+                    onChange={e =>
+                      handleFormChange({
+                        target: {
+                          name: 'datacenter',
+                          value: e.target.value
+                        }
+                      })
+                    }
+                    label='Datacenter'
+                  >
+                    <MenuItem value=''>
+                      <em>None</em>
+                    </MenuItem>
+                    {datacenters.map(datacenter => (
+                      <MenuItem key={datacenter} value={datacenter}>
+                        {datacenter}
+                      </MenuItem>
+                    ))}
+                  </SelectStyled>
+                </FormControl>
+              </Grid>
+
+              {/* Environments */}
+              <Grid item xs={12} sm={4}>
+                <AutocompleteStyled
+                  multiple
+                  id='environments-autocomplete'
+                  options={environments}
+                  getOptionLabel={option => option}
+                  value={taskForm.environments}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'environments', value: newValue } })
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      variant='outlined'
+                      label='Environments'
+                      placeholder='Select multiple environments'
+                      fullWidth
+                    />
+                  )}
+                  disabled={!taskForm.datacenter}
+                />
+              </Grid>
+
+              {/* Components */}
+              <Grid item xs={12} sm={4}>
+                <AutocompleteStyled
+                  multiple
+                  id='components-autocomplete'
+                  options={components}
+                  getOptionLabel={option => option}
+                  value={taskForm.components}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'components', value: newValue } })
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      variant='outlined'
+                      label='Components'
+                      placeholder='Select multiple components'
+                      fullWidth
+                    />
+                  )}
+                  disabled={!taskForm.environments.length}
+                />
+              </Grid>
+            </Grid>
+            {/* Hosts section */}
+            {renderDynamicFormSection('hosts')}
+            <Box mt={2} display='flex' justifyContent='flex-end'>
+              <Button
+                startIcon={
+                  <Icon
+                    icon='mdi:plus-circle-outline'
+                    style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+                  />
+                }
+                onClick={() => addSectionEntry('hosts')}
+                style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+              >
+                Add Host/Targets
+              </Button>
+            </Box>
+          </Fragment>
+        )
+      case 6:
+        return <ReviewAndSubmitSection taskForm={taskForm} />
       default:
         return 'Unknown Step'
     }
@@ -784,8 +1421,8 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>Server details have been submitted.</Typography>
-          <ReviewAndSubmitSection serverForm={serverForm} />
+          <Typography>Task details have been submitted.</Typography>
+          <ReviewAndSubmitSection taskForm={taskForm} />
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
             <Button size='large' variant='contained' onClick={handleReset}>
               Reset
@@ -801,7 +1438,18 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
               <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
                 {steps[activeStep].title}
               </Typography>
-              <Typography variant='caption' component='p' paddingBottom={5}>
+              <Typography
+                variant='caption'
+                component='p'
+                paddingBottom={5}
+                className='step-subtitle'
+                style={{
+                  color:
+                    theme.palette.mode === 'dark'
+                      ? theme.palette.customColors.brandYellow
+                      : theme.palette.secondary.light
+                }}
+              >
                 {steps[activeStep].description}
               </Typography>
             </Grid>
@@ -837,7 +1485,17 @@ const AddTaskWizard = ({ onSuccess, ...props }) => {
                   <div className='step-label'>
                     <div>
                       <Typography className='step-title'>{step.title}</Typography>
-                      <Typography className='step-subtitle'>{step.subtitle}</Typography>
+                      <Typography
+                        className='step-subtitle'
+                        style={{
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.secondary.light
+                        }}
+                      >
+                        {step.subtitle}
+                      </Typography>
                     </div>
                   </div>
                 </StepLabel>

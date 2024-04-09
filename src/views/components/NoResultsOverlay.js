@@ -1,8 +1,8 @@
 import React from 'react'
-import { Stack, Typography } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-const NoResultsOverlay = ({ message }) => {
+const NoResultsOverlay = ({ message, buttonText, onButtonClick }) => {
   const theme = useTheme()
 
   return (
@@ -20,6 +20,11 @@ const NoResultsOverlay = ({ message }) => {
       >
         {message}
       </Typography>
+      {buttonText && (
+        <Button variant='contained' onClick={onButtonClick}>
+          {buttonText}
+        </Button>
+      )}
     </Stack>
   )
 }

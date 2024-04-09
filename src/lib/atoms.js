@@ -28,3 +28,9 @@ export const refetchComponentTriggerAtom = atom(0)
 export const refetchSubcomponentTriggerAtom = atom(0)
 
 export const refetchTaskTriggerAtom = atom(0)
+
+export const sloIdsAtom = atom([])
+
+export const slosAtom = atom([])
+
+export const refetchSloTriggerAtom = atom(0)

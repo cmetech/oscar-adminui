@@ -66,7 +66,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import { sloIdsAtom, slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
-import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
+import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 
@@ -168,7 +168,7 @@ const SLOList = props => {
       flex: 0.02,
       field: 'target_type',
       editable: editmode,
-      headerName: t('Target Type'),
+      headerName: t('Budgeting Method'),
       renderCell: params => {
         const { row } = params
 
@@ -176,7 +176,7 @@ const SLOList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.calculation_method}
+                {row?.target?.calculation_method?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -187,7 +187,7 @@ const SLOList = props => {
       flex: 0.015,
       field: 'target_value',
       editable: editmode,
-      headerName: t('Target Value'),
+      headerName: t('Target Value (%)'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -197,7 +197,7 @@ const SLOList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.target_value}
+                {row?.target?.target_value}%
               </Typography>
             </Box>
           </Box>
@@ -208,7 +208,7 @@ const SLOList = props => {
       flex: 0.015,
       field: 'target_period',
       editable: editmode,
-      headerName: t('Target Period'),
+      headerName: t('Target Rolling Period (days)'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -218,7 +218,7 @@ const SLOList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.period}
+                {row?.target?.period} days
               </Typography>
             </Box>
           </Box>
@@ -385,12 +385,7 @@ const SLOList = props => {
             <Typography variant='body2'>Updates to SLO information will be effective immediately.</Typography>
           </Box>
           {currentSlo && (
-            <UpdateTaskWizard
-              currentTask={currentSlo}
-              rows={rows}
-              setRows={setRows}
-              onClose={handleUpdateDialogClose}
-            />
+            <UpdateSLOWizard currentSlo={currentSlo} rows={rows} setRows={setRows} onClose={handleUpdateDialogClose} />
           )}
         </DialogContent>
       </Dialog>
@@ -471,7 +466,7 @@ const SLOList = props => {
 
       // console.log('Deleting SLO:', currentSlo)
 
-      const endpoint = `/api/sli/delete/${currentSlo.id}`
+      const endpoint = `/api/sli/${currentSlo.id}`
 
       console.log('DELETE Endpoint:', endpoint)
       const response = await axios.delete(endpoint, { headers })

@@ -154,13 +154,15 @@ const validationSchema = yup.object({
     .integer('Target Period must be an integer')
 })
 
-const AddSLOWizard = ({ onSuccess, ...props }) => {
+const AddSLOWizard = ({ onClose, ...props }) => {
   // ** States
-  const [sloName, setSloName] = useState('')
-  const [sloDescription, setSloDescription] = useState('')
-  const [sloTargetValue, setSloTargetValue] = useState(0)
-  const [sloTargetPeriod, setSloTargetPeriod] = useState(0)
-  const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState('occurrences')
+  const [sloName, setSloName] = useState(props?.currentSlo?.name || '')
+  const [sloDescription, setSloDescription] = useState(props?.currentSlo?.description || '')
+  const [sloTargetValue, setSloTargetValue] = useState(props?.currentSlo?.target?.target_value || 0)
+  const [sloTargetPeriod, setSloTargetPeriod] = useState(props?.currentSlo?.target?.period || 0)
+  const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState(
+    props?.currentSlo?.target?.calculation_method || 'occurrences'
+  )
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
@@ -229,29 +231,40 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         }
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = '/api/sli'
-        const response = await axios.post(endpoint, payload, { headers })
+        const endpoint = `/api/sli/${props.currentSlo.id}`
+        const response = await axios.put(endpoint, payload, { headers })
 
-        if (response.status === 201 && response.data) {
-          toast.success('SLO added successfully')
-          setRefetchTrigger(Date.now())
+        if (response.status === 200 && response.data) {
+          const updatedSlo = response.data
 
-          // Call the onSuccess callback after successful submission
-          onSuccess()
+          const updatedSlos = props.rows.map(slo => {
+            if (slo.id === updatedSlo.id) {
+              return updatedSlo
+            }
+
+            return slo
+          })
+
+          props.setRows(updatedSlos)
+
+          toast.success('SLO details updated successfully')
+
+          // Call onClose to close the modal
+          onClose && onClose()
         }
       } catch (error) {
-        console.error('Error adding SLO', error)
-        toast.error('Error adding SLO')
+        console.error('Error updating SLO details', error)
+        toast.error('Error updating SLO details')
       }
     }
   }
 
   const handleReset = () => {
-    setSloName('')
-    setSloDescription('')
-    setSloTargetValue(0)
-    setSloTargetPeriod(0)
-    setSloTargetCalculationMethod('occurrences')
+    setSloName(props?.currentSlo?.name || '')
+    setSloDescription(props?.currentSlo?.description || '')
+    setSloTargetValue(props?.currentSlo?.target?.target_value || 0)
+    setSloTargetPeriod(props?.currentSlo?.target?.period || 0)
+    setSloTargetCalculationMethod(props?.currentSlo?.target?.calculation_method || 'occurrences')
     setActiveStep(0)
   }
 

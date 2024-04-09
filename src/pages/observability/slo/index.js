@@ -185,34 +185,6 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
             </Box>
           </MenuItem>
         )}
-        {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onEnable()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:plus-box' />
-              {t('Enable')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
-        )}
-        {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onDisable()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:minus-box' />
-              {t('Disable')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
-        )}
         {/* <MenuItem
           disabled
           sx={{ p: 0 }}

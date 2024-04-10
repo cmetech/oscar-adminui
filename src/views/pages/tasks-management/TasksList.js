@@ -324,9 +324,11 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
         const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
-          'US/Eastern',
+          utcToZonedTime(parseISO(row?.created_at), timezone),
+          timezone,
           'MMM d, yyyy, h:mm:ss aa zzz'
         )
 
@@ -350,9 +352,11 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
         const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
-          'US/Eastern',
+          utcToZonedTime(parseISO(row?.modified_at), timezone),
+          timezone,
           'MMM d, yyyy, h:mm:ss aa zzz'
         )
 

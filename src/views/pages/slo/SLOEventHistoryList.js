@@ -128,6 +128,8 @@ const SLOEventHistoryList = props => {
     setDetailPanelExpandedRowIds(newIds)
   }, [])
 
+  // console.log('Session:', session)
+
   // column definitions
   const columns = [
     {
@@ -281,14 +283,12 @@ const SLOEventHistoryList = props => {
       renderCell: params => {
         const { row } = params
 
-        // const createdAtDate = parseISO(row.timestamp?.substring(0, 19))
-        // const humanReadableDate = format(createdAtDate, 'PPpp')
-
-        console.log('timestamp:', row?.timestamp)
+        // console.log('timestamp:', row?.timestamp)
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
 
         const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.timestamp), 'US/Eastern'),
-          'US/Eastern',
+          utcToZonedTime(parseISO(row?.timestamp), timezone),
+          timezone,
           'MMM d, h:mm aa zzz'
         )
 

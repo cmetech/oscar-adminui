@@ -10,6 +10,7 @@ import UserModeToggler from 'src/layouts/components/shared-components/UserModeTo
 import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
+import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
 
 const notifications = [
   {
@@ -70,6 +71,7 @@ const AppBarContent = props => {
         ) : null}
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+        <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />

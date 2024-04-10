@@ -50,8 +50,8 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
@@ -324,8 +324,11 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        const createdAtDate = parseISO(row.created_at.substring(0, 19))
-        const humanReadableDate = format(createdAtDate, 'PPpp')
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
+          'US/Eastern',
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -347,8 +350,11 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        const updatedAtDate = parseISO(row.modified_at.substring(0, 19))
-        const humanReadableDate = format(updatedAtDate, 'PPpp')
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
+          'US/Eastern',
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

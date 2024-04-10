@@ -51,8 +51,8 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
@@ -281,8 +281,16 @@ const SLOEventHistoryList = props => {
       renderCell: params => {
         const { row } = params
 
-        const createdAtDate = parseISO(row.timestamp?.substring(0, 19))
-        const humanReadableDate = format(createdAtDate, 'PPpp')
+        // const createdAtDate = parseISO(row.timestamp?.substring(0, 19))
+        // const humanReadableDate = format(createdAtDate, 'PPpp')
+
+        console.log('timestamp:', row?.timestamp)
+
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.timestamp), 'US/Eastern'),
+          'US/Eastern',
+          'MMM d, h:mm aa zzz'
+        )
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

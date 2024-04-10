@@ -51,8 +51,8 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
@@ -244,8 +244,11 @@ const TaskHistoryList = props => {
         let humanReadableDate = ''
 
         if (row.received) {
-          date = parseISO(row.received?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            utcToZonedTime(parseISO(row?.received), 'US/Eastern'),
+            'US/Eastern',
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (
@@ -271,8 +274,11 @@ const TaskHistoryList = props => {
         let humanReadableDate = ''
 
         if (row.started) {
-          date = parseISO(row.started?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            utcToZonedTime(parseISO(row?.started), 'US/Eastern'),
+            'US/Eastern',
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (
@@ -298,8 +304,11 @@ const TaskHistoryList = props => {
         let humanReadableDate = ''
 
         if (row.succeeded) {
-          date = parseISO(row.succeeded?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            utcToZonedTime(parseISO(row?.succeeded), 'US/Eastern'),
+            'US/Eastern',
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (

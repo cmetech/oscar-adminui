@@ -66,9 +66,8 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import TaskHistoryDetailPanel from 'src/views/pages/tasks-management/TaskHistoryDetailPanel'
-import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { refetchSloTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 
@@ -96,16 +95,9 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
-
-const TaskHistoryList = props => {
+const SLOEventHistoryList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
-  const dgApiRef = useGridApiRef()
   const session = useSession()
   const { t } = useTranslation()
   const theme = useTheme()
@@ -121,13 +113,13 @@ const TaskHistoryList = props => {
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('succeeded')
+  const [sortColumn, setSortColumn] = useState('timestamp')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
-  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
 
   const getDetailPanelContent = useCallback(({ row }) => <TaskHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -139,7 +131,7 @@ const TaskHistoryList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.02,
+      flex: 0.03,
       field: 'name',
       headerName: t('Name'),
       renderCell: params => {
@@ -148,7 +140,7 @@ const TaskHistoryList = props => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.alias?.toUpperCase()}</StyledLink>
+              <StyledLink href='#'>{row?.sliName?.toUpperCase()}</StyledLink>
               <Typography
                 noWrap
                 variant='caption'
@@ -159,7 +151,7 @@ const TaskHistoryList = props => {
                       : theme.palette.customColors.brandYellow
                 }}
               >
-                {row?.task_id}
+                {row?.sliId}
               </Typography>
             </Box>
           </Box>
@@ -168,26 +160,75 @@ const TaskHistoryList = props => {
     },
     {
       flex: 0.02,
-      field: 'worker',
-      headerName: t('Worker'),
+      field: 'target_type',
+      headerName: t('Budgeting Method'),
       renderCell: params => {
         const { row } = params
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.worker?.toUpperCase()}</StyledLink>
-              <Typography
-                noWrap
-                variant='caption'
-                sx={{
-                  color:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
-                      : theme.palette.customColors.brandYellow
-                }}
-              >
-                {row?.id?.toUpperCase()}
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.calculationMethod?.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.015,
+      field: 'target_value',
+      headerName: t('Target Value (%)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.targetValue}%
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.015,
+      field: 'target_period',
+      headerName: t('Target Rolling Period (days)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.targetPeriod} days
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.03,
+      minWidth: 100,
+      field: 'value',
+      headerName: t('Value'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row?.value}
               </Typography>
             </Box>
           </Box>
@@ -205,9 +246,9 @@ const TaskHistoryList = props => {
 
         let color = 'error'
         let label = 'UNKN'
-        if (row?.state?.toUpperCase() === 'SUCCESS') {
+        if (row?.status?.toLowerCase() === 'success') {
           color = 'success'
-          label = 'COMPLETED'
+          label = 'SUCCESS'
         } else {
           color = 'error'
           label = 'FAILURE'
@@ -233,74 +274,15 @@ const TaskHistoryList = props => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.02,
       minWidth: 60,
-      field: 'received',
-      headerName: t('Received At'),
+      field: 'createdAtTime',
+      headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
 
-        let date = ''
-        let humanReadableDate = ''
-
-        if (row.received) {
-          date = parseISO(row.received?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
-        }
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.015,
-      minWidth: 60,
-      field: 'started',
-      headerName: t('Started At'),
-      renderCell: params => {
-        const { row } = params
-
-        let date = ''
-        let humanReadableDate = ''
-
-        if (row.started) {
-          date = parseISO(row.started?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
-        }
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.015,
-      minWidth: 60,
-      field: 'completed',
-      headerName: t('Completed At'),
-      renderCell: params => {
-        const { row } = params
-
-        let date = ''
-        let humanReadableDate = ''
-
-        if (row.succeeded) {
-          date = parseISO(row.succeeded?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
-        }
+        const createdAtDate = parseISO(row.timestamp?.substring(0, 19))
+        const humanReadableDate = format(createdAtDate, 'PPpp')
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -341,7 +323,7 @@ const TaskHistoryList = props => {
 
       setLoading(true)
       await axios
-        .get('/api/tasks/history', {
+        .get('/api/sli/events', {
           params: {
             q: searchValue,
             sort: sort,
@@ -357,7 +339,7 @@ const TaskHistoryList = props => {
           // console.log('total_records', res.data.total_records)
 
           setRowCount(res.data.total_records || 0)
-          setRows(res.data.records || [])
+          setRows(res.data.rows || [])
         })
 
       // await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
@@ -379,7 +361,7 @@ const TaskHistoryList = props => {
       fetchData()
     } else {
       setSort('desc')
-      setSortColumn('succeeded')
+      setSortColumn('timestamp')
     }
   }
 
@@ -411,21 +393,9 @@ const TaskHistoryList = props => {
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
-          localeText={{
-            toolbarColumns: t('Columns'),
-            toolbarFilters: t('Filters')
-          }}
-          initialState={{
-            columns: {
-              columnVisibilityModel: {
-                createdAtTime: true
-              }
-            }
-          }}
           autoHeight={true}
           pagination
           rows={rows}
-          apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={false}
@@ -440,7 +410,7 @@ const TaskHistoryList = props => {
           onPaginationModelChange={setPaginationModel}
           components={{
             Toolbar: ServerSideToolbar,
-            NoRowsOverlay: () => <NoRowsOverlay message='No Tasks History Found' />,
+            NoRowsOverlay: () => <NoRowsOverlay message='No SLO Event History Found' />,
             NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
           }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
@@ -475,4 +445,4 @@ const TaskHistoryList = props => {
   )
 }
 
-export default TaskHistoryList
+export default SLOEventHistoryList

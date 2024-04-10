@@ -698,7 +698,6 @@ const SLO = () => {
                 closeOnSelect={false}
                 value={dateRange}
                 defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
-                disableFuture
                 views={['day', 'hours']}
                 timeSteps={{ minute: 15 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}

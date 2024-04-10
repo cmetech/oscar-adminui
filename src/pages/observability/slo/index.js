@@ -718,11 +718,11 @@ const SLO = () => {
                   }),
                   shortcuts: {
                     items: predefinedRangesDayjs
-                  }
+                  },
 
-                  // actionBar: {
-                  //   actions: ['cancel', 'accept']
-                  // }
+                  actionBar: {
+                    actions: ['clear']
+                  }
                 }}
               />
             )}

@@ -609,14 +609,14 @@ const SLO = () => {
   }
 
   const handleConfirmDelete = async () => {
-    console.log('Deleting SLOs', selectedTaskIds)
+    console.log('Deleting SLOs', selectedSloIds)
 
     // Generate an array of promises for deleting each task
-    const deletePromises = selectedTaskIds.map(taskId =>
+    const deletePromises = selectedSloIds.map(sloId =>
       axios
-        .delete(`/api/tasks/delete/${taskId}`)
-        .then(() => ({ success: true, taskId }))
-        .catch(error => ({ success: false, taskId, error }))
+        .delete(`/api/sli/${sloId}`)
+        .then(() => ({ success: true, sloId }))
+        .catch(error => ({ success: false, sloId, error }))
     )
 
     try {
@@ -626,22 +626,22 @@ const SLO = () => {
       // Handle results
       results.forEach(result => {
         if (result.success) {
-          toast.success(`Task ${result.taskId} deleted successfully`)
+          toast.success(`SLO ${result.sloId} deleted successfully`)
         } else {
-          console.error(`Error deleting task ${result.taskId}:`, result.error)
-          toast.error(`Failed to delete task ${result.taskId}`)
+          console.error(`Error deleting SLO ${result.sloId}:`, result.error)
+          toast.error(`Failed to delete SLO ${result.sloId}`)
         }
       })
 
       // Refresh data or update UI as needed
       setRefetchTrigger(Date.now())
 
-      // Optionally clear selected taskIds after deletion
-      setSelectedTaskIds([])
+      // Optionally clear selected sloIds after deletion
+      setSelectedSloIds([])
     } catch (error) {
       // This catch block may not be necessary since individual errors are caught above
-      console.error('Unexpected error during task deletion:', error)
-      toast.error('An unexpected error occurred during task deletion')
+      console.error('Unexpected error during SLO deletion:', error)
+      toast.error('An unexpected error occurred during SLO deletion')
     }
 
     setIsDeleteModalOpen(false)

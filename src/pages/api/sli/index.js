@@ -70,8 +70,27 @@ async function handler(req, res) {
       console.error('Error adding SLO:', error)
       res.status(error.response?.status || 500).json({ message: error.message })
     }
+  } else if (req.method === 'DELETE') {
+    try {
+      const identifiers = req.body // Assuming identifiers are sent as an array in the request body
+
+      const response = await axios.delete(`${oscarConfig.MIDDLEWARE_API_URL}/sli/bulk`, {
+        data: identifiers, // Sending the identifiers in the request body
+        headers: {
+          'X-API-Key': oscarConfig.API_KEY,
+          'Content-Type': 'application/json'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+      })
+
+      // Respond with success status
+      res.status(response.status || 200).json(response.data)
+    } catch (error) {
+      console.error('Error deleting SLIs:', error)
+      res.status(error.response?.status || 500).json({ message: error.message })
+    }
   } else {
-    res.setHeader('Allow', ['GET', 'POST'])
+    res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
     res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }

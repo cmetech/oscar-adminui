@@ -31,7 +31,22 @@ const navigation = () => {
     {
       title: 'SLOs',
       icon: 'mdi:check-decagram',
-      path: '/observability/slo'
+      children: [
+        {
+          title: 'Overview',
+          path: '/observability/slo/overview',
+          icon: 'mdi:view-dashboard-variant',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Details',
+          path: '/observability/slo/details',
+          icon: 'mdi:cog',
+          action: 'read',
+          subject: 'all'
+        }
+      ]
     },
     {
       sectionTitle: 'Service Continuity',

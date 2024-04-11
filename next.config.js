@@ -9,6 +9,7 @@ const { defaultLocale } = require('yup')
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
+  transpilePackages: ['@mui/x-charts'],
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,

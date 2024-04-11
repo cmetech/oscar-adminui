@@ -131,10 +131,14 @@ const Home = () => {
                       <SingleValueCard
                         bgcolor='customColors.brandGreen4'
                         title='Critical API Performance'
-                        value='99.9'
+                        value='88.5'
                         trendDir='up'
-                        trendValue='43'
+                        trendValue='0.86'
                         showSparkline={true}
+                        sparklineData={[
+                          81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67,
+                          83.33, 100, 91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
+                        ]}
                         linkRoute='/taskrequest'
                       />
                     </Grid>
@@ -146,6 +150,7 @@ const Home = () => {
                         trendDir='down'
                         trendValue='67'
                         showSparkline={true}
+                        sparklineData={chartOrderData}
                         linkRoute='/sla'
                       />
                     </Grid>
@@ -311,9 +316,9 @@ const Home = () => {
                       <SingleValueCard
                         bgcolor='customColors.brandGreen'
                         title='Critical API Performance'
-                        value='98.6'
+                        value='88.5'
                         trendDir='up'
-                        trendValue='43'
+                        trendValue='0.86'
                         showSparkline={true}
                         linkRoute='/taskrequest'
                       />

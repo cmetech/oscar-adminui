@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 
 // ** Components
+import Autocomplete from 'src/layouts/components/Autocomplete'
 import UserModeToggler from 'src/layouts/components/shared-components/UserModeToggler'
 import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
@@ -69,6 +70,9 @@ const AppBarContent = props => {
             <Icon icon='mdi:menu' />
           </IconButton>
         ) : null}
+      </Box>
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+        <Autocomplete hidden={hidden} settings={settings} />
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         <OscarChatToggler settings={settings} saveSettings={saveSettings} />

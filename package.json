@@ -65,6 +65,7 @@
     "i18next-http-backend": "2.2.0",
     "jotai": "^2.0.3",
     "keen-slider": "6.8.5",
+    "lodash": "^4.17.21",
     "moment-timezone": "^0.5.45",
     "next": "13.3.2",
     "next-auth": "^4.24.3",

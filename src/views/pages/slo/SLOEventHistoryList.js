@@ -66,7 +66,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import TaskHistoryDetailPanel from 'src/views/pages/tasks-management/TaskHistoryDetailPanel'
+import SLOEventHistoryDetailPanel from 'src/views/pages/slo/SLOEventHistoryDetailPanel'
 import { refetchSloTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -121,7 +121,7 @@ const SLOEventHistoryList = props => {
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
 
-  const getDetailPanelContent = useCallback(({ row }) => <TaskHistoryDetailPanel row={row} />, [])
+  const getDetailPanelContent = useCallback(({ row }) => <SLOEventHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
   const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
@@ -340,7 +340,8 @@ const SLOEventHistoryList = props => {
             limit: paginationModel.pageSize,
             start_time: startTime,
             end_time: endTime
-          }
+          },
+          timeout: 30000
         })
         .then(res => {
           // console.log('total_pages', res.data.total_pages)

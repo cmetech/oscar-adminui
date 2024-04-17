@@ -42,11 +42,22 @@ import addMonths from 'date-fns/addMonths'
 import { DateRangePicker } from 'rsuite'
 import { endOfDay, startOfDay, subHours } from 'date-fns'
 
-import { useTheme } from '@mui/material/styles'
+import { useTheme, styled } from '@mui/material/styles'
 import { grid } from '@mui/system'
 import axios from 'axios'
 import { t } from 'i18next'
 import { useTranslation } from 'react-i18next'
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
 
 const predefinedRanges = [
   {
@@ -213,7 +224,6 @@ const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive,
 
 const ServerSideToolbar = ({ showButtons, ...props }) => {
   const theme = useTheme()
-  const [openAddDriverDialog, setOpenAddDriverDialog] = useState(false)
   const [openUploadCSVDialog, setOpenUploadCSVDialog] = useState(false)
   const modeDependentColor = theme.palette.mode === 'light' ? 'secondary' : 'primary'
 
@@ -222,12 +232,6 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
   // const { tripsRef, breadcrumbsRef, idleEventsRef } = dataGridRefs
 
   const { afterToday } = DateRangePicker
-
-  const handleAddDriverSubmit = () => {
-    // Logic to add the driver
-    // Close the dialog afterward
-    setOpenAddDriverDialog(false)
-  }
 
   return (
     <Box
@@ -240,15 +244,6 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
     >
       {showButtons && (
         <Box sx={{ flexWrap: 'nowrap' }}>
-          <Button
-            size='small'
-            variant='contained'
-            color={modeDependentColor}
-            startIcon={<Icon icon='mdi:account-plus' />}
-            onClick={() => setOpenAddDriverDialog(true)}
-          >
-            Add Driver
-          </Button>
           <Button
             size='small'
             variant='outlined'
@@ -271,11 +266,11 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         reportId={props.reportId}
         sx={{ gridRow: '1', gridColumn: '6 / 6' }}
       />
-      <TextField
+      <TextfieldStyled
         size='small'
         value={props.value}
         onChange={props.onChange}
-        placeholder={`${t('Search')}…`}
+        placeholder={`${t('Filter Current Page')}…`}
         InputProps={{
           startAdornment: (
             <Box sx={{ mr: 2, display: 'flex' }}>
@@ -300,21 +295,6 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
           }
         }}
       />
-      <Dialog open={openAddDriverDialog} onClose={() => setOpenAddDriverDialog(false)}>
-        <DialogTitle>Add Driver</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus margin='dense' label='Driver Name' type='text' fullWidth />
-          {/* Add more fields as required */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAddDriverDialog(false)} color='primary'>
-            Cancel
-          </Button>
-          <Button onClick={handleAddDriverSubmit} color='primary'>
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }

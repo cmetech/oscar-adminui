@@ -94,6 +94,10 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
+const escapeRegExp = value => {
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+}
+
 // TODO: Test with no Tasks to see if the NoRowsOverlay is displayed with the Register Tasks button
 // FIXME: Deleting all tasks works, but I am reloading the tasks automatically, I should now use the Overlay Register Tasks button
 
@@ -108,6 +112,7 @@ const SLOList = props => {
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
@@ -557,7 +562,19 @@ const SLOList = props => {
 
   const handleSearch = value => {
     setSearchValue(value)
-    fetchData(sort, value, sortColumn)
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      return Object.keys(row).some(field => {
+        // @ts-ignore
+        return searchRegex.test(row[field].toString())
+      })
+    })
+    if (value.length) {
+      setFilteredRows(filteredRows)
+    } else {
+      setFilteredRows([])
+    }
   }
 
   const handleRowSelection = newRowSelectionModel => {
@@ -595,7 +612,7 @@ const SLOList = props => {
           }}
           autoHeight={true}
           pagination
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}

@@ -95,6 +95,10 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
+const escapeRegExp = value => {
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+}
+
 const SLOEventHistoryList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -105,6 +109,7 @@ const SLOEventHistoryList = props => {
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
@@ -380,7 +385,19 @@ const SLOEventHistoryList = props => {
 
   const handleSearch = value => {
     setSearchValue(value)
-    fetchData()
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      return Object.keys(row).some(field => {
+        // @ts-ignore
+        return searchRegex.test(row[field].toString())
+      })
+    })
+    if (value.length) {
+      setFilteredRows(filteredRows)
+    } else {
+      setFilteredRows([])
+    }
   }
 
   const handleRowSelection = newRowSelectionModel => {
@@ -404,7 +421,7 @@ const SLOEventHistoryList = props => {
         <CustomDataGrid
           autoHeight={true}
           pagination
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={false}

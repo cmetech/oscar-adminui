@@ -15,7 +15,7 @@ const navigation = () => {
     {
       title: 'Alerts & Events',
       icon: 'mdi:bell-alert',
-      path: '/services',
+      path: '/observability',
       action: 'read',
       subject: 'all'
     },
@@ -29,9 +29,11 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'SLA',
-      icon: 'mdi:check-decagram',
-      path: '/services/sla'
+      title: 'SLOs',
+      path: '/observability/slo/details',
+      icon: 'mdi:cog',
+      action: 'read',
+      subject: 'all'
     },
     {
       sectionTitle: 'Service Continuity',

@@ -6,31 +6,27 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type } = query
+    const { q = '', column = '', sort = '', type, calculate = 'true' } = query
     const queryLowered = q.toLowerCase()
 
     try {
-      const response = await axios.get(`${oscarConfig.MIDDLEWARE_API_URL}/sli`, {
+      const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/sli`)
+      url.searchParams.append('calculate', calculate)
+
+      const response = await axios.get(url.toString(), {
+        timeout: 30000,
         headers: { 'X-API-Key': oscarConfig.API_KEY },
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
 
+      console.log('response', response?.data)
+
       if (response?.data) {
-        // console.log('export targets', response?.data)
-        const dataAsc = response.data.sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-
-        const filteredData = dataToFilter.filter(
-          item =>
-            item?.id?.toString().toLowerCase().includes(queryLowered) ||
-            item?.name?.toLowerCase().includes(queryLowered) ||
-            item?.target?.calculation_method?.toLowerCase().includes(queryLowered)
-        )
-
         res.status(response.status || 200).json({
-          allData: response.data,
-          total: filteredData.length,
-          rows: filteredData
+          total: response.data.total_slis || 0,
+          total_breached: response.data.total_breached || -1,
+          total_ok: response.data.total_ok || -1,
+          rows: response.data.slis || []
         })
       } else {
         res.status(500).json({ message: 'No response - An error occurred' })

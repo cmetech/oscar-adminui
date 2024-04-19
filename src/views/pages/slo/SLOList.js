@@ -229,7 +229,7 @@ const SLOList = props => {
                   color={breachColor}
                   sx={{
                     '& .MuiChip-label': { textTransform: 'capitalize' },
-                    width: '120px'
+                    width: '90px'
                   }}
                 />
                 <Box
@@ -243,12 +243,12 @@ const SLOList = props => {
                   <Typography
                     variant='caption'
                     sx={{
-                      fontWeight: 600,
+                      fontWeight: 500,
                       lineHeight: 1.5,
                       color: row.trend_direction === 'down' ? 'error.main' : 'success.main'
                     }}
                   >
-                    {row.delta_percentage}
+                    {row.delta_percentage}%
                   </Typography>
                 </Box>
               </Box>
@@ -279,7 +279,7 @@ const SLOList = props => {
                   color='info'
                   sx={{
                     '& .MuiChip-label': { textTransform: 'capitalize' },
-                    width: '120px'
+                    width: '90px'
                   }}
                 />
               </Box>

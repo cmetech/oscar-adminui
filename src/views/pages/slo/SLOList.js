@@ -290,7 +290,7 @@ const SLOList = props => {
     },
     {
       field: 'sparkline',
-      headerName: 'Trend',
+      headerName: t('Trend'),
       width: 200,
       renderCell: params => {
         const { row } = params

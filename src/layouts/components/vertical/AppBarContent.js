@@ -7,6 +7,7 @@ import Chip from '@mui/material/Chip'
 
 import { useRouter } from 'next/router'
 import { useTheme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -68,19 +69,20 @@ const notifications = [
 const CustomBreadcrumbs = () => {
   const router = useRouter()
   const theme = useTheme()
+  const { t } = useTranslation()
   const path = router.pathname.replace(/\/$/g, '')
 
   console.log('path', path)
 
   const breadcrumbNameMap = {
-    '/home': { name: 'Overview', icon: 'mdi:telescope' },
+    '/home': { name: t('Overview'), icon: 'mdi:telescope' },
     '/observability/slo': { name: 'SLOs', icon: 'mdi:target' },
-    '/tasks': { name: 'Automations', icon: 'mdi:arrow-decision-auto' },
-    '/administration/inventory': { name: 'Inventory Management', icon: 'mdi:server' },
-    '/administration/services': { name: 'Services', icon: 'mdi:service-toolbox' },
-    '/administration/users': { name: 'User Management', icon: 'mdi:account-multiple' },
-    '/oscar': { name: 'Oscar Chat', icon: 'mdi:message-text' },
-    '/oscar/docs': { name: 'Doc Portal', icon: 'mdi:arrow-decision-auto' }
+    '/tasks': { name: t('Automations'), icon: 'mdi:arrow-decision-auto' },
+    '/administration/inventory': { name: t('Inventory Management'), icon: 'mdi:server' },
+    '/administration/services': { name: t('Services'), icon: 'mdi:service-toolbox' },
+    '/administration/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
+    '/oscar': { name: t('Oscar Chat'), icon: 'mdi:message-text' },
+    '/oscar/docs': { name: t('Doc Portal'), icon: 'mdi:arrow-decision-auto' }
   }
 
   // Check if the entire path is a key in the breadcrumbNameMap
@@ -91,7 +93,7 @@ const CustomBreadcrumbs = () => {
       <Link underline='hover' color='inherit' href='/'>
         <CustomChip
           rounded
-          label='Home'
+          label={t('Home')}
           key='/'
           icon={<Icon icon='mdi:home' />}
           skin='light'

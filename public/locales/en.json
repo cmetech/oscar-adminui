@@ -18,6 +18,7 @@
     "Updated At": "Updated At",
     "Actions": "Actions",
     "Search": "Search",
+    "Top Search": "Search  (Ctrl+/)",
     "Support": "Support",
     "Feedback": "Feedback",
     "Academy": "Academy",
@@ -64,5 +65,18 @@
     "promptStep1_Description": "Task requires user inputs.",
     "promptStep2_Title": "Review and Submit",
     "promptStep2_SubTitle": "Confirm the details",
-    "promptStep2_Description": "Review and submit the task."
+    "promptStep2_Description": "Review and submit the task.",
+    "SLOs": "SLOs",
+    "Automations": "Automations",
+    "Automation": "Automation",
+    "Services": "Services",
+    "Service": "Service",
+    "Service Management": "Service Management",
+    "User Management": "User Management",
+    "Oscar Chat": "OSCAR Chat",
+    "Doc Portal": "Doc Portal",
+    "Budgeting Method": "Budgeting Method",
+    "Target Value (%)": "Target Value (%)",
+    "Trend": "Trend",
+    "Filter Current Page": "Filter Current Page"
 }

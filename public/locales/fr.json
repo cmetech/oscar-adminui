@@ -18,6 +18,7 @@
     "Updated At": "Mis à jour le",
     "Actions": "Actions",
     "Search": "Recherche",
+    "Top Search": "Recherche (Ctrl+/)",
     "Support": "Soutien",
     "Feedback": "Retour d'information",
     "Academy": "Académie",
@@ -64,5 +65,16 @@
     "promptStep1_Description": "La tâche nécessite des saisies utilisateur.",
     "promptStep2_Title": "Réviser et soumettre",
     "promptStep2_SubTitle": "Confirmer les détails",
-    "promptStep2_Description": "Revoir et soumettre la tâche."
+    "promptStep2_Description": "Revoir et soumettre la tâche.",
+    "SLOs": "SLOs",
+    "Automations": "Automatisations",
+    "Automation": "Automatisation",
+    "Services": "Services",
+    "Service": "Service",
+    "Service Management": "Gestion des Services",
+    "User Management": "Gestion des Utilisateurs",
+    "Oscar Chat": "Chat OSCAR",
+    "Doc Portal": "Portail de Documents",
+    "Home": "Accueil",
+    "Filter Current Page": "Filtrer la Page Actuelle"
 }

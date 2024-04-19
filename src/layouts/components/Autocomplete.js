@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 // ** Next Imports
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useTranslation } from 'react-i18next'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -284,6 +285,7 @@ const AutocompleteComponent = ({ hidden, settings }) => {
   // ** Hooks & Vars
   const theme = useTheme()
   const router = useRouter()
+  const { t } = useTranslation()
   const { layout } = settings
   const wrapper = useRef(null)
   const fullScreenDialog = useMediaQuery(theme.breakpoints.down('sm'))
@@ -383,7 +385,7 @@ const AutocompleteComponent = ({ hidden, settings }) => {
           <Icon icon='mdi:magnify' />
         </IconButton>
         {!hidden && layout === 'vertical' ? (
-          <Typography sx={{ userSelect: 'none', color: 'text.disabled' }}>Search (Ctrl+/)</Typography>
+          <Typography sx={{ userSelect: 'none', color: 'text.disabled' }}>{t('Top Search')}</Typography>
         ) : null}
         {openDialog && (
           <Dialog fullWidth open={openDialog} fullScreen={fullScreenDialog} onClose={() => setOpenDialog(false)}>

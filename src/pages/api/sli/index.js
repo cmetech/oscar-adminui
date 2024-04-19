@@ -11,6 +11,8 @@ async function handler(req, res) {
 
     try {
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/sli`)
+      if (start_time) url.searchParams.append('start_time', start_time)
+      if (end_time) url.searchParams.append('end_time', end_time)
       url.searchParams.append('calculate', calculate)
 
       const response = await axios.get(url.toString(), {

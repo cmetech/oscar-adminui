@@ -71,7 +71,6 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import { calc } from 'antd/es/theme/internal'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -144,7 +143,7 @@ const SLOList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.03,
+      flex: 0.02,
       field: 'name',
       editable: editmode,
       headerName: t('Name'),
@@ -171,10 +170,12 @@ const SLOList = props => {
       }
     },
     {
-      flex: 0.02,
+      flex: 0.01,
       field: 'target_type',
       editable: editmode,
       headerName: t('Budgeting Method'),
+      align: 'center',
+      headerAlign: 'center',
       renderCell: params => {
         const { row } = params
 
@@ -183,14 +184,24 @@ const SLOList = props => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CustomChip rounded size='large' skin='light' label={budgetingLabel} color='warning' />
+              <CustomChip
+                rounded
+                size='large'
+                skin='light'
+                label={budgetingLabel}
+                color='warning'
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '150px'
+                }}
+              />
             </Box>
           </Box>
         )
       }
     },
     {
-      flex: 0.015,
+      flex: 0.01,
       field: 'slo_percentage',
       editable: editmode,
       headerName: t('SLO (%)'),
@@ -202,16 +213,52 @@ const SLOList = props => {
         const breachColor = row.is_breaching ? 'error' : 'success'
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CustomChip rounded size='medium' skin='light' label={row.slo_percentage + '%'} color={breachColor} />
+              <Box sx={{ display: 'flex' }}>
+                <CustomChip
+                  rounded
+                  size='medium'
+                  skin='light'
+                  label={row.slo_percentage + '%'}
+                  color={breachColor}
+                  sx={{
+                    '& .MuiChip-label': { textTransform: 'capitalize' },
+                    width: '120px'
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    '& svg': { fontWeight: 600, color: row.trend_direction === 'down' ? 'error.main' : 'success.main' }
+                  }}
+                >
+                  <Icon icon={row.trend_direction === 'down' ? 'mdi:chevron-down' : 'mdi:chevron-up'} />
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      fontWeight: 600,
+                      lineHeight: 1.5,
+                      color: row.trend_direction === 'down' ? 'error.main' : 'success.main'
+                    }}
+                  >
+                    {row.delta_percentage}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           </Box>
         )
       }
     },
     {
-      flex: 0.015,
+      flex: 0.01,
       field: 'target_value',
       editable: editmode,
       headerName: t('Target Value (%)'),
@@ -224,7 +271,17 @@ const SLOList = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CustomChip rounded size='medium' skin='light' label={row.target?.target_value + '%'} color='info' />
+                <CustomChip
+                  rounded
+                  size='medium'
+                  skin='light'
+                  label={row.target?.target_value + '%'}
+                  color='info'
+                  sx={{
+                    '& .MuiChip-label': { textTransform: 'capitalize' },
+                    width: '120px'
+                  }}
+                />
               </Box>
             </Box>
           </Box>
@@ -258,28 +315,7 @@ const SLOList = props => {
       }
     },
     {
-      flex: 0.015,
-      field: 'target_period',
-      editable: editmode,
-      headerName: t('Period (days)'),
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.period} days
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.03,
+      flex: 0.04,
       minWidth: 100,
       field: 'description',
       editable: editmode,
@@ -302,7 +338,7 @@ const SLOList = props => {
       field: 'actions',
       headerName: t('Actions'),
       type: 'string',
-      flex: 0.02,
+      flex: 0.01,
       minWidth: 10,
       renderCell: params => {
         const { row } = params

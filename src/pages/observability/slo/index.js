@@ -680,10 +680,41 @@ const SLO = () => {
           <Box display='flex' alignItems='center'>
             {value === '1' && (
               <Fragment>
+                <DateRangePicker
+                  calendars={2}
+                  closeOnSelect={false}
+                  value={dateRange}
+                  defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
+                  views={['day', 'hours']}
+                  timeSteps={{ minute: 15 }}
+                  viewRenderers={{ hours: renderDigitalClockTimeView }}
+                  onChange={newValue => {
+                    // console.log('Date range:', newValue)
+                    setDateRange(newValue)
+                  }}
+                  slotProps={{
+                    field: { dateSeparator: 'to' },
+                    textField: ({ position }) => ({
+                      size: 'small',
+                      color: position === 'start' ? 'secondary' : 'secondary',
+                      focused: true,
+                      InputProps: {
+                        endAdornment: <Icon icon='mdi:calendar' />
+                      }
+                    }),
+                    shortcuts: {
+                      items: predefinedRangesDayjs
+                    },
+
+                    actionBar: {
+                      actions: ['clear']
+                    }
+                  }}
+                />
                 <Button
                   variant='contained'
                   color='secondary'
-                  sx={{ marginRight: 1 }}
+                  sx={{ marginRight: 1, marginLeft: 3 }}
                   startIcon={<Icon icon='mdi:plus' />}
                   onClick={handleOpenModal}
                 >

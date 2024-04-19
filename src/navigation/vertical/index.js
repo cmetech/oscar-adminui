@@ -3,7 +3,7 @@ const navigation = () => {
     {
       title: 'Overview',
       path: '/home',
-      icon: 'mdi:home',
+      icon: 'mdi:telescope',
       action: 'read',
       subject: 'all'
     },
@@ -30,8 +30,8 @@ const navigation = () => {
     },
     {
       title: 'SLOs',
-      path: '/observability/slo/details',
-      icon: 'mdi:cog',
+      path: '/observability/slo',
+      icon: 'mdi:target',
       action: 'read',
       subject: 'all'
     },

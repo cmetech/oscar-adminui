@@ -30,7 +30,7 @@ const navigation = () => {
     },
     {
       title: 'SLOs',
-      path: '/observability/slo/details',
+      path: '/observability/slo',
       icon: 'mdi:cog',
       action: 'read',
       subject: 'all'

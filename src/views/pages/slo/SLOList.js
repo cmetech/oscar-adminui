@@ -44,6 +44,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Fade from '@mui/material/Fade'
+import { SparkLineChart } from '@mui/x-charts/SparkLineChart'
 
 // ** ThirdParty Components
 import axios from 'axios'
@@ -149,22 +150,20 @@ const SLOList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
-              <Typography
-                noWrap
-                variant='caption'
-                sx={{
-                  color:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
-                      : theme.palette.customColors.brandYellow
-                }}
-              >
-                {row?.id}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {row?.id}
+            </Typography>
           </Box>
         )
       }
@@ -177,12 +176,33 @@ const SLOList = props => {
       renderCell: params => {
         const { row } = params
 
+        const budgetingLabel = row.target?.calculation_method?.toUpperCase()
+
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.calculation_method?.toUpperCase()}
-              </Typography>
+              <CustomChip rounded size='large' skin='light' label={budgetingLabel} color='warning' />
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.015,
+      field: 'slo_percentage',
+      editable: editmode,
+      headerName: t('SLO (%)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const breachColor = row.is_breaching ? 'error' : 'success'
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <CustomChip rounded size='medium' skin='light' label={row.slo_percentage + '%'} color={breachColor} />
             </Box>
           </Box>
         )
@@ -201,11 +221,37 @@ const SLOList = props => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.target?.target_value}%
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <CustomChip rounded size='medium' skin='light' label={row.target?.target_value + '%'} color='info' />
+              </Box>
             </Box>
           </Box>
+        )
+      }
+    },
+    {
+      field: 'sparkline',
+      headerName: 'Trend',
+      width: 200,
+      renderCell: params => {
+        const { row } = params
+
+        const sparklineColor = theme.palette.mode === 'dark' ? ['#fff'] : ['#000']
+
+        return (
+          <SparkLineChart
+            area={true}
+            curve='natural'
+            height={25}
+            colors={sparklineColor}
+            plotType='line'
+            showHighlight={true}
+            showTooltip={true}
+            data={[
+              81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67, 83.33, 100,
+              91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
+            ]}
+          />
         )
       }
     },
@@ -213,7 +259,7 @@ const SLOList = props => {
       flex: 0.015,
       field: 'target_period',
       editable: editmode,
-      headerName: t('Target Rolling Period (days)'),
+      headerName: t('Period (days)'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
@@ -244,62 +290,6 @@ const SLOList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
                 {row?.description}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.02,
-      minWidth: 60,
-      field: 'createdAtTime',
-      editable: editmode,
-      headerName: t('Created At'),
-      renderCell: params => {
-        const { row } = params
-
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
-
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.02,
-      minWidth: 60,
-      field: 'updatedAtTime',
-      editable: editmode,
-      headerName: t('Updated At'),
-      renderCell: params => {
-        const { row } = params
-
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
-
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
               </Typography>
             </Box>
           </Box>

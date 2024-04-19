@@ -19,7 +19,7 @@ async function handler(req, res) {
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
 
-      console.log('response', response?.data)
+      // console.log('response', response?.data)
 
       if (response?.data) {
         res.status(response.status || 200).json({

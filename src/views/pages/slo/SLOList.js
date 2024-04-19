@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Collapse from '@mui/material/Collapse'
-import { DataGridPro, useGridApiRef } from '@mui/x-data-grid-pro'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef } from '@mui/x-data-grid-pro'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
@@ -70,6 +70,8 @@ import { sloIdsAtom, slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
+import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { calc } from 'antd/es/theme/internal'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -508,14 +510,26 @@ const SLOList = props => {
     async (sort, q, column) => {
       let data = []
 
+      // Default start and end times to the last 24 hours if not defined
+      const [startDate, endDate] = props.dateRange || []
+
+      // Assuming props.dateRange contains Date objects or is undefined
+      const startTime =
+        props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
+
       setLoading(true)
       await axios
         .get('/api/sli', {
           params: {
             q,
             sort,
-            column
-          }
+            column,
+            start_time: startTime,
+            end_time: endTime,
+            calculate: 'true'
+          },
+          timeout: 30000
         })
         .then(res => {
           setRowCount(res.data.total)
@@ -528,7 +542,7 @@ const SLOList = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setSlos]
+    [paginationModel.page, paginationModel.pageSize, setSlos, props.dateRange]
   )
 
   useEffect(() => {

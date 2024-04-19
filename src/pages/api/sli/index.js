@@ -6,7 +6,7 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type, calculate = 'true' } = query
+    const { q = '', column = '', sort = '', type, start_time, end_time, calculate = 'true' } = query
     const queryLowered = q.toLowerCase()
 
     try {

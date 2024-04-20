@@ -6,14 +6,27 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type, start_time, end_time, calculate = 'true' } = query
+
+    const { q = '', column = '', sort = '', type, start_time, end_time, calculate = 'true', filter = '{}' } = query
+
     const queryLowered = q.toLowerCase()
+
+    console.log('Filter', filter)
+
+    const queryStringParameters = {
+      start_time: start_time,
+      end_time: end_time,
+      calculate: calculate || 'true',
+      filter: filter || '{}' // Default to empty object if not provided
+    }
 
     try {
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/sli`)
-      if (start_time) url.searchParams.append('start_time', start_time)
-      if (end_time) url.searchParams.append('end_time', end_time)
-      url.searchParams.append('calculate', calculate)
+      Object.entries(queryStringParameters).forEach(([key, value]) => {
+        if (value) url.searchParams.append(key, value)
+      })
+
+      console.log('url', url.toString())
 
       const response = await axios.get(url.toString(), {
         timeout: 30000,

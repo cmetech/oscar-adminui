@@ -56,6 +56,8 @@ import Icon from 'src/@core/components/icon'
 import SLOList from 'src/views/pages/slo/SLOList'
 import SLOEventHistoryList from 'src/views/pages/slo/SLOEventHistoryList'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+
+// import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
@@ -684,9 +686,10 @@ const SLO = () => {
                   calendars={2}
                   closeOnSelect={false}
                   value={dateRange}
+                  timezone='system'
                   defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
                   views={['day', 'hours']}
-                  timeSteps={{ minute: 15 }}
+                  timeSteps={{ minutes: 20 }}
                   viewRenderers={{ hours: renderDigitalClockTimeView }}
                   onChange={newValue => {
                     // console.log('Date range:', newValue)
@@ -728,9 +731,10 @@ const SLO = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
+                timezone='system'
                 defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
                 views={['day', 'hours']}
-                timeSteps={{ minute: 15 }}
+                timeSteps={{ minutes: 20 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
                   // console.log('Date range:', newValue)

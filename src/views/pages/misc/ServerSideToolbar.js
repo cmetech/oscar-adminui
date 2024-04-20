@@ -12,6 +12,7 @@ import {
   GridToolbarExport,
   GridToolbarDensitySelector,
   GridToolbarExportContainer,
+  GridToolbarQuickFilter,
   GridCsvExportMenuItem,
   GridPrintExportMenuItem,
   useGridApiContext,
@@ -47,6 +48,9 @@ import { grid } from '@mui/system'
 import axios from 'axios'
 import { t } from 'i18next'
 import { useTranslation } from 'react-i18next'
+
+// ** Custom Components
+import CustomSearchTextField from 'src/views/components/CustomSearchTextField'
 
 const TextfieldStyled = styled(TextField)(({ theme }) => ({
   '& label.Mui-focused': {
@@ -198,25 +202,61 @@ const CustomExportButton = props => {
   )
 }
 
-const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive, ...props }) => {
+const CustomToolbar = ({
+  setColumnsButtonEl,
+  setFilterButtonEl,
+  setFilterActive,
+  isFilterActive,
+  setRunFilterQuery,
+  ...props
+}) => {
+  const theme = useTheme()
+
   return (
     <GridToolbarContainer sx={{ flexWrap: 'nowrap' }}>
-      <GridToolbarFilterButton
-        ref={setFilterButtonEl}
-        componentsProps={{
-          button: {
-            onClick: () => {
-              setFilterActive(true)
-            }
-          }
-        }}
-      />
       <GridToolbarColumnsButton
         ref={setColumnsButtonEl}
         onClick={() => {
           setFilterActive(false)
+          console.log('FilterButton-columns: Filter Active Flag is ', isFilterActive)
         }}
       />
+      <GridToolbarFilterButton
+        ref={setFilterButtonEl}
+        onClick={() => {
+          setFilterActive(true)
+          console.log('FilterButton-filter: Filter Active Flag is ', isFilterActive)
+        }}
+        slotProps={{
+          tooltip: {
+            title: 'Filter SLO Records',
+            placement: 'bottom'
+          }
+
+          // button: {
+          //   onClick: () => {
+          //     setFilterActive(true)
+          //     console.log('FilterButton-button: Filter Active Flag is ', isFilterActive)
+          //   }
+          // }
+        }}
+      />
+      <IconButton
+        size='small'
+        title='Run Filter Query'
+        aria-label='Run Filter Query'
+        color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}
+        onClick={() => {
+          if (isFilterActive) {
+            console.log('Run Filter Query')
+            setRunFilterQuery(true)
+          } else {
+            console.log('IconButton: Filter Active Flag is ', isFilterActive)
+          }
+        }}
+      >
+        <Icon icon='mdi:filter-outline' fontSize={25} />
+      </IconButton>
       {props.showexport ? <CustomExportButton /> : null}
     </GridToolbarContainer>
   )
@@ -261,28 +301,16 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         setColumnsButtonEl={props.setColumnsButtonEl}
         setFilterButtonEl={props.setFilterButtonEl}
         setFilterActive={props.setFilterActive}
-        datagridrefs={props.datagridrefs ? props.datagridrefs : null}
+        isFilterActive={props.isFilterActive}
+        setRunFilterQuery={props.setRunFilterQuery}
         showexport={props.showexport ? props.showexport : false}
-        reportId={props.reportId}
         sx={{ gridRow: '1', gridColumn: '6 / 6' }}
       />
-      <TextfieldStyled
-        size='small'
+      <CustomSearchTextField
         value={props.value}
         onChange={props.onChange}
-        placeholder={`${t('Filter Current Page')}…`}
-        InputProps={{
-          startAdornment: (
-            <Box sx={{ mr: 2, display: 'flex' }}>
-              <Icon icon='mdi:magnify' fontSize={20} />
-            </Box>
-          ),
-          endAdornment: (
-            <IconButton size='small' title='Clear' aria-label='Clear' onClick={props.clearSearch}>
-              <Icon icon='mdi:close' fontSize={20} />
-            </IconButton>
-          )
-        }}
+        clearSearch={props.clearSearch}
+        delay={2000}
         sx={{
           gridRow: '1',
           gridColumn: '6 / 6',

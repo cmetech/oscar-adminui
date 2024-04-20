@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Collapse from '@mui/material/Collapse'
-import { DataGridPro, GridLoadingOverlay, useGridApiRef } from '@mui/x-data-grid-pro'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
@@ -126,8 +126,10 @@ const SLOList = props => {
   const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [sloIds, setSloIds] = useAtom(sloIdsAtom)
   const [slos, setSlos] = useAtom(slosAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
@@ -554,7 +556,13 @@ const SLOList = props => {
         props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
       const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
 
+      console.log('Start Time:', startTime)
+      console.log('End Time:', endTime)
+
+      console.log('Filter Data:', filterModel)
+
       setLoading(true)
+
       await axios
         .get('/api/sli', {
           params: {
@@ -563,7 +571,8 @@ const SLOList = props => {
             column,
             start_time: startTime,
             end_time: endTime,
-            calculate: 'true'
+            calculate: 'true',
+            filter: JSON.stringify(filterModel)
           },
           timeout: 30000
         })
@@ -580,6 +589,15 @@ const SLOList = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize, setSlos, props.dateRange]
   )
+
+  // Trigger based on filter application
+  useEffect(() => {
+    if (isFilterActive && filterModel.items.length > 0 && runFilterQuery) {
+      fetchData()
+      setRunFilterQuery(false) // Reset the flag
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFilterActive, filterModel.items.length, runFilterQuery]) // Triggered by filter changes
 
   useEffect(() => {
     fetchData(sort, searchValue, sortColumn)
@@ -600,16 +618,37 @@ const SLOList = props => {
     setAction(event.target.value)
   }
 
+  const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+  }
+
   const handleSearch = value => {
+    console.log('handleSearch - Search Value:', value)
+    console.log('Rows:', rows)
+
     setSearchValue(value)
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      return Object.keys(row).some(field => {
-        // @ts-ignore
-        return searchRegex.test(row[field].toString())
+      // Extend the search to include nested paths
+      const searchFields = [
+        'id',
+        'name',
+        'description',
+        'target.id',
+        'target.target_value',
+        'target.period',
+        'target.calculation_method' // Add other fields as needed
+      ]
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        // Ensure the fieldValue is a string before calling toString()
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
       })
     })
+
     if (value.length) {
       setFilteredRows(filteredRows)
     } else {
@@ -644,6 +683,13 @@ const SLOList = props => {
             toolbarFilters: t('Filters')
           }}
           initialState={{
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
+                quickFilterValues: ['ab']
+              }
+            },
             columns: {
               columnVisibilityModel: {
                 createdAtTime: true
@@ -665,16 +711,19 @@ const SLOList = props => {
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
           onPaginationModelChange={setPaginationModel}
-          components={{
-            Toolbar: ServerSideToolbar,
-            NoRowsOverlay: () => <NoRowsOverlay message='No SLOs Found' />,
-            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          slots={{
+            toolbar: ServerSideToolbar,
+            noRowsOverlay: () => <NoRowsOverlay message='No SLOs Found' />,
+            noResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
           }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
           loading={loading}
           keepNonExistentRowsSelected
-          componentsProps={{
+          filterMode='server'
+          filterModel={filterModel}
+          onFilterModelChange={newModel => setFilterModel(newModel)}
+          slotProps={{
             baseButton: {
               variant: 'outlined'
             },
@@ -688,8 +737,158 @@ const SLOList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              isFilterActive,
+              setRunFilterQuery,
               showButtons: false,
               showexport: false
+            },
+            filterPanel: {
+              // Force usage of "And" operator
+              logicOperators: [GridLogicOperator.And],
+
+              // Display columns by ascending alphabetical order
+              columnsSort: 'asc',
+              filterFormProps: {
+                // Customize inputs by passing props
+                logicOperatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small'
+                },
+                columnInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                operatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                valueInputProps: {
+                  InputComponentProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      // Target the root of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply these styles when the element is focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  }
+                },
+                deleteIconProps: {
+                  sx: {
+                    '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                  }
+                }
+              },
+              sx: {
+                // Customize inputs using css selectors
+                '& .MuiDataGrid-filterForm': { p: 2 },
+                '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                  backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                },
+                '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                  mb: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                  ml: 2
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                  mr: 2
+                }
+              }
             }
           }}
         />

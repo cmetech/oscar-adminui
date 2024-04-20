@@ -75,6 +75,13 @@
     "User Management": "Gestion des Utilisateurs",
     "Oscar Chat": "Chat OSCAR",
     "Doc Portal": "Portail de Documents",
+    "Budgeting Method": "Méthode de Budgétisation",
+    "Target Value (%)": "Valeur Cible (%)",
+    "Trend": "Tendance",
     "Home": "Accueil",
-    "Filter Current Page": "Filtrer la Page Actuelle"
+    "Filter Current Page": "Filtrer la Page Actuelle",
+    "Service Level Objectives": "Objectifs de Niveau de Service",
+    "SLO Event History": "Historique des Événements SLO",
+    "Start": "Début",
+    "End": "Fin"
 }

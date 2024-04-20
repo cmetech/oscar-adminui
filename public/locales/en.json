@@ -78,5 +78,10 @@
     "Budgeting Method": "Budgeting Method",
     "Target Value (%)": "Target Value (%)",
     "Trend": "Trend",
-    "Filter Current Page": "Filter Current Page"
+    "Home": "Home",
+    "Filter Current Page": "Filter Current Page",
+    "Service Level Objectives": "Service Level Objectives",
+    "SLO Event History": "SLO Event History",
+    "Start": "Start",
+    "End": "End"
 }

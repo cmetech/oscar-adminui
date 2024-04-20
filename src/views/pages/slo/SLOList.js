@@ -545,7 +545,7 @@ const SLOList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, q, column) => {
+    async (sort, column) => {
       let data = []
 
       // Default start and end times to the last 24 hours if not defined
@@ -566,7 +566,6 @@ const SLOList = props => {
       await axios
         .get('/api/sli', {
           params: {
-            q,
             sort,
             column,
             start_time: startTime,
@@ -592,22 +591,26 @@ const SLOList = props => {
 
   // Trigger based on filter application
   useEffect(() => {
-    if (isFilterActive && filterModel.items.length > 0 && runFilterQuery) {
+    console.log('Effect Run:', { isFilterActive, itemsLength: filterModel.items.length, runFilterQuery })
+
+    if (runFilterQuery && filterModel.items.length > 0) {
       fetchData()
       setRunFilterQuery(false) // Reset the flag
+    } else {
+      console.log('Conditions not met to run filter query')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFilterActive, filterModel.items.length, runFilterQuery]) // Triggered by filter changes
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
-  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+    fetchData(sort, sortColumn)
+  }, [refetchTrigger, fetchData, sort, sortColumn])
 
   const handleSortModel = newModel => {
     if (newModel.length) {
       setSort(newModel[0].sort)
       setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, searchValue, newModel[0].field)
+      fetchData(newModel[0].sort, newModel[0].field)
     } else {
       setSort('asc')
       setSortColumn('name')
@@ -741,6 +744,48 @@ const SLOList = props => {
               setRunFilterQuery,
               showButtons: false,
               showexport: false
+            },
+            columnsPanel: {
+              sx: {
+                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+
+                /* Target the underline of the input within the panel header */
+                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
+                  borderBottomColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+
+                /* For focused state */
+                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
+                  borderBottomColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                  mb: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                  ml: 2
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                  mr: 2
+                }
+              }
             },
             filterPanel: {
               // Force usage of "And" operator

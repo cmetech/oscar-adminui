@@ -218,27 +218,20 @@ const CustomToolbar = ({
         ref={setColumnsButtonEl}
         onClick={() => {
           setFilterActive(false)
-          console.log('FilterButton-columns: Filter Active Flag is ', isFilterActive)
         }}
       />
       <GridToolbarFilterButton
         ref={setFilterButtonEl}
-        onClick={() => {
-          setFilterActive(true)
-          console.log('FilterButton-filter: Filter Active Flag is ', isFilterActive)
-        }}
         slotProps={{
           tooltip: {
             title: 'Filter SLO Records',
             placement: 'bottom'
+          },
+          button: {
+            onClick: () => {
+              setFilterActive(true)
+            }
           }
-
-          // button: {
-          //   onClick: () => {
-          //     setFilterActive(true)
-          //     console.log('FilterButton-button: Filter Active Flag is ', isFilterActive)
-          //   }
-          // }
         }}
       />
       <IconButton
@@ -247,12 +240,8 @@ const CustomToolbar = ({
         aria-label='Run Filter Query'
         color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}
         onClick={() => {
-          if (isFilterActive) {
-            console.log('Run Filter Query')
-            setRunFilterQuery(true)
-          } else {
-            console.log('IconButton: Filter Active Flag is ', isFilterActive)
-          }
+          console.log('Run Filter Query')
+          setRunFilterQuery(true)
         }}
       >
         <Icon icon='mdi:filter-outline' fontSize={25} />

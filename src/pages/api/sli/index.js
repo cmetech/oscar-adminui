@@ -7,7 +7,7 @@ async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
 
-    const { q = '', column = '', sort = '', type, start_time, end_time, calculate = 'true', filter = '{}' } = query
+    const { column = '', sort = '', start_time, end_time, calculate = 'true', filter = '{}' } = query
 
     const queryLowered = q.toLowerCase()
 

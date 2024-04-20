@@ -60,9 +60,9 @@ const SingleValueCard = props => {
                   </Typography>
                 </Box>
                 <Box display='flex' justifyContent='center' alignItems='center' sx={{ mb: 1, pb: 1 }}>
-                  {showSparkline ? (
+                  {showSparkline && sparklineData?.length > 0 ? (
                     <SparkLineChart
-                      data={sparklineData || []}
+                      data={sparklineData}
                       area={true}
                       height={50}
                       curve='natural'

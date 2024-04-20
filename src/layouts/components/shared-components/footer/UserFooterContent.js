@@ -35,7 +35,7 @@ const UserFooterContent = props => {
           }`
         }}
       >
-        <i class='icon icon-econ' style={{ fontSize: '1rem' }} />
+        <i className='icon icon-econ' style={{ fontSize: '1rem' }} />
         {` © Ericsson 1994-${new Date().getFullYear()}`}
       </Typography>
       {hidden ? null : (

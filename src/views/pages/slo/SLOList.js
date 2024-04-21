@@ -71,6 +71,7 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { message } from 'antd'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -738,8 +739,9 @@ const SLOList = props => {
           onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
-            noRowsOverlay: () => <NoRowsOverlay message='No SLOs Found' />,
-            noResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+            noRowsOverlay: NoRowsOverlay,
+            noResultsOverlay: NoResultsOverlay,
+            loadingOverlay: CustomLoadingOverlay
           }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
@@ -754,6 +756,12 @@ const SLOList = props => {
             },
             panel: {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
+            },
+            noRowsOverlay: {
+              message: 'No SLOs found'
+            },
+            noResultsOverlay: {
+              message: 'No Results Found'
             },
             toolbar: {
               value: searchValue,
@@ -811,7 +819,7 @@ const SLOList = props => {
             },
             filterPanel: {
               // Force usage of "And" operator
-              logicOperators: [GridLogicOperator.And],
+              logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
 
               // Display columns by ascending alphabetical order
               columnsSort: 'asc',

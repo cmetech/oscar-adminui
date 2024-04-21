@@ -71,8 +71,6 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import { id } from 'date-fns/locale'
-import { hide } from '@popperjs/core'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -225,6 +223,7 @@ const SLOList = props => {
     {
       flex: 0.01,
       field: 'derived_is_breaching',
+      type: 'number',
       editable: editmode,
       headerName: t('SLO (%)'),
       align: 'center',
@@ -282,6 +281,7 @@ const SLOList = props => {
     {
       flex: 0.01,
       field: 'target_value',
+      type: 'number',
       editable: editmode,
       headerName: t('Target Value (%)'),
       align: 'center',
@@ -565,7 +565,7 @@ const SLOList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, column) => {
+    async (sort, column, filter_model) => {
       let data = []
 
       // Default start and end times to the last 24 hours if not defined
@@ -579,7 +579,7 @@ const SLOList = props => {
       console.log('Start Time:', startTime)
       console.log('End Time:', endTime)
 
-      console.log('Filter Data:', JSON.stringify(filterModel))
+      console.log('Filter Data:', JSON.stringify(filter_model))
 
       setLoading(true)
 
@@ -591,7 +591,7 @@ const SLOList = props => {
             start_time: startTime,
             end_time: endTime,
             calculate: 'true',
-            filter: JSON.stringify(filterModel)
+            filter: JSON.stringify(filter_model)
           },
           timeout: 30000
         })
@@ -616,7 +616,7 @@ const SLOList = props => {
     console.log('Filter Model:', JSON.stringify(filterModel))
 
     if (runFilterQuery && filterModel.items.length > 0) {
-      fetchData()
+      fetchData(sort, sortColumn, filterModel)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }

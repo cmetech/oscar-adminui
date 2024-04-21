@@ -591,7 +591,7 @@ const SLOList = props => {
 
   // Trigger based on filter application
   useEffect(() => {
-    console.log('Effect Run:', { isFilterActive, itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
 
     if (runFilterQuery && filterModel.items.length > 0) {
       fetchData()
@@ -600,7 +600,7 @@ const SLOList = props => {
       console.log('Conditions not met to run filter query')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFilterActive, filterModel.items.length, runFilterQuery]) // Triggered by filter changes
+  }, [filterModel.items.length, runFilterQuery]) // Triggered by filter changes
 
   useEffect(() => {
     fetchData(sort, sortColumn)
@@ -626,8 +626,8 @@ const SLOList = props => {
   }
 
   const handleSearch = value => {
-    console.log('handleSearch - Search Value:', value)
-    console.log('Rows:', rows)
+    // console.log('handleSearch - Search Value:', value)
+    // console.log('Rows:', rows)
 
     setSearchValue(value)
     const searchRegex = new RegExp(escapeRegExp(value), 'i')

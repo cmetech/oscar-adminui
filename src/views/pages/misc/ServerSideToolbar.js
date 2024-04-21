@@ -211,6 +211,7 @@ const CustomToolbar = ({
   ...props
 }) => {
   const theme = useTheme()
+  const apiRef = useGridApiContext()
 
   return (
     <GridToolbarContainer sx={{ flexWrap: 'nowrap' }}>

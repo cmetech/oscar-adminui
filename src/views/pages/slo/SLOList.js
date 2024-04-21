@@ -567,7 +567,8 @@ const SLOList = props => {
 
   const fetchData = useCallback(
     async (sort, column, filter_model) => {
-      let data = []
+      // Flag to track whether the request has completed
+      let requestCompleted = false
 
       // Default start and end times to the last 24 hours if not defined
       const [startDate, endDate] = props.dateRange || []
@@ -584,8 +585,21 @@ const SLOList = props => {
 
       setLoading(true)
 
-      await axios
-        .get('/api/sli', {
+      // Start a timeout to automatically stop loading after 60s
+      const timeoutId = setTimeout(() => {
+        if (!requestCompleted) {
+          setLoading(false)
+
+          // Optionally, set state to show a "no results found" message or take other actions
+          console.log('Request timed out.')
+
+          // Clear the rows or show some placeholder to indicate no results or timeout
+          setRows([])
+        }
+      }, 60000) // 60s timeout
+
+      try {
+        const response = await axios.get('/api/sli', {
           params: {
             sort,
             column,
@@ -596,16 +610,27 @@ const SLOList = props => {
           },
           timeout: 30000
         })
-        .then(res => {
-          setRowCount(res.data.total)
-          data = res.data.rows
-          props.set_total(res.data.total)
-          setSlos(data)
-        })
 
-      await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
-      setRunFilterQuery(false)
-      setLoading(false)
+        setRowCount(response.data.total)
+        setSlos(response.data.rows)
+        props.set_total(response.data.total)
+
+        await loadServerRows(paginationModel.page, paginationModel.pageSize, response.data.rows).then(slicedRows =>
+          setRows(slicedRows)
+        )
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+
+        toast.error('Failed to fetch SLOs')
+      } finally {
+        // Mark the request as completed
+        requestCompleted = true
+        setLoading(false)
+
+        // Clear the timeout
+        clearTimeout(timeoutId)
+        setRunFilterQuery(false)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize, setSlos, props.dateRange]

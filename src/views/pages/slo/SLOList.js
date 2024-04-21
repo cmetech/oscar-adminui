@@ -71,6 +71,8 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { id } from 'date-fns/locale'
+import { hide } from '@popperjs/core'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -146,6 +148,24 @@ const SLOList = props => {
   const columns = [
     {
       flex: 0.02,
+      field: 'id',
+      hide: true,
+      editable: editmode,
+      headerName: t('Identifier'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {row?.id}
+            </Typography>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.02,
       field: 'name',
       editable: editmode,
       headerName: t('Name'),
@@ -173,7 +193,7 @@ const SLOList = props => {
     },
     {
       flex: 0.01,
-      field: 'target_type',
+      field: 'calculation_method',
       editable: editmode,
       headerName: t('Budgeting Method'),
       align: 'center',
@@ -204,7 +224,7 @@ const SLOList = props => {
     },
     {
       flex: 0.01,
-      field: 'slo_percentage',
+      field: 'derived_is_breaching',
       editable: editmode,
       headerName: t('SLO (%)'),
       align: 'center',
@@ -291,7 +311,7 @@ const SLOList = props => {
       }
     },
     {
-      field: 'sparkline',
+      field: 'derived_sparkline',
       headerName: t('Trend'),
       width: 200,
       renderCell: params => {
@@ -337,7 +357,7 @@ const SLOList = props => {
       }
     },
     {
-      field: 'actions',
+      field: 'ignore_actions',
       headerName: t('Actions'),
       type: 'string',
       flex: 0.01,
@@ -559,7 +579,7 @@ const SLOList = props => {
       console.log('Start Time:', startTime)
       console.log('End Time:', endTime)
 
-      console.log('Filter Data:', filterModel)
+      console.log('Filter Data:', JSON.stringify(filterModel))
 
       setLoading(true)
 
@@ -583,6 +603,7 @@ const SLOList = props => {
         })
 
       await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
+      setRunFilterQuery(false)
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -592,12 +613,12 @@ const SLOList = props => {
   // Trigger based on filter application
   useEffect(() => {
     console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
 
     if (runFilterQuery && filterModel.items.length > 0) {
       fetchData()
-      setRunFilterQuery(false) // Reset the flag
     } else {
-      console.log('Conditions not met to run filter query')
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel.items.length, runFilterQuery]) // Triggered by filter changes
@@ -695,7 +716,8 @@ const SLOList = props => {
             },
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: false,
+                id: false
               }
             }
           }}

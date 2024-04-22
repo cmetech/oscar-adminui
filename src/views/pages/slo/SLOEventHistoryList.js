@@ -24,7 +24,7 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Collapse from '@mui/material/Collapse'
-import { DataGridPro, useGridApiRef } from '@mui/x-data-grid-pro'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
@@ -70,6 +70,7 @@ import SLOEventHistoryDetailPanel from 'src/views/pages/slo/SLOEventHistoryDetai
 import { refetchSloTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
+import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -419,6 +420,25 @@ const SLOEventHistoryList = props => {
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
+          localeText={{
+            toolbarColumns: t('Columns'),
+            toolbarFilters: t('Filters')
+          }}
+          initialState={{
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
+                quickFilterValues: ['ab']
+              }
+            },
+            columns: {
+              columnVisibilityModel: {
+                createdAtTime: false,
+                id: false
+              }
+            }
+          }}
           autoHeight={true}
           pagination
           rows={filteredRows.length ? filteredRows : rows}
@@ -434,10 +454,11 @@ const SLOEventHistoryList = props => {
           onPageChange={newPage => setPaginationModel(oldModel => ({ ...oldModel, page: newPage }))}
           onPageSizeChange={newPageSize => setPaginationModel(oldModel => ({ ...oldModel, pageSize: newPageSize }))}
           onPaginationModelChange={setPaginationModel}
-          components={{
-            Toolbar: ServerSideToolbar,
-            NoRowsOverlay: () => <NoRowsOverlay message='No SLO Event History Found' />,
-            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          slots={{
+            toolbar: ServerSideToolbar,
+            noRowsOverlay: NoRowsOverlay,
+            noResultsOverlay: NoResultsOverlay,
+            loadingOverlay: CustomLoadingOverlay
           }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
@@ -447,12 +468,18 @@ const SLOEventHistoryList = props => {
           onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           loading={loading}
           keepNonExistentRowsSelected
-          componentsProps={{
+          slotProps={{
             baseButton: {
               variant: 'outlined'
             },
             panel: {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
+            },
+            noRowsOverlay: {
+              message: 'No SLOs found'
+            },
+            noResultsOverlay: {
+              message: 'No Results Found'
             },
             toolbar: {
               value: searchValue,
@@ -463,6 +490,196 @@ const SLOEventHistoryList = props => {
               setFilterActive,
               showButtons: false,
               showexport: true
+            },
+            columnsPanel: {
+              sx: {
+                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+
+                /* Target the underline of the input within the panel header */
+                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
+                  borderBottomColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+
+                /* For focused state */
+                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
+                  borderBottomColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                  mb: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                  ml: 2
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                  mr: 2
+                }
+              }
+            },
+            filterPanel: {
+              // Force usage of "And" operator
+              logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+              // Display columns by ascending alphabetical order
+              columnsSort: 'asc',
+              filterFormProps: {
+                // Customize inputs by passing props
+                logicOperatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small'
+                },
+                columnInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                operatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                valueInputProps: {
+                  InputComponentProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      // Target the root of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply these styles when the element is focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  }
+                },
+                deleteIconProps: {
+                  sx: {
+                    '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                  }
+                }
+              },
+              sx: {
+                // Customize inputs using css selectors
+                '& .MuiDataGrid-filterForm': { p: 2 },
+                '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                  backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                },
+                '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                  mb: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                  ml: 2
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                  mr: 2
+                }
+              }
             }
           }}
         />

@@ -60,6 +60,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -95,10 +96,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
   }
 }))
-
-const escapeRegExp = value => {
-  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
-}
 
 // TODO: Test with no Tasks to see if the NoRowsOverlay is displayed with the Register Tasks button
 // FIXME: Deleting all tasks works, but I am reloading the tasks automatically, I should now use the Overlay Register Tasks button
@@ -665,10 +662,6 @@ const SLOList = props => {
 
   const handleAction = event => {
     setAction(event.target.value)
-  }
-
-  const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj)
   }
 
   const handleSearch = value => {

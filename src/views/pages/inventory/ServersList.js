@@ -59,6 +59,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -71,14 +72,7 @@ import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/at
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-
-function loadServerRows(page, pageSize, data) {
-  // console.log(data)
-
-  return new Promise(resolve => {
-    resolve(data.slice(page * pageSize, (page + 1) * pageSize))
-  })
-}
+import { ref } from 'yup'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -96,12 +90,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
-
 const ServersList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -113,15 +101,19 @@ const ServersList = props => {
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sort, setSort] = useState('asc')
+
+  // const [sort, setSort] = useState('asc')
+  const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('name')
+
+  // const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
@@ -530,54 +522,87 @@ const ServersList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, q, column) => {
-      let data = []
-
+    async () => {
       setLoading(true)
       await axios
         .get('/api/inventory/servers', {
-          params: {
-            q,
-            sort,
-            column
-          }
+          params: {}
         })
         .then(res => {
           setRowCount(res.data.total)
-          data = res.data.rows
+          setRows(res.data.rows)
           props.set_total(res.data.total)
-          setServers(data)
+          setServers(res.data.rows)
         })
 
-      await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setServers]
+    [setServers, setRows]
   )
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
-  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+    fetchData()
+  }, [fetchData, refetchTrigger])
 
-  const handleSortModel = newModel => {
-    if (newModel.length) {
-      setSort(newModel[0].sort)
-      setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, searchValue, newModel[0].field)
-    } else {
-      setSort('asc')
-      setSortColumn('name')
-    }
-  }
+  // useEffect(() => {
+  //   fetchData(sort, searchValue, sortColumn)
+  // }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+
+  // const handleSortModel = newModel => {
+  //   if (newModel.length) {
+  //     setSort(newModel[0].sort)
+  //     setSortColumn(newModel[0].field)
+  //     fetchData(newModel[0].sort, searchValue, newModel[0].field)
+  //   } else {
+  //     setSort('asc')
+  //     setSortColumn('name')
+  //   }
+  // }
 
   const handleAction = event => {
     setAction(event.target.value)
   }
 
   const handleSearch = value => {
+    // console.log('Search Value:', value)
+
     setSearchValue(value)
-    fetchData(sort, value, sortColumn)
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      // console.log('Row:', row)
+
+      // Extend the search to include nested paths
+      const searchFields = [
+        'id',
+        'hostname',
+        'environment_name',
+        'datacenter_name',
+        'subcomponent_name',
+        'component_name',
+        'status',
+        'component'
+      ]
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        // Ensure the fieldValue is a string before calling toString()
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
+      })
+    })
+
+    if (value.length) {
+      // console.log('Filtered Rows:', filteredRows)
+      setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
+      props.set_total(filteredRows.length)
+    } else {
+      setFilteredRows([])
+      setRowCount(rows.length)
+      props.set_total(rows.length)
+    }
   }
 
   const handleRowSelection = newRowSelectionModel => {
@@ -614,17 +639,19 @@ const ServersList = props => {
             }
           }}
           autoHeight={true}
-          pagination
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
-          sortingMode='server'
-          paginationMode='server'
+          filterMode='client'
+          sortingMode='client'
+          sortModel={sortModel}
+          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          pagination={true}
+          paginationMode='client'
           paginationModel={paginationModel}
-          onSortModelChange={handleSortModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
           onPaginationModelChange={setPaginationModel}

@@ -13,3 +13,11 @@ export function validateUUID(uuid) {
 
   return regexExp.test(uuid)
 }
+
+export const escapeRegExp = value => {
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+}
+
+export const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+}

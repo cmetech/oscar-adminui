@@ -514,7 +514,7 @@ const SubcomponentsList = props => {
             }
           }}
           autoHeight={true}
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
@@ -548,7 +548,7 @@ const SubcomponentsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No SLOs found'
+              message: 'No Subcomponents found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

@@ -143,6 +143,16 @@ const EnvironmentsList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('Identifier')
+    },
+    {
+      flex: 0.02,
+      field: 'datacenter_name',
+      headerName: t('Datacenter')
+    },
+    {
       flex: 0.04,
       minWidth: 100,
       field: 'name',
@@ -152,9 +162,17 @@ const EnvironmentsList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -186,8 +204,24 @@ const EnvironmentsList = props => {
         let label = `ACTIVE (${row?.active_servers || 0})`
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='small'
@@ -216,8 +250,24 @@ const EnvironmentsList = props => {
         let label = `IN-ACTIVE (${row?.inactive_servers || 0})`
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='small'
@@ -242,11 +292,17 @@ const EnvironmentsList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {capitalizeWords(row?.description)}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{capitalizeWords(row?.description)}</Typography>
             </Box>
           </Box>
         )
@@ -268,11 +324,17 @@ const EnvironmentsList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -294,11 +356,17 @@ const EnvironmentsList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -312,31 +380,41 @@ const EnvironmentsList = props => {
       minWidth: 10,
       renderCell: params => {
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Edit'
-              aria-label='Edit'
-              onClick={() => {
-                setCurrentEnvironment(params.row)
-                setOpenDialog(true)
-              }}
-            >
-              <Icon icon='mdi:file-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete Environment'
-              aria-label='Delete Environment'
-              color='error'
-              onClick={() => {
-                setCurrentEnvironment(params.row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Edit'
+                aria-label='Edit'
+                onClick={() => {
+                  setCurrentEnvironment(params.row)
+                  setOpenDialog(true)
+                }}
+              >
+                <Icon icon='mdi:file-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete Environment'
+                aria-label='Delete Environment'
+                color='error'
+                onClick={() => {
+                  setCurrentEnvironment(params.row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }
@@ -558,6 +636,15 @@ const EnvironmentsList = props => {
     setRowSelectionModel(rowids)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id', 'datacenter_name']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -570,7 +657,9 @@ const EnvironmentsList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: true,
+                id: false,
+                datacenter_name: false
               }
             }
           }}
@@ -622,26 +711,40 @@ const EnvironmentsList = props => {
               showButtons: false,
               showexport: true
             },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -656,10 +759,7 @@ const EnvironmentsList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

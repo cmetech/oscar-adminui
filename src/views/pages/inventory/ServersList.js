@@ -167,9 +167,17 @@ const ServersList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.hostname?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.hostname?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -195,10 +203,20 @@ const ServersList = props => {
       renderCell: params => {
         const { row } = params
 
+        // console.log('Row Datacenter:', row?.datacenter_name?.toUpperCase())
+
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.environment_name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.environment_name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -217,9 +235,8 @@ const ServersList = props => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.01,
       field: 'status',
-      editable: editmode,
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -237,8 +254,24 @@ const ServersList = props => {
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='small'
@@ -262,9 +295,17 @@ const ServersList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.component_name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.component_name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -300,9 +341,7 @@ const ServersList = props => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -312,6 +351,7 @@ const ServersList = props => {
       flex: 0.025,
       minWidth: 100,
       field: 'updatedAtTime',
+      align: 'center',
       editable: editmode,
       headerName: t('Updated At'),
       renderCell: params => {
@@ -324,11 +364,17 @@ const ServersList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -337,36 +383,46 @@ const ServersList = props => {
     {
       field: 'actions',
       headerName: t('Actions'),
-      type: 'string',
+      align: 'left',
       flex: 0.025,
       minWidth: 10,
       renderCell: params => {
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Edit'
-              aria-label='Edit'
-              onClick={() => {
-                setCurrentServer(params.row)
-                setEditDialog(true)
-              }}
-            >
-              <Icon icon='mdi:account-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete User'
-              aria-label='Delete User'
-              color='error'
-              onClick={() => {
-                setCurrentServer(params.row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Edit'
+                aria-label='Edit'
+                onClick={() => {
+                  setCurrentServer(params.row)
+                  setEditDialog(true)
+                }}
+              >
+                <Icon icon='mdi:account-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete User'
+                aria-label='Delete User'
+                color='error'
+                onClick={() => {
+                  setCurrentServer(params.row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }

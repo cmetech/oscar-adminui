@@ -146,9 +146,17 @@ const SLOEventHistoryList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.sliName?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.sliName?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -174,11 +182,17 @@ const SLOEventHistoryList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.calculationMethod?.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row?.calculationMethod?.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -194,11 +208,17 @@ const SLOEventHistoryList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.targetValue}%
-              </Typography>
+              <Typography noWrap>{row?.targetValue}%</Typography>
             </Box>
           </Box>
         )
@@ -214,11 +234,17 @@ const SLOEventHistoryList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.targetPeriod} days
-              </Typography>
+              <Typography noWrap>{row?.targetPeriod} days</Typography>
             </Box>
           </Box>
         )
@@ -233,11 +259,17 @@ const SLOEventHistoryList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.value}
-              </Typography>
+              <Typography noWrap>{row?.value}</Typography>
             </Box>
           </Box>
         )
@@ -263,8 +295,24 @@ const SLOEventHistoryList = props => {
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='medium'
@@ -299,11 +347,17 @@ const SLOEventHistoryList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -493,24 +547,33 @@ const SLOEventHistoryList = props => {
             },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -525,10 +588,7 @@ const SLOEventHistoryList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

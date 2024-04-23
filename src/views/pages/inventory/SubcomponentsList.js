@@ -132,6 +132,11 @@ const SubcomponentsList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('Identifier')
+    },
+    {
       flex: 0.035,
       minWidth: 100,
       field: 'name',
@@ -141,9 +146,17 @@ const SubcomponentsList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -171,11 +184,17 @@ const SubcomponentsList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.specifications?.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row?.specifications?.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -197,11 +216,17 @@ const SubcomponentsList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -223,11 +248,17 @@ const SubcomponentsList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -241,31 +272,41 @@ const SubcomponentsList = props => {
       minWidth: 10,
       renderCell: params => {
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Edit'
-              aria-label='Edit'
-              onClick={() => {
-                setCurrentSubcomponent(params.row)
-                setOpenDialog(true)
-              }}
-            >
-              <Icon icon='mdi:file-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete Component'
-              aria-label='Delete Component'
-              color='error'
-              onClick={() => {
-                setCurrentSubcomponent(params.row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Edit'
+                aria-label='Edit'
+                onClick={() => {
+                  setCurrentSubcomponent(params.row)
+                  setOpenDialog(true)
+                }}
+              >
+                <Icon icon='mdi:file-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete Component'
+                aria-label='Delete Component'
+                color='error'
+                onClick={() => {
+                  setCurrentSubcomponent(params.row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }
@@ -497,6 +538,15 @@ const SubcomponentsList = props => {
     setRowSelectionModel(rowids)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -509,7 +559,8 @@ const SubcomponentsList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: true,
+                id: false
               }
             }
           }}
@@ -563,26 +614,40 @@ const SubcomponentsList = props => {
               showButtons: false,
               showexport: true
             },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -597,10 +662,7 @@ const SubcomponentsList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

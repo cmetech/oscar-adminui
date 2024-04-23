@@ -148,20 +148,7 @@ const SLOList = props => {
     {
       flex: 0.02,
       field: 'id',
-      hide: true,
-      editable: editmode,
-      headerName: t('Identifier'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {row?.id}
-            </Typography>
-          </Box>
-        )
-      }
+      headerName: t('Identifier')
     },
     {
       flex: 0.02,
@@ -172,20 +159,30 @@ const SLOList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {row?.id}
-            </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
+              <Typography
+                noWrap
+                variant='caption'
+                sx={{
+                  color:
+                    theme.palette.mode === 'light'
+                      ? theme.palette.customColors.brandBlack
+                      : theme.palette.customColors.brandYellow
+                }}
+              >
+                {row?.id}
+              </Typography>
+            </Box>
           </Box>
         )
       }
@@ -203,8 +200,24 @@ const SLOList = props => {
         const budgetingLabel = row.target?.calculation_method?.toUpperCase()
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='large'
@@ -238,41 +251,50 @@ const SLOList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex' }}>
-                <CustomChip
-                  rounded
-                  size='medium'
-                  skin='light'
-                  label={row.slo_percentage + '%'}
-                  color={breachColor}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'row',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin='light'
+                label={row.slo_percentage + '%'}
+                color={breachColor}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  '& svg': { fontWeight: 600, color: row.trend_direction === 'down' ? 'error.main' : 'success.main' }
+                }}
+              >
+                <Icon icon={row.trend_direction === 'down' ? 'mdi:chevron-down' : 'mdi:chevron-up'} />
+                <Typography
+                  variant='caption'
                   sx={{
-                    '& .MuiChip-label': { textTransform: 'capitalize' },
-                    width: '90px'
-                  }}
-                />
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    '& svg': { fontWeight: 600, color: row.trend_direction === 'down' ? 'error.main' : 'success.main' }
+                    fontWeight: 500,
+                    lineHeight: 1.5,
+                    color: row.trend_direction === 'down' ? 'error.main' : 'success.main'
                   }}
                 >
-                  <Icon icon={row.trend_direction === 'down' ? 'mdi:chevron-down' : 'mdi:chevron-up'} />
-                  <Typography
-                    variant='caption'
-                    sx={{
-                      fontWeight: 500,
-                      lineHeight: 1.5,
-                      color: row.trend_direction === 'down' ? 'error.main' : 'success.main'
-                    }}
-                  >
-                    {row.delta_percentage}%
-                  </Typography>
-                </Box>
+                  {row.delta_percentage}%
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -291,21 +313,35 @@ const SLOList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CustomChip
-                  rounded
-                  size='medium'
-                  skin='light'
-                  label={row.target?.target_value + '%'}
-                  color='info'
-                  sx={{
-                    '& .MuiChip-label': { textTransform: 'capitalize' },
-                    width: '90px'
-                  }}
-                />
-              </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin='light'
+                label={row.target?.target_value + '%'}
+                color='info'
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
             </Box>
           </Box>
         )
@@ -321,19 +357,29 @@ const SLOList = props => {
         const sparklineColor = theme.palette.mode === 'dark' ? ['#fff'] : ['#000']
 
         return (
-          <SparkLineChart
-            area={true}
-            curve='natural'
-            height={25}
-            colors={sparklineColor}
-            plotType='line'
-            showHighlight={true}
-            showTooltip={true}
-            data={[
-              81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67, 83.33, 100,
-              91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
-            ]}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <SparkLineChart
+              area={true}
+              curve='natural'
+              height={25}
+              colors={sparklineColor}
+              plotType='line'
+              showHighlight={true}
+              showTooltip={true}
+              data={[
+                81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67, 83.33, 100,
+                91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
+              ]}
+            />
+          </Box>
         )
       }
     },
@@ -347,11 +393,17 @@ const SLOList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.description}
-              </Typography>
+              <Typography noWrap>{row?.description}</Typography>
             </Box>
           </Box>
         )
@@ -367,32 +419,42 @@ const SLOList = props => {
         const { row } = params
 
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Edit Task'
-              color='secondary'
-              aria-label='Edit Task'
-              onClick={() => {
-                setCurrentSlo(row)
-                setEditDialog(true)
-              }}
-            >
-              <Icon icon='mdi:account-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete Task'
-              aria-label='Delete Task'
-              color='error'
-              onClick={() => {
-                setCurrentSlo(row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Edit Task'
+                color='secondary'
+                aria-label='Edit Task'
+                onClick={() => {
+                  setCurrentSlo(row)
+                  setEditDialog(true)
+                }}
+              >
+                <Icon icon='mdi:account-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete Task'
+                aria-label='Delete Task'
+                color='error'
+                onClick={() => {
+                  setCurrentSlo(row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }
@@ -723,6 +785,15 @@ const SLOList = props => {
     setSloIds(newRowSelectionModel)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -800,26 +871,40 @@ const SLOList = props => {
               showButtons: false,
               showexport: false
             },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -834,10 +919,7 @@ const SLOList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

@@ -59,6 +59,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -111,23 +112,29 @@ const TasksList = props => {
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sort, setSort] = useState('asc')
+  const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [tasksIds, setTaskIds] = useAtom(taskIdsAtom)
   const [tasks, setTasks] = useAtom(tasksAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+  const [filterMode, setFilterMode] = useState('client')
+  const [sortingMode, setSortingMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('client')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -149,6 +156,16 @@ const TasksList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('Identifier')
+    },
+    {
+      flex: 0.02,
+      field: 'organization',
+      headerName: t('Organization')
+    },
+    {
       flex: 0.03,
       field: 'name',
       editable: editmode,
@@ -157,9 +174,17 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -186,9 +211,17 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.owner?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.owner?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -220,15 +253,31 @@ const TasksList = props => {
         let label = 'UNKN'
         if (row?.status?.toLowerCase() === 'enabled') {
           color = 'success'
-          label = 'ACTIVE'
+          label = 'ENABLED'
         } else {
           color = 'error'
-          label = 'INACTIVE'
+          label = 'DISABLED'
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='medium'
@@ -273,8 +322,24 @@ const TasksList = props => {
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='medium'
@@ -306,11 +371,17 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.description}
-              </Typography>
+              <Typography noWrap>{row?.description}</Typography>
             </Box>
           </Box>
         )
@@ -334,11 +405,17 @@ const TasksList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -362,11 +439,17 @@ const TasksList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -382,68 +465,78 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Schedule Task'
-              aria-label='Schedule Task'
-              color='info'
-              onClick={() => {
-                setCurrentTask(row)
-                setScheduleDialog(true)
-              }}
-            >
-              <Icon icon='mdi:clock-outline' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Run Task'
-              aria-label='Run Task'
-              color='warning'
-              onClick={() => {
-                setCurrentTask(row)
-                setRunDialog(true)
-              }}
-            >
-              <Icon icon='mdi:play-circle-outline' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-              aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-              color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
-              onClick={() => {
-                setCurrentTask(row)
-                setDisableDialog(true)
-              }}
-            >
-              <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Edit Task'
-              color='secondary'
-              aria-label='Edit Task'
-              onClick={() => {
-                setCurrentTask(row)
-                setEditDialog(true)
-              }}
-            >
-              <Icon icon='mdi:account-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete Task'
-              aria-label='Delete Task'
-              color='error'
-              onClick={() => {
-                setCurrentTask(row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Schedule Task'
+                aria-label='Schedule Task'
+                color='info'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setScheduleDialog(true)
+                }}
+              >
+                <Icon icon='mdi:clock-outline' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Run Task'
+                aria-label='Run Task'
+                color='warning'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setRunDialog(true)
+                }}
+              >
+                <Icon icon='mdi:play-circle-outline' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+                color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
+                onClick={() => {
+                  setCurrentTask(row)
+                  setDisableDialog(true)
+                }}
+              >
+                <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Edit Task'
+                color='secondary'
+                aria-label='Edit Task'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setEditDialog(true)
+                }}
+              >
+                <Icon icon='mdi:account-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete Task'
+                aria-label='Delete Task'
+                color='error'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }
@@ -984,54 +1077,122 @@ const TasksList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, q, column) => {
+    async (sort, sortColumn, filterModel) => {
       let data = []
 
       setLoading(true)
       await axios
         .get('/api/tasks', {
-          params: {
-            q,
-            sort,
-            column
-          }
+          params: {}
         })
         .then(res => {
           setRowCount(res.data.total)
-          data = res.data.rows
+          setRows(res.data.rows)
           props.set_total(res.data.total)
-          setTasks(data)
+          setTasks(res.data.rows)
         })
 
-      await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setTasks]
+    [setTasks, setRows]
   )
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
-  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+    fetchData()
+  }, [fetchData, refetchTrigger])
 
-  const handleSortModel = newModel => {
-    if (newModel.length) {
-      setSort(newModel[0].sort)
-      setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, searchValue, newModel[0].field)
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
+
+    if (sortingMode === 'server') {
+      // server side sorting
     } else {
-      setSort('asc')
-      setSortColumn('name')
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
+
+  // Trigger based on filter
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel.items.length, runFilterQuery])
 
   const handleAction = event => {
     setAction(event.target.value)
   }
 
   const handleSearch = value => {
+    // console.log('Search Value:', value)
+
     setSearchValue(value)
-    fetchData(sort, value, sortColumn)
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      // console.log('Row:', row)
+
+      // Extend the search to include nested paths
+      const searchFields = ['id', 'organization', 'name', 'owner', 'status', 'type', 'description']
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        // Ensure the fieldValue is a string before calling toString()
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
+      })
+    })
+
+    if (value.length) {
+      // console.log('Filtered Rows:', filteredRows)
+      setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
+      props.set_total(filteredRows.length)
+    } else {
+      setFilteredRows([])
+      setRowCount(rows.length)
+      props.set_total(rows.length)
+    }
   }
 
   const handleRegisterTasks = async () => {
@@ -1071,6 +1232,15 @@ const TasksList = props => {
     setTaskIds(newRowSelectionModel)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id', 'organization']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1083,25 +1253,31 @@ const TasksList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: true,
+                id: false,
+                organization: false
               }
             }
           }}
           autoHeight={true}
-          pagination
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
-          sortingMode='server'
-          paginationMode='server'
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
+          sortingMode={sortingMode}
+          sortModel={sortModel}
+          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          pagination={true}
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
-          onSortModelChange={handleSortModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,
@@ -1124,7 +1300,7 @@ const TasksList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No SLOs found'
+              message: 'No Tasks found'
             },
             noResultsOverlay: {
               message: 'No Results Found'
@@ -1139,26 +1315,40 @@ const TasksList = props => {
               showButtons: false,
               showexport: true
             },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -1173,10 +1363,7 @@ const TasksList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

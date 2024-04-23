@@ -72,9 +72,6 @@ import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/at
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import { ref } from 'yup'
-import { PassThrough } from 'form-data'
-import { hide } from '@popperjs/core'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -339,8 +336,16 @@ const ServersList = props => {
         )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>

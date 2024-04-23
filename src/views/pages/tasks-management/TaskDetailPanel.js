@@ -14,6 +14,10 @@ import { useTranslation } from 'react-i18next'
 import { parseISO, format } from 'date-fns'
 
 import { styled, useTheme } from '@mui/material/styles'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
+import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
+import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
+import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -86,6 +90,8 @@ const CustomTaskToolbar = () => {
 
 const TaskDetailPanel = ({ row }) => {
   const [value, setValue] = useState('1')
+
+  const theme = useTheme()
 
   const [filterModel, setFilterModel] = useState({
     args: { items: [] },
@@ -204,13 +210,226 @@ const TaskDetailPanel = ({ row }) => {
             pagination
             rowsPerPageOptions={[5, 10, 25]}
             autoHeight
-            components={{ Toolbar: CustomTaskToolbar }}
-            componentsProps={{
+            slots={{
+              toolbar: CustomTaskToolbar,
+              noRowsOverlay: NoRowsOverlay,
+              noResultsOverlay: NoResultsOverlay,
+              loadingOverlay: CustomLoadingOverlay
+            }}
+            slotProps={{
               baseButton: {
                 variant: 'outlined'
               },
+              noRowsOverlay: {
+                message: 'No Arguments Found'
+              },
+              noResultsOverlay: {
+                message: 'No Results Found'
+              },
               toolbar: {
                 showQuickFilter: true
+              },
+              columnsPanel: {
+                sx: {
+                  '& .MuiCheckbox-root': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+
+                  // Target the root of the outlined input
+                  '& .MuiOutlinedInput-root': {
+                    // Apply these styles when the element is focused
+                    '&.Mui-focused': {
+                      // Target the notched outline specifically
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                    mb: 2,
+                    mt: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                    mr: 2
+                  }
+                }
+              },
+              filterPanel: {
+                // Force usage of "And" operator
+                logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+                // Display columns by ascending alphabetical order
+                columnsSort: 'asc',
+                filterFormProps: {
+                  // Customize inputs by passing props
+                  logicOperatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small'
+                  },
+                  columnInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  operatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  valueInputProps: {
+                    InputComponentProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        // Target the root of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply these styles when the element is focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    }
+                  },
+                  deleteIconProps: {
+                    sx: {
+                      '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                    }
+                  }
+                },
+                sx: {
+                  // Customize inputs using css selectors
+                  '& .MuiDataGrid-filterForm': { p: 2 },
+                  '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                    backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                  },
+                  '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                  '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                    mb: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                    ml: 2
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                    mr: 2
+                  }
+                }
               }
             }}
           />
@@ -230,13 +449,226 @@ const TaskDetailPanel = ({ row }) => {
             pagination
             rowsPerPageOptions={[5, 10, 25]}
             autoHeight
-            components={{ Toolbar: CustomTaskToolbar }}
-            componentsProps={{
+            slots={{
+              toolbar: CustomTaskToolbar,
+              noRowsOverlay: NoRowsOverlay,
+              noResultsOverlay: NoResultsOverlay,
+              loadingOverlay: CustomLoadingOverlay
+            }}
+            slotProps={{
               baseButton: {
                 variant: 'outlined'
               },
+              noRowsOverlay: {
+                message: 'No Keyword Arguments Found'
+              },
+              noResultsOverlay: {
+                message: 'No Results Found'
+              },
               toolbar: {
                 showQuickFilter: true
+              },
+              columnsPanel: {
+                sx: {
+                  '& .MuiCheckbox-root': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+
+                  // Target the root of the outlined input
+                  '& .MuiOutlinedInput-root': {
+                    // Apply these styles when the element is focused
+                    '&.Mui-focused': {
+                      // Target the notched outline specifically
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                    mb: 2,
+                    mt: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                    mr: 2
+                  }
+                }
+              },
+              filterPanel: {
+                // Force usage of "And" operator
+                logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+                // Display columns by ascending alphabetical order
+                columnsSort: 'asc',
+                filterFormProps: {
+                  // Customize inputs by passing props
+                  logicOperatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small'
+                  },
+                  columnInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  operatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  valueInputProps: {
+                    InputComponentProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        // Target the root of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply these styles when the element is focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    }
+                  },
+                  deleteIconProps: {
+                    sx: {
+                      '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                    }
+                  }
+                },
+                sx: {
+                  // Customize inputs using css selectors
+                  '& .MuiDataGrid-filterForm': { p: 2 },
+                  '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                    backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                  },
+                  '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                  '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                    mb: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                    ml: 2
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                    mr: 2
+                  }
+                }
               }
             }}
           />
@@ -256,13 +688,226 @@ const TaskDetailPanel = ({ row }) => {
             pagination
             rowsPerPageOptions={[5, 10, 25]}
             autoHeight
-            components={{ Toolbar: CustomTaskToolbar }}
-            componentsProps={{
+            slots={{
+              toolbar: CustomTaskToolbar,
+              noRowsOverlay: NoRowsOverlay,
+              noResultsOverlay: NoResultsOverlay,
+              loadingOverlay: CustomLoadingOverlay
+            }}
+            slotProps={{
               baseButton: {
                 variant: 'outlined'
               },
+              noRowsOverlay: {
+                message: 'No Metadata Found'
+              },
+              noResultsOverlay: {
+                message: 'No Results Found'
+              },
               toolbar: {
                 showQuickFilter: true
+              },
+              columnsPanel: {
+                sx: {
+                  '& .MuiCheckbox-root': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+
+                  // Target the root of the outlined input
+                  '& .MuiOutlinedInput-root': {
+                    // Apply these styles when the element is focused
+                    '&.Mui-focused': {
+                      // Target the notched outline specifically
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                    mb: 2,
+                    mt: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                    mr: 2
+                  }
+                }
+              },
+              filterPanel: {
+                // Force usage of "And" operator
+                logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+                // Display columns by ascending alphabetical order
+                columnsSort: 'asc',
+                filterFormProps: {
+                  // Customize inputs by passing props
+                  logicOperatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small'
+                  },
+                  columnInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  operatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  valueInputProps: {
+                    InputComponentProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        // Target the root of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply these styles when the element is focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    }
+                  },
+                  deleteIconProps: {
+                    sx: {
+                      '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                    }
+                  }
+                },
+                sx: {
+                  // Customize inputs using css selectors
+                  '& .MuiDataGrid-filterForm': { p: 2 },
+                  '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                    backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                  },
+                  '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                  '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                    mb: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                    ml: 2
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                    mr: 2
+                  }
+                }
               }
             }}
           />
@@ -282,13 +927,226 @@ const TaskDetailPanel = ({ row }) => {
             pagination
             rowsPerPageOptions={[5, 10, 25]}
             autoHeight
-            components={{ Toolbar: CustomTaskToolbar }}
-            componentsProps={{
+            slots={{
+              toolbar: CustomTaskToolbar,
+              noRowsOverlay: NoRowsOverlay,
+              noResultsOverlay: NoResultsOverlay,
+              loadingOverlay: CustomLoadingOverlay
+            }}
+            slotProps={{
               baseButton: {
                 variant: 'outlined'
               },
+              noRowsOverlay: {
+                message: 'No Host Information Found'
+              },
+              noResultsOverlay: {
+                message: 'No Results Found'
+              },
               toolbar: {
                 showQuickFilter: true
+              },
+              columnsPanel: {
+                sx: {
+                  '& .MuiCheckbox-root': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    '&.Mui-checked': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+
+                  // Target the root of the outlined input
+                  '& .MuiOutlinedInput-root': {
+                    // Apply these styles when the element is focused
+                    '&.Mui-focused': {
+                      // Target the notched outline specifically
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                    mb: 2,
+                    mt: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                    mr: 2
+                  }
+                }
+              },
+              filterPanel: {
+                // Force usage of "And" operator
+                logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+                // Display columns by ascending alphabetical order
+                columnsSort: 'asc',
+                filterFormProps: {
+                  // Customize inputs by passing props
+                  logicOperatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small'
+                  },
+                  columnInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  operatorInputProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      mt: 'auto',
+
+                      // Target the root style of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+                  valueInputProps: {
+                    InputComponentProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        // Target the root of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply these styles when the element is focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    }
+                  },
+                  deleteIconProps: {
+                    sx: {
+                      '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                    }
+                  }
+                },
+                sx: {
+                  // Customize inputs using css selectors
+                  '& .MuiDataGrid-filterForm': { p: 2 },
+                  '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                    backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                  },
+                  '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                  '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                  '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                    mb: 2,
+                    borderColor:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                    ml: 2
+                  },
+                  '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                    mr: 2
+                  }
+                }
               }
             }}
           />
@@ -321,13 +1179,234 @@ const TaskDetailPanel = ({ row }) => {
               onFilterModelChange={model => handleFilterModelChange('prompts', model)}
               rowsPerPageOptions={[5, 10, 25]}
               autoHeight
-              components={{ Toolbar: CustomTaskToolbar }}
-              componentsProps={{
+              slots={{
+                toolbar: CustomTaskToolbar,
+                noRowsOverlay: NoRowsOverlay,
+                noResultsOverlay: NoResultsOverlay,
+                loadingOverlay: CustomLoadingOverlay
+              }}
+              slotProps={{
                 baseButton: {
                   variant: 'outlined'
                 },
+                noRowsOverlay: {
+                  message: 'No Schedule Information Found'
+                },
+                noResultsOverlay: {
+                  message: 'No Results Found'
+                },
                 toolbar: {
                   showQuickFilter: true
+                },
+                columnsPanel: {
+                  sx: {
+                    '& .MuiCheckbox-root': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      '&.Mui-checked': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    },
+
+                    // Target the root of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply these styles when the element is focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+                    '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                      mb: 2,
+                      mt: 2,
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    },
+                    '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                      mr: 2
+                    }
+                  }
+                },
+                filterPanel: {
+                  // Force usage of "And" operator
+                  logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+                  // Display columns by ascending alphabetical order
+                  columnsSort: 'asc',
+                  filterFormProps: {
+                    // Customize inputs by passing props
+                    logicOperatorInputProps: {
+                      variant: 'outlined',
+                      size: 'small'
+                    },
+                    columnInputProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        mt: 'auto',
+
+                        // Target the root style of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    },
+                    operatorInputProps: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        mt: 'auto',
+
+                        // Target the root style of the outlined input
+                        '& .MuiOutlinedInput-root': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            // Target the notched outline specifically
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        },
+
+                        // Target the label for color change
+                        '& .MuiInputLabel-outlined': {
+                          // Apply styles when focused
+                          '&.Mui-focused': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
+                    },
+                    valueInputProps: {
+                      InputComponentProps: {
+                        variant: 'outlined',
+                        size: 'small',
+                        sx: {
+                          // Target the root of the outlined input
+                          '& .MuiOutlinedInput-root': {
+                            // Apply these styles when the element is focused
+                            '&.Mui-focused': {
+                              // Target the notched outline specifically
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor:
+                                  theme.palette.mode == 'dark'
+                                    ? theme.palette.customColors.brandYellow
+                                    : theme.palette.primary.main
+                              }
+                            }
+                          },
+
+                          // Target the label for color change
+                          '& .MuiInputLabel-outlined': {
+                            // Apply styles when focused
+                            '&.Mui-focused': {
+                              color:
+                                theme.palette.mode == 'dark'
+                                  ? theme.palette.customColors.brandYellow
+                                  : theme.palette.primary.main
+                            }
+                          }
+                        }
+                      }
+                    },
+                    deleteIconProps: {
+                      sx: {
+                        '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                      }
+                    }
+                  },
+                  sx: {
+                    // Customize inputs using css selectors
+                    '& .MuiDataGrid-filterForm': { p: 2 },
+                    '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                      backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                    },
+                    '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                    '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                    '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                    '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                    '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                      mb: 2,
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    },
+                    '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                      ml: 2
+                    },
+                    '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                      mr: 2
+                    }
+                  }
                 }
               }}
             />

@@ -20,6 +20,8 @@ import {
   gridVisibleColumnFieldsSelector
 } from '@mui/x-data-grid-pro'
 
+import Tooltip from '@mui/material/Tooltip'
+
 import MenuItem from '@mui/material/MenuItem'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
@@ -215,17 +217,28 @@ const CustomToolbar = ({
 
   return (
     <GridToolbarContainer sx={{ flexWrap: 'nowrap' }}>
+      <Tooltip title='Toolbar allows for toggling of columns, advanced filtering, and quick search' leaveDelay={200}>
+        <IconButton size='small' color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}>
+          <Icon icon='mdi:information-slab-circle-outline' />
+        </IconButton>
+      </Tooltip>
       <GridToolbarColumnsButton
         ref={setColumnsButtonEl}
         onClick={() => {
           setFilterActive(false)
+        }}
+        slotProps={{
+          tooltip: {
+            title: 'Toggle column visibility',
+            placement: 'bottom'
+          }
         }}
       />
       <GridToolbarFilterButton
         ref={setFilterButtonEl}
         slotProps={{
           tooltip: {
-            title: 'Filter SLO Records',
+            title: 'Build filter rules then click filter button to the right to apply them to the data.',
             placement: 'bottom'
           },
           button: {
@@ -235,18 +248,18 @@ const CustomToolbar = ({
           }
         }}
       />
-      <IconButton
-        size='small'
-        title='Run Filter Query'
-        aria-label='Run Filter Query'
-        color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}
-        onClick={() => {
-          console.log('Run Filter Query')
-          setRunFilterQuery(true)
-        }}
-      >
-        <Icon icon='mdi:filter-outline' fontSize={25} />
-      </IconButton>
+      <Tooltip title='Click to perform filtering based on filter rules created'>
+        <IconButton
+          size='small'
+          color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}
+          onClick={() => {
+            console.log('Run Filter Query')
+            setRunFilterQuery(true)
+          }}
+        >
+          <Icon icon='mdi:filter-outline' fontSize={25} />
+        </IconButton>
+      </Tooltip>
       {props.showexport ? <CustomExportButton /> : null}
     </GridToolbarContainer>
   )
@@ -296,23 +309,25 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         showexport={props.showexport ? props.showexport : false}
         sx={{ gridRow: '1', gridColumn: '6 / 6' }}
       />
-      <CustomSearchTextField
-        value={props.value}
-        onChange={props.onChange}
-        clearSearch={props.clearSearch}
-        delay={2000}
-        sx={{
-          gridRow: '1',
-          gridColumn: '6 / 6',
-          width: {
-            xs: 1,
-            sm: 'auto'
-          },
-          '& .MuiInputBase-root > svg': {
-            mr: 2
-          }
-        }}
-      />
+      <Tooltip title='Search'>
+        <CustomSearchTextField
+          value={props.value}
+          onChange={props.onChange}
+          clearSearch={props.clearSearch}
+          delay={2000}
+          sx={{
+            gridRow: '1',
+            gridColumn: '6 / 6',
+            width: {
+              xs: 1,
+              sm: 'auto'
+            },
+            '& .MuiInputBase-root > svg': {
+              mr: 2
+            }
+          }}
+        />
+      </Tooltip>
     </Box>
   )
 }

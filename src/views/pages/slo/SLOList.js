@@ -124,12 +124,16 @@ const SLOList = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [sloIds, setSloIds] = useAtom(sloIdsAtom)
   const [slos, setSlos] = useAtom(slosAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
+  const [filterMode, setFilterMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('server')
+  const [paginationMode, setPaginationMode] = useState('server')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -639,6 +643,10 @@ const SLOList = props => {
 
     if (runFilterQuery && filterModel.items.length > 0) {
       fetchData(sort, sortColumn, filterModel)
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      fetchData(sort, sortColumn, filterModel)
+      setRunFilterQueryCount(0)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
@@ -747,8 +755,8 @@ const SLOList = props => {
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
-          sortingMode='server'
-          paginationMode='server'
+          sortingMode={sortingMode}
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
           onSortModelChange={handleSortModel}
           pageSizeOptions={[10, 25, 50]}
@@ -764,7 +772,7 @@ const SLOList = props => {
           rowSelectionModel={rowSelectionModel}
           loading={loading}
           keepNonExistentRowsSelected
-          filterMode='server'
+          filterMode={filterMode}
           filterModel={filterModel}
           onFilterModelChange={newModel => setFilterModel(newModel)}
           slotProps={{

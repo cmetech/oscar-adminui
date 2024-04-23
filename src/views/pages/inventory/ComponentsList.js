@@ -509,7 +509,7 @@ const ComponentsList = props => {
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      console.log('Row:', row)
+      // console.log('Row:', row)
 
       // Extend the search to include nested paths
       const searchFields = ['id', 'name', 'subcomponent', 'type', 'description']
@@ -523,7 +523,7 @@ const ComponentsList = props => {
     })
 
     if (value.length) {
-      console.log('Filtered Rows:', filteredRows)
+      // console.log('Filtered Rows:', filteredRows)
       setFilteredRows(filteredRows)
       setRowCount(filteredRows.length)
       props.set_total(filteredRows.length)

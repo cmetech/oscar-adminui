@@ -73,6 +73,8 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 import { ref } from 'yup'
+import { PassThrough } from 'form-data'
+import { hide } from '@popperjs/core'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -106,22 +108,24 @@ const ServersList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-
-  // const [sort, setSort] = useState('asc')
   const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-
-  // const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [serverIds, setServerIds] = useAtom(serverIdsAtom)
   const [servers, setServers] = useAtom(serverIdsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [filterMode, setFilterMode] = useState('client')
+  const [sortingMode, setSortingMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('client')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -140,10 +144,24 @@ const ServersList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('Identifier')
+    },
+    {
+      flex: 0.02,
+      field: 'subcomponent_name',
+      headerName: t('Subcomponent')
+    },
+    {
+      flex: 0.02,
+      field: 'datacenter_name',
+      headerName: t('Datacenter')
+    },
+    {
       flex: 0.035,
       minWidth: 100,
-      field: 'name',
-      editable: editmode,
+      field: 'hostname',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -172,8 +190,7 @@ const ServersList = props => {
     {
       flex: 0.03,
       minWidth: 100,
-      field: 'environment',
-      editable: editmode,
+      field: 'environment_name',
       headerName: t('Environment'),
       renderCell: params => {
         const { row } = params
@@ -238,7 +255,7 @@ const ServersList = props => {
     {
       flex: 0.025,
       minWidth: 100,
-      field: 'component',
+      field: 'component_name',
       editable: editmode,
       headerName: t('Component'),
       renderCell: params => {
@@ -522,7 +539,7 @@ const ServersList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async () => {
+    async (sort, sortColumn, filterModel) => {
       setLoading(true)
       await axios
         .get('/api/inventory/servers', {
@@ -545,20 +562,62 @@ const ServersList = props => {
     fetchData()
   }, [fetchData, refetchTrigger])
 
-  // useEffect(() => {
-  //   fetchData(sort, searchValue, sortColumn)
-  // }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
 
-  // const handleSortModel = newModel => {
-  //   if (newModel.length) {
-  //     setSort(newModel[0].sort)
-  //     setSortColumn(newModel[0].field)
-  //     fetchData(newModel[0].sort, searchValue, newModel[0].field)
-  //   } else {
-  //     setSort('asc')
-  //     setSortColumn('name')
-  //   }
-  // }
+    if (sortingMode === 'server') {
+      // server side sorting
+    } else {
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
+
+  // Trigger based on filter
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel.items.length, runFilterQuery])
 
   const handleAction = event => {
     setAction(event.target.value)
@@ -622,6 +681,15 @@ const ServersList = props => {
     setServerIds(newRowSelectionModel)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id', 'subcomponent_name', 'datacenter_name']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -634,7 +702,10 @@ const ServersList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: false,
+                id: false,
+                subcomponent_name: false,
+                datacenter_name: false
               }
             }
           }}
@@ -645,12 +716,14 @@ const ServersList = props => {
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
-          filterMode='client'
-          sortingMode='client'
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
+          sortingMode={sortingMode}
           sortModel={sortModel}
           onSortModelChange={newSortModel => setSortModel(newSortModel)}
           pagination={true}
-          paginationMode='client'
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
@@ -692,26 +765,40 @@ const ServersList = props => {
               showButtons: false,
               showexport: true
             },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
             columnsPanel: {
               sx: {
-                '& .MuiDataGrid-panelHeader .MuiInputLabel-root': {
+                '& .MuiCheckbox-root': {
                   color:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
                 },
 
-                /* Target the underline of the input within the panel header */
-                '& .MuiDataGrid-panelHeader .MuiInput-underline:before': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
                 },
-
-                /* For focused state */
-                '.MuiDataGrid-panelHeader .MuiInput-underline:after': {
-                  borderBottomColor:
-                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
                   mb: 2,
+                  mt: 2,
                   borderColor:
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   color:
@@ -726,10 +813,7 @@ const ServersList = props => {
                       theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
                   }
                 },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
-                  ml: 2
-                },
-                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
                   mr: 2
                 }
               }

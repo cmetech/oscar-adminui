@@ -781,9 +781,9 @@ const ServersList = props => {
           pagination={true}
           paginationMode={paginationMode}
           paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,

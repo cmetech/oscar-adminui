@@ -115,8 +115,11 @@ const SubcomponentsList = props => {
   // const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
 
   // ** Dialog
@@ -126,6 +129,9 @@ const SubcomponentsList = props => {
   const [currentSubcomponent, setCurrentSubcomponent] = useState(null)
   const [subcomponents, setSubcomponents] = useAtom(subcomponentsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSubcomponentTriggerAtom)
+  const [filterMode, setFilterMode] = useState('client')
+  const [sortingMode, setSortingMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('client')
 
   const editmode = false
 
@@ -498,6 +504,63 @@ const SubcomponentsList = props => {
     fetchData()
   }, [refetchTrigger, fetchData])
 
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
+
+    if (sortingMode === 'server') {
+      // server side sorting
+    } else {
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
+
+  // Trigger based on filter
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel.items.length, runFilterQuery])
+
   const handleAction = event => {
     setAction(event.target.value)
   }
@@ -571,16 +634,18 @@ const SubcomponentsList = props => {
           columns={columns}
           checkboxSelection={false}
           disableRowSelectionOnClick
-          filterMode='client'
-          sortingMode='client'
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
+          sortingMode={sortingMode}
           sortModel={sortModel}
           onSortModelChange={newSortModel => setSortModel(newSortModel)}
           pagination={true}
-          paginationMode='client'
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,

@@ -4,7 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { sloIdsAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -56,8 +56,7 @@ import Icon from 'src/@core/components/icon'
 import SLOList from 'src/views/pages/slo/SLOList'
 import SLOEventHistoryList from 'src/views/pages/slo/SLOEventHistoryList'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
-
-// import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
+import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
@@ -592,6 +591,7 @@ const SLO = () => {
   const ability = useContext(AbilityContext)
   const { serverRuntimeConfig, publicRuntimeConfig } = getConfig()
   const { t } = useTranslation()
+  const theme = useTheme()
 
   const [value, setValue] = useState('1')
   const [sloTotal, setSloTotal] = useState(0)
@@ -600,7 +600,8 @@ const SLO = () => {
   const [selectedSloIds, setSelectedSloIds] = useAtom(sloIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([null, null])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [onAccept, setOnAccept] = useState(value)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -674,6 +675,11 @@ const SLO = () => {
     return mapping[tabValue] || 'Item'
   }
 
+  const handleOnAccept = value => {
+    console.log('onAccept', value)
+    setOnAccept(value)
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -682,19 +688,20 @@ const SLO = () => {
           <Box display='flex' alignItems='center'>
             {value === '1' && (
               <Fragment>
-                <DateRangePicker
+                <DateTimeRangePicker
                   calendars={2}
                   closeOnSelect={false}
                   value={dateRange}
-                  timezone='system'
-                  defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
+                  defaultValue={[yesterdayRounded, todayRounded]}
+                  disableFuture
                   views={['day', 'hours']}
-                  timeSteps={{ minutes: 20 }}
+                  timeSteps={{ minutes: 10 }}
                   viewRenderers={{ hours: renderDigitalClockTimeView }}
                   onChange={newValue => {
                     // console.log('Date range:', newValue)
                     setDateRange(newValue)
                   }}
+                  onAccept={handleOnAccept}
                   slotProps={{
                     field: { dateSeparator: 'to' },
                     textField: ({ position }) => ({
@@ -705,12 +712,79 @@ const SLO = () => {
                         endAdornment: <Icon icon='mdi:calendar' />
                       }
                     }),
+
+                    desktopPaper: {
+                      style: {
+                        backgroundColor:
+                          theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                      }
+                    },
+
+                    day: {
+                      sx: {
+                        '& .MuiPickersDay-root': {
+                          color:
+                            theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
+                          '&:hover': {
+                            color:
+                              theme.palette.mode === 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.light
+                          }
+                        },
+                        '& .MuiPickersDay-root.Mui-selected': {
+                          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
+                        }
+                      }
+                    },
+
                     shortcuts: {
-                      items: predefinedRangesDayjs
+                      items: predefinedRangesDayjs,
+                      sx: {
+                        '& .MuiChip-root': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          '&:hover': {
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main,
+                            backgroundColor:
+                              theme.palette.mode === 'dark'
+                                ? theme.palette.secondary.dark
+                                : theme.palette.secondary.light
+                          }
+                        }
+                      }
                     },
 
                     actionBar: {
-                      actions: ['clear']
+                      actions: ['cancel', 'accept'],
+                      sx: {
+                        '& .MuiButton-root': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.primary.main,
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.primary.main,
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main,
+                            color:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      }
                     }
                   }}
                 />
@@ -727,19 +801,20 @@ const SLO = () => {
               </Fragment>
             )}
             {value === '2' && (
-              <DateRangePicker
+              <DateTimeRangePicker
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                timezone='system'
-                defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
+                defaultValue={[yesterdayRounded, todayRounded]}
+                disableFuture
                 views={['day', 'hours']}
-                timeSteps={{ minutes: 20 }}
+                timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
                   // console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
+                onAccept={handleOnAccept}
                 slotProps={{
                   field: { dateSeparator: 'to' },
                   textField: ({ position }) => ({
@@ -750,12 +825,75 @@ const SLO = () => {
                       endAdornment: <Icon icon='mdi:calendar' />
                     }
                   }),
+                  desktopPaper: {
+                    style: {
+                      backgroundColor:
+                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                    }
+                  },
+
+                  day: {
+                    sx: {
+                      '& .MuiPickersDay-root': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.light
+                        }
+                      },
+                      '& .MuiPickersDay-root.Mui-selected': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
+                      }
+                    }
+                  },
+
                   shortcuts: {
-                    items: predefinedRangesDayjs
+                    items: predefinedRangesDayjs,
+                    sx: {
+                      '& .MuiChip-root': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          backgroundColor:
+                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
+                        }
+                      }
+                    }
                   },
 
                   actionBar: {
-                    actions: ['clear']
+                    actions: ['cancel', 'accept'],
+                    sx: {
+                      '& .MuiButton-root': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
                   }
                 }}
               />

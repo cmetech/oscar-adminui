@@ -914,13 +914,55 @@ const TasksManager = () => {
                       endAdornment: <Icon icon='mdi:calendar' />
                     }
                   }),
-                  shortcuts: {
-                    items: predefinedRangesDayjs
-                  },
 
                   desktopPaper: {
+                    style: {
+                      backgroundColor:
+                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                    }
+                  },
+
+                  day: {
                     sx: {
-                      '& .MuiPickersLayout-actionBar .MuiButtonBase-root .MuiButton-root': {
+                      '& .MuiPickersDay-root': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.light
+                        }
+                      },
+                      '& .MuiPickersDay-root.Mui-selected': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
+                      }
+                    }
+                  },
+
+                  shortcuts: {
+                    items: predefinedRangesDayjs,
+                    sx: {
+                      '& .MuiChip-root': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          backgroundColor:
+                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
+                        }
+                      }
+                    }
+                  },
+
+                  actionBar: {
+                    actions: ['cancel', 'accept'],
+                    sx: {
+                      '& .MuiButton-root': {
                         borderColor:
                           theme.palette.mode == 'dark'
                             ? theme.palette.customColors.brandWhite
@@ -942,10 +984,6 @@ const TasksManager = () => {
                         }
                       }
                     }
-                  },
-
-                  actionBar: {
-                    actions: ['cancel', 'accept']
                   }
                 }}
               />

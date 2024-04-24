@@ -4,7 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -56,6 +56,8 @@ import Icon from 'src/@core/components/icon'
 import TasksList from 'src/views/pages/tasks-management/TasksList'
 import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
+import { CustomDateTimeRangePicker } from 'src/lib/styled-components'
 import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
@@ -618,6 +620,7 @@ const TasksManager = () => {
   const ability = useContext(AbilityContext)
   const { serverRuntimeConfig, publicRuntimeConfig } = getConfig()
   const { t } = useTranslation()
+  const theme = useTheme()
 
   const [value, setValue] = useState('1')
   const [taskTotal, setTaskTotal] = useState(0)
@@ -635,7 +638,8 @@ const TasksManager = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([null, null])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [onAccept, setOnAccept] = useState(value)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -852,6 +856,11 @@ const TasksManager = () => {
     return mapping[tabValue] || 'Item'
   }
 
+  const handleOnAccept = value => {
+    console.log('onAccept', value)
+    setOnAccept(value)
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -881,19 +890,20 @@ const TasksManager = () => {
               </Fragment>
             )}
             {value === '2' && (
-              <DateRangePicker
+              <DateTimeRangePicker
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
+                defaultValue={[yesterdayRounded, todayRounded]}
                 disableFuture
                 views={['day', 'hours']}
-                timeSteps={{ minute: 15 }}
+                timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
                   // console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
+                onAccept={handleOnAccept}
                 slotProps={{
                   field: { dateSeparator: 'to' },
                   textField: ({ position }) => ({
@@ -906,11 +916,37 @@ const TasksManager = () => {
                   }),
                   shortcuts: {
                     items: predefinedRangesDayjs
-                  }
+                  },
 
-                  // actionBar: {
-                  //   actions: ['cancel', 'accept']
-                  // }
+                  desktopPaper: {
+                    sx: {
+                      '& .MuiPickersLayout-actionBar .MuiButtonBase-root .MuiButton-root': {
+                        borderColor:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  },
+
+                  actionBar: {
+                    actions: ['cancel', 'accept']
+                  }
                 }}
               />
             )}
@@ -934,7 +970,7 @@ const TasksManager = () => {
             <TasksList set_total={setTaskTotal} total={taskTotal} />
           </TabPanel>
           <TabPanel value='2'>
-            <TaskHistoryList dateRange={dateRange} />
+            <TaskHistoryList dateRange={dateRange} onAccept={onAccept} />
           </TabPanel>
         </TabContext>
       </Grid>

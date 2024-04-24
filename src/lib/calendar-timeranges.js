@@ -20,10 +20,34 @@ import dayjs from 'dayjs'
 
 import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 
+// Function to round to the nearest 10 minutes
+const roundToNearest10Min = date => {
+  const minutes = date.minute()
+  const seconds = date.second()
+
+  // Calculate the nearest 10-minute mark
+  const rounding = seconds > 30 ? Math.ceil(minutes / 10) * 10 : Math.round(minutes / 10) * 10
+
+  return date.minute(rounding).second(0)
+}
+
+export const today = dayjs()
+
+export const todayRounded = roundToNearest10Min(today)
+
+export const yesterday = dayjs().subtract(1, 'day')
+
+export const yesterdayRounded = roundToNearest10Min(yesterday)
+
 export const predefinedRanges = [
   {
     label: 'Today',
     value: [new Date(), new Date()],
+    placement: 'left'
+  },
+  {
+    label: 'Last 4hrs',
+    value: [subHours(new Date(), 4), new Date()],
     placement: 'left'
   },
   {
@@ -80,6 +104,26 @@ export const predefinedRangesDayjs = [
       // (January 1)
       const startOfDay = dayjs().startOf('day')
       const endOfDay = dayjs().endOf('day')
+
+      return [startOfDay, endOfDay]
+    }
+  },
+  {
+    label: 'Last Hour',
+    getValue: () => {
+      // (January 1)
+      const startOfDay = dayjs().subtract(1, 'hour')
+      const endOfDay = dayjs()
+
+      return [startOfDay, endOfDay]
+    }
+  },
+  {
+    label: 'Last 4hrs',
+    getValue: () => {
+      // (January 1)
+      const startOfDay = dayjs().subtract(4, 'hour')
+      const endOfDay = dayjs()
 
       return [startOfDay, endOfDay]
     }

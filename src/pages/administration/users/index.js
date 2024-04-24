@@ -70,9 +70,14 @@ const Settings = () => {
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='users'>
             {userTotal == 0 ? (
-              <Tab value='1' label={t('Users')} />
+              <Tab value='1' label={t('Users')} icon={<Icon icon='mdi:user' />} iconPosition='start' />
             ) : (
-              <Tab value='1' label={`${t('Users')} (${userTotal})`} />
+              <Tab
+                value='1'
+                label={`${t('Users')} (${userTotal})`}
+                icon={<Icon icon='mdi:users' />}
+                iconPosition='start'
+              />
             )}
           </TabList>
           <TabPanel value='1'>

@@ -2,6 +2,7 @@ import React from 'react'
 import { styled, useTheme } from '@mui/material/styles'
 import { DataGridPro } from '@mui/x-data-grid-pro'
 import MuiTabList from '@mui/lab/TabList'
+import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 
 function customCheckbox(theme) {
   return {
@@ -130,6 +131,18 @@ export const TabList = styled(MuiTabList)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     [theme.breakpoints.up('md')]: {
       minWidth: 130
+    }
+  }
+}))
+
+export const CustomDateTimeRangePicker = styled(DateTimeRangePicker)(({ theme }) => ({
+  '& .MuiButtonBase-root .MuiButton-root': {
+    borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+      color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     }
   }
 }))

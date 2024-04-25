@@ -176,7 +176,7 @@ const SLOList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -221,7 +221,7 @@ const SLOList = props => {
               <CustomChip
                 rounded
                 size='large'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={budgetingLabel}
                 color='warning'
                 sx={{
@@ -269,7 +269,7 @@ const SLOList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={row.slo_percentage + '%'}
                 color={breachColor}
                 sx={{
@@ -334,9 +334,9 @@ const SLOList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={row.target?.target_value + '%'}
-                color='info'
+                color='success'
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
                   width: '90px'

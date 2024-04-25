@@ -134,15 +134,3 @@ export const TabList = styled(MuiTabList)(({ theme }) => ({
     }
   }
 }))
-
-export const CustomDateTimeRangePicker = styled(DateTimeRangePicker)(({ theme }) => ({
-  '& .MuiButtonBase-root .MuiButton-root': {
-    borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
-      color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
-    }
-  }
-}))

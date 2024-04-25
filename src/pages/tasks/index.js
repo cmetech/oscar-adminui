@@ -895,7 +895,6 @@ const TasksManager = () => {
                 closeOnSelect={false}
                 value={dateRange}
                 defaultValue={[yesterdayRounded, todayRounded]}
-                disableFuture
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -962,24 +961,38 @@ const TasksManager = () => {
                   actionBar: {
                     actions: ['cancel', 'accept'],
                     sx: {
-                      '& .MuiButton-root': {
+                      '& .MuiDialogActions-root, .MuiButton-root': {
+                        // Targeting buttons inside MuiDialogActions-root
+                        borderWidth: '1px', // Ensure there's a visible border
+                        borderStyle: 'solid', // Necessary for the border to show
                         borderColor:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandWhite
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandGray1b
                             : theme.palette.primary.main,
                         color:
-                          theme.palette.mode == 'dark'
+                          theme.palette.mode === 'dark'
                             ? theme.palette.customColors.brandWhite
                             : theme.palette.primary.main,
                         '&:hover': {
                           backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
                           borderColor:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandYellow
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandWhite
                               : theme.palette.primary.main,
                           color:
-                            theme.palette.mode == 'dark'
+                            theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      },
+                      '.MuiDigitalClock-list .MuiMenuItem-root': {
+                        // Regular styles for your list items
+                        transition: 'background-color 0.3s ease', // Smooth transition for background color
+
+                        '&:hover': {
+                          backgroundColor:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow3
                               : theme.palette.primary.main
                         }
                       }

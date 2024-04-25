@@ -31,9 +31,16 @@ const roundToNearest10Min = date => {
   return date.minute(rounding).second(0)
 }
 
+const roundDownToNearest10Min = date => {
+  const minutes = date.minute()
+  const roundedMinutes = Math.floor(minutes / 10) * 10
+
+  return date.minute(roundedMinutes).second(0)
+}
+
 export const today = dayjs()
 
-export const todayRounded = roundToNearest10Min(today)
+export const todayRounded = roundDownToNearest10Min(today)
 
 export const yesterday = dayjs().subtract(1, 'day')
 

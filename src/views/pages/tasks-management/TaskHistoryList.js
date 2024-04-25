@@ -74,7 +74,6 @@ import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/at
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import { fi } from 'date-fns/locale'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -91,12 +90,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
   }
 }))
-
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}
 
 const TaskHistoryList = props => {
   // ** Hooks
@@ -426,7 +419,7 @@ const TaskHistoryList = props => {
             limit: paginationModel.pageSize,
             start_time: startTime,
             end_time: endTime,
-            filter: JSON.stringify(filterModel),
+            filter: JSON.stringify(filterModel)
           }
         })
         .then(res => {
@@ -518,7 +511,7 @@ const TaskHistoryList = props => {
       // console.log('Row:', row)
 
       // Extend the search to include nested paths
-      const searchFields = ['id', 'task_id', 'name', 'worker']
+      const searchFields = ['id', 'task_id', 'alias', 'worker']
 
       return searchFields.some(field => {
         const fieldValue = getNestedValue(row, field)
@@ -532,11 +525,9 @@ const TaskHistoryList = props => {
       // console.log('Filtered Rows:', filteredRows)
       setFilteredRows(filteredRows)
       setRowCount(filteredRows.length)
-      props.set_total(filteredRows.length)
     } else {
       setFilteredRows([])
       setRowCount(rows.length)
-      props.set_total(rows.length)
     }
   }
 

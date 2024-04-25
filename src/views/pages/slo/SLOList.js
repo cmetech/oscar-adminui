@@ -61,6 +61,7 @@ import Icon from 'src/@core/components/icon'
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
 import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+import { todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -72,14 +73,7 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-
-function loadServerRows(page, pageSize, data) {
-  // console.log(data)
-
-  return new Promise(resolve => {
-    resolve(data.slice(page * pageSize, (page + 1) * pageSize))
-  })
-}
+import { set } from 'lodash'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -116,11 +110,10 @@ const SLOList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sort, setSort] = useState('asc')
+  const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
@@ -628,21 +621,28 @@ const SLOList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, column, filter_model) => {
+    async filter_model => {
       // Flag to track whether the request has completed
       let requestCompleted = false
 
       // Default start and end times to the last 24 hours if not defined
-      const [startDate, endDate] = props.dateRange || []
+      let [startDate, endDate] = []
+      if (props.onAccept == true) {
+        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+      } else {
+        ;[startDate, endDate] = props.onAccept
+      }
 
       // Assuming props.dateRange contains Date objects or is undefined
-      const startTime =
-        props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
+      console.log('onAccept:', props.onAccept)
+      console.log('Start Date:', startDate)
+      console.log('End Date:', endDate)
+
+      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const endTime = endDate?.toISOString() || new Date().toISOString()
 
       console.log('Start Time:', startTime)
       console.log('End Time:', endTime)
-
       console.log('Filter Data:', JSON.stringify(filter_model))
 
       setLoading(true)
@@ -663,8 +663,8 @@ const SLOList = props => {
       try {
         const response = await axios.get('/api/sli', {
           params: {
-            sort,
-            column,
+            sort: sortModel[0].sort || 'asc',
+            column: sortModel[0].field || 'name',
             start_time: startTime,
             end_time: endTime,
             calculate: 'true',
@@ -673,13 +673,10 @@ const SLOList = props => {
           timeout: 30000
         })
 
-        setRowCount(response.data.total)
+        setRowCount(response.data.total || 0)
         setSlos(response.data.rows)
+        setRows(response.data.rows || [])
         props.set_total(response.data.total)
-
-        await loadServerRows(paginationModel.page, paginationModel.pageSize, response.data.rows).then(slicedRows =>
-          setRows(slicedRows)
-        )
       } catch (error) {
         console.error('Failed to fetch data:', error)
 
@@ -695,7 +692,7 @@ const SLOList = props => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setSlos, props.dateRange]
+    [paginationModel, setSlos, props.onAccept]
   )
 
   // Trigger based on filter application
@@ -704,31 +701,60 @@ const SLOList = props => {
     console.log('Filter Model:', JSON.stringify(filterModel))
 
     if (runFilterQuery && filterModel.items.length > 0) {
-      fetchData(sort, sortColumn, filterModel)
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
       setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
-      fetchData(sort, sortColumn, filterModel)
+      if (filterMode === 'server') {
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
       setRunFilterQueryCount(0)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterModel.items.length, runFilterQuery]) // Triggered by filter changes
+  }, [filterModel, runFilterQuery]) // Triggered by filter changes
 
   useEffect(() => {
-    fetchData(sort, sortColumn)
-  }, [refetchTrigger, fetchData, sort, sortColumn])
+    fetchData()
+  }, [refetchTrigger, fetchData])
 
-  const handleSortModel = newModel => {
-    if (newModel.length) {
-      setSort(newModel[0].sort)
-      setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, newModel[0].field)
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
+
+    if (sortingMode === 'server') {
+      fetchData()
     } else {
-      setSort('asc')
-      setSortColumn('name')
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
 
   const handleAction = event => {
     setAction(event.target.value)
@@ -763,8 +789,10 @@ const SLOList = props => {
 
     if (value.length) {
       setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
     } else {
       setFilteredRows([])
+      setRowCount(rows.length)
     }
   }
 
@@ -819,20 +847,24 @@ const SLOList = props => {
             }
           }}
           autoHeight={true}
-          pagination
           rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
           sortingMode={sortingMode}
+          sortModel={sortModel}
+          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          pagination={true}
           paginationMode={paginationMode}
           paginationModel={paginationModel}
-          onSortModelChange={handleSortModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,
@@ -843,9 +875,6 @@ const SLOList = props => {
           rowSelectionModel={rowSelectionModel}
           loading={loading}
           keepNonExistentRowsSelected
-          filterMode={filterMode}
-          filterModel={filterModel}
-          onFilterModelChange={newModel => setFilterModel(newModel)}
           slotProps={{
             baseButton: {
               variant: 'outlined'

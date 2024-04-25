@@ -171,8 +171,8 @@ const UsersList = props => {
               }}
             >
               <CustomAvatar
-                skin={theme.palette.mode}
-                color={theme.palette.mode === 'dark' ? 'warning' : 'primary'}
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                color={theme.palette.mode === 'dark' ? 'warning' : 'warning'}
                 sx={{ mr: 3, width: 30, height: 30, fontSize: '.875rem' }}
               >
                 {getInitials(fullName)}
@@ -194,7 +194,7 @@ const UsersList = props => {
                     sx={{
                       color:
                         theme.palette.mode === 'light'
-                          ? theme.palette.customColors.brandBlack
+                          ? theme.palette.customColors.brandBlue
                           : theme.palette.customColors.brandYellow
                     }}
                   >
@@ -322,7 +322,7 @@ const UsersList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}

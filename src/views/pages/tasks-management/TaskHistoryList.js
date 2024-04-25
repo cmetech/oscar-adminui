@@ -262,7 +262,7 @@ const TaskHistoryList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{

@@ -191,7 +191,7 @@ const TasksList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -228,7 +228,7 @@ const TasksList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -281,7 +281,7 @@ const TasksList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{
@@ -304,7 +304,7 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        let color = theme.palette.mode === 'light' ? 'primary' : 'secondary'
+        let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
         let label = 'UNKN'
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'invoke') {
@@ -343,7 +343,7 @@ const TasksList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon={iconimage} />}
@@ -351,7 +351,7 @@ const TasksList = props => {
                   '& .MuiChip-label': { textTransform: 'capitalize' },
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandWhite
                       : theme.palette.customColors.brandWhite,
                   width: '150px'
                 }}

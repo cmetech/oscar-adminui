@@ -218,7 +218,7 @@ const CustomToolbar = ({
   return (
     <GridToolbarContainer sx={{ flexWrap: 'nowrap' }}>
       <Tooltip title='Toolbar allows for toggling of columns, advanced filtering, and quick search' leaveDelay={200}>
-        <IconButton size='small' color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}>
+        <IconButton size='small' color={theme.palette.mode === 'light' ? 'primary' : 'warning'}>
           <Icon icon='mdi:information-slab-circle-outline' />
         </IconButton>
       </Tooltip>
@@ -251,7 +251,7 @@ const CustomToolbar = ({
       <Tooltip title='Click to perform filtering based on filter rules created'>
         <IconButton
           size='small'
-          color={theme.palette.mode === 'light' ? 'secondary' : 'warning'}
+          color={theme.palette.mode === 'light' ? 'primary' : 'warning'}
           onClick={() => {
             console.log('Run Filter Query')
             setRunFilterQuery(true)

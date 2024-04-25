@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef } from 'react'
 import { Box, TextField, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 
@@ -32,7 +32,7 @@ function useDebounce(value, delay) {
   return debouncedValue
 }
 
-const CustomSearchTextField = ({ value, onChange, clearSearch, delay = 500, ...props }) => {
+const CustomSearchTextField = forwardRef(({ value, onChange, clearSearch, delay = 500, ...props }, ref) => {
   const [inputValue, setInputValue] = useState(value)
   const debouncedInputValue = useDebounce(inputValue, delay)
 
@@ -68,6 +68,7 @@ const CustomSearchTextField = ({ value, onChange, clearSearch, delay = 500, ...p
 
   return (
     <TextfieldStyled
+      ref={ref}
       size='small'
       value={inputValue}
       onChange={handleInputChange}
@@ -96,6 +97,6 @@ const CustomSearchTextField = ({ value, onChange, clearSearch, delay = 500, ...p
       {...props} // Pass down any additional props
     />
   )
-}
+})
 
 export default CustomSearchTextField

@@ -74,6 +74,7 @@ import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/at
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { fi } from 'date-fns/locale'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -113,7 +114,7 @@ const TaskHistoryList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sortModel, setSortModel] = useState([{ field: 'succeeded', sort: 'asc' }])
+  const [sortModel, setSortModel] = useState([{ field: 'succeeded', sort: 'desc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
@@ -151,7 +152,7 @@ const TaskHistoryList = props => {
     },
     {
       flex: 0.02,
-      field: 'name',
+      field: 'alias',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -419,13 +420,13 @@ const TaskHistoryList = props => {
       await axios
         .get('/api/tasks/history', {
           params: {
-            q: searchValue,
-            sort: sortModel[0]?.sort || 'asc',
+            sort: sortModel[0]?.sort || 'desc',
             column: sortModel[0]?.field || 'succeeded',
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
             start_time: startTime,
-            end_time: endTime
+            end_time: endTime,
+            filter: JSON.stringify(filterModel),
           }
         })
         .then(res => {
@@ -633,6 +634,8 @@ const TaskHistoryList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              isFilterActive,
+              setRunFilterQuery,
               showButtons: false,
               showexport: true
             },

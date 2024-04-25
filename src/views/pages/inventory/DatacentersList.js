@@ -171,7 +171,7 @@ const DatacentersList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -217,7 +217,7 @@ const DatacentersList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon='mdi:office-building-cog' />}
@@ -263,7 +263,7 @@ const DatacentersList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon='mdi:server' />}
@@ -309,7 +309,7 @@ const DatacentersList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon='mdi:server-off' />}

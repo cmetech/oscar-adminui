@@ -169,7 +169,7 @@ const SubcomponentsList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >

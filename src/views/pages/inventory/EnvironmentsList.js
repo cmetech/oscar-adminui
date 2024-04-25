@@ -177,7 +177,7 @@ const EnvironmentsList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -223,7 +223,7 @@ const EnvironmentsList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon='mdi:server' />}
@@ -269,7 +269,7 @@ const EnvironmentsList = props => {
               <CustomChip
                 rounded
                 size='small'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon='mdi:server-off' />}

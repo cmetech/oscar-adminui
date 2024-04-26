@@ -6,8 +6,8 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components'
 import { useTranslation } from 'react-i18next'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 
 const ServerDetailPanel = props => {
   const [value, setValue] = useState('1')
@@ -29,11 +29,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.id.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row.id.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -48,11 +54,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.name.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row.name.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -67,11 +79,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.ip_address}
-              </Typography>
+              <Typography noWrap>{row.ip_address}</Typography>
             </Box>
           </Box>
         )
@@ -86,11 +104,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.label.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row.label.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -104,15 +128,24 @@ const ServerDetailPanel = props => {
       renderCell: params => {
         const { row } = params
 
-        const createdAtDate = parseISO(row.created_at.substring(0, 19))
-        const humanReadableDate = format(createdAtDate, 'PPpp')
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
+          'US/Eastern',
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -126,15 +159,24 @@ const ServerDetailPanel = props => {
       renderCell: params => {
         const { row } = params
 
-        const createdAtDate = parseISO(row.modified_at.substring(0, 19))
-        const humanReadableDate = format(createdAtDate, 'PPpp')
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
+          'US/Eastern',
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -153,11 +195,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.key.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row.key.toUpperCase()}</Typography>
             </Box>
           </Box>
         )
@@ -172,11 +220,17 @@ const ServerDetailPanel = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row.value.toUpperCase()}
-              </Typography>
+              <Typography noWrap>{row.value.toUpperCase()}</Typography>
             </Box>
           </Box>
         )

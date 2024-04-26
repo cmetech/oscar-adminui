@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Collapse from '@mui/material/Collapse'
-import { DataGridPro, useGridApiRef } from '@mui/x-data-grid-pro'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
@@ -50,8 +50,8 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
@@ -59,6 +59,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -71,6 +72,7 @@ import { taskIdsAtom, tasksAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
 import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
+import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -110,23 +112,29 @@ const TasksList = props => {
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sort, setSort] = useState('asc')
+  const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('name')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [tasksIds, setTaskIds] = useAtom(taskIdsAtom)
   const [tasks, setTasks] = useAtom(tasksAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+  const [filterMode, setFilterMode] = useState('client')
+  const [sortingMode, setSortingMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('client')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -148,6 +156,16 @@ const TasksList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('Identifier')
+    },
+    {
+      flex: 0.02,
+      field: 'organization',
+      headerName: t('Organization')
+    },
+    {
       flex: 0.03,
       field: 'name',
       editable: editmode,
@@ -156,16 +174,24 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.name?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -185,16 +211,24 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <StyledLink href='#'>{row?.owner?.toUpperCase()}</StyledLink>
+              <Typography noWrap>{row?.owner?.toUpperCase()}</Typography>
               <Typography
                 noWrap
                 variant='caption'
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -219,19 +253,35 @@ const TasksList = props => {
         let label = 'UNKN'
         if (row?.status?.toLowerCase() === 'enabled') {
           color = 'success'
-          label = 'ACTIVE'
+          label = 'ENABLED'
         } else {
           color = 'error'
-          label = 'INACTIVE'
+          label = 'DISABLED'
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{
@@ -254,7 +304,7 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        let color = theme.palette.mode === 'light' ? 'primary' : 'secondary'
+        let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
         let label = 'UNKN'
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'invoke') {
@@ -272,12 +322,28 @@ const TasksList = props => {
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 icon={<Icon icon={iconimage} />}
@@ -285,7 +351,7 @@ const TasksList = props => {
                   '& .MuiChip-label': { textTransform: 'capitalize' },
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandWhite
                       : theme.palette.customColors.brandWhite,
                   width: '150px'
                 }}
@@ -305,11 +371,17 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.description}
-              </Typography>
+              <Typography noWrap>{row?.description}</Typography>
             </Box>
           </Box>
         )
@@ -324,15 +396,26 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        const createdAtDate = parseISO(row.created_at.substring(0, 19))
-        const humanReadableDate = format(createdAtDate, 'PPpp')
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.created_at), timezone),
+          timezone,
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -347,15 +430,26 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
 
-        const updatedAtDate = parseISO(row.modified_at.substring(0, 19))
-        const humanReadableDate = format(updatedAtDate, 'PPpp')
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
+        const humanReadableDate = formatInTimeZone(
+          utcToZonedTime(parseISO(row?.modified_at), timezone),
+          timezone,
+          'MMM d, yyyy, h:mm:ss aa zzz'
+        )
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -371,68 +465,78 @@ const TasksList = props => {
         const { row } = params
 
         return (
-          <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <IconButton
-              size='small'
-              title='Schedule Task'
-              aria-label='Schedule Task'
-              color='info'
-              onClick={() => {
-                setCurrentTask(row)
-                setScheduleDialog(true)
-              }}
-            >
-              <Icon icon='mdi:clock-outline' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Run Task'
-              aria-label='Run Task'
-              color='warning'
-              onClick={() => {
-                setCurrentTask(row)
-                setRunDialog(true)
-              }}
-            >
-              <Icon icon='mdi:play-circle-outline' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-              aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-              color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
-              onClick={() => {
-                setCurrentTask(row)
-                setDisableDialog(true)
-              }}
-            >
-              <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Edit Task'
-              color='secondary'
-              aria-label='Edit Task'
-              onClick={() => {
-                setCurrentTask(row)
-                setEditDialog(true)
-              }}
-            >
-              <Icon icon='mdi:account-edit' />
-            </IconButton>
-            <IconButton
-              size='small'
-              title='Delete Task'
-              aria-label='Delete Task'
-              color='error'
-              onClick={() => {
-                setCurrentTask(row)
-                setDeleteDialog(true)
-              }}
-            >
-              <Icon icon='mdi:delete-forever' />
-            </IconButton>
-          </Stack>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title='Schedule Task'
+                aria-label='Schedule Task'
+                color='info'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setScheduleDialog(true)
+                }}
+              >
+                <Icon icon='mdi:clock-outline' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Run Task'
+                aria-label='Run Task'
+                color='warning'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setRunDialog(true)
+                }}
+              >
+                <Icon icon='mdi:play-circle-outline' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+                color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
+                onClick={() => {
+                  setCurrentTask(row)
+                  setDisableDialog(true)
+                }}
+              >
+                <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Edit Task'
+                color='secondary'
+                aria-label='Edit Task'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setEditDialog(true)
+                }}
+              >
+                <Icon icon='mdi:account-edit' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title='Delete Task'
+                aria-label='Delete Task'
+                color='error'
+                onClick={() => {
+                  setCurrentTask(row)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-forever' />
+              </IconButton>
+            </Box>
+          </Box>
         )
       }
     }
@@ -973,54 +1077,122 @@ const TasksList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, q, column) => {
+    async (sort, sortColumn, filterModel) => {
       let data = []
 
       setLoading(true)
       await axios
         .get('/api/tasks', {
-          params: {
-            q,
-            sort,
-            column
-          }
+          params: {}
         })
         .then(res => {
           setRowCount(res.data.total)
-          data = res.data.rows
+          setRows(res.data.rows)
           props.set_total(res.data.total)
-          setTasks(data)
+          setTasks(res.data.rows)
         })
 
-      await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, setTasks]
+    [setTasks, setRows]
   )
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
-  }, [refetchTrigger, fetchData, searchValue, sort, sortColumn])
+    fetchData()
+  }, [fetchData, refetchTrigger])
 
-  const handleSortModel = newModel => {
-    if (newModel.length) {
-      setSort(newModel[0].sort)
-      setSortColumn(newModel[0].field)
-      fetchData(newModel[0].sort, searchValue, newModel[0].field)
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
+
+    if (sortingMode === 'server') {
+      // server side sorting
     } else {
-      setSort('asc')
-      setSortColumn('name')
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
+
+  // Trigger based on filter
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(sort, sortColumn, filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel.items.length, runFilterQuery])
 
   const handleAction = event => {
     setAction(event.target.value)
   }
 
   const handleSearch = value => {
+    // console.log('Search Value:', value)
+
     setSearchValue(value)
-    fetchData(sort, value, sortColumn)
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      // console.log('Row:', row)
+
+      // Extend the search to include nested paths
+      const searchFields = ['id', 'organization', 'name', 'owner', 'status', 'type', 'description']
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        // Ensure the fieldValue is a string before calling toString()
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
+      })
+    })
+
+    if (value.length) {
+      // console.log('Filtered Rows:', filteredRows)
+      setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
+      props.set_total(filteredRows.length)
+    } else {
+      setFilteredRows([])
+      setRowCount(rows.length)
+      props.set_total(rows.length)
+    }
   }
 
   const handleRegisterTasks = async () => {
@@ -1060,6 +1232,15 @@ const TasksList = props => {
     setTaskIds(newRowSelectionModel)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id', 'organization']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1072,31 +1253,36 @@ const TasksList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true
+                createdAtTime: true,
+                id: false,
+                organization: false
               }
             }
           }}
           autoHeight={true}
-          pagination
-          rows={rows}
+          rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
-          sortingMode='server'
-          paginationMode='server'
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
+          sortingMode={sortingMode}
+          sortModel={sortModel}
+          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          pagination={true}
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
-          onSortModelChange={handleSortModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
-          components={{
-            Toolbar: ServerSideToolbar,
-            NoRowsOverlay: () => (
-              <NoRowsOverlay message='No Tasks Found' buttonText='Register Tasks' onButtonClick={handleRegisterTasks} />
-            ),
-            NoResultsOverlay: () => <NoResultsOverlay message='No Results Found' />
+          slots={{
+            toolbar: ServerSideToolbar,
+            noRowsOverlay: NoRowsOverlay,
+            noResultsOverlay: NoResultsOverlay,
+            loadingOverlay: CustomLoadingOverlay
           }}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
@@ -1106,12 +1292,18 @@ const TasksList = props => {
           onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           loading={loading}
           keepNonExistentRowsSelected
-          componentsProps={{
+          slotProps={{
             baseButton: {
               variant: 'outlined'
             },
             panel: {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
+            },
+            noRowsOverlay: {
+              message: 'No Tasks found'
+            },
+            noResultsOverlay: {
+              message: 'No Results Found'
             },
             toolbar: {
               value: searchValue,
@@ -1122,6 +1314,207 @@ const TasksList = props => {
               setFilterActive,
               showButtons: false,
               showexport: true
+            },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
+            },
+            columnsPanel: {
+              sx: {
+                '& .MuiCheckbox-root': {
+                  color:
+                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  '&.Mui-checked': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main
+                  }
+                },
+
+                // Target the root of the outlined input
+                '& .MuiOutlinedInput-root': {
+                  // Apply these styles when the element is focused
+                  '&.Mui-focused': {
+                    // Target the notched outline specifically
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
+                },
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined': {
+                  mb: 2,
+                  mt: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
+                  mr: 2
+                }
+              }
+            },
+            filterPanel: {
+              // Force usage of "And" operator
+              logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
+
+              // Display columns by ascending alphabetical order
+              columnsSort: 'asc',
+              filterFormProps: {
+                // Customize inputs by passing props
+                logicOperatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small'
+                },
+                columnInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                operatorInputProps: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    mt: 'auto',
+
+                    // Target the root style of the outlined input
+                    '& .MuiOutlinedInput-root': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        // Target the notched outline specifically
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    },
+
+                    // Target the label for color change
+                    '& .MuiInputLabel-outlined': {
+                      // Apply styles when focused
+                      '&.Mui-focused': {
+                        color:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                },
+                valueInputProps: {
+                  InputComponentProps: {
+                    variant: 'outlined',
+                    size: 'small',
+                    sx: {
+                      // Target the root of the outlined input
+                      '& .MuiOutlinedInput-root': {
+                        // Apply these styles when the element is focused
+                        '&.Mui-focused': {
+                          // Target the notched outline specifically
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor:
+                              theme.palette.mode == 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.primary.main
+                          }
+                        }
+                      },
+
+                      // Target the label for color change
+                      '& .MuiInputLabel-outlined': {
+                        // Apply styles when focused
+                        '&.Mui-focused': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
+                  }
+                },
+                deleteIconProps: {
+                  sx: {
+                    '& .MuiSvgIcon-root': { color: '#d32f2f' }
+                  }
+                }
+              },
+              sx: {
+                // Customize inputs using css selectors
+                '& .MuiDataGrid-filterForm': { p: 2 },
+                '& .MuiDataGrid-filterForm:nth-of-type(even)': {
+                  backgroundColor: theme => (theme.palette.mode === 'dark' ? '#444' : '#f5f5f5')
+                },
+                '& .MuiDataGrid-filterFormLogicOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormColumnInput': { mr: 2, width: 150 },
+                '& .MuiDataGrid-filterFormOperatorInput': { mr: 2 },
+                '& .MuiDataGrid-filterFormValueInput': { width: 200 },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined': {
+                  mb: 2,
+                  borderColor:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                    borderColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                  }
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {
+                  ml: 2
+                },
+                '& .MuiDataGrid-panelFooter .MuiButton-outlined:last-of-type': {
+                  mr: 2
+                }
+              }
             }
           }}
         />

@@ -80,6 +80,13 @@ const BoxWrapper = styled(Box)(({ theme }) => ({
   }
 }))
 
+const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
+  color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+  '&.Mui-checked': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  }
+}))
+
 const TypographyStyled = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
   marginBottom: theme.spacing(1.5),
@@ -89,13 +96,45 @@ const TypographyStyled = styled(Typography)(({ theme }) => ({
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
   textDecoration: 'none',
-  color: theme.palette.customColors.brandBlue
+  color: theme.palette.customColors.brandYellow
 }))
 
 const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
   '& .MuiFormControlLabel-label': {
     fontSize: '0.875rem',
     color: theme.palette.text.secondary
+  }
+}))
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
+
+const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
+  // Style the border color
+  // '& .MuiOutlinedInput-notchedOutline': {
+  //   borderColor: 'inherit' // Replace with your default border color
+  // },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'inherit' // Replace with your hover state border color
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // Border color when focused
+  }
+
+  // You can add more styles here for other parts of the input
+}))
+
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
   }
 }))
 
@@ -228,7 +267,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                     control={control}
                     rules={{ required: true }}
                     render={({ field: { value, onChange, onBlur } }) => (
-                      <TextField
+                      <TextfieldStyled
                         autoFocus
                         label='Email'
                         value={value}
@@ -242,15 +281,15 @@ const LoginPage = ({ csrfToken, providers }) => {
                   {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
                 </FormControl>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor='auth-login-v2-password' error={Boolean(errors.password)}>
+                  <InputLabelStyled htmlFor='auth-login-v2-password' error={Boolean(errors.password)}>
                     Password
-                  </InputLabel>
+                  </InputLabelStyled>
                   <Controller
                     name='password'
                     control={control}
                     rules={{ required: true }}
                     render={({ field: { value, onChange, onBlur } }) => (
-                      <OutlinedInput
+                      <OutlinedInputStyled
                         value={value}
                         onBlur={onBlur}
                         label='Password'
@@ -289,7 +328,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                 >
                   <FormControlLabel
                     label='Remember Me'
-                    control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
+                    control={<CheckboxStyled checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
                   />
                   <LinkStyled href='/forgot-password'>Forgot Password?</LinkStyled>
                 </Box>

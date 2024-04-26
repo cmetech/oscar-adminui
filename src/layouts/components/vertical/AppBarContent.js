@@ -1,15 +1,25 @@
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
+import Breadcrumbs from '@mui/material/Breadcrumbs'
+import Link from '@mui/material/Link'
+import Chip from '@mui/material/Chip'
+
+import { useRouter } from 'next/router'
+import { useTheme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
+import CustomChip from 'src/@core/components/mui/chip'
 
 // ** Components
+import Autocomplete from 'src/layouts/components/Autocomplete'
 import UserModeToggler from 'src/layouts/components/shared-components/UserModeToggler'
 import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
+import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
 
 const notifications = [
   {
@@ -56,6 +66,56 @@ const notifications = [
   }
 ]
 
+const CustomBreadcrumbs = () => {
+  const router = useRouter()
+  const theme = useTheme()
+  const { t } = useTranslation()
+  const path = router.pathname.replace(/\/$/g, '')
+
+  console.log('path', path)
+
+  const breadcrumbNameMap = {
+    '/home': { name: t('Overview'), icon: 'mdi:telescope' },
+    '/observability/slo': { name: 'SLOs', icon: 'mdi:target' },
+    '/tasks': { name: t('Automations'), icon: 'mdi:arrow-decision-auto' },
+    '/administration/inventory': { name: t('Inventory Management'), icon: 'mdi:server' },
+    '/administration/services': { name: t('Services'), icon: 'mdi:service-toolbox' },
+    '/administration/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
+    '/oscar': { name: t('Oscar Chat'), icon: 'mdi:message-text' },
+    '/oscar/docs': { name: t('Doc Portal'), icon: 'mdi:arrow-decision-auto' }
+  }
+
+  // Check if the entire path is a key in the breadcrumbNameMap
+  const breadcrumb = breadcrumbNameMap[path]
+
+  return (
+    <Breadcrumbs separator={<Icon icon='mdi:keyboard-arrow-right' fontSize='large' />} aria-label='breadcrumb'>
+      <Link underline='hover' color='inherit' href='/'>
+        <CustomChip
+          rounded
+          label={t('Home')}
+          key='/'
+          icon={<Icon icon='mdi:home' />}
+          skin='light'
+          color={theme.palette.mode === 'light' ? 'primary' : 'warning'}
+        />
+      </Link>
+      {breadcrumb && (
+        <Link underline='hover' color='text.primary' href={`/${path}`}>
+          <CustomChip
+            rounded
+            label={breadcrumb.name}
+            key={breadcrumb}
+            icon={<Icon icon={breadcrumb.icon} />}
+            skin='light'
+            color={theme.palette.mode === 'light' ? 'primary' : 'warning'}
+          />
+        </Link>
+      )}
+    </Breadcrumbs>
+  )
+}
+
 const AppBarContent = props => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
@@ -68,8 +128,13 @@ const AppBarContent = props => {
             <Icon icon='mdi:menu' />
           </IconButton>
         ) : null}
+        <CustomBreadcrumbs />
+      </Box>
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+        <Autocomplete hidden={hidden} settings={settings} />
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+        <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />

@@ -9,6 +9,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import CardActionArea from '@mui/material/CardActionArea'
 import Paper from '@mui/material/Paper'
 import Link from 'next/link'
+import { SparkLineChart } from '@mui/x-charts/SparkLineChart'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -49,7 +50,7 @@ const SingleValueCard = props => {
                       sx={{ fontSize: '1.5em' }}
                     />
                     <Typography variant='body2' sx={{ mb: 0, fontWeight: 600, color: 'common.white' }}>
-                      0.{trendValue}%
+                      {trendValue}%
                     </Typography>
                   </Stack>
                 </Box>
@@ -59,10 +60,17 @@ const SingleValueCard = props => {
                   </Typography>
                 </Box>
                 <Box display='flex' justifyContent='center' alignItems='center' sx={{ mb: 1, pb: 1 }}>
-                  {showSparkline ? (
-                    <Sparklines data={sparklineData} height={15}>
-                      <SparklinesLine color='white' style={{ fill: 'none', strokeWidth: 2 }} />
-                    </Sparklines>
+                  {showSparkline && sparklineData?.length > 0 ? (
+                    <SparkLineChart
+                      data={sparklineData}
+                      area={true}
+                      height={50}
+                      curve='natural'
+                      colors={['#fff']}
+                      showHighlight={true}
+                      showTooltip={true}
+                      plotType='line'
+                    />
                   ) : null}
                 </Box>
               </Box>

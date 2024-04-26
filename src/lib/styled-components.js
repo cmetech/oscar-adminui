@@ -2,6 +2,7 @@ import React from 'react'
 import { styled, useTheme } from '@mui/material/styles'
 import { DataGridPro } from '@mui/x-data-grid-pro'
 import MuiTabList from '@mui/lab/TabList'
+import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 
 function customCheckbox(theme) {
   return {
@@ -18,8 +19,9 @@ function customCheckbox(theme) {
       display: 'none'
     },
     '& .MuiCheckbox-root.Mui-checked:not(.MuiCheckbox-indeterminate) svg': {
-      backgroundColor: '#1890ff',
-      borderColor: '#1890ff'
+      backgroundColor:
+        theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
     },
     '& .MuiCheckbox-root.Mui-checked .MuiIconButton-label:after': {
       position: 'absolute',
@@ -39,7 +41,8 @@ function customCheckbox(theme) {
     '& .MuiCheckbox-root.MuiCheckbox-indeterminate .MuiIconButton-label:after': {
       width: 8,
       height: 8,
-      backgroundColor: '#1890ff',
+      backgroundColor:
+        theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
       transform: 'none',
       top: '39%',
       border: 0

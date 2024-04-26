@@ -13,6 +13,13 @@ const navigation = () => {
       subject: 'all'
     },
     {
+      title: 'Alerts & Events',
+      icon: 'mdi:bell-alert',
+      path: '/observability',
+      action: 'read',
+      subject: 'all'
+    },
+    {
       title: 'Advanced Dashboards',
       path: 'https:localhost/ui',
       icon: 'mdi:monitor-eye',
@@ -22,14 +29,14 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      sectionTitle: 'Service Continuity',
+      title: 'SLOs',
+      path: '/observability/slo',
+      icon: 'mdi:cog',
       action: 'read',
       subject: 'all'
     },
     {
-      title: 'Alerts & Events',
-      icon: 'mdi:bell-alert',
-      path: '/services',
+      sectionTitle: 'Service Continuity',
       action: 'read',
       subject: 'all'
     },
@@ -55,11 +62,6 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'SLA',
-      icon: 'mdi:check-decagram',
-      path: '/services/sla'
-    },
-    {
       sectionTitle: 'AI/Automation',
       action: 'read',
       subject: 'all'
@@ -72,9 +74,9 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      sectionTitle: 'Administration',
+      sectionTitle: 'Infrastructure',
       action: 'manage',
-      subject: 'admin-section'
+      subject: 'infrastructure-section'
     },
     {
       title: 'Inventory',
@@ -89,6 +91,11 @@ const navigation = () => {
       path: '/administration/services',
       action: 'manage',
       subject: 'settings-nav'
+    },
+    {
+      sectionTitle: 'Administration',
+      action: 'manage',
+      subject: 'admin-section'
     },
     {
       title: 'Users',

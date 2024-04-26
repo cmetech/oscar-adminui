@@ -118,10 +118,6 @@ const Home = () => {
           <TabContext value={value}>
             <TabList onChange={handleChange} aria-label='simple tabs example'>
               <Tab value='1' label='Last Hour' />
-              <Tab value='2' label='Today' />
-              <Tab value='3' label='Last 7 days' />
-              <Tab value='4' label='Next 2 Hours' />
-              <Tab value='5' label='Next 8 Hours' />
             </TabList>
             <TabPanel value='1'>
               <Stack spacing={10}>
@@ -131,10 +127,14 @@ const Home = () => {
                       <SingleValueCard
                         bgcolor='customColors.brandGreen4'
                         title='Critical API Performance'
-                        value='99.9'
+                        value='88.5'
                         trendDir='up'
-                        trendValue='43'
+                        trendValue='0.86'
                         showSparkline={true}
+                        sparklineData={[
+                          81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67,
+                          83.33, 100, 91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
+                        ]}
                         linkRoute='/taskrequest'
                       />
                     </Grid>
@@ -145,7 +145,8 @@ const Home = () => {
                         value='99.8'
                         trendDir='down'
                         trendValue='67'
-                        showSparkline={true}
+                        showSparkline={false}
+                        sparklineData={chartOrderData}
                         linkRoute='/sla'
                       />
                     </Grid>
@@ -156,7 +157,7 @@ const Home = () => {
                         value='98.7'
                         trendDir='up'
                         trendValue='37'
-                        showSparkline={true}
+                        showSparkline={false}
                         linkRoute='/health/eda'
                       />
                     </Grid>
@@ -167,7 +168,7 @@ const Home = () => {
                         value='0'
                         trendDir='up'
                         trendValue='0'
-                        showSparkline={true}
+                        showSparkline={false}
                         linkRoute='/events'
                       />
                     </Grid>
@@ -208,365 +209,6 @@ const Home = () => {
                         }, 0)}
                         caption='Total Security Incidents'
                         linkRoute='/security'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </TabPanel>
-            <TabPanel value='2'>
-              <Stack spacing={10}>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Critical API Performance'
-                        value='99.3'
-                        trendDir='up'
-                        trendValue='24'
-                        showSparkline={true}
-                        linkRoute='/taskrequest'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Service Level Agreement'
-                        value='99.1'
-                        trendDir='down'
-                        trendValue='10'
-                        showSparkline={true}
-                        linkRoute='/sla'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen'
-                        title='Health Score'
-                        value='98.5'
-                        trendDir='up'
-                        trendValue='45'
-                        showSparkline={true}
-                        linkRoute='/health/eda'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandOrange'
-                        title='Notable Events'
-                        value='1'
-                        trendDir='up'
-                        trendValue='37'
-                        showSparkline={true}
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='TPS Statistics'
-                        data={orderData.today}
-                        chartData={chartOrderData}
-                        total={orderData.today.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Transactions'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='System Incidents'
-                        data={alarmData.today}
-                        chartData={chartOrderData}
-                        total={alarmData.today.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total System Incidents'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='Security Incidents'
-                        data={securityData.today}
-                        chartData={chartOrderData}
-                        total={securityData.today.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Security Incidents'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </TabPanel>
-            <TabPanel value='3'>
-              <Stack spacing={10}>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen'
-                        title='Critical API Performance'
-                        value='98.6'
-                        trendDir='up'
-                        trendValue='43'
-                        showSparkline={true}
-                        linkRoute='/taskrequest'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Service Level Agreement'
-                        value='99.2'
-                        trendDir='up'
-                        trendValue='16'
-                        showSparkline={true}
-                        linkRoute='/sla'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Health Score'
-                        value='99.0'
-                        trendDir='up'
-                        trendValue='12'
-                        showSparkline={true}
-                        linkRoute='/health/eda'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandOrange'
-                        title='Notable Events'
-                        value='4'
-                        trendDir='down'
-                        trendValue='12'
-                        showSparkline={true}
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='TPS Statistics'
-                        data={orderData.last7days}
-                        chartData={chartOrderData}
-                        total={orderData.last7days.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Transactions'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='System Incidents'
-                        data={alarmData.last7days}
-                        chartData={chartOrderData}
-                        total={alarmData.last7days.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total System Incidents'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='Security Incidents'
-                        data={securityData.last7days}
-                        chartData={chartOrderData}
-                        total={securityData.last7days.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Security Incidents'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </TabPanel>
-            <TabPanel value='4'>
-              <Stack spacing={10}>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen4'
-                        title='Critical API Performance'
-                        value='99.7'
-                        valueTo='99.9'
-                        probability='96'
-                        showSparkline={true}
-                        linkRoute='/taskrequest'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen'
-                        title='Service Level Agreement'
-                        value='99.7'
-                        valueTo='99.9'
-                        probability='90.2'
-                        showSparkline={true}
-                        linkRoute='/sla'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen4'
-                        title='Health Score'
-                        value='98.4'
-                        valueTo='99.1'
-                        probability='89.1'
-                        showSparkline={true}
-                        linkRoute='/health/eda'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen4'
-                        title='Notable Events'
-                        value='0'
-                        valueTo='1'
-                        probability='78.3'
-                        showSparkline={true}
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='TPS Statistics'
-                        data={orderData.next2hrs}
-                        chartData={chartOrderData}
-                        total={orderData.next2hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Transactions'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='System Incidents'
-                        data={alarmData.next2hrs}
-                        chartData={chartOrderData}
-                        total={alarmData.next2hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total System Incidents'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='Security Incidents'
-                        data={securityData.next2hrs}
-                        chartData={chartOrderData}
-                        total={securityData.next2hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Security Incidents'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </TabPanel>
-            <TabPanel value='5'>
-              <Stack spacing={10}>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen'
-                        title='Critical API Performance'
-                        value='99.1'
-                        valueTo='99.6'
-                        trendDir='up'
-                        probability='96'
-                        showSparkline={true}
-                        linkRoute='/taskrequest'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen'
-                        title='Service Level Agreement'
-                        value='99.0'
-                        valueTo='99.5'
-                        trendDir='up'
-                        probability='88'
-                        showSparkline={true}
-                        linkRoute='/sla'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen'
-                        title='Health Score'
-                        value='98.9'
-                        valueTo='99.2'
-                        trendDir='up'
-                        probability='76'
-                        showSparkline={true}
-                        linkRoute='/health/eda'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCardPredict
-                        bgcolor='customColors.brandGreen'
-                        title='Notable Events'
-                        value='0'
-                        trendDir='up'
-                        probability='60'
-                        showSparkline={true}
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='TPS Statistics'
-                        data={orderData.next8hrs}
-                        chartData={chartOrderData}
-                        total={orderData.next8hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Transactions'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='System Incidents'
-                        data={alarmData.next8hrs}
-                        chartData={chartOrderData}
-                        total={alarmData.next8hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total System Incidents'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='Security Incidents'
-                        data={securityData.next8hrs}
-                        chartData={chartOrderData}
-                        total={securityData.next8hrs.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Security Incidents'
                       />
                     </Grid>
                   </Grid>

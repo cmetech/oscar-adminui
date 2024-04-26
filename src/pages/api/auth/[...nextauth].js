@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import https from 'https'
 import formData from 'form-data'
+import { fi } from 'date-fns/locale'
+import { time } from 'console'
 
 export const authOptions = {
   // ** Configure one or more authentication providers
@@ -125,6 +127,10 @@ export const authOptions = {
           apiToken,
           role: user.is_superuser ? 'admin' : 'regular',
           name: user.first_name + ' ' + user.last_name,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          organization: user.organization,
+          timezone: user.timezone,
           username: user.username
         }
 
@@ -147,7 +153,12 @@ export const authOptions = {
             ...session.user,
             role: token.role,
             username: token.username,
-            apiToken: token.apiToken
+            apiToken: token.apiToken,
+            firstName: token.first_name,
+            lastName: token.last_name,
+            organization: token.organization,
+            timezone: token.timezone,
+            username: token.username
           },
           sessionID: uuidv4()
         }

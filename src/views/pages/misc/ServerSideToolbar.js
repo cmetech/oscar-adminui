@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { useState } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
@@ -12,12 +12,15 @@ import {
   GridToolbarExport,
   GridToolbarDensitySelector,
   GridToolbarExportContainer,
+  GridToolbarQuickFilter,
   GridCsvExportMenuItem,
   GridPrintExportMenuItem,
   useGridApiContext,
   gridFilteredSortedRowIdsSelector,
   gridVisibleColumnFieldsSelector
 } from '@mui/x-data-grid-pro'
+
+import Tooltip from '@mui/material/Tooltip'
 
 import MenuItem from '@mui/material/MenuItem'
 import ExcelJS from 'exceljs'
@@ -42,11 +45,25 @@ import addMonths from 'date-fns/addMonths'
 import { DateRangePicker } from 'rsuite'
 import { endOfDay, startOfDay, subHours } from 'date-fns'
 
-import { useTheme } from '@mui/material/styles'
+import { useTheme, styled } from '@mui/material/styles'
 import { grid } from '@mui/system'
 import axios from 'axios'
 import { t } from 'i18next'
 import { useTranslation } from 'react-i18next'
+
+// ** Custom Components
+import CustomSearchTextField from 'src/views/components/CustomSearchTextField'
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    }
+  }
+}))
 
 const predefinedRanges = [
   {
@@ -187,12 +204,43 @@ const CustomExportButton = props => {
   )
 }
 
-const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive, ...props }) => {
+const CustomToolbar = ({
+  setColumnsButtonEl,
+  setFilterButtonEl,
+  setFilterActive,
+  isFilterActive,
+  setRunFilterQuery,
+  ...props
+}) => {
+  const theme = useTheme()
+  const apiRef = useGridApiContext()
+
   return (
     <GridToolbarContainer sx={{ flexWrap: 'nowrap' }}>
+      <Tooltip title='Toolbar allows for toggling of columns, advanced filtering, and quick search' leaveDelay={200}>
+        <IconButton size='small' color={theme.palette.mode === 'light' ? 'primary' : 'warning'}>
+          <Icon icon='mdi:information-slab-circle-outline' />
+        </IconButton>
+      </Tooltip>
+      <GridToolbarColumnsButton
+        ref={setColumnsButtonEl}
+        onClick={() => {
+          setFilterActive(false)
+        }}
+        slotProps={{
+          tooltip: {
+            title: 'Toggle column visibility',
+            placement: 'bottom'
+          }
+        }}
+      />
       <GridToolbarFilterButton
         ref={setFilterButtonEl}
-        componentsProps={{
+        slotProps={{
+          tooltip: {
+            title: 'Build filter rules then click filter button to the right to apply them to the data.',
+            placement: 'bottom'
+          },
           button: {
             onClick: () => {
               setFilterActive(true)
@@ -200,12 +248,18 @@ const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive,
           }
         }}
       />
-      <GridToolbarColumnsButton
-        ref={setColumnsButtonEl}
-        onClick={() => {
-          setFilterActive(false)
-        }}
-      />
+      <Tooltip title='Click to perform filtering based on filter rules created'>
+        <IconButton
+          size='small'
+          color={theme.palette.mode === 'light' ? 'primary' : 'warning'}
+          onClick={() => {
+            console.log('Run Filter Query')
+            setRunFilterQuery(true)
+          }}
+        >
+          <Icon icon='mdi:filter-outline' fontSize={25} />
+        </IconButton>
+      </Tooltip>
       {props.showexport ? <CustomExportButton /> : null}
     </GridToolbarContainer>
   )
@@ -213,7 +267,6 @@ const CustomToolbar = ({ setColumnsButtonEl, setFilterButtonEl, setFilterActive,
 
 const ServerSideToolbar = ({ showButtons, ...props }) => {
   const theme = useTheme()
-  const [openAddDriverDialog, setOpenAddDriverDialog] = useState(false)
   const [openUploadCSVDialog, setOpenUploadCSVDialog] = useState(false)
   const modeDependentColor = theme.palette.mode === 'light' ? 'secondary' : 'primary'
 
@@ -222,12 +275,6 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
   // const { tripsRef, breadcrumbsRef, idleEventsRef } = dataGridRefs
 
   const { afterToday } = DateRangePicker
-
-  const handleAddDriverSubmit = () => {
-    // Logic to add the driver
-    // Close the dialog afterward
-    setOpenAddDriverDialog(false)
-  }
 
   return (
     <Box
@@ -240,15 +287,6 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
     >
       {showButtons && (
         <Box sx={{ flexWrap: 'nowrap' }}>
-          <Button
-            size='small'
-            variant='contained'
-            color={modeDependentColor}
-            startIcon={<Icon icon='mdi:account-plus' />}
-            onClick={() => setOpenAddDriverDialog(true)}
-          >
-            Add Driver
-          </Button>
           <Button
             size='small'
             variant='outlined'
@@ -266,55 +304,30 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         setColumnsButtonEl={props.setColumnsButtonEl}
         setFilterButtonEl={props.setFilterButtonEl}
         setFilterActive={props.setFilterActive}
-        datagridrefs={props.datagridrefs ? props.datagridrefs : null}
+        isFilterActive={props.isFilterActive}
+        setRunFilterQuery={props.setRunFilterQuery}
         showexport={props.showexport ? props.showexport : false}
-        reportId={props.reportId}
         sx={{ gridRow: '1', gridColumn: '6 / 6' }}
       />
-      <TextField
-        size='small'
-        value={props.value}
-        onChange={props.onChange}
-        placeholder={`${t('Search')}…`}
-        InputProps={{
-          startAdornment: (
-            <Box sx={{ mr: 2, display: 'flex' }}>
-              <Icon icon='mdi:magnify' fontSize={20} />
-            </Box>
-          ),
-          endAdornment: (
-            <IconButton size='small' title='Clear' aria-label='Clear' onClick={props.clearSearch}>
-              <Icon icon='mdi:close' fontSize={20} />
-            </IconButton>
-          )
-        }}
-        sx={{
-          gridRow: '1',
-          gridColumn: '6 / 6',
-          width: {
-            xs: 1,
-            sm: 'auto'
-          },
-          '& .MuiInputBase-root > svg': {
-            mr: 2
-          }
-        }}
-      />
-      <Dialog open={openAddDriverDialog} onClose={() => setOpenAddDriverDialog(false)}>
-        <DialogTitle>Add Driver</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus margin='dense' label='Driver Name' type='text' fullWidth />
-          {/* Add more fields as required */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAddDriverDialog(false)} color='primary'>
-            Cancel
-          </Button>
-          <Button onClick={handleAddDriverSubmit} color='primary'>
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Tooltip title='Search'>
+        <CustomSearchTextField
+          value={props.value}
+          onChange={props.onChange}
+          clearSearch={props.clearSearch}
+          delay={2000}
+          sx={{
+            gridRow: '1',
+            gridColumn: '6 / 6',
+            width: {
+              xs: 1,
+              sm: 'auto'
+            },
+            '& .MuiInputBase-root > svg': {
+              mr: 2
+            }
+          }}
+        />
+      </Tooltip>
     </Box>
   )
 }

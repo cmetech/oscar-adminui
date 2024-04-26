@@ -6,50 +6,42 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type, start_time, end_time, skip = '1', limit = '100' } = query
-    const queryLowered = q.toLowerCase()
+    const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}' } = query
+    console.log('Filter', filter)
+
+    const queryStringParameters = {
+      start_time: start_time,
+      end_time: end_time,
+      column: column,
+      order: sort,
+      page: skip,
+      perPage: limit,
+      filter: filter || '{}' // Default to empty object if not provided
+    }
 
     try {
       // Construct the request URL with query parameters
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/sli/events`)
-      if (start_time) url.searchParams.append('start_time', start_time)
-      if (end_time) url.searchParams.append('end_time', end_time)
-      url.searchParams.append('page', skip)
-      url.searchParams.append('perPage', limit)
-      url.searchParams.append('column', column)
-      url.searchParams.append('order', sort)
+      Object.entries(queryStringParameters).forEach(([key, value]) => {
+        if (value) url.searchParams.append(key, value)
+      })
+
+      console.log('url', url.toString())
 
       const response = await axios.get(url.toString(), {
+        timeout: 30000,
         headers: { 'X-API-Key': oscarConfig.API_KEY },
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
 
-      if (response?.data) {
-        if (response?.data?.records?.length > 0) {
-          const filteredData = response.data?.records.filter(
-            item =>
-              item?.id?.toString().toLowerCase().includes(queryLowered) ||
-              item?.sliName?.toLowerCase().includes(queryLowered) ||
-              item?.calculationMethod?.toLowerCase().includes(queryLowered) ||
-              item?.status?.toLowerCase().includes(queryLowered)
-          )
+      console.log('response', response)
 
-          res.status(response.status || 200).json({
-            total_filtered_records: filteredData.length,
-            total_pages: response.data.total_pages,
-            total_records: response.data.total_records,
-            records: response.data.records,
-            rows: filteredData || []
-          })
-        } else {
-          res.status(200).json({
-            total_filtered_records: [],
-            total_pages: 0,
-            total_records: 0,
-            records: [],
-            rows: []
-          })
-        }
+      if (response?.data) {
+        res.status(response.status || 200).json({
+          total_pages: response.data.total_pages,
+          total_records: response.data.total_records,
+          records: response.data.records
+        })
       } else {
         res.status(500).json({ message: 'No response - An error occurred' })
       }

@@ -8,7 +8,9 @@ import {
   GridToolbarContainer,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
-  GridToolbarQuickFilter
+  GridToolbarQuickFilter,
+  GridLogicOperator,
+  useGridApiRef
 } from '@mui/x-data-grid-pro'
 import { useTranslation } from 'react-i18next'
 import { parseISO, format } from 'date-fns'
@@ -94,6 +96,8 @@ const SLOEventHistoryDetailPanel = ({ row }) => {
   const [filterModel, setFilterModel] = useState({
     metadata: { items: [] }
   })
+
+  const theme = useTheme()
 
   const { t } = useTranslation()
 

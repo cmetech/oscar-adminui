@@ -958,34 +958,29 @@ const TasksManager = () => {
                     }
                   },
 
-                  digitalClockSectionItem: {
+                  digitalClockItem: {
                     sx: {
-                      '& .MuiMenuItem-root': {
-                        '& .Mui-selected': {
-                          '& .MuiTouchRipple-root': {
-                            color:
-                              theme.palette.mode === 'dark'
-                                ? theme.palette.customColors.brandYellow
-                                : theme.palette.common.white
-                          }
-                        }
+                      '&:hover': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandBlack
+                            : theme.palette.customColors.black,
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandGray4
+                            : theme.palette.customColors.brandGray4
                       },
-                      '& .MuiDigitalClock-list, .MuiMenuItem-root': {
-                        // Regular styles for your list items
-                        transition: 'background-color 0.3s ease', // Smooth transition for background color
-
-                        '&:hover': {
-                          backgroundColor:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow3
-                              : theme.palette.primary.main
-                        }
+                      '&.Mui-selected': {
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow4
+                            : theme.palette.customColors.brandGray1
                       }
                     }
                   },
 
                   actionBar: {
-                    actions: ['cancel', 'accept'],
+                    actions: ['clear', 'today', 'cancel', 'accept'],
                     sx: {
                       '& .MuiDialogActions-root, .MuiButton-root': {
                         // Targeting buttons inside MuiDialogActions-root

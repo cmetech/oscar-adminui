@@ -693,7 +693,6 @@ const SLO = () => {
                   closeOnSelect={false}
                   value={dateRange}
                   defaultValue={[yesterdayRounded, todayRounded]}
-                  disableFuture
                   views={['day', 'hours']}
                   timeSteps={{ minutes: 10 }}
                   viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -806,7 +805,6 @@ const SLO = () => {
                 closeOnSelect={false}
                 value={dateRange}
                 defaultValue={[yesterdayRounded, todayRounded]}
-                disableFuture
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -869,8 +867,29 @@ const SLO = () => {
                     }
                   },
 
+                  digitalClockItem: {
+                    sx: {
+                      '&:hover': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandBlack
+                            : theme.palette.customColors.black,
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandGray4
+                            : theme.palette.customColors.brandGray4
+                      },
+                      '&.Mui-selected': {
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow4
+                            : theme.palette.customColors.brandGray1
+                      }
+                    }
+                  },
+
                   actionBar: {
-                    actions: ['cancel', 'accept'],
+                    actions: ['clear', 'today', 'cancel', 'accept'],
                     sx: {
                       '& .MuiButton-root': {
                         borderColor:

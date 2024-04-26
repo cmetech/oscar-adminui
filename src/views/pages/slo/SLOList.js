@@ -73,7 +73,6 @@ import UpdateSLOWizard from 'src/views/pages/slo/forms/UpdateSLOWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import { set } from 'lodash'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -228,13 +227,13 @@ const SLOList = props => {
       }
     },
     {
-      flex: 0.01,
+      flex: 0.008,
       field: 'derived_is_breaching',
       type: 'number',
       editable: editmode,
       headerName: t('SLO (%)'),
-      align: 'center',
-      headerAlign: 'center',
+      align: 'left',
+      headerAlign: 'left',
       renderCell: params => {
         const { row } = params
 
@@ -255,7 +254,7 @@ const SLOList = props => {
                 display: 'flex',
                 alignItems: 'center', // Ensures vertical centering inside the Box
                 flexDirection: 'row',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                justifyContent: 'left', // Ensures content within this Box is also centered vertically
                 width: '100%' // Uses full width to align text to the start properly
               }}
             >
@@ -663,8 +662,8 @@ const SLOList = props => {
       try {
         const response = await axios.get('/api/sli', {
           params: {
-            sort: sortModel[0].sort || 'asc',
-            column: sortModel[0].field || 'name',
+            sort: sortModel[0]?.sort || 'asc',
+            column: sortModel[0]?.field || 'name',
             start_time: startTime,
             end_time: endTime,
             calculate: 'true',

@@ -60,6 +60,8 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+import { todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -71,14 +73,6 @@ import { refetchSloTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-
-function loadServerRows(page, pageSize, data) {
-  // console.log(data)
-
-  return new Promise(resolve => {
-    resolve(data.slice(page * pageSize, (page + 1) * pageSize))
-  })
-}
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -96,10 +90,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-const escapeRegExp = value => {
-  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
-}
-
 const SLOEventHistoryList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -115,17 +105,22 @@ const SLOEventHistoryList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sort, setSort] = useState('desc')
+  const [sortModel, setSortModel] = useState([{ field: 'timestamp', sort: 'desc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [sortColumn, setSortColumn] = useState('timestamp')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
+  const [filterMode, setFilterMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('server')
+  const [paginationMode, setPaginationMode] = useState('server')
 
   const getDetailPanelContent = useCallback(({ row }) => <SLOEventHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -139,8 +134,18 @@ const SLOEventHistoryList = props => {
   // column definitions
   const columns = [
     {
+      flex: 0.02,
+      field: 'id',
+      headerName: t('SLI EventId')
+    },
+    {
+      flex: 0.02,
+      field: 'sli_id',
+      headerName: t('SLI Id')
+    },
+    {
       flex: 0.03,
-      field: 'name',
+      field: 'sli_name',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -163,7 +168,7 @@ const SLOEventHistoryList = props => {
                 sx={{
                   color:
                     theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
+                      ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
               >
@@ -176,7 +181,7 @@ const SLOEventHistoryList = props => {
     },
     {
       flex: 0.02,
-      field: 'target_type',
+      field: 'calculation_method',
       headerName: t('Budgeting Method'),
       renderCell: params => {
         const { row } = params
@@ -201,9 +206,10 @@ const SLOEventHistoryList = props => {
     {
       flex: 0.015,
       field: 'target_value',
+      type: 'number',
       headerName: t('Target Value (%)'),
-      align: 'center',
-      headerAlign: 'center',
+      align: 'left',
+      headerAlign: 'left',
       renderCell: params => {
         const { row } = params
 
@@ -227,9 +233,10 @@ const SLOEventHistoryList = props => {
     {
       flex: 0.015,
       field: 'target_period',
+      type: 'number',
       headerName: t('Target Rolling Period (days)'),
-      align: 'center',
-      headerAlign: 'center',
+      align: 'left',
+      headerAlign: 'left',
       renderCell: params => {
         const { row } = params
 
@@ -251,9 +258,11 @@ const SLOEventHistoryList = props => {
       }
     },
     {
-      flex: 0.03,
-      minWidth: 100,
+      flex: 0.01,
       field: 'value',
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
@@ -316,7 +325,7 @@ const SLOEventHistoryList = props => {
               <CustomChip
                 rounded
                 size='medium'
-                skin='light'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{
@@ -370,36 +379,38 @@ const SLOEventHistoryList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async () => {
-      let data = []
-
+    async filter_model => {
       // Default start and end times to the last 24 hours if not defined
-      const [startDate, endDate] = props.dateRange || []
+      let [startDate, endDate] = []
+      if (props.onAccept == true) {
+        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+      } else {
+        ;[startDate, endDate] = props.onAccept
+      }
 
       // Assuming props.dateRange contains Date objects or is undefined
-      const startTime =
-        props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
+      console.log('onAccept:', props.onAccept)
+      console.log('Start Date:', startDate)
+      console.log('End Date:', endDate)
 
-      // console.log('Start Time:', startTime)
-      // console.log('End Time:', endTime)
-      // console.log('Search Value:', searchValue)
-      // console.log('Sort:', sort)
-      // console.log('Sort Column:', sortColumn)
-      // console.log('Page:', paginationModel.page)
-      // console.log('Page Size:', paginationModel.pageSize)
+      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const endTime = endDate?.toISOString() || new Date().toISOString()
+
+      console.log('Start Time:', startTime)
+      console.log('End Time:', endTime)
+      console.log('Filter Data:', JSON.stringify(filter_model))
 
       setLoading(true)
       await axios
         .get('/api/sli/events', {
           params: {
-            q: searchValue,
-            sort: sort,
-            column: sortColumn,
+            sort: sortModel[0]?.sort || 'desc',
+            column: sortModel[0]?.field || 'timestamp',
+            start_time: startTime,
+            end_time: endTime,
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
-            start_time: startTime,
-            end_time: endTime
+            filter: JSON.stringify(filter_model)
           },
           timeout: 30000
         })
@@ -408,50 +419,105 @@ const SLOEventHistoryList = props => {
           // console.log('total_records', res.data.total_records)
 
           setRowCount(res.data.total_records || 0)
-          setRows(res.data.rows || [])
+          setRows(res.data.records || [])
         })
 
-      // await loadServerRows(paginationModel.page, paginationModel.pageSize, data).then(slicedRows => setRows(slicedRows))
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel.page, paginationModel.pageSize, sort, sortColumn, props.dateRange]
+    [paginationModel, props.onAccept]
   )
 
   useEffect(() => {
     fetchData()
   }, [refetchTrigger, fetchData])
 
-  const handleSortModel = newModel => {
-    if (newModel.length) {
-      setSort(newModel[0].sort)
-      setSortColumn(newModel[0].field)
-      setSearchValue(searchValue)
+  // Trigger based on filter application
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel, runFilterQuery]) // Triggered by filter changes
+
+  // Trigger based on sort
+  useEffect(() => {
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
+
+    if (sortingMode === 'server') {
       fetchData()
     } else {
-      setSort('desc')
-      setSortColumn('timestamp')
+      // client side sorting
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
 
   const handleAction = event => {
     setAction(event.target.value)
   }
 
   const handleSearch = value => {
+    // console.log('handleSearch - Search Value:', value)
+    // console.log('Rows:', rows)
+
     setSearchValue(value)
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      return Object.keys(row).some(field => {
-        // @ts-ignore
-        return searchRegex.test(row[field].toString())
+      // Extend the search to include nested paths
+      const searchFields = ['sliId', 'sliName', 'calculationMethod', 'targetValue', 'targetPeriod', 'status', 'value']
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        // Ensure the fieldValue is a string before calling toString()
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
       })
     })
+
     if (value.length) {
       setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
     } else {
       setFilteredRows([])
+      setRowCount(rows.length)
     }
   }
 
@@ -467,6 +533,15 @@ const SLOEventHistoryList = props => {
 
     // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
+  }
+
+  // Hidden columns
+  const hiddenFields = ['id', 'sli_id']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
   return (
@@ -489,25 +564,29 @@ const SLOEventHistoryList = props => {
             columns: {
               columnVisibilityModel: {
                 createdAtTime: false,
+                sli_id: false,
                 id: false
               }
             }
           }}
           autoHeight={true}
-          pagination
           rows={filteredRows.length ? filteredRows : rows}
           rowCount={rowCountState}
           columns={columns}
           checkboxSelection={false}
           disableRowSelectionOnClick
-          sortingMode='server'
-          paginationMode='server'
+          filterMode={filterMode}
+          filterModel={filterModel}
+          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
+          sortingMode={sortingMode}
+          sortModel={sortModel}
+          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          pagination={true}
+          paginationMode={paginationMode}
           paginationModel={paginationModel}
-          onSortModelChange={handleSortModel}
-          pageSizeOptions={[5, 10, 25, 50]}
-          onPageChange={newPage => setPaginationModel(oldModel => ({ ...oldModel, page: newPage }))}
-          onPageSizeChange={newPageSize => setPaginationModel(oldModel => ({ ...oldModel, pageSize: newPageSize }))}
           onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50]}
+          onPageChange={newPage => setPage(newPage)}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,
@@ -542,8 +621,15 @@ const SLOEventHistoryList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              isFilterActive,
+              setRunFilterQuery,
               showButtons: false,
               showexport: true
+            },
+            columnsManagement: {
+              getTogglableColumns,
+              disableShowHideToggle: false,
+              disableResetButton: false
             },
             columnsPanel: {
               sx: {

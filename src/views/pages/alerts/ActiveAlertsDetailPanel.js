@@ -103,210 +103,13 @@ const CustomTaskToolbar = () => {
   )
 }
 
-const AlertDetailPanel = ({ alert }) => {
+const ActiveAlertsDetailPanel = ({ alert }) => {
   const [value, setValue] = useState('1')
   const [filterModel, setFilterModel] = useState({ items: [] })
   const { t } = useTranslation()
   const theme = useTheme()
 
-  const groupDetailsColumns = [ 
-    {
-      flex: 0.035,
-      minWidth: 100,
-      field: 'group_key',
-      editable: editmode,
-      headerName: t('GroupKey'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.group_key)} placement="bottom" arrow> 
-            <StyledLink href='#'>{String(row?.group_key).toUpperCase()}</StyledLink>
-            </Tooltip>
-            <Tooltip title={String(row?.group_id)} placement="bottom" arrow>           
-              <Typography
-                noWrap
-                variant='caption'
-                sx={{
-                  fontSize: '0.65rem',
-                  color:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
-                      : theme.palette.customColors.brandYellow
-                }}
-              >
-                {row?.group_id}
-              </Typography>
-            </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.020,
-      field: 'group_status',
-      editable: editmode,
-      headerName: t('Group Status'),
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: params => {
-        const { row } = params
-
-        let color = 'error'
-        let label = 'UNKN'
-        if (row?.group_status?.toLowerCase() === 'firing') {
-          color = 'error'
-          label = 'ACTIVE'
-        } else if (row?.group_status?.toLowerCase() === 'pending') {
-          color = 'warning'
-          label = 'PENDING'
-        } else if (row?.group_status?.toLowerCase() === 'resolved') {
-          color = 'success'
-          label = 'RESOLVED'
-        } 
-        else {
-          color = 'info'
-          label = 'INACTIVE'
-        }
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CustomChip
-                rounded
-                size='small'
-                skin='light'
-                label={label || 'UNKN'}
-                color={color}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.035,
-      minWidth: 100,
-      field: 'external_url',
-      editable: editmode,
-      headerName: t('External URL'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.external_url)} placement="bottom" arrow> 
-            <StyledLink href='#'>{String(row?.external_url).toUpperCase()}</StyledLink>
-            </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.035,
-      minWidth: 100,
-      field: 'generator_url',
-      editable: editmode,
-      headerName: t('Generator URL'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.generator_url)} placement="bottom" arrow> 
-            <StyledLink href='#'>{String(row?.generator_url).toUpperCase()}</StyledLink>
-            </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.035,
-      minWidth: 100,
-      field: 'fingerprint',
-      editable: editmode,
-      headerName: t('Alert Fingerprint'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.fingerprint)} placement="bottom" arrow> 
-            <StyledLink href='#'>{String(row?.fingerprint).toUpperCase()}</StyledLink>
-            </Tooltip>
-            <Tooltip title={String(row?.alert_id)} placement="bottom" arrow>           
-              <Typography
-                noWrap
-                variant='caption'
-                sx={{
-                  fontSize: '0.65rem',
-                  color:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
-                      : theme.palette.customColors.brandYellow
-                }}
-              >
-                {row?.alert_id}
-              </Typography>
-            </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.030,
-      minWidth: 60,
-      field: 'modified_at',
-      headerName: t('Modified At'),
-      renderCell: params => {
-        const { row } = params
-
-        let date = ''
-        let humanReadableDate = ''
-
-        if (row.modified_at) {
-          date = parseISO(row.modified_at?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
-        }
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-  ];
-
-  const groupDetailsRows = [
-        {
-            id: 1,
-            group_id: alert.group_id,
-            group_key: alert.group_key,
-            group_status: alert.group_status,
-            external_url: alert.external_url,
-            generator_url: alert.generator_url,
-            modified_at: alert.modified_at,
-            fingerprint: alert.fingerPrint,
-            alert_id: alert.alert_id
-        }
-    ];
-
-  const groupLabelRows = alert.group_labels || [];
+  const receivers = alert.receivers || [];
   const labelRows = alert.alert_labels || [];
   const annotationRows = alert.alert_annotations || [];
 
@@ -357,7 +160,7 @@ const AlertDetailPanel = ({ alert }) => {
       }
   ];
 
-  const groupLabelsColumns = [
+  const receiversColumns = [
     {
       flex: 0.025,
       minWidth: 100,
@@ -379,30 +182,8 @@ const AlertDetailPanel = ({ alert }) => {
           </Box>
         )
       }
-    },
-    {
-      flex: 0.075,
-      minWidth: 100,
-      field: 'value',
-      editable: editmode,
-      headerName: t('Value'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.value)} placement="top" arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.value}
-                </Typography>
-              </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
     }
-];
+  ];
 
   const annotationsColumns = [
       {
@@ -464,60 +245,12 @@ const AlertDetailPanel = ({ alert }) => {
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleChange} aria-label='Task history detail tabs'>
-            <Tab label={t('Details')} value='1' />
-            <Tab label={t('Group Labels')} value='2' />
-            <Tab label={t('Alert Labels')} value='3' />
-            <Tab label={t('Alert Annotations')} value='4' />
+            <Tab label={t('Alert Labels')} value='1' />
+            <Tab label={t('Alert Annotations')} value='2' />
+            <Tab label={t('Receivers')} value='3' />
           </TabList>
         </Box>
-        <TabPanel value='1'>
-            <CustomDataGrid
-              rows={groupDetailsRows}
-              columns={groupDetailsColumns}
-              pageSize={10}
-              rowsPerPageOptions={[10]}
-              autoHeight
-              disablePagination={true} // Assuming your CustomDataGrid accepts this prop to disable pagination
-              filterModel={filterModel}
-              onFilterModelChange={handleFilterModelChange}
-              components={{ Toolbar: CustomTaskToolbar }}
-              componentsProps={{
-                baseButton: {
-                  variant: 'outlined'
-                },
-                toolbar: {
-                  showQuickFilter: true
-                }
-              }}
-            />
-        </TabPanel>
-        <TabPanel value='2'>
-          {groupLabelRows.length > 0 ? (
-            <CustomDataGrid
-              rows={groupLabelRows}
-              columns={groupLabelsColumns}
-              pageSize={10}
-              getRowId={(row) => row.name}
-              rowsPerPageOptions={[10]}
-              autoHeight
-              disablePagination={true} // Assuming your CustomDataGrid accepts this prop to disable pagination
-              filterModel={filterModel}
-              onFilterModelChange={handleFilterModelChange}
-              components={{ Toolbar: CustomTaskToolbar }}
-              componentsProps={{
-                baseButton: {
-                  variant: 'outlined'
-                },
-                toolbar: {
-                  showQuickFilter: true
-                }
-              }}
-            />
-          ) : (
-            <Typography variant='body2'>No alert labels available.</Typography>
-          )}
-          </TabPanel>
-        <TabPanel value='3'>
+         <TabPanel value='1'>
           {labelRows.length > 0 ? (
             <CustomDataGrid
               rows={labelRows}
@@ -543,7 +276,7 @@ const AlertDetailPanel = ({ alert }) => {
             <Typography variant='body2'>No alert labels available.</Typography>
           )}
           </TabPanel>
-          <TabPanel value='4'>
+          <TabPanel value='2'>
           {annotationRows.length > 0 ? (
             <CustomDataGrid
               rows={annotationRows}
@@ -569,6 +302,32 @@ const AlertDetailPanel = ({ alert }) => {
             <Typography variant='body2'>No alert annotations available.</Typography>
           )}
           </TabPanel>
+          <TabPanel value='3'>
+          {receivers.length > 0 ? (
+            <CustomDataGrid
+              rows={receivers}
+              columns={receiversColumns}
+              pageSize={10}
+              getRowId={(row) => row.name}
+              rowsPerPageOptions={[10]}
+              autoHeight
+              disablePagination={true} // Assuming your CustomDataGrid accepts this prop to disable pagination
+              filterModel={filterModel}
+              onFilterModelChange={handleFilterModelChange}
+              components={{ Toolbar: CustomTaskToolbar }}
+              componentsProps={{
+                baseButton: {
+                  variant: 'outlined'
+                },
+                toolbar: {
+                  showQuickFilter: true
+                }
+              }}
+            />
+          ) : (
+            <Typography variant='body2'>No receivers available.</Typography>
+          )}
+          </TabPanel>
 
       </TabContext>
     </Box>
@@ -576,4 +335,4 @@ const AlertDetailPanel = ({ alert }) => {
 }
 
 
-export default AlertDetailPanel
+export default ActiveAlertsDetailPanel

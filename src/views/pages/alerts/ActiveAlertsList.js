@@ -66,7 +66,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import AlertDetailPanel from 'src/views/pages/alerts/AlertDetailPanel'
+import ActiveAlertsDetailPanel from 'src/views/pages/alerts/ActiveAlertsDetailPanel'
 import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
 import { setRef } from '@mui/material'
 
@@ -100,7 +100,7 @@ const userRoleObj = {
   unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
 }
 
-const AlertsList = props => {
+const ActiveAlertsList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const dgApiRef = useGridApiRef()
@@ -125,8 +125,6 @@ const AlertsList = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
-  const [alertIds, setAlertIds] = useAtom(alertIdsAtom)
-  const [alerts, setAlerts] = useAtom(alertsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   // ** Dialog
@@ -137,7 +135,7 @@ const AlertsList = props => {
   const editmode = false
 
   
-  const getDetailPanelContent = useCallback(({ row }) => <AlertDetailPanel alert={row} />, [])
+  const getDetailPanelContent = useCallback(({ row }) => <ActiveAlertsDetailPanel alert={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
   const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
@@ -265,6 +263,15 @@ const AlertsList = props => {
         } else if (row?.alert_status?.toLowerCase() === 'resolved') {
           color = 'success'
           label = 'RESOLVED'
+        } else if (row?.alert_status?.toLowerCase() === 'active') {
+          color = 'error'
+          label = 'ACTIVE'
+        } else if (row?.alert_status?.toLowerCase() === 'suppressed') {
+          color = 'warning'
+          label = 'SUPPRESSED'
+        } else if (row?.alert_status?.toLowerCase() === 'unprocessed') {
+          color = 'warning'
+          label = 'UNSUPPRESSED'
         } else {
           color = 'info'
           label = 'INACTIVE'
@@ -356,28 +363,6 @@ const AlertsList = props => {
     {
       flex: 0.03,
       minWidth: 100,
-      field: 'receiver',
-      editable: editmode,
-      headerName: t('Receiver'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.receiver)} placement="top" arrow>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.receiver}
-              </Typography>
-              </Tooltip>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.03,
-      minWidth: 100,
       field: 'fingerprint',
       editable: editmode,
       headerName: t('Fingerprint'),
@@ -387,9 +372,9 @@ const AlertsList = props => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.fingerPrint)} placement="top" arrow>
+            <Tooltip title={String(row?.fingerprint)} placement="top" arrow>
               <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {row?.fingerPrint}
+                {row?.fingerprint}
               </Typography>
               </Tooltip>
             </Box>
@@ -400,7 +385,7 @@ const AlertsList = props => {
   ]
 
   function getRowId(row) {
-    return row.alert_id;
+    return row.fingerprint;
   }
   
 
@@ -425,7 +410,7 @@ const AlertsList = props => {
 
       setLoading(true)
       await axios
-        .get('/api/alertmanager', {
+        .get('/api/alertmanager/alerts/active', {
           params: {
             q: searchValue,
             sort: sort,
@@ -558,4 +543,4 @@ const AlertsList = props => {
   )
 }
 
-export default AlertsList
+export default ActiveAlertsList

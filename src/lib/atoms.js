@@ -29,6 +29,6 @@ export const refetchSubcomponentTriggerAtom = atom(0)
 
 export const refetchTaskTriggerAtom = atom(0)
 
-export const alertGroupIdsAtom = atom([])
+export const alertIdsAtom = atom([])
 
-export const alertGroupsAtom = atom([])
+export const alertsAtom = atom([])

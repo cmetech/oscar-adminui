@@ -1,7 +1,7 @@
 // Next.js API route for proxying export targets requests to FastAPI
 import axios from 'axios'
 import https from 'https'
-import oscarConfig from '../../../configs/oscarConfig'
+import oscarConfig from '../../../../../configs/oscarConfig'
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -20,7 +20,7 @@ async function handler(req, res) {
 
     try {
       // Construct the request URL with query parameters
-      const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/alerts/`)
+      const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/alerts/active-alerts`)
       
       if (start_time) url.searchParams.append('start_time', start_time)
       if (end_time) url.searchParams.append('end_time', end_time)
@@ -42,11 +42,10 @@ async function handler(req, res) {
         if (response?.data?.records?.length > 0) {
           const filteredData = response?.data?.records?.filter(
             item =>
-            item?.alert_id?.toString().toLowerCase().includes(queryLowered) ||
-            item?.alertname?.toLowerCase().includes(queryLowered) ||
-            item?.alert_status?.toLowerCase().includes(queryLowered) ||
-            item?.severity?.toLowerCase().includes(queryLowered) ||
-            item?.instance?.toLowerCase().includes(queryLowered)
+              item?.alertname?.toLowerCase().includes(queryLowered) ||
+              item?.alert_status?.toLowerCase().includes(queryLowered) ||
+              item?.severity?.toLowerCase().includes(queryLowered) ||
+              item?.instance?.toLowerCase().includes(queryLowered)
           )
 
           // Log the entire response data or any specific part of it

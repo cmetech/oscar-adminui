@@ -21,7 +21,7 @@ const navigation = () => {
     },
     {
       title: 'Advanced Dashboards',
-      path: 'https:localhost/ui',
+      path: '/api/oscar/ui',
       icon: 'mdi:monitor-eye',
       externalLink: true,
       openInNewTab: true,

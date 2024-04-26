@@ -51,8 +51,8 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, format } from 'date-fns'
-import formatDistance from 'date-fns/formatDistance'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
@@ -60,6 +60,8 @@ import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+import { todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -68,19 +70,9 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import AlertDetailPanel from 'src/views/pages/alerts/AlertDetailPanel'
 import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
-import { setRef } from '@mui/material'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-
-/*
-function loadServerRows(page, pageSize, data) {
-  // console.log(data)
-
-  return new Promise(resolve => {
-    resolve(data.slice(page * pageSize, (page + 1) * pageSize))
-  })
-}*/
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -98,13 +90,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-/*
-const userRoleObj = {
-  admin: { icon: 'mdi:cog-outline', color: 'error.main' },
-  regular: { icon: 'mdi:account-outline', color: 'info.main' },
-  unknown: { icon: 'mdi:account-question-outline', color: 'warning.main' }
-}*/
-
 const AlertsList = props => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -121,35 +106,26 @@ const AlertsList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  //const [sort, setSort] = useState('asc')
-  const [sortModel, setSortModel] = useState([{ field: 'succeeded', sort: 'desc' }])
+  const [sortModel, setSortModel] = useState([{ field: 'alertname', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  //const [sortColumn, setSortColumn] = useState('alertname')
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
+  const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
+
   //const [alertIds, setAlertIds] = useAtom(alertIdsAtom)
   //const [alerts, setAlerts] = useAtom(alertsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
- 
 
-  // ** Dialog
-  /*const [editDialog, setEditDialog] = useState(false)
-  const [deleteDialog, setDeleteDialog] = useState(false)
-  const [currentServer, setCurrentServer] = useState(null)
-  */
-  //const editmode = false
-
-  
   const getDetailPanelContent = useCallback(({ row }) => <AlertDetailPanel alert={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
@@ -160,7 +136,7 @@ const AlertsList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.030,
+      flex: 0.03,
       minWidth: 60,
       field: 'starts_at',
       headerName: t('Started At'),
@@ -179,7 +155,7 @@ const AlertsList = props => {
         }
 
         return (
-          <Box 
+          <Box
             sx={{
               display: 'flex',
               alignItems: 'center', // Ensures vertical centering inside the Box
@@ -213,7 +189,7 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.alertname)} placement="top" arrow>
+              <Tooltip title={String(row?.alertname)} placement='top' arrow>
                 <Typography noWrap>{row?.alertname}</Typography>
               </Tooltip>
             </Box>
@@ -240,8 +216,8 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.summary)} placement="top" arrow>
-              <Typography noWrap>{row?.summary}</Typography>
+              <Tooltip title={String(row?.summary)} placement='top' arrow>
+                <Typography noWrap>{row?.summary}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -249,7 +225,7 @@ const AlertsList = props => {
       }
     },
     {
-      flex: 0.030,
+      flex: 0.03,
       minWidth: 60,
       field: 'ends_at',
       headerName: t('Completed At'),
@@ -278,7 +254,7 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap>{humanReadableDate}</Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -320,7 +296,7 @@ const AlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box 
+            <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center', // Ensures vertical centering inside the Box
@@ -426,7 +402,7 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.instance)} placement="top" arrow>
+              <Tooltip title={String(row?.instance)} placement='top' arrow>
                 <Typography noWrap>{row?.instance}</Typography>
               </Tooltip>
             </Box>
@@ -452,8 +428,8 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.receiver)} placement="top" arrow>
-              <Typography noWrap>{row?.receiver}</Typography>
+              <Tooltip title={String(row?.receiver)} placement='top' arrow>
+                <Typography noWrap>{row?.receiver}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -477,9 +453,9 @@ const AlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title={String(row?.fingerPrint)} placement="top" arrow>
-              <Typography noWrap>{row?.fingerPrint}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Tooltip title={String(row?.fingerPrint)} placement='top' arrow>
+                <Typography noWrap>{row?.fingerPrint}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -489,9 +465,8 @@ const AlertsList = props => {
   ]
 
   function getRowId(row) {
-    return row.alert_id;
+    return row.alert_id
   }
-  
 
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
@@ -512,31 +487,26 @@ const AlertsList = props => {
       console.log('Start Date:', startDate)
       console.log('End Date:', endDate)
 
-      // Assuming props.dateRange contains Date objects or is undefined
-      const startTime =
-        props.dateRange?.[0]?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = props.dateRange?.[1]?.toISOString() || new Date().toISOString()
+      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const endTime = endDate?.toISOString() || new Date().toISOString()
 
       console.log('Start Time:', startTime)
       console.log('End Time:', endTime)
-      console.log('Search Value:', searchValue)
-      console.log('Sort:', sortModel[0]?.sort)
-      console.log('Sort Column:', sortModel[0]?.field)
-      console.log('Page:', paginationModel.page)
-      console.log('Page Size:', paginationModel.pageSize)
+      console.log('Filter Data:', JSON.stringify(filter_model))
 
       setLoading(true)
       await axios
         .get('/api/alertmanager', {
           params: {
-            sort: sortModel[0]?.sort || 'desc',
-            column: sortModel[0]?.field || 'succeeded',
+            sort: sortModel[0]?.sort || 'asc',
+            column: sortModel[0]?.field || 'alertname',
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
             start_time: startTime,
             end_time: endTime,
             filter: JSON.stringify(filterModel)
-          }
+          },
+          timeout: 30000
         })
         .then(res => {
           console.log('total_pages', res.data.total_pages)
@@ -553,8 +523,35 @@ const AlertsList = props => {
   )
 
   useEffect(() => {
-    fetchData(sort, searchValue, sortColumn)
+    fetchData()
   }, [refetchTrigger, fetchData])
+
+  // Trigger based on filter application
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel, runFilterQuery]) // Triggered by filter changes
 
   // Trigger based on sort
   useEffect(() => {
@@ -632,6 +629,15 @@ const AlertsList = props => {
     setRowSelectionModel(newRowSelectionModel)
   }
 
+  // Hidden columns
+  const hiddenFields = ['id']
+
+  const getTogglableColumns = columns => {
+    setFilterActive(false)
+
+    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -650,7 +656,6 @@ const AlertsList = props => {
           }}
           autoHeight={true}
           getRowId={getRowId}
-          pagination
           rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}
@@ -668,7 +673,6 @@ const AlertsList = props => {
           paginationModel={paginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
-          onPaginationModelChange={setPaginationModel}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,
@@ -764,7 +768,7 @@ const AlertsList = props => {
             filterPanel: {
               // Force usage of "And" operator
               logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
-  
+
               // Display columns by ascending alphabetical order
               columnsSort: 'asc',
               filterFormProps: {
@@ -778,7 +782,7 @@ const AlertsList = props => {
                   size: 'small',
                   sx: {
                     mt: 'auto',
-  
+
                     // Target the root style of the outlined input
                     '& .MuiOutlinedInput-root': {
                       // Apply styles when focused
@@ -792,7 +796,7 @@ const AlertsList = props => {
                         }
                       }
                     },
-  
+
                     // Target the label for color change
                     '& .MuiInputLabel-outlined': {
                       // Apply styles when focused
@@ -810,7 +814,7 @@ const AlertsList = props => {
                   size: 'small',
                   sx: {
                     mt: 'auto',
-  
+
                     // Target the root style of the outlined input
                     '& .MuiOutlinedInput-root': {
                       // Apply styles when focused
@@ -824,7 +828,7 @@ const AlertsList = props => {
                         }
                       }
                     },
-  
+
                     // Target the label for color change
                     '& .MuiInputLabel-outlined': {
                       // Apply styles when focused
@@ -855,7 +859,7 @@ const AlertsList = props => {
                           }
                         }
                       },
-  
+
                       // Target the label for color change
                       '& .MuiInputLabel-outlined': {
                         // Apply styles when focused

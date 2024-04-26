@@ -1,7 +1,7 @@
 // ** React Imports
 import { useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { predefinedRangesDayjs } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -9,10 +9,10 @@ import Grid from '@mui/material/Grid'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
-import { Box, Typography, TextField } from '@mui/material';
+import { Box, Typography, TextField } from '@mui/material'
 
 // ** Styled Component Imports
-import { styled } from '@mui/material/styles'
+import { styled, useTheme } from '@mui/material/styles'
 import MuiTabList from '@mui/lab/TabList'
 
 // ** Icon Imports
@@ -25,7 +25,6 @@ import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 import { CustomDateTimeRangePicker } from 'src/lib/styled-components'
-import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -54,6 +53,8 @@ const Alerts = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const { t } = useTranslation()
+  const theme = useTheme()
+
   const [value, setValue] = useState('1')
   const [alertGroupTotal, setAlertGroupTotal] = useState(0)
   const [activeAlertsTotal, setActiveAlertsTotal] = useState(0)
@@ -72,131 +73,140 @@ const Alerts = () => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
-          <Typography variant="h4">{t('Alert Management')}</Typography>
+        <Box display='flex' justifyContent='space-between' alignItems='center' mb={6}>
+          <Typography variant='h4'>{t('Alert Management')}</Typography>
           {value === '1' && (
             // Conditionally render the DateRangePicker when the Alert History tab is active
             <DateRangePicker
-                calendars={2}
-                closeOnSelect={false}
-                value={dateRange}
-                defaultValue={[yesterdayRounded, todayRounded]}
-                views={['day', 'hours']}
-                timeSteps={{ minute: 10 }}
-                viewRenderers={{ hours: renderDigitalClockTimeView }}
-                onChange={newValue => {
-                  console.log('Date range:', newValue)
-                  setDateRange(newValue)
-                }}
-                onAccept={handleOnAccept}
-                slotProps={{
-                  field: { dateSeparator: 'to' },
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    color: position === 'start' ? 'secondary' : 'secondary',
-                    focused: true,
-                    InputProps: {
-                      endAdornment: <Icon icon='mdi:calendar' />
-                    }
-                  }),
-                  desktopPaper: {
-                    style: {
-                      backgroundColor:
-                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
-                    }
-                  },
-                  day: {
-                    sx: {
-                      '& .MuiPickersDay-root': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
-                        '&:hover': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.light
-                        }
-                      },
-                      '& .MuiPickersDay-root.Mui-selected': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
-                      }
-                    }
-                  },
-                  shortcuts: {
-                    items: predefinedRangesDayjs,
-                    sx: {
-                      '& .MuiChip-root': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandYellow
-                            : theme.palette.primary.main,
-                        '&:hover': {
-                          color:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          backgroundColor:
-                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
-                        }
-                      }
-                    }
-                  },
-                  digitalClockItem: {
-                    sx: {
+              calendars={2}
+              closeOnSelect={false}
+              value={dateRange}
+              defaultValue={[yesterdayRounded, todayRounded]}
+              views={['day', 'hours']}
+              timeSteps={{ minute: 10 }}
+              viewRenderers={{ hours: renderDigitalClockTimeView }}
+              onChange={newValue => {
+                // console.log('Date range:', newValue)
+                setDateRange(newValue)
+              }}
+              onAccept={handleOnAccept}
+              slotProps={{
+                field: { dateSeparator: 'to' },
+                textField: ({ position }) => ({
+                  size: 'small',
+                  color: position === 'start' ? 'secondary' : 'secondary',
+                  focused: true,
+                  InputProps: {
+                    endAdornment: <Icon icon='mdi:calendar' />
+                  }
+                }),
+                desktopPaper: {
+                  style: {
+                    backgroundColor:
+                      theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                  }
+                },
+
+                day: {
+                  sx: {
+                    '& .MuiPickersDay-root': {
+                      color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
                       '&:hover': {
                         color:
                           theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandBlack
-                            : theme.palette.customColors.black,
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandGray4
-                            : theme.palette.customColors.brandGray4
-                      },
-                      '&.Mui-selected': {
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandYellow4
-                            : theme.palette.customColors.brandGray1
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.light
                       }
+                    },
+                    '& .MuiPickersDay-root.Mui-selected': {
+                      color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
                     }
-                  },
-                  actionBar: {
-                    actions: ['clear', 'today', 'cancel', 'accept'],
-                    sx: {
-                      '& .MuiDialogActions-root, .MuiButton-root': {
-                        // Targeting buttons inside MuiDialogActions-root
-                        borderWidth: '1px', // Ensure there's a visible border
-                        borderStyle: 'solid', // Necessary for the border to show
-                        borderColor:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandGray1b
-                            : theme.palette.primary.main,
+                  }
+                },
+
+                shortcuts: {
+                  items: predefinedRangesDayjs,
+                  sx: {
+                    '& .MuiChip-root': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      '&:hover': {
                         color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandWhite
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow
                             : theme.palette.primary.main,
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                          borderColor:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandWhite
-                              : theme.palette.primary.main,
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main
-                        }
+                        backgroundColor:
+                          theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
                       }
                     }
                   }
-                }}
-              />
+                },
+
+                digitalClockItem: {
+                  sx: {
+                    '&:hover': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandBlack
+                          : theme.palette.customColors.black,
+                      background:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandGray4
+                          : theme.palette.customColors.brandGray4
+                    },
+                    '&.Mui-selected': {
+                      background:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandYellow4
+                          : theme.palette.customColors.brandGray1
+                    }
+                  }
+                },
+
+                actionBar: {
+                  actions: ['clear', 'today', 'cancel', 'accept'],
+                  sx: {
+                    '& .MuiDialogActions-root, .MuiButton-root': {
+                      // Targeting buttons inside MuiDialogActions-root
+                      borderWidth: '1px', // Ensure there's a visible border
+                      borderStyle: 'solid', // Necessary for the border to show
+                      borderColor:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandGray1b
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                        borderColor:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main
+                      }
+                    }
+                  }
+                }
+              }}
+            />
           )}
         </Box>
         <TabContext value={value}>
-          <TabList onChange={handleChange} aria-label="Alert-tabs">
-          {alertGroupTotal == 0 ? (
-              <Tab value='1' label={t('Alert History')} icon={<Icon icon='mdi:arrow-decision-auto' />} iconPosition='start' />
+          <TabList onChange={handleChange} aria-label='Alert-tabs'>
+            {alertGroupTotal == 0 ? (
+              <Tab
+                value='1'
+                label={t('Alert History')}
+                icon={<Icon icon='mdi:arrow-decision-auto' />}
+                iconPosition='start'
+              />
             ) : (
               <Tab
                 value='1'
@@ -206,7 +216,12 @@ const Alerts = () => {
               />
             )}
             {activeAlertsTotal == 0 ? (
-              <Tab value='2' label={t('Active Alerts')} icon={<Icon icon='mdi:arrow-decision-auto' />} iconPosition='start' />
+              <Tab
+                value='2'
+                label={t('Active Alerts')}
+                icon={<Icon icon='mdi:arrow-decision-auto' />}
+                iconPosition='start'
+              />
             ) : (
               <Tab
                 value='2'
@@ -216,11 +231,21 @@ const Alerts = () => {
               />
             )}
           </TabList>
-          <TabPanel value="1">
-            <AlertHistorytList dateRange={dateRange} set_total={setAlertGroupTotal} total={alertGroupTotal} />
+          <TabPanel value='1'>
+            <AlertHistorytList
+              dateRange={dateRange}
+              set_total={setAlertGroupTotal}
+              total={alertGroupTotal}
+              onAccept={onAccept}
+            />
           </TabPanel>
-          <TabPanel value="2">
-            <ActiveAlertsList dateRange={dateRange} set_total={setActiveAlertsTotal} total={activeAlertsTotal} />
+          <TabPanel value='2'>
+            <ActiveAlertsList
+              dateRange={dateRange}
+              set_total={setActiveAlertsTotal}
+              total={activeAlertsTotal}
+              onAccept={onAccept}
+            />
           </TabPanel>
         </TabContext>
       </Grid>

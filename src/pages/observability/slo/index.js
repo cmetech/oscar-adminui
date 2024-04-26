@@ -759,26 +759,50 @@ const SLO = () => {
                       }
                     },
 
-                    actionBar: {
-                      actions: ['cancel', 'accept'],
+                    digitalClockItem: {
                       sx: {
-                        '& .MuiButton-root': {
-                          borderColor:
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandBlack
+                              : theme.palette.customColors.black,
+                          background:
                             theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandWhite
+                              ? theme.palette.customColors.brandGray4
+                              : theme.palette.customColors.brandGray4
+                        },
+                        '&.Mui-selected': {
+                          background:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow4
+                              : theme.palette.customColors.brandGray1
+                        }
+                      }
+                    },
+
+                    actionBar: {
+                      actions: ['clear', 'today', 'cancel', 'accept'],
+                      sx: {
+                        '& .MuiDialogActions-root, .MuiButton-root': {
+                          // Targeting buttons inside MuiDialogActions-root
+                          borderWidth: '1px', // Ensure there's a visible border
+                          borderStyle: 'solid', // Necessary for the border to show
+                          borderColor:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandGray1b
                               : theme.palette.primary.main,
                           color:
-                            theme.palette.mode == 'dark'
+                            theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandWhite
                               : theme.palette.primary.main,
                           '&:hover': {
                             backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
                             borderColor:
-                              theme.palette.mode == 'dark'
-                                ? theme.palette.customColors.brandYellow
+                              theme.palette.mode === 'dark'
+                                ? theme.palette.customColors.brandWhite
                                 : theme.palette.primary.main,
                             color:
-                              theme.palette.mode == 'dark'
+                              theme.palette.mode === 'dark'
                                 ? theme.palette.customColors.brandYellow
                                 : theme.palette.primary.main
                           }

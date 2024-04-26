@@ -68,7 +68,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import ActiveAlertsDetailPanel from 'src/views/pages/alerts/ActiveAlertsDetailPanel'
-import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { alertIdsAtom, alertsAtom } from 'src/lib/atoms'
 import { setRef } from '@mui/material'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -118,7 +118,6 @@ const ActiveAlertsList = props => {
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
-  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
   const [paginationMode, setPaginationMode] = useState('client')

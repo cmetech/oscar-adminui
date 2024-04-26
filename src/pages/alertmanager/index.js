@@ -22,6 +22,9 @@ import Icon from 'src/@core/components/icon'
 import AlertHistorytList from 'src/views/pages/alerts/AlertHistoryList'
 import ActiveAlertsList from 'src/views/pages/alerts/ActiveAlertsList'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
+import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
+import { CustomDateTimeRangePicker } from 'src/lib/styled-components'
 import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
@@ -54,10 +57,16 @@ const Alerts = () => {
   const [value, setValue] = useState('1')
   const [alertGroupTotal, setAlertGroupTotal] = useState(0)
   const [activeAlertsTotal, setActiveAlertsTotal] = useState(0)
-  const [dateRange, setDateRange] = useState([null, null])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [onAccept, setOnAccept] = useState(value)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
+  }
+
+  const handleOnAccept = value => {
+    console.log('onAccept', value)
+    setOnAccept(value)
   }
 
   return (
@@ -71,15 +80,15 @@ const Alerts = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[dayjs().subtract(2, 'day'), dayjs()]}
-                //disableFuture
+                defaultValue={[yesterdayRounded, todayRounded]}
                 views={['day', 'hours']}
-                timeSteps={{ minute: 15 }}
+                timeSteps={{ minute: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
                   console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
+                onAccept={handleOnAccept}
                 slotProps={{
                   field: { dateSeparator: 'to' },
                   textField: ({ position }) => ({
@@ -90,8 +99,95 @@ const Alerts = () => {
                       endAdornment: <Icon icon='mdi:calendar' />
                     }
                   }),
+                  desktopPaper: {
+                    style: {
+                      backgroundColor:
+                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                    }
+                  },
+                  day: {
+                    sx: {
+                      '& .MuiPickersDay-root': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.light
+                        }
+                      },
+                      '& .MuiPickersDay-root.Mui-selected': {
+                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
+                      }
+                    }
+                  },
                   shortcuts: {
-                    items: predefinedRangesDayjs
+                    items: predefinedRangesDayjs,
+                    sx: {
+                      '& .MuiChip-root': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandYellow
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main,
+                          backgroundColor:
+                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
+                        }
+                      }
+                    }
+                  },
+                  digitalClockItem: {
+                    sx: {
+                      '&:hover': {
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandBlack
+                            : theme.palette.customColors.black,
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandGray4
+                            : theme.palette.customColors.brandGray4
+                      },
+                      '&.Mui-selected': {
+                        background:
+                          theme.palette.mode == 'dark'
+                            ? theme.palette.customColors.brandYellow4
+                            : theme.palette.customColors.brandGray1
+                      }
+                    }
+                  },
+                  actionBar: {
+                    actions: ['clear', 'today', 'cancel', 'accept'],
+                    sx: {
+                      '& .MuiDialogActions-root, .MuiButton-root': {
+                        // Targeting buttons inside MuiDialogActions-root
+                        borderWidth: '1px', // Ensure there's a visible border
+                        borderStyle: 'solid', // Necessary for the border to show
+                        borderColor:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandGray1b
+                            : theme.palette.primary.main,
+                        color:
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.customColors.brandWhite
+                            : theme.palette.primary.main,
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                          borderColor:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.primary.main,
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.primary.main
+                        }
+                      }
+                    }
                   }
                 }}
               />

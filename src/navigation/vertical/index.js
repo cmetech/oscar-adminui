@@ -13,13 +13,6 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts & Events',
-      icon: 'mdi:bell-alert',
-      path: '/observability',
-      action: 'read',
-      subject: 'all'
-    },
-    {
       title: 'Advanced Dashboards',
       path: '/api/oscar/ui',
       icon: 'mdi:monitor-eye',

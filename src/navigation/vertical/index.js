@@ -13,6 +13,13 @@ const navigation = () => {
       subject: 'all'
     },
     {
+      title: 'Alerts & Events',
+      icon: 'mdi:bell-alert',
+      path: '/alertmanager',
+      action: 'read',
+      subject: 'all'
+    },
+    {
       title: 'Advanced Dashboards',
       path: '/api/oscar/ui',
       icon: 'mdi:monitor-eye',
@@ -29,9 +36,7 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts & Events',
-      icon: 'mdi:bell-alert',
-      path: '/alertmanager',
+      sectionTitle: 'Service Continuity',
       action: 'read',
       subject: 'all'
     },

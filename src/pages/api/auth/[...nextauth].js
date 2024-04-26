@@ -1,7 +1,7 @@
 // ** Third Party Imports
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import GithubProvider from 'next-auth/providers/github'
+import Auth0Provider from 'next-auth/providers/auth0'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -80,9 +80,14 @@ export const authOptions = {
           throw new Error('NextAuth - Authorize: Auth Error')
         }
       }
-    })
+    }),
 
     // ** ...add more providers here
+    Auth0Provider({
+      clientId: process.env.AUTH0_ID || 'YOUR_AUTH0',
+      clientSecret: process.env.AUTH0_SECRET || 'ffff',
+      issuer: process.env.AUTH0_ISSUER || 'issuer'
+    })
   ],
 
   // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
@@ -135,7 +140,7 @@ export const authOptions = {
         }
 
         // Log the updated token object
-        // console.log('Updated Token', updatedToken)
+        console.log('Updated Token', updatedToken)
 
         // Return the updated token object
         return updatedToken
@@ -158,13 +163,14 @@ export const authOptions = {
             lastName: token.last_name,
             organization: token.organization,
             timezone: token.timezone,
-            username: token.username
+            username: token.username,
+            jwt: token
           },
           sessionID: uuidv4()
         }
 
         // Log the updated session object
-        // console.log('Updated Session', updatedSession)
+        console.log('Updated Session', updatedSession)
 
         // Return the updated session object
         return updatedSession

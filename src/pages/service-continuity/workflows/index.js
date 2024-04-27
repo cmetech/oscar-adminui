@@ -17,7 +17,7 @@ import ServicesDataGrid from 'src/views/pages/ServicesDataGrid'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { set } from 'nprogress'
 
-const ServicesDashboard = () => {
+const Workflows = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
 
@@ -30,9 +30,9 @@ const ServicesDashboard = () => {
   )
 }
 
-ServicesDashboard.acl = {
+Workflows.acl = {
   action: 'read',
   subject: 'services-page'
 }
 
-export default ServicesDashboard
+export default Workflows

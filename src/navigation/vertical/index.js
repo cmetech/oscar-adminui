@@ -13,9 +13,9 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts & Events',
+      title: 'Alerts',
       icon: 'mdi:bell-alert',
-      path: '/alertmanager',
+      path: '/observability/alerts',
       action: 'read',
       subject: 'all'
     },
@@ -29,9 +29,16 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'SLOs',
-      path: '/observability/slo',
-      icon: 'mdi:target',
+      title: 'Performance',
+      icon: 'mdi:chart-areaspline-variant',
+      path: '/observability/performance',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Capacity',
+      icon: 'mdi:thermometer-check',
+      path: '/observability/capacity',
       action: 'read',
       subject: 'all'
     },
@@ -41,42 +48,45 @@ const navigation = () => {
       subject: 'all'
     },
     {
+      title: 'SLOs',
+      path: '/service-continuity/slo',
+      icon: 'mdi:target',
+      action: 'read',
+      subject: 'all'
+    },
+    {
       title: 'Availability',
       icon: 'mdi:list-status',
-      path: '/services/availability',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Capacity',
-      icon: 'mdi:thermometer-check',
-      path: '/services/capacity',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Performance',
-      icon: 'mdi:chart-areaspline-variant',
-      path: '/services/performance',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      sectionTitle: 'AI/Automation',
+      path: '/service-continuity/availability',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'Automations',
-      path: '/tasks',
       icon: 'mdi:arrow-decision-auto',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Tasks',
+          path: '/service-continuity/tasks',
+          icon: 'mdi:subtasks',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Workflows',
+          path: '/service-continuity/workflows',
+          icon: 'mdi:workflow',
+          action: 'read',
+          subject: 'all'
+        }
+      ]
     },
     {
-      sectionTitle: 'Infrastructure',
+      sectionTitle: 'Administration',
       action: 'manage',
-      subject: 'infrastructure-section'
+      subject: 'admin-section'
     },
     {
       title: 'Inventory',
@@ -91,11 +101,6 @@ const navigation = () => {
       path: '/administration/services',
       action: 'manage',
       subject: 'settings-nav'
-    },
-    {
-      sectionTitle: 'Administration',
-      action: 'manage',
-      subject: 'admin-section'
     },
     {
       title: 'Users',

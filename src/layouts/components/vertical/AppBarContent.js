@@ -70,7 +70,7 @@ const notifications = [
 const shortcuts = [
   {
     title: 'Users',
-    url: '/administration/users/',
+    url: '/management/security/users',
     subtitle: 'Manage Users',
     icon: 'mdi:account-outline'
   },
@@ -79,6 +79,18 @@ const shortcuts = [
     subtitle: 'FAQs & Articles',
     icon: 'mdi:help-circle-outline',
     url: '/oscar/docs'
+  },
+  {
+    title: 'Tasks',
+    subtitle: 'Manage Tasks',
+    icon: 'mdi:subtasks',
+    url: '/service-continuity/tasks/'
+  },
+  {
+    title: 'Log Explorer',
+    subtitle: 'Explore Logs',
+    icon: 'mdi:math-log',
+    url: '/observability/logs/explorer/'
   }
 ]
 

@@ -92,8 +92,6 @@ const ShortcutsDropdown = props => {
     if (shortcut.title === 'Grafana' && session) {
       // Perform the redirection with headers
       window.location.href = `/api/oscar/ui?url=${shortcut.url}`
-    } else {
-      window.location.href = shortcut.url
     }
   }, [])
 
@@ -115,7 +113,7 @@ const ShortcutsDropdown = props => {
           sx={{ cursor: 'default', userSelect: 'auto', backgroundColor: 'transparent !important' }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <Typography sx={{ fontSize: '1.125rem', color: 'text.secondary', fontWeight: 600 }}>Shortcuts</Typography>
+            <Typography sx={{ fontSize: '1.125rem', color: 'text.secondary', fontWeight: 600 }}>Favorites</Typography>
             <Tooltip title='Add Shortcut' placement='top'>
               <IconButton disableRipple>
                 <Icon icon='mdi:plus-circle-outline' />

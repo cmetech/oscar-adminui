@@ -1336,6 +1336,7 @@ const TasksList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              setRunFilterQuery,
               showButtons: false,
               showexport: true
             },

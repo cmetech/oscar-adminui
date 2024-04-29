@@ -15,6 +15,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 
 // ** Components
 import Autocomplete from 'src/layouts/components/Autocomplete'
+import UserShortcutsDropdown from 'src/layouts/components/shared-components/UserShortcutsDropdown'
 import UserModeToggler from 'src/layouts/components/shared-components/UserModeToggler'
 import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
@@ -63,6 +64,33 @@ const notifications = [
     subtitle: '25 hrs ago',
     avatarImg: '/images/misc/chart.png',
     title: 'Finance report has been generated'
+  }
+]
+
+const shortcuts = [
+  {
+    title: 'Users',
+    url: '/management/security/users',
+    subtitle: 'Manage Users',
+    icon: 'mdi:account-outline'
+  },
+  {
+    title: 'Help Center',
+    subtitle: 'FAQs & Articles',
+    icon: 'mdi:help-circle-outline',
+    url: '/oscar/docs'
+  },
+  {
+    title: 'Tasks',
+    subtitle: 'Manage Tasks',
+    icon: 'mdi:subtasks',
+    url: '/service-continuity/tasks/'
+  },
+  {
+    title: 'Log Explorer',
+    subtitle: 'Explore Logs',
+    icon: 'mdi:math-log',
+    url: '/observability/logs/explorer/'
   }
 ]
 
@@ -137,6 +165,7 @@ const AppBarContent = props => {
         <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
+        <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} />
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>

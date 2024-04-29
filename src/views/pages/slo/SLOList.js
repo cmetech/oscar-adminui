@@ -664,6 +664,8 @@ const SLOList = props => {
           params: {
             sort: sortModel[0]?.sort || 'asc',
             column: sortModel[0]?.field || 'name',
+            skip: paginationModel.page + 1,
+            limit: paginationModel.pageSize,
             start_time: startTime,
             end_time: endTime,
             calculate: 'true',
@@ -672,10 +674,10 @@ const SLOList = props => {
           timeout: 30000
         })
 
-        setRowCount(response.data.total || 0)
-        setSlos(response.data.rows)
-        setRows(response.data.rows || [])
-        props.set_total(response.data.total)
+        setRowCount(response.data.total_records || 0)
+        setSlos(response.data.records)
+        setRows(response.data.records || [])
+        props.set_total(response.data.total_records)
       } catch (error) {
         console.error('Failed to fetch data:', error)
 

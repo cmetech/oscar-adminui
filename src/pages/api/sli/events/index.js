@@ -6,14 +6,14 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
+
     const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}' } = query
-    console.log('Filter', filter)
 
     const queryStringParameters = {
+      sort: sort,
+      column: column,
       start_time: start_time,
       end_time: end_time,
-      column: column,
-      order: sort,
       page: skip,
       perPage: limit,
       filter: filter || '{}' // Default to empty object if not provided
@@ -26,15 +26,11 @@ async function handler(req, res) {
         if (value) url.searchParams.append(key, value)
       })
 
-      console.log('url', url.toString())
-
       const response = await axios.get(url.toString(), {
         timeout: 30000,
         headers: { 'X-API-Key': oscarConfig.API_KEY },
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
-
-      console.log('response', response)
 
       if (response?.data) {
         res.status(response.status || 200).json({

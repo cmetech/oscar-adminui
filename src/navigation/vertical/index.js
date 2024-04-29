@@ -13,91 +13,144 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Advanced Dashboards',
-      path: '/api/oscar/ui',
-      icon: 'mdi:monitor-eye',
-      externalLink: true,
-      openInNewTab: true,
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'SLOs',
-      path: '/observability/slo',
-      icon: 'mdi:target',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Alerts & Events',
+      title: 'Alerts',
       icon: 'mdi:bell-alert',
-      path: '/alertmanager',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Availability',
-      icon: 'mdi:list-status',
-      path: '/services/availability',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Capacity',
-      icon: 'mdi:thermometer-check',
-      path: '/services/capacity',
+      path: '/observability/alerts',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'Performance',
       icon: 'mdi:chart-areaspline-variant',
-      path: '/services/performance',
+      path: '/observability/performance',
       action: 'read',
       subject: 'all'
     },
     {
-      sectionTitle: 'AI/Automation',
+      title: 'Capacity',
+      icon: 'mdi:thermometer-check',
+      path: '/observability/capacity',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Infrastructure',
+      icon: 'mdi:collections',
+      action: 'manage',
+      subject: 'infra-nav',
+      children: [
+        {
+          title: 'Inventory',
+          path: '/observability/inventory',
+          icon: 'mdi:server-network',
+          action: 'manage',
+          subject: 'settings-nav'
+        },
+        {
+          title: 'Monitoring',
+          path: '/api/oscar/ui',
+          icon: 'mdi:monitor-eye',
+          action: 'manage',
+          subject: 'settings-nav',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'error'
+        }
+      ]
+    },
+    {
+      title: 'Logs',
+      icon: 'mdi:math-log',
+      action: 'read',
+      subject: 'all',
+      children: [
+        {
+          title: 'Explorer',
+          path: '/observability/logs/explorer',
+          icon: 'mdi:explore',
+          action: 'read',
+          subject: 'all'
+        }
+      ]
+    },
+    {
+      sectionTitle: 'Service Continuity',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'SLOs',
+      path: '/service-continuity/slo',
+      icon: 'mdi:target',
+      action: 'read',
+      subject: 'all'
+    },
+    {
+      title: 'Availability',
+      icon: 'mdi:list-status',
+      path: '/service-continuity/availability',
       action: 'read',
       subject: 'all'
     },
     {
       title: 'Automations',
-      path: '/tasks',
       icon: 'mdi:arrow-decision-auto',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Tasks',
+          path: '/service-continuity/tasks',
+          icon: 'mdi:subtasks',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Workflows',
+          path: '/service-continuity/workflows',
+          icon: 'mdi:workflow',
+          action: 'read',
+          subject: 'all'
+        }
+      ]
     },
     {
-      sectionTitle: 'Infrastructure',
-      action: 'manage',
-      subject: 'infrastructure-section'
-    },
-    {
-      title: 'Inventory',
-      icon: 'mdi:server',
-      path: '/administration/inventory',
-      action: 'manage',
-      subject: 'settings-nav'
-    },
-    {
-      title: 'Services',
-      icon: 'mdi:service-toolbox',
-      path: '/administration/services',
-      action: 'manage',
-      subject: 'settings-nav'
-    },
-    {
-      sectionTitle: 'Administration',
+      sectionTitle: 'Management',
       action: 'manage',
       subject: 'admin-section'
     },
     {
-      title: 'Users',
-      icon: 'mdi:account-multiple',
-      path: '/administration/users',
+      title: 'Application',
+      icon: 'mdi:application-cog',
       action: 'manage',
-      subject: 'settings-nav'
+      subject: 'settings-nav',
+      children: [
+        {
+          title: 'Monitoring',
+          path: '/management/application/services',
+          icon: 'mdi:server-network',
+          action: 'manage',
+          subject: 'settings-nav'
+        }
+      ]
+    },
+    {
+      title: 'Security',
+      icon: 'mdi:account-security',
+      action: 'manage',
+      subject: 'settings-nav',
+      children: [
+        {
+          title: 'Users',
+          icon: 'mdi:account-multiple',
+          path: '/management/security/users',
+          action: 'manage',
+          subject: 'settings-nav',
+          badgeContent: 'Keycloak',
+          badgeColor: 'error'
+        }
+      ]
     }
   ]
 }

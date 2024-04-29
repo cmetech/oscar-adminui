@@ -6,12 +6,26 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { column = '', sort = '', start_time, end_time, calculate = 'true', filter = '{}' } = query
+
+    const {
+      column = '',
+      sort = '',
+      start_time,
+      end_time,
+      skip = '1',
+      limit = '100',
+      calculate = 'true',
+      filter = '{}'
+    } = query
     console.log('Filter', filter)
 
     const queryStringParameters = {
+      sort: sort,
+      column: column,
       start_time: start_time,
       end_time: end_time,
+      page: skip,
+      perPage: limit,
       calculate: calculate || 'true',
       filter: filter || '{}' // Default to empty object if not provided
     }
@@ -34,10 +48,11 @@ async function handler(req, res) {
 
       if (response?.data) {
         res.status(response.status || 200).json({
-          total: response.data.total_slis || 0,
+          total_records: response.data.total_records || 0,
+          total_pages: response.data.total_pages || 0,
           total_breached: response.data.total_breached || -1,
           total_ok: response.data.total_ok || -1,
-          rows: response.data.slis || []
+          records: response.data.records || []
         })
       } else {
         res.status(500).json({ message: 'No response - An error occurred' })

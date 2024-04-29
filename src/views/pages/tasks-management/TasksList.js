@@ -132,9 +132,9 @@ const TasksList = props => {
   const [tasksIds, setTaskIds] = useAtom(taskIdsAtom)
   const [tasks, setTasks] = useAtom(tasksAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
-  const [filterMode, setFilterMode] = useState('client')
-  const [sortingMode, setSortingMode] = useState('client')
-  const [paginationMode, setPaginationMode] = useState('client')
+  const [filterMode, setFilterMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('server')
+  const [paginationMode, setPaginationMode] = useState('server')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -143,8 +143,6 @@ const TasksList = props => {
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
   const [currentTask, setCurrentTask] = useState(null)
-
-  const editmode = false
 
   const getDetailPanelContent = useCallback(({ row }) => <TaskDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -168,7 +166,6 @@ const TasksList = props => {
     {
       flex: 0.03,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -205,7 +202,6 @@ const TasksList = props => {
     {
       flex: 0.02,
       field: 'owner',
-      editable: editmode,
       headerName: t('Owner'),
       renderCell: params => {
         const { row } = params
@@ -242,7 +238,6 @@ const TasksList = props => {
     {
       flex: 0.015,
       field: 'status',
-      editable: editmode,
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -297,7 +292,6 @@ const TasksList = props => {
     {
       flex: 0.015,
       field: 'type',
-      editable: editmode,
       headerName: t('Type'),
       align: 'center',
       headerAlign: 'center',
@@ -365,7 +359,6 @@ const TasksList = props => {
       flex: 0.03,
       minWidth: 100,
       field: 'description',
-      editable: editmode,
       headerName: t('Description'),
       renderCell: params => {
         const { row } = params
@@ -391,7 +384,6 @@ const TasksList = props => {
       flex: 0.02,
       minWidth: 60,
       field: 'createdAtTime',
-      editable: editmode,
       headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
@@ -425,7 +417,6 @@ const TasksList = props => {
       flex: 0.02,
       minWidth: 60,
       field: 'updatedAtTime',
-      editable: editmode,
       headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
@@ -1077,26 +1068,86 @@ const TasksList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async (sort, sortColumn, filterModel) => {
-      let data = []
+    async filter_model => {
+      // Flag to track whether the request has completed
+      let requestCompleted = false
 
       setLoading(true)
-      await axios
-        .get('/api/tasks', {
-          params: {}
+
+      // Start a timeout to automatically stop loading after 60s
+      const timeoutId = setTimeout(() => {
+        if (!requestCompleted) {
+          setLoading(false)
+
+          // Optionally, set state to show a "no results found" message or take other actions
+          console.log('Request timed out.')
+
+          // Clear the rows or show some placeholder to indicate no results or timeout
+          setRows([])
+        }
+      }, 20000) // 60s timeout
+
+      try {
+        const response = await axios.get('/api/tasks', {
+          params: {
+            sort: sortModel[0]?.sort || 'asc',
+            column: sortModel[0]?.field || 'name',
+            skip: paginationModel.page + 1,
+            limit: paginationModel.pageSize,
+            filter: JSON.stringify(filter_model)
+          },
+          timeout: 10000
         })
-        .then(res => {
-          setRowCount(res.data.total)
-          setRows(res.data.rows)
-          props.set_total(res.data.total)
-          setTasks(res.data.rows)
-        })
+
+        setRowCount(response.data.total_records)
+        setRows(response.data.records)
+        props.set_total(response.data.total_records)
+        setTasks(response.data.records)
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error)
+        toast.error('Failed to fetch tasks')
+      } finally {
+        // Mark the request as completed
+        requestCompleted = true
+        setLoading(false)
+
+        // Clear the timeout
+        clearTimeout(timeoutId)
+        setRunFilterQuery(false)
+      }
 
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setTasks, setRows]
+    [paginationModel, setTasks, setRows]
   )
+
+  // Trigger based on filter application
+  useEffect(() => {
+    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    console.log('Filter Model:', JSON.stringify(filterModel))
+
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        const sort = sortModel[0]?.sort
+        const sortColumn = sortModel[0]?.field
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchData(filterModel)
+      } else {
+        // client side filtering
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel, runFilterQuery]) // Triggered by filter changes
 
   useEffect(() => {
     fetchData()
@@ -1108,7 +1159,7 @@ const TasksList = props => {
     console.log('Sort Model:', JSON.stringify(sortModel))
 
     if (sortingMode === 'server') {
-      // server side sorting
+      fetchData()
     } else {
       // client side sorting
       const column = sortModel[0]?.field
@@ -1131,33 +1182,6 @@ const TasksList = props => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel])
-
-  // Trigger based on filter
-  useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
-
-    if (runFilterQuery && filterModel.items.length > 0) {
-      if (filterMode === 'server') {
-        const sort = sortModel[0]?.sort
-        const sortColumn = sortModel[0]?.field
-        fetchData(sort, sortColumn, filterModel)
-      } else {
-        // client side filtering
-      }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
-    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
-      if (filterMode === 'server') {
-        fetchData(sort, sortColumn, filterModel)
-      } else {
-        // client side filtering
-      }
-      setRunFilterQueryCount(0)
-    } else {
-      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterModel.items.length, runFilterQuery])
 
   const handleAction = event => {
     setAction(event.target.value)
@@ -1312,6 +1336,7 @@ const TasksList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              setRunFilterQuery,
               showButtons: false,
               showexport: true
             },

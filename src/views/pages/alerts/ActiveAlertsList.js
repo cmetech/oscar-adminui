@@ -258,7 +258,7 @@ const ActiveAlertsList = props => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.025,
       field: 'alert_status',
       headerName: t('Status'),
       align: 'center',
@@ -324,7 +324,7 @@ const ActiveAlertsList = props => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.025,
       field: 'severity',
       headerName: t('Severity'),
       align: 'center',

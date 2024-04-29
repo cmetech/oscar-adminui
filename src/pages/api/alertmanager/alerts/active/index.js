@@ -1,7 +1,7 @@
 // Next.js API route for proxying export targets requests to FastAPI
 import axios from 'axios'
 import https from 'https'
-import oscarConfig from 'react-perfect-scrollbar/configs/oscarConfig'
+import oscarConfig from 'src/configs/oscarConfig'
 
 async function handler(req, res) {
   if (req.method === 'GET') {

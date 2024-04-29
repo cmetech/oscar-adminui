@@ -122,7 +122,6 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -144,7 +143,6 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
       flex: 0.075,
       minWidth: 100,
       field: 'value',
-      editable: editmode,
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
@@ -169,7 +167,6 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -194,7 +191,6 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
@@ -216,7 +212,6 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
       flex: 0.075,
       minWidth: 100,
       field: 'value',
-      editable: editmode,
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params

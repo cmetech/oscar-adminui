@@ -77,7 +77,7 @@ const Alerts = () => {
           <Typography variant='h4'>{t('Alert Management')}</Typography>
           {value === '1' && (
             // Conditionally render the DateRangePicker when the Alert History tab is active
-            <DateRangePicker
+            <DateTimeRangePicker
               calendars={2}
               closeOnSelect={false}
               value={dateRange}

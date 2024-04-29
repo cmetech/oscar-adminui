@@ -165,7 +165,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+              <Tooltip title={humanReadableDate} placement='top' arrow>
+                <Typography noWrap>{humanReadableDate}</Typography>
+              </Tooltip>
             </Box>
           </Box>
         )
@@ -254,16 +256,17 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+              <Tooltip title={humanReadableDate} placement='top' arrow>
+                <Typography noWrap>{humanReadableDate}</Typography>
+              </Tooltip>
             </Box>
           </Box>
         )
       }
     },
     {
-      flex: 0.015,
-      field: 'alert_status',
-      editable: editmode,
+      flex: 0.025,
+      field: 'alert_status',  
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -322,7 +325,7 @@ const AlertsList = props => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.025,
       field: 'severity',
       headerName: t('Severity'),
       align: 'center',
@@ -473,7 +476,7 @@ const AlertsList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async filterModel => {
+    async filter_model => {
       // Default start and end times to the last 24 hours if not defined
       let [startDate, endDate] = []
       if (props.onAccept == true) {

@@ -8,7 +8,9 @@ import {
   GridToolbarContainer,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
-  GridToolbarQuickFilter
+  GridToolbarQuickFilter,
+  GridLogicOperator,
+  useGridApiRef
 } from '@mui/x-data-grid-pro'
 import { useTranslation } from 'react-i18next'
 import Typography from '@mui/material/Typography'
@@ -20,6 +22,7 @@ import themeConfig from 'src/configs/themeConfig'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -114,18 +117,24 @@ const AlertDetailPanel = ({ alert }) => {
   const groupDetailsColumns = [
     {
       flex: 0.035,
-      minWidth: 100,
       field: 'group_key',
-      editable: editmode,
       headerName: t('GroupKey'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box 
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.group_key)} placement='bottom' arrow>
-                <StyledLink href='#'>{String(row?.group_key).toUpperCase()}</StyledLink>
+                <Typography noWrap>{String(row?.group_key).toUpperCase()}</Typography>
               </Tooltip>
               <Tooltip title={String(row?.group_id)} placement='bottom' arrow>
                 <Typography
@@ -150,7 +159,6 @@ const AlertDetailPanel = ({ alert }) => {
     {
       flex: 0.02,
       field: 'group_status',
-      editable: editmode,
       headerName: t('Group Status'),
       align: 'center',
       headerAlign: 'center',
@@ -174,12 +182,28 @@ const AlertDetailPanel = ({ alert }) => {
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
               <CustomChip
                 rounded
-                size='small'
-                skin='light'
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
                 sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
@@ -191,18 +215,24 @@ const AlertDetailPanel = ({ alert }) => {
     },
     {
       flex: 0.035,
-      minWidth: 100,
       field: 'external_url',
-      editable: editmode,
       headerName: t('External URL'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center', // Ensures vertical centering inside the Box
+            justifyContent: 'flex-start',
+            width: '100%', // Ensures the Box takes full width of the cell
+            height: '100%' // Ensures the Box takes full height of the cell
+          }}
+        >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.external_url)} placement='bottom' arrow>
-                <StyledLink href='#'>{String(row?.external_url).toUpperCase()}</StyledLink>
+                <Typography noWrap>{String(row?.external_url).toUpperCase()}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -213,16 +243,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.035,
       minWidth: 100,
       field: 'generator_url',
-      editable: editmode,
       headerName: t('Generator URL'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.generator_url)} placement='bottom' arrow>
-                <StyledLink href='#'>{String(row?.generator_url).toUpperCase()}</StyledLink>
+                <Typography noWrap>{String(row?.generator_url).toUpperCase()}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -233,16 +270,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.035,
       minWidth: 100,
       field: 'fingerprint',
-      editable: editmode,
       headerName: t('Alert Fingerprint'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.fingerprint)} placement='bottom' arrow>
-                <StyledLink href='#'>{String(row?.fingerprint).toUpperCase()}</StyledLink>
+                <Typography noWrap>{String(row?.fingerprint).toUpperCase()}</Typography>
               </Tooltip>
               <Tooltip title={String(row?.alert_id)} placement='bottom' arrow>
                 <Typography
@@ -276,16 +320,25 @@ const AlertDetailPanel = ({ alert }) => {
         let humanReadableDate = ''
 
         if (row.modified_at) {
-          date = parseISO(row.modified_at?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
+            'US/Eastern',
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {humanReadableDate}
-              </Typography>
+              <Typography noWrap>{humanReadableDate}</Typography>
             </Box>
           </Box>
         )
@@ -316,18 +369,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.name}
-                </Typography>
+                <Typography noWrap>{row?.name}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -338,18 +396,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.075,
       minWidth: 100,
       field: 'value',
-      editable: editmode,
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.value)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.value}
-                </Typography>
+                <Typography noWrap>{row?.value}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -363,18 +426,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.name}
-                </Typography>
+                <Typography noWrap>{row?.name}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -385,18 +453,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.075,
       minWidth: 100,
       field: 'value',
-      editable: editmode,
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.value)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.value}
-                </Typography>
+                <Typography noWrap>{row?.value}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -410,18 +483,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.025,
       minWidth: 100,
       field: 'name',
-      editable: editmode,
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.name}
-                </Typography>
+                <Typography noWrap>{row?.name}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -432,18 +510,23 @@ const AlertDetailPanel = ({ alert }) => {
       flex: 0.075,
       minWidth: 100,
       field: 'value',
-      editable: editmode,
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Tooltip title={String(row?.value)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-                  {row?.value}
-                </Typography>
+                <Typography noWrap>{row?.value}</Typography>
               </Tooltip>
             </Box>
           </Box>
@@ -491,9 +574,6 @@ const AlertDetailPanel = ({ alert }) => {
               baseButton: {
                 variant: 'outlined'
               },
-              panel: {
-                anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
-              },
               noRowsOverlay: {
                 message: 'No SLOs found'
               },
@@ -501,21 +581,7 @@ const AlertDetailPanel = ({ alert }) => {
                 message: 'No Results Found'
               },
               toolbar: {
-                value: searchValue,
-                clearSearch: () => handleSearch(''),
-                onChange: event => handleSearch(event.target.value),
-                setColumnsButtonEl,
-                setFilterButtonEl,
-                setFilterActive,
-                isFilterActive,
-                setRunFilterQuery,
-                showButtons: false,
-                showexport: true
-              },
-              columnsManagement: {
-                getTogglableColumns,
-                disableShowHideToggle: false,
-                disableResetButton: false
+                showQuickFilter: true
               },
               columnsPanel: {
                 sx: {

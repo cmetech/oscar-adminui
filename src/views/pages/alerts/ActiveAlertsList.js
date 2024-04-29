@@ -61,6 +61,7 @@ import Icon from 'src/@core/components/icon'
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
 import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+import { today, yesterdayRounded } from 'src/lib/calendar-timeranges'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
@@ -127,8 +128,6 @@ const ActiveAlertsList = props => {
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentServer, setCurrentServer] = useState(null)
 
-  const editmode = false
-
   const getDetailPanelContent = useCallback(({ row }) => <ActiveAlertsDetailPanel alert={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
@@ -175,7 +174,6 @@ const ActiveAlertsList = props => {
       flex: 0.035,
       minWidth: 100,
       field: 'alertname',
-      editable: editmode,
       headerName: t('Alertname'),
       renderCell: params => {
         const { row } = params
@@ -203,7 +201,6 @@ const ActiveAlertsList = props => {
       flex: 0.045,
       minWidth: 100,
       field: 'summary',
-      editable: editmode,
       headerName: t('Summary'),
       renderCell: params => {
         const { row } = params
@@ -263,7 +260,6 @@ const ActiveAlertsList = props => {
     {
       flex: 0.015,
       field: 'alert_status',
-      editable: editmode,
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -330,7 +326,6 @@ const ActiveAlertsList = props => {
     {
       flex: 0.015,
       field: 'severity',
-      editable: editmode,
       headerName: t('Severity'),
       align: 'center',
       headerAlign: 'center',
@@ -392,7 +387,6 @@ const ActiveAlertsList = props => {
       flex: 0.03,
       minWidth: 100,
       field: 'instance',
-      editable: editmode,
       headerName: t('Instance'),
       renderCell: params => {
         const { row } = params
@@ -420,7 +414,6 @@ const ActiveAlertsList = props => {
       flex: 0.03,
       minWidth: 100,
       field: 'fingerprint',
-      editable: editmode,
       headerName: t('Fingerprint'),
       renderCell: params => {
         const { row } = params
@@ -459,7 +452,7 @@ const ActiveAlertsList = props => {
       // Default start and end times to the last 24 hours if not defined
       let [startDate, endDate] = []
       if (props.onAccept == true) {
-        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+        ;[startDate, endDate] = [yesterdayRounded, today]
       } else {
         ;[startDate, endDate] = props.onAccept
       }
@@ -502,7 +495,7 @@ const ActiveAlertsList = props => {
 
   useEffect(() => {
     fetchData()
-  }, [refetchTrigger, fetchData])
+  }, [fetchData])
 
   // Trigger based on sort
   useEffect(() => {
@@ -575,7 +568,7 @@ const ActiveAlertsList = props => {
       // console.log('Row:', row)
 
       // Extend the search to include nested paths
-      const searchFields = ['id', 'task_id', 'alias', 'worker']
+      const searchFields = ['alertname', 'alert_status', 'severity', 'summary', 'fingerprint']
 
       return searchFields.some(field => {
         const fieldValue = getNestedValue(row, field)

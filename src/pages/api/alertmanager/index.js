@@ -62,9 +62,11 @@ async function handler(req, res) {
             rows: filteredData || []
           })
         } else {
-          res.status(500).json({ 
-            allData: [],
-            total: 0,
+          res.status(200).json({ 
+            records: [],
+            total_filtered_records: 0,
+            total_pages: 0,
+            total_records: 0,
             rows: []
           })
         }

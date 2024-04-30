@@ -12,73 +12,73 @@ const searchData = [
   },
   {
     id: 2,
-    url: '/observability',
+    url: '/observability/alerts',
     icon: 'mdi:bell-alert',
-    title: 'Alerts & Events',
+    title: 'Alerts',
     category: 'observability'
   },
   {
     id: 3,
-    url: 'https:localhost/ui',
-    icon: 'mdi:monitor-eye',
-    title: 'Advanced Dashboards',
+    url: '/observability/performance',
+    icon: 'mdi:speedometer',
+    title: 'Performance',
     category: 'observability'
   },
   {
     id: 4,
-    url: '/observability/slo/overview',
-    icon: 'mdi:view-dashboard-variant',
-    title: 'Overview',
+    url: '/observability/logs/explorer',
+    icon: 'mdi:math-log',
+    title: 'Log Explorer',
     category: 'observability'
   },
   {
     id: 5,
-    url: '/observability/slo/details',
-    icon: 'mdi:cog',
-    title: 'Details',
+    url: '/observability/capacity',
+    icon: 'mdi:thermometer-check',
+    title: 'Capacity',
     category: 'observability'
   },
   {
     id: 6,
-    url: '/services/availability',
+    url: '/observability/inventory',
+    icon: 'mdi:server',
+    title: 'Inventory Management',
+    category: 'observability'
+  },
+  {
+    id: 7,
+    url: '/service-continuity/tasks',
+    icon: 'mdi:arrow-decision-auto',
+    title: 'Tasks',
+    category: 'serviceContinuity'
+  },
+  {
+    id: 8,
+    url: '/service-continuity/workflows',
+    icon: 'mdi:workflow',
+    title: 'Workflows',
+    category: 'serviceContinuity'
+  },
+  {
+    id: 9,
+    url: '/service-continuity/availability',
     icon: 'mdi:list-status',
     title: 'Availability',
     category: 'serviceContinuity'
   },
   {
-    id: 7,
-    url: '/services/capacity',
-    icon: 'mdi:thermometer-check',
-    title: 'Capacity',
-    category: 'serviceContinuity'
-  },
-  {
-    id: 8,
-    url: '/services/performance',
-    icon: 'mdi:chart-areaspline-variant',
-    title: 'Performance',
-    category: 'serviceContinuity'
-  },
-  {
-    id: 9,
-    url: '/tasks',
-    icon: 'mdi:arrow-decision-auto',
-    title: 'Automations',
-    category: 'aiAutomation'
-  },
-  {
     id: 10,
-    url: '/administration/inventory',
-    icon: 'mdi:server',
-    title: 'Inventory',
-    category: 'infrastructure'
+    url: '/account-settings/account',
+    icon: 'mdi:account-settings',
+    title: 'Account Settings',
+    category: 'management'
   },
   {
     id: 11,
-    url: '/administration/services',
-    icon: 'mdi:service-toolbox',
-    title: 'Services',
-    category: 'infrastructure'
+    url: '/oscar/docs',
+    icon: 'mdi:arrow-decision-auto',
+    title: 'Doc Portal',
+    category: 'documentation'
   }
 ]
 
@@ -92,15 +92,15 @@ async function handler(req, res) {
     const exactData = {
       observability: [],
       serviceContinuity: [],
-      aiAutomation: [],
-      infrastructure: []
+      documentation: [],
+      management: []
     }
 
     const includeData = {
       observability: [],
       serviceContinuity: [],
-      aiAutomation: [],
-      infrastructure: []
+      documentation: [],
+      management: []
     }
 
     searchData.forEach(obj => {
@@ -136,8 +136,8 @@ async function handler(req, res) {
       .json([
         ...exactData.observability.concat(includeData.observability).slice(0, resultsLength),
         ...exactData.serviceContinuity.concat(includeData.serviceContinuity).slice(0, resultsLength),
-        ...exactData.aiAutomation.concat(includeData.aiAutomation).slice(0, resultsLength),
-        ...exactData.infrastructure.concat(includeData.infrastructure).slice(0, resultsLength)
+        ...exactData.documentation.concat(includeData.documentation).slice(0, resultsLength),
+        ...exactData.management.concat(includeData.management).slice(0, resultsLength)
       ])
   } else {
     res.setHeader('Allow', ['GET'])

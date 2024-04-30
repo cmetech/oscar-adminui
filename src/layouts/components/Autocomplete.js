@@ -90,12 +90,49 @@ const defaultSuggestionsData = [
         link: '/service-continuity/availability'
       }
     ]
+  },
+  {
+    category: 'Documentation',
+    suggestions: [
+      {
+        icon: 'mdi:book-open-variant',
+        suggestion: 'Guides',
+        link: '/oscar/docs'
+      },
+      {
+        icon: 'mdi:book-open-page-variant',
+        suggestion: 'API Reference',
+        link: '/oscar/docs'
+      },
+      {
+        icon: 'mdi:book-open-blank-variant',
+        suggestion: 'Changelog',
+        link: '/oscar/docs'
+      }
+    ]
+  },
+  {
+    category: 'Management',
+    suggestions: [
+      {
+        icon: 'mdi:account-settings',
+        suggestion: 'User Profile',
+        link: '/account-settings/account'
+      },
+      {
+        icon: 'mdi:server-network',
+        suggestion: 'Services',
+        link: '/management/application/services'
+      }
+    ]
   }
 ]
 
 const categoryTitle = {
   observability: 'Observability',
-  serviceContinuity: 'Service Continuity'
+  serviceContinuity: 'Service Continuity',
+  documentation: 'Documentation',
+  management: 'Management'
 }
 
 // ** Styled Autocomplete component
@@ -195,7 +232,7 @@ const NoResult = ({ value, setOpenDialog }) => {
         <ListItem sx={{ py: 2 }} disablePadding onClick={() => setOpenDialog(false)}>
           <Box
             component={Link}
-            href='/dashboards/ecommerce'
+            href='/observability/alerts'
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -207,33 +244,14 @@ const NoResult = ({ value, setOpenDialog }) => {
               <Icon icon='mdi:cart-outline' fontSize={20} />
             </Box>
             <Typography variant='body2' sx={{ color: 'text.primary' }}>
-              eCommerce Dashboard
+              Active Alerts
             </Typography>
           </Box>
         </ListItem>
         <ListItem sx={{ py: 2 }} disablePadding onClick={() => setOpenDialog(false)}>
           <Box
             component={Link}
-            href='/pages/user-profile/profile'
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              textDecoration: 'none',
-              '&:hover > *': { color: 'primary.main' }
-            }}
-          >
-            <Box sx={{ mr: 2.5, display: 'flex', color: 'text.primary' }}>
-              <Icon icon='mdi:account-outline' fontSize={20} />
-            </Box>
-            <Typography variant='body2' sx={{ color: 'text.primary' }}>
-              User Profile
-            </Typography>
-          </Box>
-        </ListItem>
-        <ListItem sx={{ py: 2 }} disablePadding onClick={() => setOpenDialog(false)}>
-          <Box
-            component={Link}
-            href='/pages/account-settings/account'
+            href='/account-settings/account'
             sx={{
               display: 'flex',
               alignItems: 'center',

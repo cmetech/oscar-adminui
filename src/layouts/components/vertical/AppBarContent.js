@@ -115,6 +115,7 @@ const CustomBreadcrumbs = () => {
     '/service-continuity/availability': { name: t('Availability'), icon: 'mdi:list-status' },
     '/management/application/services': { name: t('Services'), icon: 'mdi:server-network' },
     '/management/security/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
+    '/account-settings/account': { name: t('Account Settings'), icon: 'mdi:account-settings' },
     '/oscar': { name: t('Oscar Chat'), icon: 'mdi:message-text' },
     '/oscar/docs': { name: t('Doc Portal'), icon: 'mdi:arrow-decision-auto' }
   }

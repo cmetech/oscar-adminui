@@ -445,7 +445,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Task Name'
-          value={taskForm.name || 'N/A'}
+          value={taskForm.name !== undefined ? taskForm.name : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -455,7 +455,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Task Type'
-          value={taskForm.type || 'N/A'}
+          value={taskForm.type !== undefined ? taskForm.type : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -465,7 +465,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Owner'
-          value={taskForm.owner || 'N/A'}
+          value={taskForm.owner !== undefined ? taskForm.owner : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -475,7 +475,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Organization'
-          value={taskForm.organization || 'N/A'}
+          value={taskForm.organization !== undefined ? taskForm.organization : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -485,7 +485,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Description'
-          value={taskForm.description || 'N/A'}
+          value={taskForm.description !== undefined ? taskForm.description : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -509,7 +509,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
           <TextfieldStyled
             fullWidth
             label={`Arg ${index + 1}`}
-            value={arg.value ? arg.value.toString() : 'N/A'}
+            value={arg.value ? arg.value.toString() : ''}
             InputProps={{ readOnly: true }}
             variant='outlined'
             margin='normal'
@@ -530,7 +530,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
             <TextfieldStyled
               fullWidth
               label='Prompt'
-              value={prompt.prompt || 'N/A'}
+              value={prompt.prompt !== undefined ? prompt.prompt : ''}
               InputProps={{ readOnly: true }}
               variant='outlined'
               margin='normal'
@@ -540,7 +540,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
             <TextfieldStyled
               fullWidth
               label='Default Value'
-              value={prompt.default_value || 'N/A'}
+              value={prompt.default_value !== undefined ? prompt.default_value : ''}
               InputProps={{ readOnly: true }}
               variant='outlined'
               margin='normal'
@@ -550,7 +550,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
             <TextfieldStyled
               fullWidth
               label='Value'
-              value={prompt.value || 'N/A'}
+              value={prompt.value !== undefined ? prompt.value : ''}
               InputProps={{ readOnly: true }}
               variant='outlined'
               margin='normal'
@@ -572,7 +572,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Datacenter'
-          value={taskForm.datacenter || 'N/A'}
+          value={taskForm.datacenter !== undefined ? taskForm.datacenter : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -582,7 +582,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Environments'
-          value={taskForm.environments.join(', ') || 'N/A'} // Join the array values into a string
+          value={taskForm.environments.join(', ') !== undefined ? taskForm.environments.join(', ') : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -592,7 +592,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
         <TextfieldStyled
           fullWidth
           label='Components'
-          value={taskForm.components.join(', ') || 'N/A'} // Join the array values into a string
+          value={taskForm.components.join(', ') !== undefined ? taskForm.components.join(', ') : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -603,7 +603,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
           <TextfieldStyled
             fullWidth
             label={`Host ${index + 1}`}
-            value={host.ip_address ? host.ip_address.toString() : 'N/A'}
+            value={host.ip_address ? host.ip_address.toString() : ''}
             InputProps={{ readOnly: true }}
             variant='outlined'
             margin='normal'
@@ -632,7 +632,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
               <TextfieldStyled
                 fullWidth
                 label={label}
-                value={formattedValue || 'N/A'}
+                value={formattedValue !== undefined ? formattedValue : ''}
                 InputProps={{ readOnly: true }}
                 variant='outlined'
                 margin='normal'
@@ -1122,7 +1122,7 @@ const AddTaskWizard = ({ onClose }) => {
                   label='Description'
                   name='description'
                   autoComplete='off'
-                  value={taskForm.description || 'N/A'}
+                  value={taskForm.description !== undefined ? taskForm.description : ''}
                   onChange={handleFormChange}
                   multiline
                   rows={2}

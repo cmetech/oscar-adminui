@@ -7,6 +7,8 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     const payload = req.body
 
+    // console.log('payload:', payload)
+
     try {
       const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/tasks/add`, payload, {
         headers: {

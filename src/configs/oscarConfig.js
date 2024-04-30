@@ -3,7 +3,7 @@ const oscarConfig = {
   MIDDLEWARE_URL: `${process.env.NEXT_PUBLIC_API_URL}`,
   MIDDLEWARE_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
   MIDDLEWARE_INVENTORY_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/inventory`,
-  BRANDING_TAGLINE: 'powered by Magenta'
+  BRANDING_TAGLINE: 'powered by OSCAR'
 }
 
 export default oscarConfig

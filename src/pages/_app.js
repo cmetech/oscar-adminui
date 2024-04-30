@@ -118,7 +118,7 @@ const App = props => {
       <Head>
         <title>{`${themeConfig.templateName} - ${oscarConfig.BRANDING_TAGLINE}`}</title>
         <meta name='description' content={`${themeConfig.templateName} – ${oscarConfig.BRANDING_TAGLINE}`} />
-        <meta name='keywords' content='Ericsson, COMET, powered by Ericsson, Monitoring' />
+        <meta name='keywords' content='Ericsson, COMET, powered by OSCAR, Monitoring' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
 

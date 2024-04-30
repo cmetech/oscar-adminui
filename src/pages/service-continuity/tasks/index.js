@@ -67,7 +67,6 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AddTaskWizard from 'src/views/pages/tasks-management/forms/AddTaskWizard'
 import toast from 'react-hot-toast'
 import { useAtom } from 'jotai'
-import { da } from 'date-fns/locale'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -871,7 +870,6 @@ const TasksManager = () => {
               <Fragment>
                 <Button
                   variant='contained'
-                  disabled
                   color='secondary'
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}

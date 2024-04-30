@@ -75,8 +75,7 @@ const Alerts = () => {
       <Grid item xs={12}>
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={6}>
           <Typography variant='h4'>{t('Alert Management')}</Typography>
-          {value === '1' && (
-            // Conditionally render the DateRangePicker when the Alert History tab is active
+          {value === '2' && (
             <DateTimeRangePicker
               calendars={2}
               closeOnSelect={false}
@@ -200,50 +199,40 @@ const Alerts = () => {
         </Box>
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='Alert-tabs'>
-            {alertGroupTotal == 0 ? (
-              <Tab
-                value='1'
-                label={t('Alert History')}
-                icon={<Icon icon='mdi:arrow-decision-auto' />}
-                iconPosition='start'
-              />
+            {activeAlertsTotal == 0 ? (
+              <Tab value='1' label={t('Active Alerts')} icon={<Icon icon='mdi:bell-alert' />} iconPosition='start' />
             ) : (
               <Tab
                 value='1'
-                label={`${t('Alert History')} (${alertGroupTotal})`}
-                icon={<Icon icon='mdi:arrow-decision-auto' />}
+                label={`${t('Active Alerts')} (${activeAlertsTotal})`}
+                icon={<Icon icon='mdi:bell-alert' />}
                 iconPosition='start'
               />
             )}
-            {activeAlertsTotal == 0 ? (
-              <Tab
-                value='2'
-                label={t('Active Alerts')}
-                icon={<Icon icon='mdi:arrow-decision-auto' />}
-                iconPosition='start'
-              />
+            {alertGroupTotal == 0 ? (
+              <Tab value='2' label={t('Alert History')} icon={<Icon icon='mdi:bell-alert' />} iconPosition='start' />
             ) : (
               <Tab
                 value='2'
-                label={`${t('Active Alerts')} (${activeAlertsTotal})`}
-                icon={<Icon icon='mdi:arrow-decision-auto' />}
+                label={`${t('Alert History')} (${alertGroupTotal})`}
+                icon={<Icon icon='mdi:bell-alert' />}
                 iconPosition='start'
               />
             )}
           </TabList>
           <TabPanel value='1'>
-            <AlertHistorytList
-              dateRange={dateRange}
-              set_total={setAlertGroupTotal}
-              total={alertGroupTotal}
-              onAccept={onAccept}
-            />
-          </TabPanel>
-          <TabPanel value='2'>
             <ActiveAlertsList
               dateRange={dateRange}
               set_total={setActiveAlertsTotal}
               total={activeAlertsTotal}
+              onAccept={onAccept}
+            />
+          </TabPanel>
+          <TabPanel value='2'>
+            <AlertHistorytList
+              dateRange={dateRange}
+              set_total={setAlertGroupTotal}
+              total={alertGroupTotal}
               onAccept={onAccept}
             />
           </TabPanel>

@@ -87,7 +87,7 @@ async function handler(req, res) {
     const { q = '' } = req.query
     const queryLowered = q.toLowerCase()
 
-    console.log('queryLowered', queryLowered)
+    // console.log('queryLowered', queryLowered)
 
     const exactData = {
       observability: [],

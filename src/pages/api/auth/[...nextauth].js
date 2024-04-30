@@ -140,7 +140,7 @@ export const authOptions = {
         }
 
         // Log the updated token object
-        console.log('Updated Token', updatedToken)
+        // console.log('Updated Token', updatedToken)
 
         // Return the updated token object
         return updatedToken
@@ -170,7 +170,7 @@ export const authOptions = {
         }
 
         // Log the updated session object
-        console.log('Updated Session', updatedSession)
+        // console.log('Updated Session', updatedSession)
 
         // Return the updated session object
         return updatedSession

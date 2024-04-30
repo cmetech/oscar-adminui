@@ -1086,8 +1086,8 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         metadata: Object.entries(currentTask.metadata || {}).map(([key, value]) => ({ key, value })),
         hosts: currentTask.hosts.map(host => ({ ip_address: host })) || [],
         datacenter: currentTask.datacenter || '',
-        environments: currentTask.environments.map(environment => ({ value: environment })) || [],
-        components: currentTask.components.map(component => ({ value: component })) || [],
+        environments: currentTask.environments?.map(environment => ({ value: environment })) || [],
+        components: currentTask.components?.map(component => ({ value: component })) || [],
         promptForCredentials,
         promptForAPIKey
       }

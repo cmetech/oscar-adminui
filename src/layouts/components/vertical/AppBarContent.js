@@ -104,11 +104,17 @@ const CustomBreadcrumbs = () => {
 
   const breadcrumbNameMap = {
     '/home': { name: t('Overview'), icon: 'mdi:telescope' },
-    '/observability/slo': { name: 'SLOs', icon: 'mdi:target' },
-    '/tasks': { name: t('Automations'), icon: 'mdi:arrow-decision-auto' },
-    '/administration/inventory': { name: t('Inventory Management'), icon: 'mdi:server' },
-    '/administration/services': { name: t('Services'), icon: 'mdi:service-toolbox' },
-    '/administration/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
+    '/observability/alerts': { name: t('Alerts'), icon: 'mdi:bell' },
+    '/observability/performance': { name: t('Performance'), icon: 'mdi:speedometer' },
+    '/observability/capacity': { name: t('Capacity'), icon: 'mdi:thermometer-check' },
+    '/observability/inventory': { name: t('Inventory Management'), icon: 'mdi:server' },
+    '/observability/logs/explorer': { name: t('Log Explorer'), icon: 'mdi:explore' },
+    '/service-continuity/slo': { name: 'SLOs', icon: 'mdi:target' },
+    '/service-continuity/tasks': { name: t('Tasks'), icon: 'mdi:arrow-decision-auto' },
+    '/service-continuity/workflows': { name: t('Workflows'), icon: 'mdi:workflow' },
+    '/service-continuity/availability': { name: t('Availability'), icon: 'mdi:list-status' },
+    '/management/application/services': { name: t('Services'), icon: 'mdi:server-network' },
+    '/management/security/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
     '/oscar': { name: t('Oscar Chat'), icon: 'mdi:message-text' },
     '/oscar/docs': { name: t('Doc Portal'), icon: 'mdi:arrow-decision-auto' }
   }

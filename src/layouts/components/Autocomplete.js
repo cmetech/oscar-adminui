@@ -36,9 +36,33 @@ const defaultSuggestionsData = [
     category: 'Observability',
     suggestions: [
       {
-        icon: 'mdi:cog',
-        suggestion: 'SLO Details',
-        link: '/observability/slo/details'
+        icon: 'mdi:bell',
+        suggestion: 'Alerts',
+        link: '/observability/alerts'
+      },
+      {
+        icon: 'mdi:speedometer',
+        suggestion: 'Performance',
+        link: '/observability/performance'
+      },
+      {
+        icon: 'mdi:thermometer-check',
+        suggestion: 'Capacity',
+        link: '/observability/capacity'
+      },
+      {
+        icon: 'mdi:server-network',
+        suggestion: 'Inventory',
+        link: '/observability/inventory'
+      },
+      {
+        icon: 'mdi:monitor-eye',
+        suggestion: 'Monitoring',
+        link: '/api/oscar/ui',
+        externalLink: true,
+        openInNewTab: true,
+        badgeContent: 'Grafana',
+        badgeColor: 'error'
       }
     ]
   },
@@ -46,29 +70,24 @@ const defaultSuggestionsData = [
     category: 'Service Continuity',
     suggestions: [
       {
-        icon: 'mdi:thermometer-check',
-        suggestion: 'Capacity',
-        link: '/services/capacity'
-      }
-    ]
-  },
-  {
-    category: 'AI/Automation',
-    suggestions: [
+        icon: 'mdi:target',
+        suggestion: 'SLOs',
+        link: '/service-continuity/slo'
+      },
       {
         icon: 'mdi:arrow-decision-auto',
         suggestion: 'Tasks',
-        link: '/tasks'
-      }
-    ]
-  },
-  {
-    category: 'Infrastructure',
-    suggestions: [
+        link: '/service-continuity/tasks'
+      },
       {
-        icon: 'mdi:service-toolbox',
-        suggestion: 'Services',
-        link: '/administration/services'
+        icon: 'mdi:workflow',
+        suggestion: 'Workflows',
+        link: '/service-continuity/workflows'
+      },
+      {
+        icon: 'mdi:list-status',
+        suggestion: 'Availability',
+        link: '/service-continuity/availability'
       }
     ]
   }
@@ -76,9 +95,7 @@ const defaultSuggestionsData = [
 
 const categoryTitle = {
   observability: 'Observability',
-  serviceContinuity: 'Service Continuity',
-  aiAutomation: 'AI/Automation',
-  infrastructure: 'Infrastructure'
+  serviceContinuity: 'Service Continuity'
 }
 
 // ** Styled Autocomplete component

@@ -120,20 +120,25 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
   const labelsColumns = [
     {
       flex: 0.025,
-      minWidth: 100,
       field: 'name',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          <Box 
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column' , overflow: 'hidden', textOverflow: 'ellipsis'}} >
+                <Typography title={String(row?.name)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.name}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )
@@ -141,20 +146,25 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
     },
     {
       flex: 0.075,
-      minWidth: 100,
       field: 'value',
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.value)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          <Box 
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column',  overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={String(row?.value)}  noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.value}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )
@@ -165,20 +175,25 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
   const receiversColumns = [
     {
       flex: 0.025,
-      minWidth: 100,
       field: 'name',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                <Typography title={String(row?.name)} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.name}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )
@@ -189,20 +204,25 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
   const annotationsColumns = [
     {
       flex: 0.025,
-      minWidth: 100,
       field: 'name',
       headerName: t('Name'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.name)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={String(row?.name)}  noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.name}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )
@@ -210,20 +230,25 @@ const ActiveAlertsDetailPanel = ({ alert }) => {
     },
     {
       flex: 0.075,
-      minWidth: 100,
       field: 'value',
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Tooltip title={String(row?.value)} placement='top' arrow>
-                <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+          <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={String(row?.value)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.value}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )

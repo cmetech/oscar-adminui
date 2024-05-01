@@ -139,7 +139,6 @@ const ActiveAlertsList = props => {
   const columns = [
     {
       flex: 0.03,
-      minWidth: 60,
       field: 'starts_at',
       headerName: t('Started At'),
       renderCell: params => {
@@ -163,8 +162,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -172,7 +173,6 @@ const ActiveAlertsList = props => {
     },
     {
       flex: 0.035,
-      minWidth: 100,
       field: 'alertname',
       headerName: t('Alertname'),
       renderCell: params => {
@@ -188,10 +188,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Tooltip title={String(row?.alertname)} placement='top' arrow>
-                <Typography noWrap>{row?.alertname}</Typography>
-              </Tooltip>
+            <Box sx={{ display: 'flex', flexDirection: 'row', lexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={String(row?.alertname)} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
+                  {row?.alertname}
+                </Typography>
             </Box>
           </Box>
         )
@@ -215,10 +215,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Tooltip title={String(row?.summary)} placement='top' arrow>
-                <Typography noWrap>{row?.summary}</Typography>
-              </Tooltip>
+            <Box sx={{ display: 'flex', flexDirection: 'row' , overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                <Typography title={String(row?.summary)} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
+                  {row?.summary}
+                </Typography>
             </Box>
           </Box>
         )
@@ -250,8 +250,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+              <Typography title={humanReadableDate} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -401,10 +403,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Tooltip title={String(row?.instance)} placement='top' arrow>
-                <Typography noWrap>{row?.instance}</Typography>
-              </Tooltip>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}
+                  >{row?.instance}
+                </Typography>
             </Box>
           </Box>
         )
@@ -428,10 +430,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Tooltip title={String(row?.fingerprint)} placement='top' arrow>
-                <Typography noWrap>{row?.fingerprint}</Typography>
-              </Tooltip>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={String(row?.fingerprint)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                    {row?.fingerprint}
+                </Typography>
             </Box>
           </Box>
         )

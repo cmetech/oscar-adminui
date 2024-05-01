@@ -160,10 +160,15 @@ const SLOList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.name?.toUpperCase()} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.name?.toUpperCase()}
+              </Typography>
               <Typography
+                title={row?.id}
                 noWrap
+                overflow={'hidden'}
+                textOverflow={'ellipsis'}
                 variant='caption'
                 sx={{
                   color:
@@ -207,10 +212,15 @@ const SLOList = props => {
                 alignItems: 'center', // Ensures vertical centering inside the Box
                 flexDirection: 'column',
                 justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
             >
               <CustomChip
+                title={budgetingLabel}
+                overflow='hidden'
+                textOverflow='ellipsis'
                 rounded
                 size='large'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -320,10 +330,15 @@ const SLOList = props => {
                 alignItems: 'center', // Ensures vertical centering inside the Box
                 flexDirection: 'column',
                 justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
             >
               <CustomChip
+                title={row.target?.target_value + '%'}
+                overflow='hidden'
+                textOverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -394,8 +409,10 @@ const SLOList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.description}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.description} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.description}
+              </Typography>
             </Box>
           </Box>
         )

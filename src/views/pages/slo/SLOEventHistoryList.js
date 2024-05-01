@@ -160,10 +160,15 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.sliName?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.sliName?.toUpperCase()} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.sliName?.toUpperCase()}
+              </Typography>
               <Typography
+                title={row?.sliId}
                 noWrap
+                overflow={'hidden'}
+                textOverflow={'ellipsis'}
                 variant='caption'
                 sx={{
                   color:
@@ -196,8 +201,15 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.calculationMethod?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography
+                title={row?.calculationMethod?.toUpperCase()}
+                noWrap
+                overflow={'hidden'}
+                textOverflow={'ellipsis'}
+              >
+                {row?.calculationMethod?.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -223,8 +235,10 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.targetValue}%</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.targetValue + '%'} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.targetValue + '%'}
+              </Typography>
             </Box>
           </Box>
         )
@@ -250,8 +264,10 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.targetPeriod} days</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.targetPeriod + 'days'} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.targetPeriod + 'days'}
+              </Typography>
             </Box>
           </Box>
         )
@@ -277,8 +293,10 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.value}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={row?.value} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.value}
+              </Typography>
             </Box>
           </Box>
         )
@@ -319,10 +337,15 @@ const SLOEventHistoryList = props => {
                 alignItems: 'center', // Ensures vertical centering inside the Box
                 flexDirection: 'column',
                 justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
             >
               <CustomChip
+                title={label}
+                overflow='hidden'
+                textOverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -365,8 +388,10 @@ const SLOEventHistoryList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )

@@ -127,7 +127,7 @@ const navigation = () => {
       subject: 'settings-nav',
       children: [
         {
-          title: 'Monitoring',
+          title: 'Services',
           path: '/management/application/services',
           icon: 'mdi:server-network',
           action: 'manage',

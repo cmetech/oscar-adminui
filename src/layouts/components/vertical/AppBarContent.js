@@ -90,7 +90,9 @@ const shortcuts = [
     title: 'Log Explorer',
     subtitle: 'Explore Logs',
     icon: 'mdi:math-log',
-    url: '/observability/logs/explorer/'
+    url: '/api/oscar/ui?path=explore',
+    externalLink: true,
+    openInNewTab: true
   }
 ]
 

@@ -13,11 +13,30 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts',
+      title: 'Alerting',
       icon: 'mdi:bell-alert',
-      path: '/observability/alerts',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Alerts',
+          path: '/observability/alerts',
+          icon: 'mdi:notifications-active',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Alert Rules',
+          path: '/api/oscar/ui?path=alerting/list',
+          icon: 'mdi:file-document-alert',
+          action: 'read',
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'error'
+        }
+      ]
     },
     {
       title: 'Performance',
@@ -48,7 +67,7 @@ const navigation = () => {
         },
         {
           title: 'Monitoring',
-          path: '/api/oscar/ui',
+          path: '/api/oscar/ui?path=d/rYdddlPWk/node-metrics?orgId=1',
           icon: 'mdi:monitor-eye',
           action: 'manage',
           subject: 'settings-nav',
@@ -67,10 +86,14 @@ const navigation = () => {
       children: [
         {
           title: 'Explorer',
-          path: '/observability/logs/explorer',
+          path: '/api/oscar/ui?path=explore',
           icon: 'mdi:explore',
           action: 'read',
-          subject: 'all'
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'error'
         }
       ]
     },

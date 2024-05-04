@@ -67,10 +67,14 @@ const navigation = () => {
       children: [
         {
           title: 'Explorer',
-          path: '/observability/logs/explorer',
+          path: '/api/oscar/ui',
           icon: 'mdi:explore',
           action: 'read',
-          subject: 'all'
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'error'
         }
       ]
     },
@@ -127,7 +131,7 @@ const navigation = () => {
       subject: 'settings-nav',
       children: [
         {
-          title: 'Monitoring',
+          title: 'Services',
           path: '/management/application/services',
           icon: 'mdi:server-network',
           action: 'manage',

@@ -5,7 +5,9 @@ const navigation = () => {
       path: '/home',
       icon: 'mdi:telescope',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      badgeContent: 'WIP',
+      badgeColor: 'error'
     },
     {
       sectionTitle: 'Observability',

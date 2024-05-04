@@ -34,23 +34,9 @@ const navigation = () => {
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Grafana',
-          badgeColor: 'error'
+          badgeColor: 'info'
         }
       ]
-    },
-    {
-      title: 'Performance',
-      icon: 'mdi:chart-areaspline-variant',
-      path: '/observability/performance',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Capacity',
-      icon: 'mdi:thermometer-check',
-      path: '/observability/capacity',
-      action: 'read',
-      subject: 'all'
     },
     {
       title: 'Infrastructure',
@@ -74,7 +60,7 @@ const navigation = () => {
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Grafana',
-          badgeColor: 'error'
+          badgeColor: 'info'
         }
       ]
     },
@@ -93,7 +79,7 @@ const navigation = () => {
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Grafana',
-          badgeColor: 'error'
+          badgeColor: 'info'
         }
       ]
     },
@@ -131,7 +117,7 @@ const navigation = () => {
         },
         {
           title: 'Workflows',
-          path: '/service-continuity/workflows',
+          path: '#',
           icon: 'mdi:workflow',
           action: 'read',
           subject: 'all'
@@ -139,7 +125,39 @@ const navigation = () => {
       ]
     },
     {
-      sectionTitle: 'Management',
+      title: 'Security',
+      path: '#',
+      icon: 'mdi:security',
+      action: 'manage',
+      subject: 'settings-nav',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      sectionTitle: 'AI/Analytics',
+      action: 'manage',
+      subject: 'admin-section'
+    },
+    {
+      title: 'Anomaly Detection',
+      icon: 'mdi:smoke-detector-variant-alert',
+      path: '#',
+      action: 'read',
+      subject: 'all',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      title: 'AI Assistant',
+      icon: 'mdi:brain',
+      path: '/oscar',
+      action: 'read',
+      subject: 'all',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      sectionTitle: 'Runtime',
       action: 'manage',
       subject: 'admin-section'
     },
@@ -159,8 +177,8 @@ const navigation = () => {
       ]
     },
     {
-      title: 'Security',
-      icon: 'mdi:account-security',
+      title: 'Settings',
+      icon: 'mdi:cog',
       action: 'manage',
       subject: 'settings-nav',
       children: [

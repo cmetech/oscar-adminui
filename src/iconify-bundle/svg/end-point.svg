@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/end-point</title>
+    <g id="icon/light/end-point" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M4.93699,8.5 C4.71497,9.36261 3.93192,10 3,10 C1.89543,10 1,9.10457 1,8 C1,6.89543 1.89543,6 3,6 C3.93192,6 4.71497,6.63739 4.93699,7.5 L15,7.5 L15,8.5 L4.93699,8.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

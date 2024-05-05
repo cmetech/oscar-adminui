@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/ruler</title>
+    <g id="icon/light/ruler" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15.5,5 L11,0.5 L0.5,11 L5,15.5 L15.5,5 Z M5,14.0858 L1.91421,11 L3.10355,9.81066 L3.89645,10.6036 L4.60355,9.89645 L3.81066,9.10356 L4.60355,8.31066 L6.14645,9.85356 L6.85355,9.14645 L5.31066,7.60356 L6.10355,6.81066 L6.89645,7.60356 L7.60355,6.89645 L6.81066,6.10356 L7.60355,5.31066 L9.14645,6.85356 L9.85355,6.14645 L8.31066,4.60356 L9.10355,3.81066 L9.89645,4.60356 L10.6036,3.89645 L9.81066,3.10356 L11,1.91421 L14.0858,5 L5,14.0858 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/warehouse</title>
+    <g id="icon/light/warehouse" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15,14 L1,14 L1,5 L8,2 L15,5 L15,14 Z M8,3.08797 L14,5.6594 L14,13 L11.5,13 L11.5,10 L10,10 L10,7 L6,7 L6,10 L4.5,10 L4.5,13 L2,13 L2,5.6594 L8,3.08797 Z M7,10 L9,10 L9,8 L7,8 L7,10 Z M5.5,11 L5.5,13 L7.5,13 L7.5,11 L5.5,11 Z M8.5,11 L8.5,13 L10.5,13 L10.5,11 L8.5,11 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

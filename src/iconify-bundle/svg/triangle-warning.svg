@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/triangle-warning</title>
+    <g id="icon/light/triangle-warning" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,1 L15.5,14.5 L0.5,14.5 L8,1 Z M8,3.05913 L2.19951,13.5 L13.8005,13.5 L8,3.05913 Z M8,11.2 C8.41421,11.2 8.75,11.5358 8.75,11.95 C8.75,12.3642 8.41421,12.7 8,12.7 C7.58579,12.7 7.25,12.3642 7.25,11.95 C7.25,11.5358 7.58579,11.2 8,11.2 Z M8.5,6 L8.5,10.4 L7.5,10.4 L7.5,6 L8.5,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

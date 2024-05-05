@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/app-launcher</title>
+    <g id="icon/light/app-launcher" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M5,11 L5,13 L3,13 L3,11 L5,11 Z M9,11 L9,13 L7,13 L7,11 L9,11 Z M13,11 L13,13 L11,13 L11,11 L13,11 Z M5,7.00003 L5,9.00003 L3,9.00003 L3,7.00003 L5,7.00003 Z M9,7.00003 L9,9.00003 L7,9.00003 L7,7.00003 L9,7.00003 Z M13,7.00003 L13,9.00003 L11,9.00003 L11,7.00003 L13,7.00003 Z M5,2.99963 L5,4.99963 L3,4.99963 L3,2.99963 L5,2.99963 Z M9,3.00003 L9,5.00003 L7,5.00003 L7,3.00003 L9,3.00003 Z M13,2.99963 L13,4.99963 L11,4.99963 L11,2.99963 L13,2.99963 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

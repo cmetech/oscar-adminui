@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/robot-head</title>
+    <g id="icon/light/robot-head" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M6,1 L6,4 L10,4 L10,1 L11,1 L11,4 L14,4 L14,7 L16,7 L16,11 L14,11 L14,14 L2,14 L2,11 L0,11 L0,7 L2,7 L2,4 L5,4 L5,1 L6,1 Z M13,5 L3,5 L3,13 L13,13 L13,5 Z M10.2921,9.1645 L10.9411,9.9265 L10.7789,10.0569 C10.3059,10.4179 9.33245,11.0065 8.0001,11.0065 C6.66775,11.0065 5.69353,10.4179 5.22101,10.0569 L5.0591,9.9265 L5.7071,9.1645 C6.0041,9.4175 6.8231,10.0065 8.0001,10.0065 C9.02017,10.0065 9.77134,9.5641 10.1462,9.28143 L10.2921,9.1645 Z M2,8 L1,8 L1,10 L2,10 L2,8 Z M15,8 L14,8 L14,10 L15,10 L15,8 Z M7.001,7 L7.001,8 L5,8 L5,7 L7.001,7 Z M11,7 L11,8 L9,8 L9,7 L11,7 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

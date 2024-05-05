@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/heart-solid</title>
+    <g id="icon/light/heart-solid" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M1,6 C1,9.10322 4,12 8,15 C12,12 15,9.10322 15,6 C15,3.81724 13.356,2 11.2,2 C10.3216,2 9.4426,2.30777 8.73456,2.82011 C8.46087,3.01816 8.21271,3.24678 8,3.5 C7.78729,3.24678 7.53913,3.01816 7.26544,2.82011 C6.5574,2.30777 5.67844,2 4.8,2 C2.644,2 1,3.81724 1,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

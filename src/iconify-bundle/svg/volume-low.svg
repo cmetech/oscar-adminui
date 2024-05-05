@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/volume-low</title>
+    <g id="icon/light/volume-low" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,2 L8,14 L4,11 L1,11 L1,5 L4,5 L8,2 Z M7,4 L4.33333,6 L2,6 L2,10 L4.33333,10 L7,12 L7,4 Z M9.65285,4.6943 C11.0195,5.17086 12,6.47092 12,8 C12,9.52908 11.0195,10.8291 9.65285,11.3057 L9.65285,11.3057 L9.2003,10.4006 C10.2402,10.0978 11,9.13762 11,8 C11,6.86238 10.2402,5.90224 9.2003,5.59941 L9.2003,5.59941 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

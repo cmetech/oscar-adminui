@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/email-open</title>
+    <g id="icon/light/email-open" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,9.05902 L2,6.05902 L2,13 L14,13 L14,6.05902 L8,9.05902 Z M15,14 L1,14 L1,5 L8,2 L15,5 L15,14 Z M13.2263,5.32782 L8,3.08797 L2.77368,5.32782 L8,7.94098 L13.2263,5.32782 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

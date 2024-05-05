@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/polygon</title>
+    <g id="icon/light/polygon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,8 L8,2 L2,2 L2,14 L14,14 L14,8 L8,8 Z M13,9 L7,9 L7,3 L3,3 L3,13 L13,13 L13,9 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/send</title>
+    <g id="icon/light/send" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M1,1 L3,8 L1,15 L15,8 L1,1 Z M2.586,2.912 L11.764,7.501 L3.897,7.501 L2.586,2.912 Z M3.896,8.501 L11.764,8.501 L2.586,13.089 L3.896,8.501 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

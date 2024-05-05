@@ -47,9 +47,9 @@ const UserFooterContent = props => {
             <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Feedback')}</StyledLink>
             </Button>
-            <Button variant='contained' color='primary'>
+            {/* <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Support')}</StyledLink>
-            </Button>
+            </Button> */}
           </Stack>
         </Box>
       )}

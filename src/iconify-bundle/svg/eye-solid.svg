@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/eye-solid</title>
+    <g id="icon/light/eye-solid" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,3 C11.4185,3 14.4031,5.01101 16,8 C14.4031,10.989 11.4185,13 8,13 C4.58154,13 1.59687,10.989 0,8 C1.59687,5.01101 4.58154,3 8,3 Z M8,5 C6.34315,5 5,6.34315 5,8 C5,9.65685 6.34315,11 8,11 C9.65685,11 11,9.65685 11,8 C11,6.34315 9.65685,5 8,5 Z M8,6 C9.10457,6 10,6.89543 10,8 C10,9.10457 9.10457,10 8,10 C6.89543,10 6,9.10457 6,8 C6,6.89543 6.89543,6 8,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

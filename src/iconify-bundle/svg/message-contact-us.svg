@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/message-contact-us</title>
+    <g id="icon/light/message-contact-us" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15,2 L15,12 L5,12 L1,15 L1,2 L15,2 Z M14,3 L2,3 L2,13 L4.66667,11 L14,11 L14,3 Z M4.75,6.25 C5.16421,6.25 5.5,6.58579 5.5,7 C5.5,7.41421 5.16421,7.75 4.75,7.75 C4.33579,7.75 4,7.41421 4,7 C4,6.58579 4.33579,6.25 4.75,6.25 Z M8,6.25 C8.41421,6.25 8.75,6.58579 8.75,7 C8.75,7.41421 8.41421,7.75 8,7.75 C7.58579,7.75 7.25,7.41421 7.25,7 C7.25,6.58579 7.58579,6.25 8,6.25 Z M11.25,6.25 C11.6642,6.25 12,6.58579 12,7 C12,7.41421 11.6642,7.75 11.25,7.75 C10.8358,7.75 10.5,7.41421 10.5,7 C10.5,6.58579 10.8358,6.25 11.25,6.25 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

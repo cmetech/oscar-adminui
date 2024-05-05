@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/graph-plot</title>
+    <g id="icon/light/graph-plot" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M2.5,1.5 L2.5,13.5 L14.5,13.5 L14.5,14.5 L1.5,14.5 L1.5,1.5 L2.5,1.5 Z M13.504,3.5 L13.504,4.5 L12.504,4.5 C10.3341,4.5 9.69967,5.97844 8.96416,7.69228 L8.963,7.695 C8.199,9.478 7.333,11.498 4.504,11.498 L3.5,11.498 L3.5,10.498 L4.504,10.498 C6.67385,10.498 7.30891,9.0162 8.04385,7.30134 L8.04541,7.29771 C8.81006,5.51652 9.67574,3.5 12.504,3.5 L13.504,3.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

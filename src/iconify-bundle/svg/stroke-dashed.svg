@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/stroke-dashed</title>
+    <g id="icon/light/stroke-dashed" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M3.76181,11.5303 L4.46968,12.2382 L2.70787,14 L2,13.2921 L3.76181,11.5303 Z M6.93859,8.35354 L7.64646,9.06141 L5.88465,10.8232 L5.17678,10.1153 L6.93859,8.35354 Z M10.1154,5.17678 L10.8232,5.88464 L9.06144,7.64643 L8.35357,6.93856 L10.1154,5.17678 Z M13.2921,2 L14,2.70787 L12.2382,4.46967 L11.5303,3.7618 L13.2921,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/room</title>
+    <g id="icon/light/room" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M2,2 L14,2 L14,14 L8,14 L8,10.0354 C6.30385,10.2781 5,11.7368 5,13.5 L5,14 L2,14 L2,2 Z M3,3 L3,13 L4.02746,13 C4.27619,10.75 6.18372,9 8.5,9 L9,9 L9,13 L13,13 L13,3 L3,3 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

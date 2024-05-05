@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/radio-base-antenna</title>
+    <g id="icon/light/radio-base-antenna" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M3,1 L2,1 L2,4 L7.07692,4 L2,15 L14,15 L8.92308,4 L14,4 L14,1 L13,1 L13,3 L8.5,3 L8.5,1 L7.5,1 L7.5,3 L3,3 L3,1 Z M10.0473,8.82205 L8,4.3863 L6.49867,7.63918 L10.0473,8.82205 Z M10.5896,9.99717 L6.0406,11.5135 L12.3109,13.7266 L10.5896,9.99717 Z M10.081,14 L4.47595,12.0217 L3.56291,14 L10.081,14 Z M5.04364,10.7917 L8.91886,9.50001 L6.07703,8.55273 L5.04364,10.7917 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

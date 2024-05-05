@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/trowel</title>
+    <g id="icon/light/trowel" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15,3.5 L12.5,1 L8,5.5 L8,7.2929 L6.64645,8.64645 L3.5,5.5 L1,15 L10.5,12.5 L7.35356,9.35356 L8.70711,8 L10.5,8 L15,3.5 Z M9,7 L9,5.91421 L12.5,2.41421 L13.5858,3.5 L10.0858,7 L9,7 Z M5.14645,10.1465 L5.93934,9.35356 L4.02399,7.43821 L2.40335,13.5967 L8.56179,11.976 L6.64645,10.0607 L5.85355,10.8536 L5.14645,10.1465 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

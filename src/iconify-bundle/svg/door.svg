@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/door</title>
+    <g id="icon/light/door" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M12.5,1 L12.5,15 L3.5,15 L3.5,1 L12.5,1 Z M11.5,2 L4.5,2 L4.5,14 L11.5,14 L11.5,2 Z M7.25,7.25 L7.25,8.25 L5.25,8.25 L5.25,7.25 L7.25,7.25 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

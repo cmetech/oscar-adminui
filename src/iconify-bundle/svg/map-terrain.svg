@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/map-terrain</title>
+    <g id="icon/light/map-terrain" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15.5,14 L9.5,1.5 L6.59677,7.54839 L5,4 L0.5,14 L15.5,14 Z M13.9108,13 L9.5,3.8109 L7.1335,8.74111 L8.15,11 L7.05341,11 L5,6.43686 L2.04659,13 L3.98,13 L4,12.9583 L4,13 L13.9108,13 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

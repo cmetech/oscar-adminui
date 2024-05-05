@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/engine</title>
+    <g id="icon/light/engine" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M5,3 L5,4 L6.001,4 L6.001,5 L3,5 L3,7.999 L2,7.999 L2,6 L1,6 L1,10.999 L2,10.999 L2,8.999 L3,8.999 L3,12 L7.001,12 L7.001,13 L13,13 L13,12 L14,12 L14,13 L15.001,13 L15.001,6 L14,6 L14,7 L12,7 L12,5 L7.001,5 L7.001,4 L8.001,4 L8.001,3 L5,3 Z M4,6 L11,6 L11,7.999 L14,7.999 L14,10.999 L12,10.999 L12,12 L8.001,12 L8.001,10.999 L4,10.999 L4,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

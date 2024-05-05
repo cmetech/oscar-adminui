@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/weather-humidity</title>
+    <g id="icon/light/weather-humidity" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M7.99999,2.79815 L4.67284,7.77034 C4.04984,8.70137 3.84544,9.85085 4.10929,10.9396 C5.09818,15.0202 10.9018,15.0202 11.8907,10.9396 C12.1545,9.85085 11.9501,8.70137 11.3271,7.77034 L7.99999,2.79815 Z M3.84175,7.21421 C3.06312,8.37781 2.80767,9.81441 3.13742,11.1751 C4.37333,16.275 11.6266,16.275 12.8626,11.1751 C13.1923,9.81441 12.9369,8.37781 12.1582,7.21421 L7.99999,1 L3.84175,7.21421 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

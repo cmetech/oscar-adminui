@@ -231,8 +231,8 @@ const Home = () => {
             <strong>ervice</strong>{' '}
             <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>C</span>
             <strong>ontinuity</strong> by leveraging{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>A</span>I
-            powered{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>A</span>
+            <strong>I</strong> powered{' '}
             <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>R</span>
             <strong>untime</strong> deployed on a containerized environment. Get started with the following:
           </Typography>

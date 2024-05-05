@@ -45,6 +45,7 @@ function createGradient(baseColor, intensity = 30) {
 
 const Home = () => {
   const theme = useTheme()
+  const middleSectionColor = theme.palette.mode === 'dark' ? '#FFCA64' : '#444'
   const { data: session } = useSession()
 
   const userName = session?.user?.name || 'John Doe'
@@ -52,37 +53,39 @@ const Home = () => {
 
   const cards = [
     {
-      title: 'Observability',
-      description: 'Consolidate your logs, metrics with purpose build UIs',
+      title: 'Observe',
+      description:
+        'Collect, Consolidate, and Aggregate data from logs, metrics and events for comprehensive system insights',
       link: '/observability/alerts',
       icon: 'mdi:eye',
       baseColor: '#FCE282'
     },
     {
-      title: 'Service Continuity',
-      description: 'Ensure service reliability',
+      title: 'Detect',
+      description: 'AI/ML techniques to identify anomalies and pinpoint the root cause of service continuity issues',
       link: '/service-continuity/slo',
-      icon: 'mdi:service-toolbox',
+      icon: 'mdi:ear-hearing',
       baseColor: '#CEADE2'
     },
     {
-      title: 'Analytics',
-      description: 'Explore, visualize, and analyze your data using a powerful suite of analytical tools.',
+      title: 'Analyze',
+      description:
+        'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
       link: '#',
-      icon: 'mdi:analytics',
+      icon: 'mdi:brain',
       baseColor: '#70DBAA'
     },
     {
-      title: 'AI/ML',
-      description: 'Leverage machine learning',
+      title: 'Automate',
+      description: 'Easily Run Jobs, Synthetic Monitors, AI Pipelines, Business Process and Data ETL Workflows',
       link: '#',
-      icon: 'mdi:brain',
+      icon: 'mdi:touch-reading',
       baseColor: '#81BAF3'
     }
   ]
 
   const middleSection = {
-    title: 'Get started with OSCAR',
+    title: 'Get Started',
     text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
     imageUrl: '/images/oscar.png',
     imageTitle: 'OSCAR Academy',
@@ -105,7 +108,7 @@ const Home = () => {
     },
     {
       title: 'Runtime',
-      description: 'Monitor OSCAR runtime',
+      description: 'Monitor OSCAR services for runtime issues',
       link: '/management/application/services',
       icon: 'mdi:heart-pulse'
     },
@@ -116,8 +119,8 @@ const Home = () => {
       icon: 'mdi:server-network'
     },
     {
-      title: 'ML Models',
-      description: 'Train and deploy ML models',
+      title: 'AI/ML',
+      description: 'Train, deploy and run AI pipelines and ML models',
       link: '/monitor-stack',
       icon: 'mdi:brain'
     }
@@ -134,7 +137,7 @@ const Home = () => {
       }}
     >
       <Typography variant='h4' sx={{ mb: 6, textAlign: 'left', fontWeight: 900 }}>
-        Hi {firstName}, I'm OSCAR - nice to meet you!
+        Hi {firstName}, I'm OSCAR - I Can ...
       </Typography>
       <Grid container spacing={8}>
         {cards.map((card, index) => (
@@ -220,7 +223,19 @@ const Home = () => {
           <Typography variant='h5' sx={{ mb: 2, fontWeight: 900 }}>
             {middleSection.title}
           </Typography>
-          <Typography sx={{ mb: 2 }}>{middleSection.text}</Typography>
+          <Typography sx={{ mb: 2 }}>
+            <span style={{ fontWeight: 'bold', color: middleSectionColor }}>OSCAR</span> allows for{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>O</span>
+            <strong>bservability</strong> and ensures{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>S</span>
+            <strong>ervice</strong>{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>C</span>
+            <strong>ontinuity</strong> by leveraging{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>A</span>I
+            powered{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>R</span>
+            <strong>untime</strong> deployed on a containerized environment. Get started with the following:
+          </Typography>
           {middleSection.actions.map(action => (
             <Button
               key={action.text}
@@ -290,56 +305,68 @@ const Home = () => {
       <Grid container spacing={2}>
         {managementTools.map((tool, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
+            <Paper
+              elevation={10}
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
                 height: '100%',
+                p: 2,
                 backgroundColor:
                   theme.palette.mode == 'dark'
                     ? theme.palette.customColors.brandGray1
                     : theme.palette.customColors.brandWhite
               }}
             >
-              <CardActionArea onClick={() => (window.location.href = tool.link)} sx={{ flex: 1 }}>
-                <CardContent sx={{ display: 'flex', alignItems: 'top' }}>
-                  <Icon icon={tool.icon} color='success' fontSize={30} />
-                  <Box
-                    sx={{
-                      textAlign: 'left',
-                      flexGrow: 1,
-                      ml: 2, // Adjusted from 6 for closer alignment
-                      width: '80%', // Set specific width relative to parent
-                      maxWidth: 300 // Ensures the Box does not grow beyond 300px
-                    }}
-                  >
-                    <Typography
-                      variant='subtitle1'
+              <Card
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  backgroundColor:
+                    theme.palette.mode == 'dark'
+                      ? theme.palette.customColors.brandGray1
+                      : theme.palette.customColors.brandWhite
+                }}
+              >
+                <CardActionArea onClick={() => (window.location.href = tool.link)} sx={{ flex: 1 }}>
+                  <CardContent sx={{ display: 'flex', alignItems: 'top' }}>
+                    <Icon icon={tool.icon} fontSize={30} />
+                    <Box
                       sx={{
-                        fontWeight: 900,
-                        color:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandWhite
-                            : theme.palette.customColors.brandBlack
+                        textAlign: 'left',
+                        flexGrow: 1,
+                        ml: 2, // Adjusted from 6 for closer alignment
+                        width: '80%', // Set specific width relative to parent
+                        maxWidth: 300 // Ensures the Box does not grow beyond 300px
                       }}
                     >
-                      {tool.title}
-                    </Typography>
-                    <Typography
-                      variant='body2'
-                      sx={{
-                        color:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandWhite
-                            : theme.palette.customColors.brandBlack
-                      }}
-                    >
-                      {tool.description}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+                      <Typography
+                        variant='subtitle1'
+                        sx={{
+                          fontWeight: 900,
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.customColors.brandBlack
+                        }}
+                      >
+                        {tool.title}
+                      </Typography>
+                      <Typography
+                        variant='body2'
+                        sx={{
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.customColors.brandBlack
+                        }}
+                      >
+                        {tool.description}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Paper>
           </Grid>
         ))}
       </Grid>

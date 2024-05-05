@@ -16,7 +16,9 @@ import Paper from '@mui/material/Paper'
 import { styled, useTheme } from '@mui/material/styles'
 import { useSession } from 'next-auth/react'
 
-function createGradient(baseColor, intensity = 30) {
+function createGradient(baseColor, themeMode, intensity = 30) {
+  const adjustIntensity = themeMode === 'dark' ? intensity : intensity + 20 // Darker gradient in light mode
+
   const lightenDarkenColor = (col, amt) => {
     let usePound = false
     if (col[0] === '#') {
@@ -37,9 +39,9 @@ function createGradient(baseColor, intensity = 30) {
     return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16)
   }
 
-  return `linear-gradient(145deg, ${lightenDarkenColor(baseColor, intensity)}, ${lightenDarkenColor(
+  return `linear-gradient(145deg, ${lightenDarkenColor(baseColor, adjustIntensity)}, ${lightenDarkenColor(
     baseColor,
-    -intensity
+    -adjustIntensity
   )})`
 }
 
@@ -58,14 +60,16 @@ const Home = () => {
         'Collect, Consolidate, and Aggregate data from logs, metrics and events for comprehensive system insights',
       link: '/observability/alerts',
       icon: 'mdi:eye',
-      baseColor: '#FCE282'
+      baseColorDark: '#FCE282',
+      baseColorLight: '#FAD22D'
     },
     {
       title: 'Detect',
       description: 'AI/ML techniques to identify anomalies and pinpoint the root cause of service continuity issues',
       link: '/service-continuity/slo',
       icon: 'mdi:ear-hearing',
-      baseColor: '#CEADE2'
+      baseColorDark: '#CEADE2',
+      baseColorLight: '#AF78D2'
     },
     {
       title: 'Analyze',
@@ -73,7 +77,8 @@ const Home = () => {
         'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
       link: '/api/oscar/ui?path=explore',
       icon: 'mdi:brain',
-      baseColor: '#70DBAA',
+      baseColorDark: '#70DBAA',
+      baseColorLight: '#0C9B5B',
       externalLink: true,
       openInNewTab: true
     },
@@ -82,7 +87,8 @@ const Home = () => {
       description: 'Easily Run Jobs, Synthetic Monitors, AI Pipelines, Business Process and Data ETL Workflows',
       link: '/service-continuity/tasks',
       icon: 'mdi:touch-reading',
-      baseColor: '#81BAF3'
+      baseColorDark: '#81BAF3',
+      baseColorLight: '#4D97ED'
     }
   ]
 
@@ -93,11 +99,11 @@ const Home = () => {
     imageTitle: 'OSCAR Academy',
     link: '/oscar/docs',
     imageText:
-      'Deploy, scale, and upgrade your stack faster with Elastic Cloud. We’ll help you quickly move your data.',
+      'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
     actions: [
-      { text: 'Add Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
-      { text: 'Upload Inventory', icon: 'mdi:server-network', link: '/observability/inventory' },
-      { text: 'Create SLOs', icon: 'mdi:target', link: '/service-continuity/slo' }
+      { text: 'Create Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
+      { text: 'Create SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
+      { text: 'Upload Inventory', icon: 'mdi:server-network', link: '/observability/inventory' }
     ]
   }
 
@@ -160,7 +166,11 @@ const Home = () => {
                     sx={{
                       position: 'relative',
                       height: '125px',
-                      background: createGradient(card.baseColor) // Apply dynamic gradient
+                      background: createGradient(
+                        theme.palette.mode === 'dark' ? card.baseColorDark : card.baseColorLight,
+                        theme.palette.mode,
+                        30
+                      )
                     }}
                   >
                     <Box

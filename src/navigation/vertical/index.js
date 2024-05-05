@@ -1,15 +1,6 @@
 const navigation = () => {
   return [
     {
-      title: 'Overview',
-      path: '/home',
-      icon: 'mdi:telescope',
-      action: 'read',
-      subject: 'all',
-      badgeContent: 'WIP',
-      badgeColor: 'error'
-    },
-    {
       sectionTitle: 'Observability',
       action: 'read',
       subject: 'all'

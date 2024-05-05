@@ -71,14 +71,16 @@ const Home = () => {
       title: 'Analyze',
       description:
         'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
-      link: '#',
+      link: '/api/oscar/ui?path=explore',
       icon: 'mdi:brain',
-      baseColor: '#70DBAA'
+      baseColor: '#70DBAA',
+      externalLink: true,
+      openInNewTab: true
     },
     {
       title: 'Automate',
       description: 'Easily Run Jobs, Synthetic Monitors, AI Pipelines, Business Process and Data ETL Workflows',
-      link: '#',
+      link: '/service-continuity/tasks',
       icon: 'mdi:touch-reading',
       baseColor: '#81BAF3'
     }
@@ -103,7 +105,7 @@ const Home = () => {
     {
       title: 'Security',
       description: 'Manage your security settings',
-      link: '/monitor-stack',
+      link: '#',
       icon: 'mdi:application-cog'
     },
     {
@@ -121,7 +123,7 @@ const Home = () => {
     {
       title: 'AI/ML',
       description: 'Train, deploy and run AI pipelines and ML models',
-      link: '/monitor-stack',
+      link: '#',
       icon: 'mdi:brain'
     }
   ]
@@ -143,7 +145,16 @@ const Home = () => {
         {cards.map((card, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Card sx={{ display: 'flex', flexDirection: 'column', height: '300px' }}>
-              <CardActionArea onClick={() => (window.location.href = card.link)} sx={{ flex: 1 }}>
+              <CardActionArea
+                onClick={() => {
+                  if (card.externalLink && card.openInNewTab) {
+                    window.open(card.link, '_blank', 'noopener,noreferrer')
+                  } else {
+                    window.location.href = card.link
+                  }
+                }}
+                sx={{ flex: 1 }}
+              >
                 <Box sx={{ position: 'relative', height: '125px' }}>
                   <Box
                     sx={{

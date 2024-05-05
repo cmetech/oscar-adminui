@@ -6,6 +6,6 @@ export default async function handler(req, res) {
 
   console.log('path', path)
 
-  const oscarUi = `https://localhost:443/ui/${path}`
+  const oscarUi = `https://${process.env.DOMAIN}:${process.env.NGINX_PORT}/ui/${path}`
   res.redirect(oscarUi)
 }

@@ -109,11 +109,15 @@ const navigation = () => {
           subject: 'all'
         },
         {
-          title: 'Workflows',
-          path: '#',
+          title: 'BPMS',
+          path: 'https://localhost:8443/nifi',
           icon: 'mdi:workflow',
           action: 'read',
-          subject: 'all'
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'NiFi',
+          badgeColor: 'info'
         }
       ]
     },

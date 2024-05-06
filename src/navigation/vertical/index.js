@@ -110,7 +110,7 @@ const navigation = () => {
         },
         {
           title: 'BPMS',
-          path: 'https://localhost:8443/nifi',
+          path: '/api/oscar/bpms',
           icon: 'mdi:workflow',
           action: 'read',
           subject: 'all',

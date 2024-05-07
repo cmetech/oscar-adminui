@@ -91,9 +91,24 @@ const navigation = () => {
     {
       title: 'Availability',
       icon: 'mdi:list-status',
-      path: '/service-continuity/availability',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Health',
+          path: '/service-continuity/availability',
+          icon: 'mdi:list-status',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Probes',
+          path: '/service-continuity/probes',
+          icon: 'mdi:monitor-eye',
+          action: 'manage',
+          subject: 'settings-nav',
+        }
+      ]
     },
     {
       title: 'Automations',

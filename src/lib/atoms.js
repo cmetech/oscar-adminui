@@ -37,3 +37,11 @@ export const sloIdsAtom = atom([])
 export const slosAtom = atom([])
 
 export const refetchSloTriggerAtom = atom(0)
+
+export const probesAtom = atom([])
+
+export const probeIdsAtom = atom([])
+
+export const refetchProbeTriggerAtom = atom(0)
+
+

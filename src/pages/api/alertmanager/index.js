@@ -6,18 +6,16 @@ import oscarConfig from '../../../configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { q = '', column = '', sort = '', type, start_time, end_time, skip = '1', limit = '100' } = query
-    const queryLowered = q.toLowerCase()
-
+    const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}'} = query
+   
     console.log('start_time', start_time)
     console.log('end_time', end_time)
     console.log('skip', skip)
     console.log('limit', limit)
     console.log('column', column)
     console.log('sort', sort)
-    console.log('type', type)
-    console.log('query', q)
-
+    console.log('filter', filter)
+  
     try {
       // Construct the request URL with query parameters
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/alerts/`)
@@ -28,46 +26,30 @@ async function handler(req, res) {
       url.searchParams.append('perPage', limit)
       url.searchParams.append('column', column)
       url.searchParams.append('order', sort)
+      url.searchParams.append('filter', filter || '{}')
+
+      console.log('url', url.toString())
 
       const response = await axios.get(url.toString(), {
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
 
       if (response?.data) {
-
-        // console.log('export targets', response?.data)
-        //const dataAsc = response.data.sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        //const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-
-        if (response?.data?.records?.length > 0) {
-          const filteredData = response?.data?.records?.filter(
-            item =>
-            item?.alert_id?.toString().toLowerCase().includes(queryLowered) ||
-            item?.alertname?.toLowerCase().includes(queryLowered) ||
-            item?.alert_status?.toLowerCase().includes(queryLowered) ||
-            item?.severity?.toLowerCase().includes(queryLowered) ||
-            item?.instance?.toLowerCase().includes(queryLowered)
-          )
-
-          // Log the entire response data or any specific part of it
-          //console.log("Fetched data:", response.data);
-          //console.log("Filtered data:", filteredData);
-          //console.log("Length of filtered data:", filteredData.length);
-
-          res.status(200).json({
+        if (response?.data?.records?.length > 0) {          
+          res.status(response.status || 200).json({
             records: response.data.records,
-            total_filtered_records: filteredData.length,
+            //total_filtered_records: filteredData.length,
             total_pages: response.data.total_pages,
             total_records: response.data.total_records,
-            rows: filteredData || []
+            //rows: filteredData || []
           })
         } else {
           res.status(200).json({ 
             records: [],
-            total_filtered_records: 0,
+            //total_filtered_records: 0,
             total_pages: 0,
             total_records: 0,
-            rows: []
+            //rows: []
           })
         }
       } else {

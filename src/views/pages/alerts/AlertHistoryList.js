@@ -44,7 +44,6 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Fade from '@mui/material/Fade'
-import Tooltip from '@mui/material/Tooltip'
 
 // ** ThirdParty Components
 import axios from 'axios'
@@ -175,7 +174,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.035,
-      field: 'alertname',
+      field: 'derived_alertname',
       headerName: t('Alertname'),
       renderCell: params => {
         const { row } = params
@@ -389,7 +388,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.03,
-      field: 'instance',
+      field: 'derived_instance',
       headerName: t('Instance'),
       renderCell: params => {
         const { row } = params
@@ -405,11 +404,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis'  }}>
-              <Tooltip placement='top' arrow>
                 <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
                   {row?.instance}
                 </Typography>
-              </Tooltip>
             </Box>
           </Box>
         )
@@ -417,7 +414,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.03,
-      field: 'receiver',
+      field: 'receiver', //must match the database field for filtering purposes
       headerName: t('Receiver'),
       renderCell: params => {
         const { row } = params
@@ -443,7 +440,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.03,
-      field: 'fingerprint',
+      field: 'fingerPrint',  //must match the database field for filtering purposes
       headerName: t('Fingerprint'),
       renderCell: params => {
         const { row } = params
@@ -478,7 +475,7 @@ const AlertsList = props => {
   }, [rowCount, setRowCountState])
 
   const fetchData = useCallback(
-    async filter_model => {
+    async filterModel => {
       // Default start and end times to the last 24 hours if not defined
       let [startDate, endDate] = []
       if (props.onAccept == true) {
@@ -497,7 +494,7 @@ const AlertsList = props => {
 
       console.log('Start Time:', startTime)
       console.log('End Time:', endTime)
-      console.log('Filter Data:', JSON.stringify(filter_model))
+      console.log('Filter Data:', JSON.stringify(filterModel))
 
       setLoading(true)
       await axios
@@ -522,6 +519,7 @@ const AlertsList = props => {
         })
 
       setLoading(false)
+      setRunFilterQuery(false); //temp adding to check if it fixes my condition
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel, props.onAccept]
@@ -676,6 +674,7 @@ const AlertsList = props => {
           pagination={true}
           paginationMode={paginationMode}
           paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           onPageChange={newPage => setPage(newPage)}
           slots={{

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/infrastructure</title>
+    <g id="icon/light/infrastructure" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M14,11 L14,15 L2,15 L2,11 L14,11 Z M13,12 L3,12 L3,14 L13,14 L13,12 Z M14,6 L14,10 L2,10 L2,6 L14,6 Z M13,7 L3,7 L3,9 L13,9 L13,7 Z M14,1 L14,5 L2,5 L2,1 L14,1 Z M13,2 L3,2 L3,4 L13,4 L13,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

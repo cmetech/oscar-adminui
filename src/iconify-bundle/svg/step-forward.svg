@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/step-forward</title>
+    <g id="icon/light/step-forward" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M10,8.66667 L2,14 L2,2 L10,7.33333 L10,2.5 L14,2.5 L14,13.5 L10,13.5 L10,8.66667 Z M11,12.5 L13,12.5 L13,3.5 L11,3.5 L11,12.5 Z M9.19722,8 L3,12.1315 L3,3.86852 L9.19722,8 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

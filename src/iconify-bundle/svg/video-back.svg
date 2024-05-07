@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/video-back</title>
+    <g id="icon/light/video-back" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,7.21429 L8,2.5 L1,8 L8,13.5 L8,8.78571 L14,13.5 L14,2.5 L8,7.21429 Z M7,11.4425 L2.61859,8 L7,4.55746 L7,11.4425 Z M8.61859,8 L13,11.4425 L13,4.55746 L8.61859,8 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -13,25 +13,30 @@ const navigation = () => {
       subject: 'all'
     },
     {
-      title: 'Alerts',
+      title: 'Alerting',
       icon: 'mdi:bell-alert',
-      path: '/observability/alerts',
       action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Performance',
-      icon: 'mdi:chart-areaspline-variant',
-      path: '/observability/performance',
-      action: 'read',
-      subject: 'all'
-    },
-    {
-      title: 'Capacity',
-      icon: 'mdi:thermometer-check',
-      path: '/observability/capacity',
-      action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Alerts',
+          path: '/observability/alerts',
+          icon: 'mdi:notifications-active',
+          action: 'read',
+          subject: 'all'
+        },
+        {
+          title: 'Alert Rules',
+          path: '/api/oscar/ui?path=alerting/list',
+          icon: 'mdi:file-document-alert',
+          action: 'read',
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'info'
+        }
+      ]
     },
     {
       title: 'Infrastructure',
@@ -48,14 +53,14 @@ const navigation = () => {
         },
         {
           title: 'Monitoring',
-          path: '/api/oscar/ui',
+          path: '/api/oscar/ui?path=d/rYdddlPWk/node-metrics?orgId=1',
           icon: 'mdi:monitor-eye',
           action: 'manage',
           subject: 'settings-nav',
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Grafana',
-          badgeColor: 'error'
+          badgeColor: 'info'
         }
       ]
     },
@@ -67,10 +72,14 @@ const navigation = () => {
       children: [
         {
           title: 'Explorer',
-          path: '/observability/logs/explorer',
+          path: '/api/oscar/ui?path=explore',
           icon: 'mdi:explore',
           action: 'read',
-          subject: 'all'
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Grafana',
+          badgeColor: 'info'
         }
       ]
     },
@@ -108,7 +117,7 @@ const navigation = () => {
         },
         {
           title: 'Workflows',
-          path: '/service-continuity/workflows',
+          path: '#',
           icon: 'mdi:workflow',
           action: 'read',
           subject: 'all'
@@ -116,7 +125,39 @@ const navigation = () => {
       ]
     },
     {
-      sectionTitle: 'Management',
+      title: 'Security',
+      path: '#',
+      icon: 'mdi:security',
+      action: 'manage',
+      subject: 'settings-nav',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      sectionTitle: 'AI/Analytics',
+      action: 'manage',
+      subject: 'admin-section'
+    },
+    {
+      title: 'Anomaly Detection',
+      icon: 'mdi:smoke-detector-variant-alert',
+      path: '#',
+      action: 'read',
+      subject: 'all',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      title: 'AI Assistant',
+      icon: 'mdi:brain',
+      path: '/oscar',
+      action: 'read',
+      subject: 'all',
+      badgeContent: 'Future',
+      badgeColor: 'error'
+    },
+    {
+      sectionTitle: 'Runtime',
       action: 'manage',
       subject: 'admin-section'
     },
@@ -127,7 +168,7 @@ const navigation = () => {
       subject: 'settings-nav',
       children: [
         {
-          title: 'Monitoring',
+          title: 'Services',
           path: '/management/application/services',
           icon: 'mdi:server-network',
           action: 'manage',
@@ -136,8 +177,8 @@ const navigation = () => {
       ]
     },
     {
-      title: 'Security',
-      icon: 'mdi:account-security',
+      title: 'Settings',
+      icon: 'mdi:cog',
       action: 'manage',
       subject: 'settings-nav',
       children: [

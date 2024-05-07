@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/feedback</title>
+    <g id="icon/light/feedback" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15,2 L15,12 L5,12 L1,15 L1,2 L15,2 Z M14,3 L2,3 L2,13 L4.66667,11 L14,11 L14,3 Z M8,8.5 C8.41421,8.5 8.75,8.83579 8.75,9.25 C8.75,9.66421 8.41421,10 8,10 C7.58579,10 7.25,9.66421 7.25,9.25 C7.25,8.83579 7.58579,8.5 8,8.5 Z M8.5,4 L8.5,7.5 L7.5,7.5 L7.5,4 L8.5,4 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/trashcan</title>
+    <g id="icon/light/trashcan" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M10,1 L10,3 L14,3 L14,4 L13,4 L13,15 L3,15 L3,4 L2,4 L2,3 L6,3 L6,1 L10,1 Z M12,4 L4,4 L4,14 L12,14 L12,4 Z M7,6 L7,12 L6,12 L6,6 L7,6 Z M10,6 L10,12 L9,12 L9,6 L10,6 Z M9,2 L7,2 L7,3 L9,3 L9,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

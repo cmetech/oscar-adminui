@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/fuel</title>
+    <g id="icon/light/fuel" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M11,1 L11,6.5 L12.9414,6.5 L13.4414,10.5 L14,10.5 L14,5.20711 L12.1464,3.35355 L12.8536,2.64645 L15,4.79289 L15,11.5 L12.5586,11.5 L12.0586,7.5 L11,7.5 L11,14 L12,14 L12,15 L1,15 L1,14 L2,14 L2,1 L11,1 Z M10,2 L3,2 L3,14 L10,14 L10,2 Z M9,3 L9,7 L4,7 L4,3 L9,3 Z M8,4 L5,4 L5,6 L8,6 L8,4 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/polygon-dashed</title>
+    <g id="icon/light/polygon-dashed" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M9,13 L9,14 L6,14 L6,13 L9,13 Z M14,12 L14,14 L11,14 L11,13 L13,13 L13,12 L14,12 Z M3,12 L3,13 L4,13 L4,14 L2,14 L2,12 L3,12 Z M14,8 L14,10 L13,10 L13,9 L11,9 L11,8 L14,8 Z M3,7 L3,10 L2,10 L2,7 L3,7 Z M8,7 L8,8 L9,8 L9,9 L7,9 L7,7 L8,7 Z M4,2 L4,3 L3,3 L3,5 L2,5 L2,2 L4,2 Z M8,2 L8,5 L7,5 L7,3 L6,3 L6,2 L8,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

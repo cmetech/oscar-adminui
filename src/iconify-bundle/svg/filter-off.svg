@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/filter-off</title>
+    <g id="icon/light/filter-off" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M14.2929,1 L15,1.70712 L10,6.70712 L10,12.5 L6,15 L6,10.7071 L1.70712,15 L1,14.2929 L14.2929,1 Z M9,7.70712 L7,9.70712 L7,13.1958 L9,11.9458 L9,7.70712 Z M12.8786,1 L11.8786,2 L3.72318,2 L6.6888,7.18984 L5.95587,7.92277 L2,1 L12.8786,1 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

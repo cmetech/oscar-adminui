@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/camera-photo</title>
+    <g id="icon/light/camera-photo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M10.618,2 L11.618,4 L15,4 L15,14 L1,14 L1,4 L4.5,4 L5.5,2 L10.618,2 Z M10,3 L6.11803,3 L5.11803,5 L2,5 L2,13 L14,13 L14,5 L11,5 L10,3 Z M8,5.5 C9.65685,5.5 11,6.84315 11,8.5 C11,10.1569 9.65685,11.5 8,11.5 C6.34315,11.5 5,10.1569 5,8.5 C5,6.84315 6.34315,5.5 8,5.5 Z M8,6.5 C6.89543,6.5 6,7.39543 6,8.5 C6,9.60457 6.89543,10.5 8,10.5 C9.10457,10.5 10,9.60457 10,8.5 C10,7.39543 9.10457,6.5 8,6.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -89,10 +89,16 @@ const ShortcutsDropdown = props => {
 
   const handleShortcutClick = useCallback(async shortcut => {
     handleDropdownClose()
-    if (shortcut.title === 'Grafana' && session) {
-      // Perform the redirection with headers
-      window.location.href = `/api/oscar/ui?url=${shortcut.url}`
+    if (shortcut.externalLink) {
+      if (shortcut.openInNewTab) {
+        // Opens the URL in a new tab
+        window.open(shortcut.url, '_blank')
+      } else {
+        // Redirects in the current tab
+        window.location.href = shortcut.url
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

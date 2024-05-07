@@ -1,230 +1,401 @@
-// ** React Imports
-import { useState } from 'react'
-
-// ** MUI Imports
-import Grid from '@mui/material/Grid'
-import Stack from '@mui/material/Stack'
+import React from 'react'
+import BlankLayoutWithAppBar from 'src//layouts/UserBlankLayoutWithAppBar'
+import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Tab from '@mui/material/Tab'
-import MuiTabList from '@mui/lab/TabList'
-import TabPanel from '@mui/lab/TabPanel'
-import TabContext from '@mui/lab/TabContext'
-import { styled, useTheme } from '@mui/material/styles'
-
-// ** Icon Imports
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
+import CardActions from '@mui/material/CardActions'
+import CardActionArea from '@mui/material/CardActionArea'
+import CardMedia from '@mui/material/CardMedia'
+import Grid from '@mui/material/Grid'
 import Icon from 'src/@core/components/icon'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import Paper from '@mui/material/Paper'
+import { styled, useTheme } from '@mui/material/styles'
+import { useSession } from 'next-auth/react'
 
-// ** Custom Components Imports
-import CardStatisticsVerticalComponent from 'src/@core/components/card-statistics/card-stats-vertical'
+function createGradient(baseColor, themeMode, intensity = 30) {
+  const adjustIntensity = themeMode === 'dark' ? intensity : intensity + 20 // Darker gradient in light mode
 
-import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
-import TabularSummaryStatisticsCard from 'src/views/cards/TabularSummaryStatisticsCard'
-import SingleValueCard from 'src/views/cards/SingleValueCard'
-import SingleValueCardPredict from 'src/views/cards/SingleValueCardPredict'
+  const lightenDarkenColor = (col, amt) => {
+    let usePound = false
+    if (col[0] === '#') {
+      col = col.slice(1)
+      usePound = true
+    }
+    let num = parseInt(col, 16)
+    let r = (num >> 16) + amt
+    if (r > 255) r = 255
+    else if (r < 0) r = 0
+    let b = ((num >> 8) & 0x00ff) + amt
+    if (b > 255) b = 255
+    else if (b < 0) b = 0
+    let g = (num & 0x0000ff) + amt
+    if (g > 255) g = 255
+    else if (g < 0) g = 0
 
-// ** Fake Data
-import { alarmData } from 'src/@fake/data/system_incidents'
-import { orderData } from 'src/@fake/data/tps_statistics'
-import { securityData } from 'src/@fake/data/security_incidents'
-
-import { useSettings } from 'src/@core/hooks/useSettings'
-
-const chartOrderData = [
-  { value: 50 },
-  { value: 30 },
-  { value: 500 },
-  { value: 75 },
-  { value: 40 },
-  { value: 75 },
-  { value: 20 }
-]
-
-const transData = [
-  {
-    sales: '86,471',
-    title: 'WSIL',
-    trendDir: 'down',
-    color: 'customColors.brandGreen1',
-    trendNumber: '15%'
-  },
-  {
-    trendDir: 'up',
-    sales: '57,484',
-    title: 'BSCS',
-    color: 'customColors.brandBlack',
-    trendNumber: '85%'
-  },
-  {
-    sales: '2,534',
-    trendDir: 'up',
-    color: 'ericsson.brandYellow1',
-    title: 'EPCOMON',
-    trendNumber: '48%'
-  },
-  {
-    sales: '977',
-    title: 'SPECTRUM',
-    color: 'ericsson.brandRed1',
-    trendDir: 'down',
-    trendNumber: '36%'
-  },
-  {
-    sales: '977',
-    title: 'VERTEX',
-    color: 'customColors.brandOrange1',
-    trendDir: 'down',
-    trendNumber: '36%'
+    return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16)
   }
-]
+
+  return `linear-gradient(145deg, ${lightenDarkenColor(baseColor, adjustIntensity)}, ${lightenDarkenColor(
+    baseColor,
+    -adjustIntensity
+  )})`
+}
 
 const Home = () => {
-  // ** State
-  const [value, setValue] = useState('1')
+  const theme = useTheme()
+  const middleSectionColor = theme.palette.mode === 'dark' ? '#FFCA64' : '#444'
+  const { data: session } = useSession()
 
-  const { settings } = useSettings()
-  const { mode } = settings
+  const userName = session?.user?.name || 'John Doe'
+  const firstName = userName.split(' ')[0]
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue)
+  const cards = [
+    {
+      title: 'Observe',
+      description:
+        'Collect, Consolidate, and Aggregate data from logs, metrics and events for comprehensive system insights',
+      link: '/observability/alerts',
+      icon: 'mdi:eye',
+      baseColorDark: '#FCE282',
+      baseColorLight: '#FAD22D'
+    },
+    {
+      title: 'Detect',
+      description: 'AI/ML techniques to identify anomalies and pinpoint the root cause of service continuity issues',
+      link: '/service-continuity/slo',
+      icon: 'mdi:ear-hearing',
+      baseColorDark: '#CEADE2',
+      baseColorLight: '#AF78D2'
+    },
+    {
+      title: 'Analyze',
+      description:
+        'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
+      link: '/api/oscar/ui?path=explore',
+      icon: 'mdi:brain',
+      baseColorDark: '#70DBAA',
+      baseColorLight: '#0C9B5B',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Automate',
+      description: 'Easily Run Jobs, Synthetic Monitors, AI Pipelines, Business Process and Data ETL Workflows',
+      link: '/service-continuity/tasks',
+      icon: 'mdi:touch-reading',
+      baseColorDark: '#81BAF3',
+      baseColorLight: '#4D97ED'
+    }
+  ]
+
+  const middleSection = {
+    title: 'Get Started',
+    text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
+    imageUrl: '/images/oscar.png',
+    imageTitle: 'OSCAR Academy',
+    link: '/oscar/docs',
+    imageText:
+      'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
+    actions: [
+      { text: 'Create Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
+      { text: 'Create SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
+      { text: 'Upload Inventory', icon: 'mdi:server-network', link: '/observability/inventory' }
+    ]
   }
 
-  // Styled TabList
-  const TabList = styled(MuiTabList)(({ theme }) => ({
-    '& .MuiTab-root': {
-      minHeight: 38,
-      minWidth: 130,
-      borderRadius: 6,
-      color:
-        theme.palette.mode === 'light' ? theme.palette.customColors.brandBlack : theme.palette.customColors.brandWhite,
-      '&.Mui-selected': {
-        backgroundColor: theme.palette.mode === 'light' ? '#E5E5E5' : theme.palette.primary.main,
-        color:
-          theme.palette.mode === 'light' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
-      }
+  const managementTools = [
+    {
+      title: 'Security',
+      description: 'Manage your security settings',
+      link: '#',
+      icon: 'mdi:application-cog'
     },
-    '& .MuiTab-root:hover': {
-      color:
-        theme.palette.mode === 'light' ? theme.palette.customColors.brandBlue : theme.palette.customColors.brandBlue
+    {
+      title: 'Runtime',
+      description: 'Monitor OSCAR services for runtime issues',
+      link: '/management/application/services',
+      icon: 'mdi:heart-pulse'
     },
-    '& .MuiTabs-indicator': {
-      display: 'none'
+    {
+      title: 'Inventory',
+      description: 'Manage your server inventory',
+      link: '/observability/inventory',
+      icon: 'mdi:server-network'
+    },
+    {
+      title: 'AI/ML',
+      description: 'Train, deploy and run AI pipelines and ML models',
+      link: '#',
+      icon: 'mdi:brain'
     }
-  }))
+  ]
 
   return (
-    <ApexChartWrapper>
-      <Stack direction='column' spacing={4}>
-        <Box>
-          <TabContext value={value}>
-            <TabList onChange={handleChange} aria-label='simple tabs example'>
-              <Tab value='1' label='Last Hour' />
-            </TabList>
-            <TabPanel value='1'>
-              <Stack spacing={10}>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Critical API Performance'
-                        value='88.5'
-                        trendDir='up'
-                        trendValue='0.86'
-                        showSparkline={true}
-                        sparklineData={[
-                          81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67,
-                          83.33, 100, 91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
-                        ]}
-                        linkRoute='/taskrequest'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Service Level Agreement'
-                        value='99.8'
-                        trendDir='down'
-                        trendValue='67'
-                        showSparkline={false}
-                        sparklineData={chartOrderData}
-                        linkRoute='/sla'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen4'
-                        title='Health Score'
-                        value='98.7'
-                        trendDir='up'
-                        trendValue='37'
-                        showSparkline={false}
-                        linkRoute='/health/eda'
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <SingleValueCard
-                        bgcolor='customColors.brandGreen'
-                        title='Notable Events'
-                        value='0'
-                        trendDir='up'
-                        trendValue='0'
-                        showSparkline={false}
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                  </Grid>
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        mb: 20,
+        mx: 'auto',
+        maxWidth: 1200
+      }}
+    >
+      <Typography variant='h4' sx={{ mb: 6, textAlign: 'left', fontWeight: 900 }}>
+        Hi {firstName}, I'm OSCAR - I Can ...
+      </Typography>
+      <Grid container spacing={8}>
+        {cards.map((card, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', height: '300px' }}>
+              <CardActionArea
+                onClick={() => {
+                  if (card.externalLink && card.openInNewTab) {
+                    window.open(card.link, '_blank', 'noopener,noreferrer')
+                  } else {
+                    window.location.href = card.link
+                  }
+                }}
+                sx={{ flex: 1 }}
+              >
+                <Box sx={{ position: 'relative', height: '125px' }}>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      height: '125px',
+                      background: createGradient(
+                        theme.palette.mode === 'dark' ? card.baseColorDark : card.baseColorLight,
+                        theme.palette.mode,
+                        30
+                      )
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <Icon icon={card.icon} color='white' fontSize={64} />
+                    </Box>
+                  </Box>
                 </Box>
-                <Box>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='TPS Statistics'
-                        data={orderData.lastHour}
-                        chartData={chartOrderData}
-                        total={orderData.lastHour.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Transactions'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='System Incidents'
-                        data={alarmData.lastHour}
-                        chartData={chartOrderData}
-                        total={alarmData.lastHour.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total System Incidents'
-                        linkRoute='/events'
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4} sx={{ order: 0 }}>
-                      <TabularSummaryStatisticsCard
-                        title='Security Incidents'
-                        data={securityData.lastHour}
-                        chartData={chartOrderData}
-                        total={securityData.lastHour.reduce((acc, cur) => {
-                          return acc + parseInt(cur.sales, 10)
-                        }, 0)}
-                        caption='Total Security Incidents'
-                        linkRoute='/security'
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </TabPanel>
-          </TabContext>
-        </Box>
-      </Stack>
-    </ApexChartWrapper>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    backgroundColor:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandGray1
+                        : theme.palette.customColors.brandWhite,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandWhite
+                        : theme.palette.customColors.brandBlack,
+                    height: '175px'
+                  }}
+                >
+                  <Typography
+                    variant='h6'
+                    component='div'
+                    fontWeight={900}
+                    sx={{
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.customColors.brandBlack
+                    }}
+                  >
+                    {card.title}
+                  </Typography>
+                  <Typography
+                    variant='body2'
+                    sx={{
+                      textAlign: 'center',
+                      color:
+                        theme.palette.mode == 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.customColors.brandBlack
+                    }}
+                  >
+                    {card.description}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Divider sx={{ mt: 8, mb: 4 }} />
+      <Grid container spacing={6} sx={{ my: 4, alignItems: 'center' }}>
+        <Grid item xs={12} md={6}>
+          <Typography variant='h5' sx={{ mb: 2, fontWeight: 900 }}>
+            {middleSection.title}
+          </Typography>
+          <Typography sx={{ mb: 2 }}>
+            <span style={{ fontWeight: 'bold', color: middleSectionColor }}>OSCAR</span> allows for{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>O</span>
+            <strong>bservability</strong> and ensures{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>S</span>
+            <strong>ervice</strong>{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>C</span>
+            <strong>ontinuity</strong> by leveraging{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>A</span>
+            <strong>I</strong> powered{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>R</span>
+            <strong>untime</strong> deployed on a containerized environment. Get started with the following:
+          </Typography>
+          {middleSection.actions.map(action => (
+            <Button
+              key={action.text}
+              variant='contained'
+              color={theme.palette.mode == 'dark' ? 'warning' : 'primary'}
+              startIcon={<Icon icon={action.icon} fontSize={20} />}
+              href={action.link}
+              sx={{ margin: '0.5rem', textTransform: 'none' }}
+            >
+              {action.text}
+            </Button>
+          ))}
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={10}
+            sx={{
+              width: '100%',
+              p: 2,
+              backgroundColor:
+                theme.palette.mode == 'dark'
+                  ? theme.palette.customColors.brandGray1
+                  : theme.palette.customColors.brandWhite
+            }}
+          >
+            <Grid container spacing={2}>
+              <Grid item>
+                <CardMedia
+                  component='img'
+                  sx={{
+                    width: 250,
+                    height: 175,
+                    objectFit: 'contain',
+                    p: 1,
+                    display: 'block',
+                    mx: 'auto'
+                  }}
+                  image={middleSection.imageUrl}
+                  alt={middleSection.imageText}
+                />
+              </Grid>
+              <Grid item xs>
+                <Typography variant='h6' sx={{ mt: 2, fontWeight: 900 }}>
+                  {middleSection.imageTitle}
+                </Typography>
+                <Typography variant='body1' sx={{ mt: 2 }}>
+                  {middleSection.imageText}
+                </Typography>
+                <Button
+                  variant='contained'
+                  color={theme.palette.mode == 'dark' ? 'warning' : 'primary'}
+                  startIcon={<Icon icon='mdi:school' fontSize={20} />}
+                  sx={{ mt: 4, mb: 2 }}
+                  href={middleSection.link}
+                >
+                  Explore OSCAR Academy
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+      </Grid>
+      <Divider sx={{ mt: 4, mb: 4 }} />
+      <Typography variant='h5' sx={{ mt: 20, mb: 4, textAlign: 'left', fontWeight: 900 }}>
+        Management
+      </Typography>
+      <Grid container spacing={2}>
+        {managementTools.map((tool, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Paper
+              elevation={10}
+              sx={{
+                height: '100%',
+                p: 2,
+                backgroundColor:
+                  theme.palette.mode == 'dark'
+                    ? theme.palette.customColors.brandGray1
+                    : theme.palette.customColors.brandWhite
+              }}
+            >
+              <Card
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  backgroundColor:
+                    theme.palette.mode == 'dark'
+                      ? theme.palette.customColors.brandGray1
+                      : theme.palette.customColors.brandWhite
+                }}
+              >
+                <CardActionArea onClick={() => (window.location.href = tool.link)} sx={{ flex: 1 }}>
+                  <CardContent sx={{ display: 'flex', alignItems: 'top' }}>
+                    <Icon icon={tool.icon} fontSize={30} />
+                    <Box
+                      sx={{
+                        textAlign: 'left',
+                        flexGrow: 1,
+                        ml: 2, // Adjusted from 6 for closer alignment
+                        width: '80%', // Set specific width relative to parent
+                        maxWidth: 300 // Ensures the Box does not grow beyond 300px
+                      }}
+                    >
+                      <Typography
+                        variant='subtitle1'
+                        sx={{
+                          fontWeight: 900,
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.customColors.brandBlack
+                        }}
+                      >
+                        {tool.title}
+                      </Typography>
+                      <Typography
+                        variant='body2'
+                        sx={{
+                          color:
+                            theme.palette.mode == 'dark'
+                              ? theme.palette.customColors.brandWhite
+                              : theme.palette.customColors.brandBlack
+                        }}
+                      >
+                        {tool.description}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+      <Divider sx={{ mt: 8, mb: 4 }} />
+    </Box>
   )
 }
 
-Home.acl = {
-  action: 'read',
-  subject: 'overview-page'
-}
-
 export default Home
+
+Home.getLayout = page => <BlankLayoutWithAppBar>{page}</BlankLayoutWithAppBar>

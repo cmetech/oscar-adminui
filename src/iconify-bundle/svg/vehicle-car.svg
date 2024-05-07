@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/vehicle-car</title>
+    <g id="icon/light/vehicle-car" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M14,13 L12,13 L12,12 L4,12 L4,13 L2,13 L2,7.5 L2.222,7 L1,7 L1,6 L2.667,6 L4,3 L12,3 L13.333,6 L15,6 L15,7 L13.778,7 L14,7.5 L14,13 Z M13,7.5 L3,7.5 L3,11 L13,11 L13,7.5 Z M4.75,8.5 C5.16421,8.5 5.5,8.83579 5.5,9.25 C5.5,9.66421 5.16421,10 4.75,10 C4.33579,10 4,9.66421 4,9.25 C4,8.83579 4.33579,8.5 4.75,8.5 Z M11.25,8.5 C11.6642,8.5 12,8.83579 12,9.25 C12,9.66421 11.6642,10 11.25,10 C10.8358,10 10.5,9.66421 10.5,9.25 C10.5,8.83579 10.8358,8.5 11.25,8.5 Z M11.35,4 L4.649,4 L3.538,6.5 L12.461,6.5 L11.35,4 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

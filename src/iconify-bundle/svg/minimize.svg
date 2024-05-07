@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/minimize</title>
+    <g id="icon/light/minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M6,10 L6,14 L5,14 L5,11 L2,11 L2,10 L6,10 Z M14,10 L14,11 L11,11 L11,14 L10,14 L10,10 L14,10 Z M6,2 L6,6 L2,6 L2,5 L5,5 L5,2 L6,2 Z M11,2 L11,5 L14,5 L14,6 L10,6 L10,2 L11,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

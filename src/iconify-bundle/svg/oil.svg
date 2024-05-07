@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/oil</title>
+    <g id="icon/light/oil" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M4,7.5 L0,5.5 L2,3 L5,4.5 L5,6 L7,6 L7,5 L6,5 L6,4 L9,4 L9,5 L8,5 L8,6 L9.5,6 L10.5,8.5 L14,7 L16,9 L11,13 L4,13 L4,7.5 Z M2.27586,4.25596 L4,5.11803 L4,6.38197 L1.55361,5.15877 L2.27586,4.25596 Z M5,12 L10.6492,12 L14.5029,8.91708 L13.7716,8.18584 L9.95208,9.82279 L8.82297,7 L5,7 L5,12 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

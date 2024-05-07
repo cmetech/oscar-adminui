@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/crown</title>
+    <g id="icon/light/crown" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M1,2 L1,13 L15,13 L15,2 L11,6 L8,2 L5,6 L1,2 Z M8,3.66667 L5.10819,7.52241 L2,4.41421 L2,12 L14,12 L14,4.41421 L10.8918,7.52241 L8,3.66667 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

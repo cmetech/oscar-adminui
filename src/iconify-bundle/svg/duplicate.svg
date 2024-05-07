@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/duplicate</title>
+    <g id="icon/light/duplicate" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M5,2 L5,5 L2,5 L2,14 L11,14 L11,11 L14,11 L14,2 L5,2 Z M13,3 L6,3 L6,10 L13,10 L13,3 Z M10,11 L5,11 L5,6 L3,6 L3,13 L10,13 L10,11 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

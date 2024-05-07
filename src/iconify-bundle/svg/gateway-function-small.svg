@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/gateway-function-small</title>
+    <g id="icon/light/gateway-function-small" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M10.5,7.5 L13,10 L10.5,12.5 L9.7929,11.7929 L11.0858,10.5 L6,10.5 L6,9.5 L11.0858,9.5 L9.79288,8.20711 L10.5,7.5 Z M5.5,3.5 L6.20712,4.20711 L4.91423,5.5 L10,5.5 L10,6.5 L4.91419,6.5 L6.2071,7.79289 L5.5,8.5 L3,6 L5.5,3.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

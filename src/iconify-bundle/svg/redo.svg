@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/redo</title>
+    <g id="icon/light/redo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M12,2.99998 L11.2929,3.70707 L13.0858,5.49998 L4.75,5.50001 C2.67893,5.50001 1,7.17894 1,9.25001 C1,11.3211 2.67893,13 4.75,13 L8,13 L8,12 L4.75,12 C3.23122,12 2,10.7688 2,9.25001 C2,7.73122 3.23122,6.50001 4.75,6.50001 L13.0858,6.49998 L11.2929,8.29286 L12,8.99998 L15,5.99996 L12,2.99998 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/sidemenu-left-open</title>
+    <g id="icon/light/sidemenu-left-open" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M15,2 L15,14 L1,14 L1,2 L15,2 Z M14,3 L5,3 L5,13 L14,13 L14,3 Z M4,3 L2,3 L2,5 L3,5 L3,6 L2,6 L2,7.5 L3,7.5 L3,8.5 L2,8.5 L2,10 L3,10 L3,11 L2,11 L2,13 L4,13 L4,3 Z M8.70711,5.20996 L11.4971,7.99996 L8.70711,10.79 L8,10.0829 L10.0829,7.99996 L8,5.91707 L8.70711,5.20996 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/cpu</title>
+    <g id="icon/light/cpu" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M5.5,1 L5.5,3 L7.5,3 L7.5,1 L8.5,1 L8.5,3 L10.5,3 L10.5,1 L11.5,1 L11.5,3 L13,3 L13,4.5 L15,4.5 L15,5.5 L13,5.5 L13,7.5 L15,7.5 L15,8.5 L13,8.5 L13,10.5 L15,10.5 L15,11.5 L13,11.5 L13,13 L11.5,13 L11.5,15 L10.5,15 L10.5,13 L8.5,13 L8.5,15 L7.5,15 L7.5,13 L5.5,13 L5.5,15 L4.5,15 L4.5,13 L3,13 L3,11.5 L1,11.5 L1,10.5 L3,10.5 L3,8.5 L1,8.5 L1,7.5 L3,7.5 L3,5.5 L1,5.5 L1,4.5 L3,4.5 L3,3 L4.5,3 L4.5,1 L5.5,1 Z M12,4 L4,4 L4,12 L12,12 L12,4 Z M10.5,5.5 L10.5,10.5 L5.5,10.5 L5.5,5.5 L10.5,5.5 Z M9.5,6.5 L6.5,6.5 L6.5,9.5 L9.5,9.5 L9.5,6.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

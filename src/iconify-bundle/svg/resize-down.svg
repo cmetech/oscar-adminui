@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/resize-down</title>
+    <g id="icon/light/resize-down" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M7,9 L7,13 L6,13 L6,10.7071 L2.70711,14 L2,13.2929 L5.2929,10 L3,10 L3,9 L7,9 Z M13.2929,2 L14,2.7071 L10.7071,6 L13,6 L13,7 L9,7 L9,3 L10,3 L10,5.29289 L13.2929,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

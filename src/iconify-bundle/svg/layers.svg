@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/layers</title>
+    <g id="icon/light/layers" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M1,5 L3.625,6.5 L1,8 L3.625,9.5 L1,11 L8,15 L15,11 L12.375,9.5 L15,8 L12.375,6.5 L15,5 L8,1 L1,5 Z M11.3672,7.07588 L8,9 L4.63278,7.07588 L3.01556,8 L8,10.8482 L12.9844,8 L11.3672,7.07588 Z M11.3672,10.0759 L8,12 L4.63278,10.0759 L3.01556,11 L8,13.8482 L12.9844,11 L11.3672,10.0759 Z M3.01556,5 L8,7.84825 L12.9844,5 L8,2.15175 L3.01556,5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

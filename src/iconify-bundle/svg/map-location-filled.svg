@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/map-location-filled</title>
+    <g id="icon/light/map-location-filled" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8.5,1 L8.5,3.02469 C10.8622,3.25922 12.7408,5.13779 12.9753,7.5 L15,7.5 L15,8.5 L12.9753,8.5 C12.7408,10.8622 10.8622,12.7408 8.5,12.9753 L8.5,15 L7.5,15 L7.5,12.9753 C5.13779,12.7408 3.25922,10.8622 3.02469,8.5 L1,8.5 L1,7.5 L3.02469,7.5 C3.25922,5.13779 5.13779,3.25922 7.5,3.02469 L7.5,1 L8.5,1 Z M8,4 C5.79086,4 4,5.79086 4,8 C4,10.2091 5.79086,12 8,12 C10.2091,12 12,10.2091 12,8 C12,5.79086 10.2091,4 8,4 Z M8,6 C9.10457,6 10,6.89543 10,8 C10,9.10457 9.10457,10 8,10 C6.89543,10 6,9.10457 6,8 C6,6.89543 6.89543,6 8,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

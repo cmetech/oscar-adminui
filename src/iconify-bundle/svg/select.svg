@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/select</title>
+    <g id="icon/light/select" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M14,2 L14,14 L2,14 L2,2 L14,2 Z M13,3 L3,3 L3,13 L13,13 L13,3 Z M11.1219,5 L11.8652,5.66896 L7.01265,11.0607 L4.14,8.18804 L4.84711,7.48093 L6.97446,9.60828 L11.1219,5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

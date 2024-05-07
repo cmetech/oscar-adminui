@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/search</title>
+    <g id="icon/light/search" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M10.8744,11.5815 C9.82908,12.4664 8.47685,13 7,13 C3.68629,13 1,10.3137 1,7 C1,3.68629 3.68629,1 7,1 C10.3137,1 13,3.68629 13,7 C13,8.47685 12.4664,9.82908 11.5815,10.8744 L15,14.2929 L14.2929,15 L10.8744,11.5815 Z M12,7 C12,9.76142 9.76142,12 7,12 C4.23858,12 2,9.76142 2,7 C2,4.23858 4.23858,2 7,2 C9.76142,2 12,4.23858 12,7 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

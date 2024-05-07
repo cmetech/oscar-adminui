@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/ping-ip</title>
+    <g id="icon/light/ping-ip" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M9,2 L9,2.5 L15,2.5 L15,3.5 L9,3.5 L9,4 L8.5,4 L8.5,5 L14.5,5 L14.5,14 L1.5,14 L1.5,5 L7.5,5 L7.5,4 L7,4 L7,3.5 L1,3.5 L1,2.5 L7,2.5 L7,2 L9,2 Z M13.5,6 L2.5,6 L2.5,13 L13.5,13 L13.5,6 Z M12,11 L12,12 L8,12 L8,11 L12,11 Z M4.70707,7 L7.20711,9.50004 L4.70714,12 L4,11.2929 L5.79289,9.50004 L4,7.70714 L4.70707,7 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

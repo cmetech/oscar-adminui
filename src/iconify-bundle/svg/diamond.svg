@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/diamond</title>
+    <g id="icon/light/diamond" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M4,2 L12,2 L15.5,6.5 L8,14 L0.5,6.5 L4,2 Z M2.15575,6 L4.48908,3 L5.7785,3 L4.6535,6 L2.15575,6 Z M5.7215,6 L6.8465,3 L9.1535,3 L10.2785,6 L5.7215,6 Z M10.2402,7 L5.7598,7 L8.00001,12.2005 L10.2402,7 Z M9.62124,10.9645 L11.329,7 L13.5858,7 L9.62124,10.9645 Z M11.3465,6 L10.2215,3 L11.5109,3 L13.8442,6 L11.3465,6 Z M2.41421,7 L4.67097,7 L6.37878,10.9646 L2.41421,7 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

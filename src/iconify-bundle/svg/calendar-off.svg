@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/calendar-off</title>
+    <g id="icon/light/calendar-off" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M14.2929,1 L15,1.70712 L14.2071,2.5 L15,2.5 L15,14 L2.70712,14 L1.70712,15 L1,14.2929 L14.2929,1 Z M14,6.5 L10.2071,6.5 L8.70712,8 L9,8 L9,9 L7.70712,9 L3.70712,13 L14,13 L14,6.5 Z M5,1.5 L5,2.5 L11,2.5 L11,1.5 L12,1.5 L12,1.87864 L10.3786,3.5 L5,3.5 L5,4.5 L4,4.5 L4,3.5 L2,3.5 L2,5.5 L8.37864,5.5 L7.37864,6.5 L2,6.5 L2,11.8786 L1,12.8786 L1,2.5 L4,2.5 L4,1.5 L5,1.5 Z M9,10.5 L9,11.5 L7,11.5 L7,10.5 L9,10.5 Z M12.5,10.5 L12.5,11.5 L10.5,11.5 L10.5,10.5 L12.5,10.5 Z M12.5,8 L12.5,9 L10.5,9 L10.5,8 L12.5,8 Z M5.5,8 L5.5,8.37864 L4.87864,9 L3.5,9 L3.5,8 L5.5,8 Z M14,3.5 L13.2071,3.5 L11.2071,5.5 L14,5.5 L14,3.5 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

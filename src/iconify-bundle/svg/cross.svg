@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/cross</title>
+    <g id="icon/light/cross" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="shape" fill="#242424" points="3 12.2929 7.29289 8.00002 3 3.70712 3.70709 3 8 7.29291 12.2929 3 13 3.70712 8.70711 8.00002 13 12.2929 12.2929 13 8 8.70712 3.70712 13"></polygon>
+    </g>
+</svg>

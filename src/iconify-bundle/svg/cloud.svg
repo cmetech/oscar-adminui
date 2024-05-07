@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/cloud</title>
+    <g id="icon/light/cloud" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,4 C6.61929,4 5.5,5.11929 5.5,6.5 L5.5,7 L4.5,7 C3.11929,7 2,8.11929 2,9.5 C2,10.8807 3.11929,12 4.5,12 L11.5,12 C12.8807,12 14,10.8807 14,9.5 C14,8.11929 12.8807,7 11.5,7 L10.5,7 L10.5,6.5 C10.5,5.11929 9.38071,4 8,4 Z M4.53544,6 C4.77806,4.30385 6.23676,3 8,3 C9.76324,3 11.2219,4.30385 11.4646,6 L11.5,6 C13.433,6 15,7.567 15,9.5 C15,11.433 13.433,13 11.5,13 L4.5,13 C2.567,13 1,11.433 1,9.5 C1,7.567 2.567,6 4.5,6 L4.53544,6 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

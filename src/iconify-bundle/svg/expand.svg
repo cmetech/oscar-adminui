@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/expand</title>
+    <g id="icon/light/expand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M6.2929,9 L7,9.70711 L3.70711,13 L6,13 L6,14 L2,14 L2,10 L3,10 L3,12.2929 L6.2929,9 Z M9.70711,9 L13,12.2929 L13,10 L14,10 L14,14 L10,14 L10,13 L12.2929,13 L9,9.7071 L9.70711,9 Z M14,2 L14,6 L13,6 L13,3.70711 L9.70711,7 L9,6.2929 L12.2929,3 L10,3 L10,2 L14,2 Z M6,2 L6,3 L3.70711,3 L7,6.29289 L6.2929,7 L3,3.7071 L3,6 L2,6 L2,2 L6,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

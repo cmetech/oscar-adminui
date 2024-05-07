@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/map-directions</title>
+    <g id="icon/light/map-directions" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8,0.5 L15.5,8 L8,15.5 L0.5,8 L8,0.5 Z M8,1.91421 L1.91421,8.00001 L8,14.0858 L14.0858,8.00001 L8,1.91421 Z M9.35355,5.14648 L11.7071,7.50004 L9.35355,9.85359 L8.64645,9.14648 L9.7929,8.00003 L6.5,8.00003 L6.5,10 L5.5,10 L5.5,7.00003 L9.79289,7.00003 L8.64645,5.85359 L9.35355,5.14648 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/pin-solid</title>
+    <g id="icon/light/pin-solid" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M9.62743,13.3036 C9.44534,13.5785 9.23321,13.8393 8.99105,14.0815 L5.80835,10.8988 L1.70712,15 L1,14.2929 L5.10124,10.1917 L1.91998,7.01041 C2.16214,6.76825 2.42296,6.55612 2.69781,6.37402 C3.90827,5.57206 5.39088,5.3526 6.75029,5.71563 L11.4659,1 L15.0015,4.53553 L10.2858,9.25117 C10.6489,10.6106 10.4294,12.0932 9.62743,13.3036 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

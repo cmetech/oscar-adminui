@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/weather-precipitation</title>
+    <g id="icon/light/weather-precipitation" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M1.07089,7 C1.02417,7.3266 1,7.66048 1,8 L7.5,8 L7.5,13.25 C7.5,13.6642 7.16421,14 6.75,14 C6.33579,14 6,13.6642 6,13.25 L6,12 L5,12 L5,13.25 C5,14.2165 5.7835,15 6.75,15 C7.7165,15 8.5,14.2165 8.5,13.25 L8.5,8 L15,8 C15,7.66048 14.9758,7.3266 14.9291,7 C14.4439,3.60771 11.5265,1 8,1 C4.47353,1 1.55612,3.60771 1.07089,7 Z M8,2 C10.973,2 13.441,4.16229 13.917,7 L2.08296,7 C2.55904,4.16229 5.027,2 8,2 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

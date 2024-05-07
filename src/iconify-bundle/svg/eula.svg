@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon/light/eula</title>
+    <g id="icon/light/eula" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M9.5,1 L13.5,5 L13.5,15 L2.5,15 L2.5,1 L9.5,1 Z M9.08579,2 L3.5,2 L3.5,14 L12.5,14 L12.5,5.41421 L9.08579,2 Z M8,8 C9.10457,8 10,8.89543 10,10 L9,10 C9,9.44772 8.55228,9 8,9 L6,9 C5.44772,9 5,9.44772 5,10 L4,10 C4,8.89543 4.89543,8 6,8 L8,8 Z M7,3 C8.10457,3 9,3.89543 9,5 L9,5 L9,5.5 C9,6.60457 8.10457,7.5 7,7.5 C5.89543,7.5 5,6.60457 5,5.5 L5,5.5 L5,5 C5,3.89543 5.89543,3 7,3 Z M7,4 C6.44772,4 6,4.44772 6,5 L6,5 L6,5.5 C6,6.05228 6.44772,6.5 7,6.5 C7.55228,6.5 8,6.05229 8,5.5 L8,5.5 L8,5 C8,4.44772 7.55228,4 7,4 Z" id="shape" fill="#242424"></path>
+    </g>
+</svg>

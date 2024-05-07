@@ -743,10 +743,10 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
       }
 
       // Initialize the taskForm with the currentTask schedule data
-      const { schedule = {} } = currentTask
+      const { schedule } = currentTask || {}
 
-      // Destructuring to exclude fields you don't need, rest will contain only needed fields
-      const { id, task_id, created_at, modified_at, ...scheduleFields } = schedule
+      // Check if schedule exists before destructuring
+      const { id, task_id, created_at, modified_at, ...scheduleFields } = schedule || {}
 
       // Dynamically filter out undefined, null, or empty string values from scheduleFields
       const filteredScheduleFields = Object.entries(scheduleFields).reduce((acc, [key, value]) => {

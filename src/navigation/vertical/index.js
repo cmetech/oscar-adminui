@@ -106,7 +106,7 @@ const navigation = () => {
           path: '/service-continuity/probes',
           icon: 'mdi:monitor-eye',
           action: 'manage',
-          subject: 'settings-nav',
+          subject: 'settings-nav'
         }
       ]
     },
@@ -154,15 +154,6 @@ const navigation = () => {
       title: 'Anomaly Detection',
       icon: 'mdi:smoke-detector-variant-alert',
       path: '#',
-      action: 'read',
-      subject: 'all',
-      badgeContent: 'Future',
-      badgeColor: 'error'
-    },
-    {
-      title: 'AI Assistant',
-      icon: 'mdi:brain',
-      path: '/oscar',
       action: 'read',
       subject: 'all',
       badgeContent: 'Future',

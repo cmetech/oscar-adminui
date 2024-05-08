@@ -57,11 +57,35 @@ const StyledLink = styled(Link)(({ mode }) => ({
 
 // Custom styled component to replace `StyledLink`
 const OscarChatToggle = styled('div')(({ mode }) => ({
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
   textDecoration: 'none',
   color: mode === 'light' ? '#0c0c0c' : '#fff',
-  cursor: 'pointer'
+  cursor: 'pointer',
+
+  '& .main-image': {
+    position: 'relative',
+    zIndex: 1,
+    transition: 'opacity 0.2s ease'
+  },
+
+  '& .hover-image': {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 2,
+    opacity: 0,
+    transition: 'opacity 0.2s ease'
+  },
+
+  '&:hover .hover-image': {
+    opacity: 1
+  },
+
+  '&:hover .main-image': {
+    opacity: 0
+  }
 }))
 
 const MenuFooter = () => {
@@ -83,15 +107,31 @@ const MenuFooter = () => {
         borderTop: theme => `1px solid ${theme.palette.divider}`
       }}
     >
-      {navCollapsed ? (
-        <OscarChatToggle onClick={handleToggleOscarChat}>
-          <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
-        </OscarChatToggle>
-      ) : (
-        <OscarChatToggle onClick={handleToggleOscarChat}>
-          <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
-        </OscarChatToggle>
-      )}
+      <OscarChatToggle onClick={handleToggleOscarChat}>
+        {navCollapsed ? (
+          <>
+            <img className='main-image' src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
+            <img
+              className='hover-image'
+              src='/images/oscar-hover.png' // Replace with the hover image path
+              width='40'
+              height='40'
+              alt='hover-image'
+            />
+          </>
+        ) : (
+          <>
+            <img className='main-image' src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
+            <img
+              className='hover-image'
+              src='/images/oscar-hover.png' // Replace with the hover image path
+              width='150'
+              height='150'
+              alt='hover-image'
+            />
+          </>
+        )}
+      </OscarChatToggle>
     </Box>
   )
 }

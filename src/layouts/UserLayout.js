@@ -3,6 +3,8 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import Link from 'next/link'
 import Stack from '@mui/material/Stack'
 import { useSession } from 'next-auth/react'
+import { useAtom } from 'jotai'
+import { showOscarChatAtom } from 'src/lib/atoms'
 
 // ** Layout Imports
 // !Do not remove this Layout import
@@ -49,20 +51,27 @@ const StyledLink = styled(Link)(({ mode }) => ({
   display: 'flex',
   alignItems: 'center',
   textDecoration: 'none',
-  color: mode === 'light' ? '#0c0c0c' : '#fff'
+  color: mode === 'light' ? '#0c0c0c' : '#fff',
+  cursor: 'pointer'
+}))
+
+// Custom styled component to replace `StyledLink`
+const OscarChatToggle = styled('div')(({ mode }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  textDecoration: 'none',
+  color: mode === 'light' ? '#0c0c0c' : '#fff',
+  cursor: 'pointer'
 }))
 
 const MenuFooter = () => {
   const { settings } = useSettings()
-  const { navCollapsed, mode, disablePopper } = settings
-  const [anchorEl, setAnchorEl] = useState(null)
-  const [open, setOpen] = useState(false)
-  const [placement, setPlacement] = useState()
+  const { navCollapsed } = settings
+  const [showOscarChat, setShowOscarChat] = useAtom(showOscarChatAtom)
+  const theme = useTheme()
 
-  const handleClick = newPlacement => event => {
-    setAnchorEl(event.currentTarget)
-    setOpen(prev => placement !== newPlacement || !prev)
-    setPlacement(newPlacement)
+  const handleToggleOscarChat = () => {
+    setShowOscarChat(!showOscarChat)
   }
 
   return (
@@ -75,13 +84,13 @@ const MenuFooter = () => {
       }}
     >
       {navCollapsed ? (
-        <Link href='/oscar'>
-          <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' style={{ cursor: 'pointer' }} />
-        </Link>
+        <OscarChatToggle onClick={handleToggleOscarChat}>
+          <img src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
+        </OscarChatToggle>
       ) : (
-        <Link href='/oscar'>
-          <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' style={{ cursor: 'pointer' }} />
-        </Link>
+        <OscarChatToggle onClick={handleToggleOscarChat}>
+          <img src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
+        </OscarChatToggle>
       )}
     </Box>
   )

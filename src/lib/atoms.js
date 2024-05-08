@@ -32,6 +32,7 @@ export const refetchTaskTriggerAtom = atom(0)
 export const alertIdsAtom = atom([])
 
 export const alertsAtom = atom([])
+
 export const sloIdsAtom = atom([])
 
 export const slosAtom = atom([])
@@ -44,4 +45,4 @@ export const probeIdsAtom = atom([])
 
 export const refetchProbeTriggerAtom = atom(0)
 
-
+export const showOscarChatAtom = atom(false)

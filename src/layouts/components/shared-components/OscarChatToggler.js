@@ -1,91 +1,30 @@
-import { useState, Fragment, useContext } from 'react'
+import { Fragment } from 'react'
 
 // ** MUI Imports
 import IconButton from '@mui/material/IconButton'
 
-// ** Next Import
-import { useRouter } from 'next/router'
+// ** Jotai imports
+import { useAtom } from 'jotai'
+import { showOscarChatAtom } from 'src/lib/atoms'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
-import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import Typography from '@mui/material/Typography'
-import CardContent from '@mui/material/CardContent'
-import ChatBot from 'src/views/chat'
-import Box from '@mui/material/Box'
-import { styled, useTheme } from '@mui/material/styles'
-import Drawer from '@mui/material/Drawer'
+import OscarChatSideBar from 'src/layouts/components/shared-components/OscarChatSideBar'
 
-// Define the responsive Box using styled
-const ResponsiveBox = styled(Box)(({ theme }) => ({
-  width: '100%', // Default width
-  height: '100%', // Default height
-  maxWidth: '1000px', // Default max width
-  mx: 'auto', // Center the box
-  [theme.breakpoints.down('sm')]: {
-    maxWidth: '90%' // Slightly less than full width for sm devices
-  },
-  [theme.breakpoints.down('md')]: {
-    maxWidth: '75%' // Use more space on md devices, but not full width
-  },
-  [theme.breakpoints.up('lg')]: {
-    maxWidth: '1000px' // Limit maxWidth for lg and xl devices
-  }
+const OscarChatToggler = ({ settings, saveSettings }) => {
+  const [showOscarChat, setShowOscarChat] = useAtom(showOscarChatAtom)
 
-  // Add more responsive styles if needed
-}))
-
-const OscarChatToggler = props => {
-  // ** Props
-  const { settings, saveSettings } = props
-  const [state, setState] = useState(false)
-  const theme = useTheme()
-
-  // ** Hooks
-  const router = useRouter()
-
-  const handleModeChange = mode => {
-    saveSettings({ ...settings, mode: mode })
-  }
-
-  const handleModeToggle = open => event => {
-    console.log('oscar chat toggler')
-
-    // router.push('/oscar')
-
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return
-    }
-
-    setState(open)
+  const handleToggle = () => {
+    setShowOscarChat(!showOscarChat)
   }
 
   return (
     <Fragment>
-      <IconButton color='inherit' aria-haspopup='true' onClick={handleModeToggle(true)}>
+      <IconButton color='inherit' aria-haspopup='true' onClick={handleToggle}>
         <Icon icon={settings.mode === 'dark' ? 'mdi:robot' : 'mdi:robot'} />
       </IconButton>
-      <Drawer
-        anchor='right'
-        open={state}
-        onClose={handleModeToggle(false)}
-        sx={{
-          '& .MuiDrawer-paper': {
-            minWidth: 700,
-            backgroundColor:
-              theme.palette.mode === 'dark'
-                ? theme.palette.customColors.brandBlack
-                : theme.palette.customColors.brandWhite
-          }
-        }}
-      >
-        <ResponsiveBox>
-          <ChatBot />
-        </ResponsiveBox>
-      </Drawer>
+      <OscarChatSideBar />
     </Fragment>
   )
 }

@@ -148,7 +148,7 @@ const ChatBot = () => {
   }
 
   return (
-    <div style={{ position: 'relative', height: '1000px' }}>
+    <div style={{ position: 'relative', height: '100%' }}>
       <MainContainer>
         <ChatContainer>
           <ConversationHeader>

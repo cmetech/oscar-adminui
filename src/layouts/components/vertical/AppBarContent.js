@@ -115,6 +115,7 @@ const CustomBreadcrumbs = () => {
     '/service-continuity/tasks': { name: t('Tasks'), icon: 'mdi:arrow-decision-auto' },
     '/service-continuity/workflows': { name: t('Workflows'), icon: 'mdi:workflow' },
     '/service-continuity/availability': { name: t('Availability'), icon: 'mdi:list-status' },
+    '/service-continuity/probes': { name: t('Probes'), icon: 'mdi:monitor-eye' },
     '/management/application/services': { name: t('Services'), icon: 'mdi:server-network' },
     '/management/security/users': { name: t('User Management'), icon: 'mdi:account-multiple' },
     '/account-settings/account': { name: t('Account Settings'), icon: 'mdi:account-settings' },

@@ -23,7 +23,7 @@ import Drawer from '@mui/material/Drawer'
 const ResponsiveBox = styled(Box)(({ theme }) => ({
   width: '100%', // Default width
   height: '100%', // Default height
-  maxWidth: '900px', // Default max width
+  maxWidth: '1000px', // Default max width
   mx: 'auto', // Center the box
   [theme.breakpoints.down('sm')]: {
     maxWidth: '90%' // Slightly less than full width for sm devices
@@ -32,7 +32,7 @@ const ResponsiveBox = styled(Box)(({ theme }) => ({
     maxWidth: '75%' // Use more space on md devices, but not full width
   },
   [theme.breakpoints.up('lg')]: {
-    maxWidth: '900px' // Limit maxWidth for lg and xl devices
+    maxWidth: '1000px' // Limit maxWidth for lg and xl devices
   }
 
   // Add more responsive styles if needed
@@ -74,6 +74,7 @@ const OscarChatToggler = props => {
         onClose={handleModeToggle(false)}
         sx={{
           '& .MuiDrawer-paper': {
+            minWidth: 700,
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.customColors.brandBlack

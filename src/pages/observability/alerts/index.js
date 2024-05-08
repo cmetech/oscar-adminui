@@ -111,10 +111,7 @@ const Alerts = () => {
                     '& .MuiPickersDay-root': {
                       color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
                       '&:hover': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandYellow
-                            : theme.palette.primary.light
+                        color: theme.palette.customColors.accent
                       }
                     },
                     '& .MuiPickersDay-root.Mui-selected': {

@@ -188,10 +188,18 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row', lexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.alertname)} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.alertname}
-                </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                lexDirection: 'column',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              <Typography title={String(row?.alertname)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.alertname}
+              </Typography>
             </Box>
           </Box>
         )
@@ -215,10 +223,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' , overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                <Typography title={String(row?.summary)} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.summary}
-                </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={String(row?.summary)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.summary}
+              </Typography>
             </Box>
           </Box>
         )
@@ -250,8 +258,8 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-              <Typography title={humanReadableDate} noWrap  overflow={'hidden'} textOverflow={'ellipsis'}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
                 {humanReadableDate}
               </Typography>
             </Box>
@@ -403,10 +411,10 @@ const ActiveAlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}
-                  >{row?.instance}
-                </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.instance}
+              </Typography>
             </Box>
           </Box>
         )
@@ -431,9 +439,9 @@ const ActiveAlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.fingerprint)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                    {row?.fingerprint}
-                </Typography>
+              <Typography title={String(row?.fingerprint)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.fingerprint}
+              </Typography>
             </Box>
           </Box>
         )
@@ -699,8 +707,7 @@ const ActiveAlertsList = props => {
             columnsPanel: {
               sx: {
                 '& .MuiCheckbox-root': {
-                  color:
-                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  color: theme.palette.customColors.accent,
                   '&.Mui-checked': {
                     color:
                       theme.palette.mode === 'dark'
@@ -731,12 +738,8 @@ const ActiveAlertsList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
@@ -876,12 +879,8 @@ const ActiveAlertsList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {

@@ -164,9 +164,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {humanReadableDate}
-                </Typography>
+              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -190,9 +190,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.alertname)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.alertname}
-                </Typography>
+              <Typography title={String(row?.alertname)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.alertname}
+              </Typography>
             </Box>
           </Box>
         )
@@ -217,9 +217,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.summary)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.summary}
-                </Typography>
+              <Typography title={String(row?.summary)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.summary}
+              </Typography>
             </Box>
           </Box>
         )
@@ -255,9 +255,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {humanReadableDate}
-                </Typography>
+              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -265,7 +265,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.025,
-      field: 'alert_status',  
+      field: 'alert_status',
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -403,10 +403,10 @@ const AlertsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis'  }}>
-                <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.instance}
-                </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography title={String(row?.instance)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.instance}
+              </Typography>
             </Box>
           </Box>
         )
@@ -430,9 +430,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.receiver)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.receiver}
-                </Typography>
+              <Typography title={String(row?.receiver)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.receiver}
+              </Typography>
             </Box>
           </Box>
         )
@@ -440,7 +440,7 @@ const AlertsList = props => {
     },
     {
       flex: 0.03,
-      field: 'fingerPrint',  //must match the database field for filtering purposes
+      field: 'fingerPrint', //must match the database field for filtering purposes
       headerName: t('Fingerprint'),
       renderCell: params => {
         const { row } = params
@@ -456,9 +456,9 @@ const AlertsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={String(row?.fingerPrint)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                  {row?.fingerPrint}
-                </Typography>
+              <Typography title={String(row?.fingerPrint)} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {row?.fingerPrint}
+              </Typography>
             </Box>
           </Box>
         )
@@ -519,7 +519,7 @@ const AlertsList = props => {
         })
 
       setLoading(false)
-      setRunFilterQuery(false); //temp adding to check if it fixes my condition
+      setRunFilterQuery(false) //temp adding to check if it fixes my condition
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel, props.onAccept]
@@ -724,8 +724,7 @@ const AlertsList = props => {
             columnsPanel: {
               sx: {
                 '& .MuiCheckbox-root': {
-                  color:
-                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  color: theme.palette.customColors.accent,
                   '&.Mui-checked': {
                     color:
                       theme.palette.mode === 'dark'
@@ -756,12 +755,8 @@ const AlertsList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
@@ -901,12 +896,8 @@ const AlertsList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {

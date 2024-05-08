@@ -926,8 +926,7 @@ const SLOList = props => {
             columnsPanel: {
               sx: {
                 '& .MuiCheckbox-root': {
-                  color:
-                    theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+                  color: theme.palette.customColors.accent,
                   '&.Mui-checked': {
                     color:
                       theme.palette.mode === 'dark'
@@ -958,12 +957,8 @@ const SLOList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-columnsManagementFooter .MuiButton-outlined:first-of-type': {
@@ -1103,12 +1098,8 @@ const SLOList = props => {
                     theme.palette.mode == 'dark' ? theme.palette.customColors.brandWhite : theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                    borderColor:
-                      theme.palette.mode == 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+                    borderColor: theme.palette.customColors.accent,
+                    color: theme.palette.customColors.accent
                   }
                 },
                 '& .MuiDataGrid-panelFooter .MuiButton-outlined:first-of-type': {

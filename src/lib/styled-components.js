@@ -19,9 +19,8 @@ function customCheckbox(theme) {
       display: 'none'
     },
     '& .MuiCheckbox-root.Mui-checked:not(.MuiCheckbox-indeterminate) svg': {
-      backgroundColor:
-        theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
-      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+      backgroundColor: theme.palette.customColors.accent,
+      borderColor: theme.palette.customColors.accent
     },
     '& .MuiCheckbox-root.Mui-checked .MuiIconButton-label:after': {
       position: 'absolute',
@@ -41,8 +40,7 @@ function customCheckbox(theme) {
     '& .MuiCheckbox-root.MuiCheckbox-indeterminate .MuiIconButton-label:after': {
       width: 8,
       height: 8,
-      backgroundColor:
-        theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+      backgroundColor: theme.palette.customColors.accent,
       transform: 'none',
       top: '39%',
       border: 0

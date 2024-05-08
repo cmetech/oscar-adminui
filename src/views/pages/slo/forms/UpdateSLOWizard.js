@@ -64,19 +64,19 @@ const steps = [
 ]
 
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
-  color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main,
+  color: theme.palette.customColors.accent,
   '&.Mui-checked': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   }
 }))
 
 const TextfieldStyled = styled(TextField)(({ theme }) => ({
   '& label.Mui-focused': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   },
   '& .MuiOutlinedInput-root': {
     '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+      borderColor: theme.palette.customColors.accent
     }
   }
 }))
@@ -88,7 +88,7 @@ const SelectStyled = styled(Select)(({ theme }) => ({
     },
     '&.Mui-focused': {
       fieldset: {
-        borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // border color when focused
+        borderColor: theme.palette.customColors.accent // border color when focused
       }
     }
   }
@@ -96,11 +96,11 @@ const SelectStyled = styled(Select)(({ theme }) => ({
 
 const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
   '& .MuiInputLabel-outlined.Mui-focused': {
-    color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   },
   '& .MuiOutlinedInput-root': {
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+      borderColor: theme.palette.customColors.accent
     }
   }
 }))
@@ -109,16 +109,16 @@ const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
 
 const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
   '&.Mui-focused': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   }
 }))
 
 const RadioStyled = styled(Radio)(({ theme }) => ({
   '&.MuiRadio-root': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   },
   '&.Mui-checked': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   }
 }))
 
@@ -131,7 +131,7 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
     borderColor: 'inherit' // Replace with your hover state border color
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // Border color when focused
+    borderColor: theme.palette.customColors.accent // Border color when focused
   }
 
   // You can add more styles here for other parts of the input

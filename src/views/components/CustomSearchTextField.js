@@ -6,11 +6,11 @@ import { useTheme, styled } from '@mui/material/styles'
 
 const TextfieldStyled = styled(TextField)(({ theme }) => ({
   '& label.Mui-focused': {
-    color: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+    color: theme.palette.customColors.accent
   },
   '& .MuiOutlinedInput-root': {
     '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode == 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main
+      borderColor: theme.palette.customColors.accent
     }
   }
 }))

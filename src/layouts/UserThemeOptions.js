@@ -105,6 +105,7 @@ const UserThemeOptions = () => {
         darkBg: skin === 'bordered' ? '#312D4B' : '#28243D',
         lightBg: skin === 'bordered' ? whiteColor : '#F4F5FA',
         tableHeaderBg: mode === 'light' ? '#A0A0A0' : '#242424',
+        accent: mode === 'light' ? '#242424' : '#FAD22D',
         brandBlue1: mode === 'light' ? '#4D97ED' : '#4D97ED',
         brandBlack: '#0C0C0C',
         brandWhite: '#FAFAFA',

@@ -1220,10 +1220,35 @@ const TasksList = props => {
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      // console.log('Row:', row)
+      console.log('Row:', row)
 
       // Extend the search to include nested paths
-      const searchFields = ['id', 'organization', 'name', 'owner', 'status', 'type', 'description']
+      // Extend the search to include nested paths
+      const searchFields = [
+        'id',
+        'name',
+        'celery_job_name',
+        'type',
+        'status',
+        'owner',
+        'organization',
+        'description',
+        'schedule.id',
+        'schedule.task_id',
+        'schedule.minute',
+        'schedule.hour',
+        'schedule.day',
+        'schedule.month',
+        'schedule.year',
+        'args', // Array of arguments
+        'kwargs.key1',
+        'kwargs.key2',
+        'kwargs.key3',
+        'metadata.metakey1',
+        'metadata.metakey2',
+        'metadata.metakey3',
+        'hosts' // Array of hosts
+      ]
 
       return searchFields.some(field => {
         const fieldValue = getNestedValue(row, field)

@@ -218,7 +218,7 @@ const ActiveProbes = props => {
       }
     },
     {
-      flex: 0.020,
+      flex: 0.02,
       field: 'status',
       headerName: t('Status'),
       align: 'center',
@@ -277,13 +277,14 @@ const ActiveProbes = props => {
       }
     },
     {
-      flex: 0.020,
+      flex: 0.02,
       field: 'ssl_status',
       headerName: t('SSL'),
       align: 'center',
       headerAlign: 'center',
       renderCell: params => {
         const { row } = params
+        const shouldShowChip = row.target && !row.target.startsWith('http:')
 
         let color = 'error'
         let label = 'UNKN'
@@ -305,46 +306,50 @@ const ActiveProbes = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%', // Uses full width to align text to the start properly
-                overflow: 'hidden',
-                textoverflow: 'ellipsis'
-              }}
-            >
-              <CustomChip
-                title={label}
-                overflow='hidden'
-                textoverflow='ellipsis'
-                rounded
-                size='medium'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
+            {shouldShowChip ? (
+              <Box
                 sx={{
-                  '& .MuiChip-label': { textTransform: 'capitalize' },
-                  width: '120px'
+                  display: 'flex',
+                  alignItems: 'center', // Ensures vertical centering inside the Box
+                  flexDirection: 'column',
+                  justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                  width: '100%', // Uses full width to align text to the start properly
+                  overflow: 'hidden',
+                  textoverflow: 'ellipsis'
                 }}
-              />
-            </Box>
+              >
+                <CustomChip
+                  title={label}
+                  overflow='hidden'
+                  textoverflow='ellipsis'
+                  rounded
+                  size='medium'
+                  skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                  label={label || 'UNKN'}
+                  color={color}
+                  sx={{
+                    '& .MuiChip-label': { textTransform: 'capitalize' },
+                    width: '120px'
+                  }}
+                />
+              </Box>
+            ) : (
+              <Box sx={{ width: '120px', height: '100%' }} />
+            )}
           </Box>
         )
       }
     },
     {
-      flex: 0.015,     
+      flex: 0.015,
       field: 'http_status_code',
       headerName: t('HTTP CODE'),
       renderCell: params => {
         const { row } = params
 
-        if (row?.http_status_code?.toLowerCase() === 'unknown') {
+        if (row?.http_status_code?.toLowerCase() === 'unknown' || row?.http_status_code == 0) {
           row.http_status_code = ''
-        }  
+        }
 
         return (
           <Box
@@ -374,7 +379,7 @@ const ActiveProbes = props => {
 
         if (row?.tls_version?.toLowerCase() === 'unknown') {
           row.tls_version = ''
-        } 
+        }
 
         return (
           <Box
@@ -414,7 +419,8 @@ const ActiveProbes = props => {
         } else if (row?.type?.toLowerCase() === 'tcpport') {
           label = 'TCP PORT'
           iconimage = 'mdi:script-text'
-        } 
+        }
+
         return (
           <Box
             sx={{
@@ -576,7 +582,7 @@ const ActiveProbes = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>              
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
                 title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Probe' : 'Enable Probe'}
@@ -946,7 +952,7 @@ const ActiveProbes = props => {
         }
       }, 20000) // 60s timeout
 
-      try {             
+      try {
         const response = await axios.get('/api/probes', {
           params: {
             sort: sortModel[0]?.sort || 'asc',
@@ -957,7 +963,7 @@ const ActiveProbes = props => {
           },
           timeout: 10000
         })
-        
+
         setRowCount(response.data.total_records)
         setRows(response.data.records)
         props.set_total(response.data.total_records)

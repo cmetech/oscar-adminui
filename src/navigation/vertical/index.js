@@ -46,7 +46,7 @@ const navigation = () => {
         },
         {
           title: 'Monitoring',
-          path: '/api/oscar/ui?path=d/rYdddlPWk/node-metrics?orgId=1',
+          path: '/api/oscar/ui?path=d/bdkxfkrhtor28b/server-monitoring?orgId=1',
           icon: 'mdi:monitor-eye',
           action: 'manage',
           subject: 'settings-nav',

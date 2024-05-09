@@ -3,7 +3,14 @@ import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'r
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { serverIdsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import {
+  serverIdsAtom,
+  componentIdsAtom,
+  subcomponentIdsAtom,
+  refetchSubcomponentTriggerAtom,
+  refetchComponentTriggerAtom,
+  refetchServerTriggerAtom
+} from 'src/lib/atoms'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -151,7 +158,8 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
   }
 
   // Define tabs where the Delete menu item should be shown
-  const deletableTabs = ['3']
+  const deletableTabs = ['3', '4', '5']
+  const showUploadServersTab = tabValue === '3'
 
   return (
     <Fragment>
@@ -192,18 +200,20 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             {t('Export')}
           </Box>
         </MenuItem>
-        <MenuItem
-          sx={{ p: 0 }}
-          onClick={() => {
-            onUpload()
-            handleDropdownClose()
-          }}
-        >
-          <Box sx={styles}>
-            <Icon icon='mdi:upload' />
-            {t('Upload Servers')}
-          </Box>
-        </MenuItem>
+        {showUploadServersTab && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onUpload()
+              handleDropdownClose()
+            }}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:upload' />
+              {t('Upload Servers')}
+            </Box>
+          </MenuItem>
+        )}
       </Menu>
     </Fragment>
   )
@@ -243,7 +253,7 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
           {t('Cancel')}
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={() => onConfirm(tab)}
           size='large'
           variant='contained'
           color='error'
@@ -529,7 +539,11 @@ const Settings = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [openUploadDialog, setOpenUploadDialog] = useState(false)
   const [serverIds] = useAtom(serverIdsAtom)
+  const [componentIds] = useAtom(componentIdsAtom)
+  const [subcomponentIds] = useAtom(subcomponentIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [, setRefetchComponentTrigger] = useAtom(refetchComponentTriggerAtom)
+  const [, setRefetchSubcomponentTrigger] = useAtom(refetchSubcomponentTriggerAtom)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -555,20 +569,45 @@ const Settings = () => {
     setOpenUploadDialog(false)
   }
 
-  const handleConfirmDelete = async () => {
-    // Implement delete functionality
-    console.log('Deleting serverIds', serverIds)
+  const handleConfirmDelete = async tab => {
+    const endpointMapping = {
+      3: '/api/inventory/servers',
+      4: '/api/inventory/components',
+      5: '/api/inventory/subcomponents'
+    }
+
+    const ids = {
+      3: serverIds,
+      4: componentIds,
+      5: subcomponentIds
+    }
+
+    const refecthTriggers = {
+      3: setRefetchTrigger,
+      4: setRefetchComponentTrigger,
+      5: setRefetchSubcomponentTrigger
+    }
+
+    const endpoint = endpointMapping[tab] || null
+
+    if (!endpoint) {
+      toast.error('Invalid tab selection')
+
+      return
+    }
 
     try {
-      const response = await axios.put('/api/inventory/servers', {
-        ids: serverIds // Assuming the API expects an object with an ids array
+      const response = await axios.put(endpoint, {
+        ids: ids[tab] // Assuming the API expects an object with an ids array
       })
 
       // Handle 204 No Content response here
       // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
       if (response.status === 204) {
         toast.success('Servers deleted successfully')
-        setRefetchTrigger(Date.now())
+
+        // Trigger a refetch of the data
+        refecthTriggers[tab](Date.now())
       } else {
         toast.error('Error deleting servers')
       }

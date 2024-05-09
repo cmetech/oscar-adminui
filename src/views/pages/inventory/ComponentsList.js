@@ -7,6 +7,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useSession } from 'next-auth/react'
 import themeConfig from 'src/configs/themeConfig'
 import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -70,8 +71,7 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
-import { componentsAtom, refetchComponentTriggerAtom } from 'src/lib/atoms'
-import { useAtom } from 'jotai'
+import { componentIdsAtom, componentsAtom, refetchComponentTriggerAtom } from 'src/lib/atoms'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -124,6 +124,7 @@ const ComponentsList = props => {
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentComponent, setCurrentComponent] = useState(null)
   const [components, setComponents] = useAtom(componentsAtom)
+  const [componentIds, setComponentIds] = useAtom(componentIdsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchComponentTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
@@ -637,8 +638,21 @@ const ComponentsList = props => {
     }
   }
 
-  const handleRowSelection = rowid => {
-    setRowSelectionModel(rowids)
+  const handleRowSelection = newRowSelectionModel => {
+    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
+
+    console.log('Added IDs:', addedIds)
+
+    addedIds.forEach(id => {
+      const row = rows.find(r => r.id === id)
+      console.log('Added Row:', row)
+    })
+
+    // Update the row selection model
+    setRowSelectionModel(newRowSelectionModel)
+
+    // Update the Jotai atom with the new selection model
+    setComponentIds(newRowSelectionModel)
   }
 
   // Hidden columns
@@ -672,7 +686,7 @@ const ComponentsList = props => {
           apiRef={dgApiRef}
           rowCount={rowCountState}
           columns={columns}
-          checkboxSelection={false}
+          checkboxSelection={true}
           disableRowSelectionOnClick
           filterMode={filterMode}
           filterModel={filterModel}

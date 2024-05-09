@@ -691,7 +691,7 @@ const ServersList = props => {
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      // console.log('Row:', row)
+      console.log('Row:', row)
 
       // Extend the search to include nested paths
       const searchFields = [
@@ -702,7 +702,11 @@ const ServersList = props => {
         'subcomponent_name',
         'component_name',
         'status',
-        'component'
+        'component',
+        'network_interfaces.name',
+        'network_interfaces.ip_address',
+        'metadata.key',
+        'metadata.value'
       ]
 
       return searchFields.some(field => {

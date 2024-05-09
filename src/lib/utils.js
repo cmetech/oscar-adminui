@@ -18,6 +18,20 @@ export const escapeRegExp = value => {
   return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
 }
 
+// Utility function to get a value from a nested object given a path like 'networkInterfaces.ipaddress'
+// Utility function to get a value from a nested object or list given a path like 'network_interfaces.ip_address'
 export const getNestedValue = (obj, path) => {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+  const keys = path.split('.')
+
+  return keys.reduce((current, key) => {
+    if (Array.isArray(current)) {
+      // If the current field is an array, search each object within it
+      return current
+        .map(item => item[key])
+        .filter(value => value !== undefined && value !== null)
+        .join(', ') // Combine all found values into a single string (for search purposes)
+    }
+
+    return current && current[key] !== undefined ? current[key] : undefined
+  }, obj)
 }

@@ -95,13 +95,6 @@ const navigation = () => {
       subject: 'all',
       children: [
         {
-          title: 'Health',
-          path: '/service-continuity/availability',
-          icon: 'mdi:list-status',
-          action: 'read',
-          subject: 'all'
-        },
-        {
           title: 'Probes',
           path: '/service-continuity/probes',
           icon: 'mdi:monitor-eye',

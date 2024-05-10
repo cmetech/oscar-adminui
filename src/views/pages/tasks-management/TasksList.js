@@ -405,7 +405,48 @@ const TasksList = props => {
     {
       flex: 0.02,
       minWidth: 60,
-      field: 'createdAtTime',
+      field: 'next_run_time',
+      headerName: t('Next Run'),
+      renderCell: params => {
+        const { row } = params
+
+        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
+        // Check if next_run_time exists and is a valid date
+        if (row?.next_run_time && !isNaN(new Date(row.next_run_time).getTime())) {
+          const humanReadableDate = formatInTimeZone(
+            utcToZonedTime(parseISO(row.next_run_time), timezone),
+            timezone,
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                  {humanReadableDate}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        } else {
+          // If next_run_time is null or not a valid date, display an empty cell
+          return null
+        }
+      }
+    },
+    {
+      flex: 0.02,
+      minWidth: 60,
+      field: 'created_at',
       headerName: t('Created At'),
       renderCell: params => {
         const { row } = params
@@ -440,7 +481,7 @@ const TasksList = props => {
     {
       flex: 0.02,
       minWidth: 60,
-      field: 'updatedAtTime',
+      field: 'modified_at',
       headerName: t('Updated At'),
       renderCell: params => {
         const { row } = params
@@ -1148,6 +1189,17 @@ const TasksList = props => {
     [paginationModel, setTasks, setRows]
   )
 
+  // Effect to fetch data initially and start the periodic refresh
+  useEffect(() => {
+    if (!runFilterQuery) {
+      fetchData()
+    }
+
+    const intervalId = setInterval(fetchData, 300000) // Fetch data every 300 seconds (5 minutes)
+
+    return () => clearInterval(intervalId) // Cleanup interval on component unmount
+  }, [fetchData, refetchTrigger, runFilterQuery])
+
   // Trigger based on filter application
   useEffect(() => {
     console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
@@ -1172,6 +1224,12 @@ const TasksList = props => {
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
+
+    // Reset the runFilterQuery flag
+    return () => {
+      runFilterQuery && setRunFilterQuery(false)
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel, runFilterQuery]) // Triggered by filter changes
 
@@ -1206,6 +1264,12 @@ const TasksList = props => {
         setRows(dataToFilter)
       }
     }
+
+    // Reset sortModel on unmount
+    return () => {
+      setSortModel([{ field: 'name', sort: 'asc' }])
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel])
 
@@ -1328,7 +1392,8 @@ const TasksList = props => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                createdAtTime: true,
+                created_at: false,
+                modified_at: false,
                 id: false,
                 organization: false
               }

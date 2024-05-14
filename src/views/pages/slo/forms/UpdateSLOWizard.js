@@ -31,6 +31,7 @@ import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
+import Tooltip from '@mui/material/Tooltip'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -55,6 +56,16 @@ const steps = [
     title: 'SLO Information',
     subtitle: 'Add SLO Information',
     description: 'Add the Name, Description, and Target Details for the SLO.'
+  },
+  {
+    title: 'Define SLI Details',
+    subtitle: 'Add SLI Details',
+    description: 'Add the SLI Source Index, SLI Filters and Query details.'
+  },
+  {
+    title: 'Define the Objective',
+    subtitle: 'Add the Objective Details',
+    description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
   },
   {
     title: 'Review',
@@ -138,31 +149,53 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 }))
 
 // Define validation schema for the form
-const validationSchema = yup.object({
-  sloName: yup
-    .string()
-    .required('SLO Name is required')
-    .matches(/^[A-Za-z0-9-_]+$/, 'Only alphanumeric characters, hyphens, underscores are allowed')
-    .min(3, 'Name must be at least 3 characters')
-    .trim(),
-  sloDescription: yup.string().trim(),
-  sloTargetValue: yup.number().required('Target Value is required').positive('Target Value must be positive'),
-  sloTargetPeriod: yup
-    .number()
-    .required('Target Period is required')
-    .positive('Target Period must be positive')
-    .integer('Target Period must be an integer')
-})
+const stepValidationSchemas = [
+  yup.object({
+    sloName: yup
+      .string()
+      .required('SLO Name is required')
+      .matches(/^[A-Za-z0-9-_]+$/, 'Only alphanumeric characters, hyphens, and underscores are allowed')
+      .min(3, 'Name must be at least 3 characters')
+      .trim(),
+    sloDescription: yup.string().trim()
+  }),
+  yup.object(),
+  yup.object({
+    sloTargetValue: yup.number().required('Target Value is required').positive('Target Value must be positive')
+  }),
+  yup.object() // No validation for the review step
+]
 
-const AddSLOWizard = ({ onClose, ...props }) => {
+const periodOptions = [
+  { label: '7 days', value: 7 },
+  { label: '30 days', value: 30 },
+  { label: '90 days', value: 90 }
+]
+
+const findPeriodObjectByValue = (value, options) => {
+  // Find the period object where the value matches the provided value
+  return options.find(option => option.value === value) || null
+}
+
+const UpdateSLOWizard = ({ onClose, ...props }) => {
   // ** States
   const [sloName, setSloName] = useState(props?.currentSlo?.name || '')
   const [sloDescription, setSloDescription] = useState(props?.currentSlo?.description || '')
-  const [sloTargetValue, setSloTargetValue] = useState(props?.currentSlo?.target?.target_value || 0)
-  const [sloTargetPeriod, setSloTargetPeriod] = useState(props?.currentSlo?.target?.period || 0)
+  const [sloTargetValue, setSloTargetValue] = useState(props?.currentSlo?.target?.target_value || 95)
+
+  const initialPeriodObject = findPeriodObjectByValue(props?.currentSlo?.target?.period, periodOptions)
+  const [sloTargetPeriod, setSloTargetPeriod] = useState(initialPeriodObject || periodOptions[1])
+
   const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState(
     props?.currentSlo?.target?.calculation_method || 'occurrences'
   )
+
+  const [sloTimeWindow, setSloTimeWindow] = useState(props?.currentSlo?.target?.time_window || 'rolling')
+  const [sloTargetType, setSloTargetType] = useState(props?.currentSlo?.target?.target_type || 'internal')
+  const [sloTargetIndex, setSloTargetIndex] = useState(props?.currentSlo?.target?.target_index || '')
+  const [sloFilterQuery, setSloFilterQuery] = useState(props?.currentSlo?.target?.filter_query || '')
+  const [sloGoodQuery, setSloGoodQuery] = useState(props?.currentSlo?.target?.good_query || '')
+  const [sloTotalQuery, setSloTotalQuery] = useState(props?.currentSlo?.target?.total_query || '')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
@@ -171,12 +204,18 @@ const AddSLOWizard = ({ onClose, ...props }) => {
   const theme = useTheme()
   const session = useSession()
 
-  // Validate Form
+  // Validate form based on the active step
   const validateForm = async () => {
     try {
-      // Validate the form values
-      await validationSchema.validate(
-        { sloName, sloDescription, sloTargetValue, sloTargetPeriod },
+      // Validate based on the current step
+      const currentSchema = stepValidationSchemas[activeStep]
+      await currentSchema.validate(
+        {
+          sloName,
+          sloDescription,
+          sloTargetValue,
+          sloTargetPeriod
+        },
         { abortEarly: false }
       )
 
@@ -225,8 +264,14 @@ const AddSLOWizard = ({ onClose, ...props }) => {
           description: sloDescription,
           target: {
             target_value: parseFloat(sloTargetValue),
-            period: parseInt(sloTargetPeriod),
-            calculation_method: sloTargetCalculationMethod.toLowerCase()
+            period: parseInt(sloTargetPeriod.value),
+            calculation_method: sloTargetCalculationMethod.toLowerCase(),
+            target_type: sloTargetType.toLowerCase(),
+            target_index: sloTargetIndex,
+            filter_query: sloFilterQuery,
+            good_query: sloGoodQuery,
+            total_query: sloTotalQuery,
+            time_window: sloTimeWindow.toLowerCase()
           }
         }
 
@@ -262,9 +307,17 @@ const AddSLOWizard = ({ onClose, ...props }) => {
   const handleReset = () => {
     setSloName(props?.currentSlo?.name || '')
     setSloDescription(props?.currentSlo?.description || '')
-    setSloTargetValue(props?.currentSlo?.target?.target_value || 0)
-    setSloTargetPeriod(props?.currentSlo?.target?.period || 0)
+    setSloTargetValue(props?.currentSlo?.target?.target_value || 95)
+
+    const initialPeriodObject = findPeriodObjectByValue(props?.currentSlo?.target?.period, periodOptions)
+    setSloTargetPeriod(initialPeriodObject || periodOptions[1])
     setSloTargetCalculationMethod(props?.currentSlo?.target?.calculation_method || 'occurrences')
+    setSloTargetType(props?.currentSlo?.target?.target_type || 'internal')
+    setSloTargetIndex(props?.currentSlo?.target?.target_index || '')
+    setSloFilterQuery(props?.currentSlo?.target?.filter_query || '')
+    setSloGoodQuery(props?.currentSlo?.target?.good_query || '')
+    setSloTotalQuery(props?.currentSlo?.target?.total_query || '')
+    setSloTimeWindow(props?.currentSlo?.target?.time_window || 'rolling')
     setActiveStep(0)
   }
 
@@ -281,12 +334,41 @@ const AddSLOWizard = ({ onClose, ...props }) => {
     setSloTargetValue(event.target.value)
   }
 
-  const handleTargetPeriodChange = event => {
-    setSloTargetPeriod(event.target.value)
+  const handleTargetPeriodChange = (event, newValue) => {
+    if (newValue) {
+      setSloTargetPeriod(newValue)
+    } else {
+      // Handle case when newValue is null (clearing selection)
+      setSloTargetPeriod(null)
+    }
   }
 
   const handleTargetCalculationMethodChange = event => {
     setSloTargetCalculationMethod(event.target.value)
+  }
+
+  const handleTargetTypeChange = event => {
+    setSloTargetType(event.target.value)
+  }
+
+  const handleFilterQueryChange = event => {
+    setSloFilterQuery(event.target.value)
+  }
+
+  const handleTargetIndexChange = event => {
+    setSloTargetIndex(event.target.value)
+  }
+
+  const handleGoodQueryChange = event => {
+    setSloGoodQuery(event.target.value)
+  }
+
+  const handleTotalQueryChange = event => {
+    setSloTotalQuery(event.target.value)
+  }
+
+  const handleTimeWindowChange = event => {
+    setSloTimeWindow(event.target.value)
   }
 
   // Handle Confirm Password
@@ -324,31 +406,122 @@ const AddSLOWizard = ({ onClose, ...props }) => {
                   />
                 </FormControl>
               </Grid>
+              <Grid item xs={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='slotargettype-autocomplete'
+                  options={['INTERNAL', 'ELASTIC', 'PROMETHEUS', 'GRAFANA']}
+                  value={sloTargetType.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleTargetTypeChange({ target: { name: 'target_type', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleTargetTypeChange({ target: { name: 'target_type', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Target Type' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 1:
+        return (
+          <Fragment>
+            <Grid container spacing={6}>
+              <Grid item sm={6} xs={12}>
+                <TextfieldStyled
+                  fullWidth
+                  value={sloTargetIndex}
+                  onChange={handleTargetIndexChange}
+                  label='Source Index'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextfieldStyled
+                  fullWidth
+                  value={sloFilterQuery}
+                  onChange={handleFilterQueryChange}
+                  label='Filter Query'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
+              </Grid>
+              <Grid item xs={12}>
+                <TextfieldStyled
+                  fullWidth
+                  value={sloTotalQuery}
+                  onChange={handleTotalQueryChange}
+                  label='Total Query'
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 2:
+        return (
+          <Fragment>
+            <Grid container spacing={6}>
+              <Grid item sm={6} xs={12}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='slo-timewindow'
+                  options={['ROLLING', 'CALENDAR']}
+                  value={sloTimeWindow.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleTimeWindowChange({ target: { name: 'time_window', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleTimeWindowChange({ target: { name: 'time_window', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Time Window' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='sloTargetPeriod-autocomplete'
+                  options={periodOptions}
+                  getOptionLabel={option => option.label}
+                  value={sloTargetPeriod}
+                  onChange={handleTargetPeriodChange}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
                   <TextfieldStyled
                     fullWidth
                     value={sloTargetValue}
                     onChange={handleTargetValueChange}
-                    label='Target Value'
+                    label='Target / SLO (%)'
                     error={Boolean(formErrors.sloTargetValue)}
                     helperText={formErrors.sloTargetValue}
                   />
                 </FormControl>
               </Grid>
               <Grid item sm={6} xs={12}>
-                <FormControl fullWidth>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTargetPeriod}
-                    onChange={handleTargetPeriodChange}
-                    label='Target Period'
-                    error={Boolean(formErrors.sloTargetPeriod)}
-                    helperText={formErrors.sloTargetPeriod}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={6}>
                 <AutocompleteStyled
                   freeSolo
                   clearOnBlur
@@ -382,50 +555,65 @@ const AddSLOWizard = ({ onClose, ...props }) => {
             </Grid>
           </Fragment>
         )
-      case 1:
+      case 3:
         return (
           <Fragment>
-            <Grid container spacing={1}>
-              <Grid item xs={4}>
-                <Typography
-                  variant='h6'
-                  sx={{
-                    mt: 2,
-                    mb: 1,
-                    textDecoration: 'underline',
-                    color:
-                      theme.palette.mode === 'light'
-                        ? theme.palette.customColors.brandBlack
-                        : theme.palette.customColors.brandYellow
-                  }}
-                >
-                  General Information
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                  Review and Confirm
                 </Typography>
-                <Grid item xs={12}>
-                  <Typography>
-                    Name: <strong>{sloName.toUpperCase()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Description: <strong>{sloDescription.toUpperCase()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Target Value: <strong>{sloTargetValue.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Target Period: <strong>{sloTargetPeriod.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Target Method: <strong>{sloTargetCalculationMethod.toUpperCase()}</strong>
-                  </Typography>
-                </Grid>
+                <Divider sx={{ my: 2 }} />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Name:</strong> {sloName}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Description:</strong> {sloDescription}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Index:</strong> {sloTargetIndex}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Filter Query:</strong> {sloFilterQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Good Query:</strong> {sloGoodQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Total Query:</strong> {sloTotalQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Time Window:</strong> {sloTimeWindow}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Period:</strong> {sloTargetPeriod.label}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Value:</strong> {sloTargetValue}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                </Typography>
               </Grid>
             </Grid>
           </Fragment>
@@ -458,27 +646,52 @@ const AddSLOWizard = ({ onClose, ...props }) => {
               </Typography>
               <Grid item xs={12}>
                 <Typography>
-                  Name: <strong>{sloName.toUpperCase()}</strong>
+                  <strong>Name:</strong> {sloName}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Description: <strong>{sloDescription.toUpperCase()}</strong>
+                  <strong>Description:</strong> {sloDescription}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Target Value: <strong>{sloTargetValue.toString()}</strong>
+                  <strong>Target Index:</strong> {sloTargetIndex}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Target Period: <strong>{sloTargetPeriod.toString()}</strong>
+                  <strong>Filter Query:</strong> {sloFilterQuery}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  Target Method: <strong>{sloTargetCalculationMethod.toUpperCase()}</strong>
+                  <strong>Good Query:</strong> {sloGoodQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Total Query:</strong> {sloTotalQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Time Window:</strong> {sloTimeWindow}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Period:</strong> {sloTargetPeriod.label}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Value:</strong> {sloTargetValue}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
                 </Typography>
               </Grid>
             </Grid>
@@ -550,4 +763,4 @@ const AddSLOWizard = ({ onClose, ...props }) => {
   )
 }
 
-export default AddSLOWizard
+export default UpdateSLOWizard

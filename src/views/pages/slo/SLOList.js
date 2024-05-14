@@ -220,7 +220,7 @@ const SLOList = props => {
               <CustomChip
                 title={budgetingLabel}
                 overflow='hidden'
-                textOverflow='ellipsis'
+                textoverflow='ellipsis'
                 rounded
                 size='large'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -248,6 +248,7 @@ const SLOList = props => {
         const { row } = params
 
         const breachColor = row.is_breaching ? 'error' : 'success'
+        const sloPercentage = row.slo_percentage ? row.slo_percentage : 0
 
         return (
           <Box
@@ -272,7 +273,7 @@ const SLOList = props => {
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={row.slo_percentage + '%'}
+                label={sloPercentage + '%'}
                 color={breachColor}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
@@ -338,7 +339,7 @@ const SLOList = props => {
               <CustomChip
                 title={row.target?.target_value + '%'}
                 overflow='hidden'
-                textOverflow='ellipsis'
+                textoverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -650,16 +651,16 @@ const SLOList = props => {
       }
 
       // Assuming props.dateRange contains Date objects or is undefined
-      console.log('onAccept:', props.onAccept)
-      console.log('Start Date:', startDate)
-      console.log('End Date:', endDate)
+      // console.log('onAccept:', props.onAccept)
+      // console.log('Start Date:', startDate)
+      // console.log('End Date:', endDate)
 
       const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
       const endTime = endDate?.toISOString() || new Date().toISOString()
 
-      console.log('Start Time:', startTime)
-      console.log('End Time:', endTime)
-      console.log('Filter Data:', JSON.stringify(filter_model))
+      // console.log('Start Time:', startTime)
+      // console.log('End Time:', endTime)
+      // console.log('Filter Data:', JSON.stringify(filter_model))
 
       setLoading(true)
 
@@ -715,8 +716,8 @@ const SLOList = props => {
 
   // Trigger based on filter application
   useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
+    // console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    // console.log('Filter Model:', JSON.stringify(filterModel))
 
     if (runFilterQuery && filterModel.items.length > 0) {
       if (filterMode === 'server') {
@@ -746,8 +747,8 @@ const SLOList = props => {
 
   // Trigger based on sort
   useEffect(() => {
-    console.log('Effect Run:', { sortModel, runFilterQuery })
-    console.log('Sort Model:', JSON.stringify(sortModel))
+    // console.log('Effect Run:', { sortModel, runFilterQuery })
+    // console.log('Sort Model:', JSON.stringify(sortModel))
 
     if (sortingMode === 'server') {
       fetchData()
@@ -756,10 +757,10 @@ const SLOList = props => {
       const column = sortModel[0]?.field
       const sort = sortModel[0]?.sort
 
-      console.log('Column:', column)
-      console.log('Sort:', sort)
+      // console.log('Column:', column)
+      // console.log('Sort:', sort)
 
-      console.log('Rows:', rows)
+      // console.log('Rows:', rows)
 
       if (filteredRows.length > 0) {
         const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
@@ -817,11 +818,12 @@ const SLOList = props => {
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
-    console.log('Added IDs:', addedIds)
+    // console.log('Added IDs:', addedIds)
 
     addedIds.forEach(id => {
       const row = rows.find(r => r.id === id)
-      console.log('Added Row:', row)
+
+      // console.log('Added Row:', row)
     })
 
     // Update the row selection model

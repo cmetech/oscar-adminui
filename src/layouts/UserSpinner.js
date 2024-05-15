@@ -53,9 +53,9 @@ const UserFallbackSpinner = ({ sx }) => {
             height='40px'
           />
         )}
-        <Typography noWrap variant='caption' color={textColor}>
+        {/* <Typography noWrap variant='caption' color={textColor}>
           {oscarConfig.BRANDING_TAGLINE}
-        </Typography>
+        </Typography> */}
       </Stack>
       <CircularProgress
         disableShrink

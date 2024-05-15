@@ -171,14 +171,14 @@ const AppBrand = () => {
             height='40px'
           />
         )}
-        <Typography
+        {/* <Typography
           noWrap
           variant='caption'
           color={textColor}
           sx={{ ...menuCollapsedStyles, ...(navCollapsed ? {} : { paddingLeft: 3, marginBottom: 2 }) }}
         >
           {oscarConfig.BRANDING_TAGLINE}
-        </Typography>
+        </Typography> */}
       </Stack>
     </StyledLink>
   )

@@ -514,7 +514,7 @@ const SLOList = props => {
               plotType='line'
               showHighlight={true}
               showTooltip={true}
-              data={row?.sparkline_slo_percentages}
+              data={row?.sparkline_slo_percentages || []}
             />
           </Box>
         )

@@ -177,8 +177,259 @@ const SLOList = props => {
                       : theme.palette.customColors.brandYellow
                 }}
               >
-                {row?.id}
+                Period: Rolling {row?.target?.period} days
               </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.008,
+      field: 'slo_percentage',
+      type: 'number',
+      editable: editmode,
+      headerName: t('SLO (%)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const breachColor = row.is_breaching ? 'error' : 'success'
+        const sloPercentage = row.slo_percentage ? row.slo_percentage : 0
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'left', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={sloPercentage + '%'}
+                color={breachColor}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.01,
+      field: 'delta_percentage',
+      type: 'number',
+      editable: editmode,
+      headerName: t('SLO (%) - Last Period'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const breachColor = row.is_breaching ? 'error' : 'success'
+        const delta_percentage = row.delta_percentage ? row.delta_percentage : 0
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'left', // Ensures content within this Box is also centered vertically
+                width: '100%' // Uses full width to align text to the start properly
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={delta_percentage + '%'}
+                color={breachColor}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.01,
+      field: 'target_value',
+      type: 'number',
+      editable: editmode,
+      headerName: t('Target Value (%)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              <CustomChip
+                title={row.target?.target_value + '%'}
+                overflow='hidden'
+                textoverflow='ellipsis'
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={row.target?.target_value + '%'}
+                color='success'
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.01,
+      field: 'error_budget',
+      type: 'number',
+      editable: editmode,
+      headerName: t('Budget Remaining (%)'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const color = row.error_budget < 50 ? 'error' : 'success'
+        const error_budget = row.error_budget ? row.error_budget : 0
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={error_budget + '%'}
+                color={color}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.009,
+      field: 'burn_rate',
+      type: 'number',
+      editable: editmode,
+      headerName: t('Burn Rate'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const color = row.burn_rate > 1.5 ? 'error' : 'success'
+        const burn_rate = row.burn_rate ? row.burn_rate : 0
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Ensures vertical centering inside the Box
+              justifyContent: 'flex-start',
+              width: '100%', // Ensures the Box takes full width of the cell
+              height: '100%' // Ensures the Box takes full height of the cell
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={burn_rate}
+                color={color}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '90px'
+                }}
+              />
             </Box>
           </Box>
         )
@@ -237,125 +488,6 @@ const SLOList = props => {
       }
     },
     {
-      flex: 0.008,
-      field: 'derived_is_breaching',
-      type: 'number',
-      editable: editmode,
-      headerName: t('SLO (%)'),
-      align: 'left',
-      headerAlign: 'left',
-      renderCell: params => {
-        const { row } = params
-
-        const breachColor = row.is_breaching ? 'error' : 'success'
-        const sloPercentage = row.slo_percentage ? row.slo_percentage : 0
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'row',
-                justifyContent: 'left', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='medium'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={sloPercentage + '%'}
-                color={breachColor}
-                sx={{
-                  '& .MuiChip-label': { textTransform: 'capitalize' },
-                  width: '90px'
-                }}
-              />
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  '& svg': { fontWeight: 600, color: row.trend_direction === 'down' ? 'error.main' : 'success.main' }
-                }}
-              >
-                <Icon icon={row.trend_direction === 'down' ? 'mdi:chevron-down' : 'mdi:chevron-up'} />
-                <Typography
-                  variant='caption'
-                  sx={{
-                    fontWeight: 500,
-                    lineHeight: 1.5,
-                    color: row.trend_direction === 'down' ? 'error.main' : 'success.main'
-                  }}
-                >
-                  {row.delta_percentage}%
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.01,
-      field: 'target_value',
-      type: 'number',
-      editable: editmode,
-      headerName: t('Target Value (%)'),
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%', // Uses full width to align text to the start properly
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              <CustomChip
-                title={row.target?.target_value + '%'}
-                overflow='hidden'
-                textoverflow='ellipsis'
-                rounded
-                size='medium'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={row.target?.target_value + '%'}
-                color='success'
-                sx={{
-                  '& .MuiChip-label': { textTransform: 'capitalize' },
-                  width: '90px'
-                }}
-              />
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
       field: 'derived_sparkline',
       headerName: t('Trend'),
       width: 200,
@@ -382,10 +514,7 @@ const SLOList = props => {
               plotType='line'
               showHighlight={true}
               showTooltip={true}
-              data={[
-                81.82, 83.33, 100, 91.67, 84.62, 90.91, 83.33, 75, 75, 83.33, 91.67, 83.33, 91.67, 91.67, 83.33, 100,
-                91.67, 100, 90.91, 100, 83.33, 75, 100, 91.67
-              ]}
+              data={row?.sparkline_slo_percentages}
             />
           </Box>
         )
@@ -867,6 +996,7 @@ const SLOList = props => {
             }
           }}
           autoHeight={true}
+          rowHeight={60}
           rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}

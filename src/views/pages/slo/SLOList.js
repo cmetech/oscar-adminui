@@ -996,7 +996,6 @@ const SLOList = props => {
             }
           }}
           autoHeight={true}
-          rowHeight={60}
           rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}
           rowCount={rowCountState}

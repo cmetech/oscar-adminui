@@ -219,7 +219,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
         <TextfieldStyled
           fullWidth
           //label='Target'
-          label={probeForm.type === 'PORT' ? "HOST" : "URL"}
+          label={probeForm.type === 'PORT' ? 'HOST' : 'URL'}
           value={probeForm.target !== undefined ? probeForm.target : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
@@ -228,17 +228,17 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
       </Grid>
       {probeForm.type.toLowerCase() === 'port' && (
         <Grid item xs={12} sm={6}>
-        <TextfieldStyled
-          fullWidth
-          label='Port'
-          value={probeForm.port}
-          InputProps={{ readOnly: true }}
-          variant='outlined'
-          margin='normal'
-          type="number"
-        />        
+          <TextfieldStyled
+            fullWidth
+            label='Port'
+            value={probeForm.port}
+            InputProps={{ readOnly: true }}
+            variant='outlined'
+            margin='normal'
+            type='number'
+          />
         </Grid>
-      )}  
+      )}
       <Grid item xs={12}>
         <TextfieldStyled
           fullWidth
@@ -255,46 +255,44 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
     </Grid>
   )
 
-  return (
-    <Fragment>
-      {renderGeneralSection(probeForm)}
-    </Fragment>
-  )
+  return <Fragment>{renderGeneralSection(probeForm)}</Fragment>
 }
 
 // Define validation schema
 const stepValidationSchemas = [
-  yup.object(),// No validation in select type step
+  yup.object(), // No validation in select type step
   yup.object({
     type: yup.string().required('Type is required'),
-    port: yup.string()
-      .when("type", (typeValue, schema) => {
-        //console.log("Type Value in .when():", typeValue); 
-        if (typeValue[0] === 'PORT') {
-          //console.log("checking for port since typevalue = port")
-          return schema
-            .required('Port is required')
-            .matches(/^\d+$/, 'Only numbers are allowed')
-            .test('is-valid-port', 'Port must be a valid number between 1 and 65535', value => {
-              const num = parseInt(value, 10);
-              return !isNaN(num) && num >= 1 && num <= 65535;
-            });
-        } else {
-          //console.log("Ignoring port check typevalue = port as its url")
-          return schema.notRequired();
-        }
-      }),
-      target: yup.string()
-        .when("type", (typeValue, schema) => {
-          if (typeValue[0] === 'PORT') {
-            return schema
-              .required('Target is required')
-              .matches(/^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/, 'Must be a valid IP address')
-          } else {
-            //console.log("Ignoring target check typevalue = port as its url");
-            return schema.notRequired();
-          }
-        })
+    port: yup.string().when('type', (typeValue, schema) => {
+      //console.log("Type Value in .when():", typeValue);
+      if (typeValue[0] === 'PORT') {
+        //console.log("checking for port since typevalue = port")
+        return schema
+          .required('Port is required')
+          .matches(/^\d+$/, 'Only numbers are allowed')
+          .test('is-valid-port', 'Port must be a valid number between 1 and 65535', value => {
+            const num = parseInt(value, 10)
+
+            return !isNaN(num) && num >= 1 && num <= 65535
+          })
+      } else {
+        //console.log("Ignoring port check typevalue = port as its url")
+        return schema.notRequired()
+      }
+    }),
+    target: yup.string().when('type', (typeValue, schema) => {
+      if (typeValue[0] === 'PORT') {
+        return schema
+          .required('Target is required')
+          .matches(
+            /^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+            'Must be a valid IP address'
+          )
+      } else {
+        //console.log("Ignoring target check typevalue = port as its url");
+        return schema.notRequired()
+      }
+    })
   }),
   yup.object() //No validation for the review step
 ]
@@ -304,7 +302,7 @@ const AddProbeWizard = ({ onClose }) => {
   const [probeForm, setProbeForm] = useState(initialProbeFormState)
   const [activeStep, setActiveStep] = useState(0)
   const [probeType, setProbeType] = useState('URL')
-  const [resetFormFields, setResetFormFields] = useState(false)  
+  const [resetFormFields, setResetFormFields] = useState(false)
   const [formErrors, setFormErrors] = useState({})
   const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
 
@@ -314,32 +312,33 @@ const AddProbeWizard = ({ onClose }) => {
   useEffect(() => {
     // Update the probeForm state to reflect the selected probeType
     setProbeForm(prevForm => ({
-        ...prevForm,        
-        type: probeType, 
-        port: probeType === 'URL' ? '' : prevForm.port,
-        //target: ''
-    }));    
-  }, [probeType]); 
-  
+      ...prevForm,
+      type: probeType,
+      port: probeType === 'URL' ? '' : prevForm.port
+
+      //target: ''
+    }))
+  }, [probeType])
+
   // Validate Form
   const validateForm = async () => {
     try {
       // Validate based on the current step
       const formData = {
-        type: probeType,  // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
-        port: probeForm.port,  // Make sure 'probeForm.port' exists and holds the current port number from the form
+        type: probeType, // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
+        port: probeForm.port, // Make sure 'probeForm.port' exists and holds the current port number from the form
         target: probeForm.target
-      };
-      
+      }
+
       const validationSchema = stepValidationSchemas[activeStep]
-      
-      await validationSchema.validate(formData, { abortEarly: false } )
+
+      await validationSchema.validate(formData, { abortEarly: false })
 
       // If validation is successful, clear errors
       setFormErrors({})
 
       return true
-    } catch (yupError) {      
+    } catch (yupError) {
       if (yupError.inner) {
         // Transform the validation errors to a more manageable structure
         const transformedErrors = yupError.inner.reduce(
@@ -353,7 +352,7 @@ const AddProbeWizard = ({ onClose }) => {
       } else {
         // Handle cases where inner does not exist or is empty
         //console.error("Validation failed without specific field errors:", yupError);
-        setFormErrors({ general: yupError.message || "An unknown error occurred" });
+        setFormErrors({ general: yupError.message || 'An unknown error occurred' })
       }
 
       return false
@@ -379,13 +378,13 @@ const AddProbeWizard = ({ onClose }) => {
 
       // Top-level field updates
       newForm[name] = value
-      
+
       return newForm
     })
   }
 
   // Handle Stepper
-  const handleBack = () => {    
+  const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
@@ -393,10 +392,10 @@ const AddProbeWizard = ({ onClose }) => {
     const isValid = await validateForm()
     if (!isValid) {
       return // Stop the submission or the next step if the validation fails
-    }    
+    }
 
     setActiveStep(prevActiveStep => prevActiveStep + 1)
-    
+
     if (activeStep === steps.length - 1) {
       try {
         const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
@@ -444,65 +443,74 @@ const AddProbeWizard = ({ onClose }) => {
     setResetFormFields(false)
     setActiveStep(0)
   }
-  
+
   const getStepContent = step => {
     switch (step) {
-      case 0:        
-        return (          
-        <Fragment>
+      case 0:
+        return (
+          <Fragment>
             <Grid container direction='column' spacing={2}>
               <Grid container spacing={2} style={{ padding: '16px' }}>
                 <Grid item>
                   <Typography variant='body2' gutterBottom>
-                    <strong>Probes</strong>, are designed to monitor services from an external perspective. 
-                    The are two types of probes in Oscar: HTTP URL and Port Check. Please select the probe type to
-                    get a detailed description of each probe type.
+                    <strong>Probes</strong>, are designed to monitor services from an external perspective. The are two
+                    types of probes in Oscar: HTTP URL and Port Check. Please select the probe type to get a detailed
+                    description of each probe type.
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <Typography variant="body2" gutterBottom>
+                  <Typography variant='body2' gutterBottom>
                     {probeType === 'URL' ? (
                       <Fragment>
-                        <strong>URL</strong> - HTTP URL probes are designed to monitor the availability and response time of HTTP or HTTPS URLs. 
-                        They can verify SSL/TLS certificate validity, uptime of websites, and more.
+                        <strong>URL</strong> - HTTP URL probes are designed to monitor the availability and response
+                        time of HTTP or HTTPS URLs. They can verify SSL/TLS certificate validity, uptime of websites,
+                        and more.
                         <ul>
                           <li>Monitoring the uptime of websites and web applications.</li>
                           <li>Verifying SSL/TLS certificate validity and expiration.</li>
-                          <li>Tracking the response time of API endpoints or other web services to ensure they meet performance benchmarks.</li>
-                          <li><strong>Example:</strong> http://example.com, https://example.com</li>
+                          <li>
+                            Tracking the response time of API endpoints or other web services to ensure they meet
+                            performance benchmarks.
+                          </li>
+                          <li>
+                            <strong>Example:</strong> http://example.com, https://example.com
+                          </li>
                         </ul>
                       </Fragment>
                     ) : (
                       <Fragment>
-                        <strong>PORT</strong> - Port Check probes verify if a specific TCP port on a host is open and listening, which is crucial for service accessibility such as databases and file servers.
+                        <strong>PORT</strong> - Port Check probes verify if a specific TCP port on a host is open and
+                        listening, which is crucial for service accessibility such as databases and file servers.
                         <ul>
                           <li>Ensuring that core services like SSH, HTTP, HTTPS, FTP, and databases are accessible.</li>
                           <li>Network security audits to verify that only the expected ports are open.</li>
                           <li>Infrastructure monitoring in both development and production environments.</li>
-                          <li><strong>Example:</strong> YourServerIP:PortNumber</li>
+                          <li>
+                            <strong>Example:</strong> YourServerIP:PortNumber
+                          </li>
                         </ul>
                       </Fragment>
                     )}
                   </Typography>
-                </Grid>            
+                </Grid>
                 <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth margin="normal">
-                    <InputLabelStyled id="probe-type-label">Probe Type</InputLabelStyled>
+                  <FormControl fullWidth margin='normal'>
+                    <InputLabelStyled id='probe-type-label'>Probe Type</InputLabelStyled>
                     <SelectStyled
-                      labelId="probe-type-label"
+                      labelId='probe-type-label'
                       value={probeType}
                       onChange={e => setProbeType(e.target.value)}
-                      label="Probe Type"
-                    >                    
-                      <MenuItem value="URL">URL</MenuItem>
-                      <MenuItem value="PORT">PORT</MenuItem>
+                      label='Probe Type'
+                    >
+                      <MenuItem value='URL'>URL</MenuItem>
+                      <MenuItem value='PORT'>PORT</MenuItem>
                     </SelectStyled>
                   </FormControl>
                 </Grid>
               </Grid>
             </Grid>
-          </Fragment>          
-      )
+          </Fragment>
+        )
       case 1:
         return (
           <Fragment>
@@ -530,41 +538,43 @@ const AddProbeWizard = ({ onClose }) => {
                   label='Type'
                   fullWidth
                   autoComplete='off'
-                  value={probeType?.toUpperCase() || ''}                                    
+                  value={probeType?.toUpperCase() || ''}
                   InputProps={{
-                    readOnly: true, // This makes the field read-only
+                    readOnly: true // This makes the field read-only
                   }}
                 />
-              </Grid>               
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  required                 
+                  required
                   id='target'
                   //name={probeType === 'PORT' ? "HOST" : "URL"}
                   name='target'
-                  label={probeType === 'PORT' ? "HOST" : "URL"}
+                  label={probeType === 'PORT' ? 'HOST' : 'URL'}
                   fullWidth
-                  autoComplete='off'                  
+                  autoComplete='off'
                   //variant="outlined"
-                  value={probeForm.target}                  
+                  value={probeForm.target}
                   onChange={handleFormChange}
+
                   //margin="normal"
                 />
-              </Grid>             
+              </Grid>
               {probeType === 'PORT' && (
                 <Grid item xs={12} sm={6}>
-                <TextField
-                  id='port'
-                  name="port"
-                  label="Port"
-                  fullWidth                                    
-                  type="number"
-                  value={probeForm.port}
-                  onChange={handleFormChange}
-                  //margin="normal"
-                />
+                  <TextField
+                    id='port'
+                    name='port'
+                    label='Port'
+                    fullWidth
+                    type='number'
+                    value={probeForm.port}
+                    onChange={handleFormChange}
+                    error={Boolean(formErrors?.port)}
+                    helperText={formErrors?.port}
+                  />
                 </Grid>
-              )}            
+              )}
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -602,7 +612,7 @@ const AddProbeWizard = ({ onClose }) => {
               </Grid>
             </Grid>
           </Fragment>
-        )      
+        )
       case 2:
         return <ReviewAndSubmitSection probeForm={probeForm} />
       default:

@@ -451,6 +451,9 @@ const TaskHistoryList = props => {
           setRowCount(res.data.total_records || 0)
           setRows(res.data.records || [])
         })
+        .finally(() => {
+          setRunRefresh(false)
+        })
 
       setLoading(false)
     },

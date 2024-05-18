@@ -116,6 +116,7 @@ const SLOList = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
@@ -837,6 +838,7 @@ const SLOList = props => {
         // Clear the timeout
         clearTimeout(timeoutId)
         setRunFilterQuery(false)
+        setRunRefresh(false)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -873,6 +875,17 @@ const SLOList = props => {
   useEffect(() => {
     fetchData()
   }, [refetchTrigger, fetchData])
+
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    // Reset the runRefresh flag
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
 
   // Trigger based on sort
   useEffect(() => {
@@ -1047,7 +1060,9 @@ const SLOList = props => {
               isFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: false
+              showexport: false,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

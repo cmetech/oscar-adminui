@@ -112,6 +112,7 @@ const SLOEventHistoryList = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
@@ -446,6 +447,9 @@ const SLOEventHistoryList = props => {
           setRowCount(res.data.total_records || 0)
           setRows(res.data.records || [])
         })
+        .finally(() => {
+          setRunRefresh(false)
+        })
 
       setLoading(false)
     },
@@ -456,6 +460,17 @@ const SLOEventHistoryList = props => {
   useEffect(() => {
     fetchData()
   }, [refetchTrigger, fetchData])
+
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    // Reset the runRefresh flag
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
 
   // Trigger based on filter application
   useEffect(() => {
@@ -649,7 +664,9 @@ const SLOEventHistoryList = props => {
               isFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

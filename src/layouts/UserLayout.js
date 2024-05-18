@@ -113,7 +113,7 @@ const MenuFooter = () => {
             <img className='main-image' src='/images/oscar.png' width='40' height='40' alt='menu-footer' />
             <img
               className='hover-image'
-              src='/images/oscar-hover.png' // Replace with the hover image path
+              src={theme.palette.mode == 'dark' ? '/images/oscar-hover-accent.png' : '/images/oscar-hover-bw.png'}
               width='40'
               height='40'
               alt='hover-image'
@@ -124,7 +124,7 @@ const MenuFooter = () => {
             <img className='main-image' src='/images/oscar.png' width='150' height='150' alt='menu-footer' />
             <img
               className='hover-image'
-              src='/images/oscar-hover.png' // Replace with the hover image path
+              src={theme.palette.mode == 'dark' ? '/images/oscar-hover-accent.png' : '/images/oscar-hover-bw.png'}
               width='150'
               height='150'
               alt='hover-image'

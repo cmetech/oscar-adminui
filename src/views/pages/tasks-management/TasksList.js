@@ -73,6 +73,8 @@ import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskW
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { on } from 'form-data'
+import { fi } from 'date-fns/locale'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -124,6 +126,7 @@ const TasksList = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
@@ -1181,6 +1184,7 @@ const TasksList = props => {
         // Clear the timeout
         clearTimeout(timeoutId)
         setRunFilterQuery(false)
+        setRunRefresh(false)
       }
 
       setLoading(false)
@@ -1236,6 +1240,17 @@ const TasksList = props => {
   useEffect(() => {
     fetchData()
   }, [fetchData, refetchTrigger])
+
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    // Reset the runRefresh flag
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
 
   // Trigger based on sort
   useEffect(() => {
@@ -1454,7 +1469,9 @@ const TasksList = props => {
               setFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

@@ -210,6 +210,7 @@ const CustomToolbar = ({
   setFilterActive,
   isFilterActive,
   setRunFilterQuery,
+  setRunRefresh,
   ...props
 }) => {
   const theme = useTheme()
@@ -234,6 +235,7 @@ const CustomToolbar = ({
           }
         }}
       />
+      {props.showexport ? <CustomExportButton /> : null}
       <GridToolbarFilterButton
         ref={setFilterButtonEl}
         slotProps={{
@@ -260,7 +262,21 @@ const CustomToolbar = ({
           <Icon icon='mdi:filter-outline' fontSize={25} />
         </IconButton>
       </Tooltip>
-      {props.showexport ? <CustomExportButton /> : null}
+      {props.showRefresh ? (
+        <Tooltip title='Refresh Data'>
+          <IconButton
+            size='small'
+            color={theme.palette.mode === 'light' ? 'primary' : 'warning'}
+            onClick={() => {
+              console.log('Run Filter Query')
+              setRunRefresh(true)
+            }}
+            sx={{ ml: 1 }}
+          >
+            <Icon icon='mdi:refresh' fontSize={25} />
+          </IconButton>
+        </Tooltip>
+      ) : null}
     </GridToolbarContainer>
   )
 }
@@ -300,15 +316,20 @@ const ServerSideToolbar = ({ showButtons, ...props }) => {
         </Box>
       )}
 
-      <CustomToolbar
-        setColumnsButtonEl={props.setColumnsButtonEl}
-        setFilterButtonEl={props.setFilterButtonEl}
-        setFilterActive={props.setFilterActive}
-        isFilterActive={props.isFilterActive}
-        setRunFilterQuery={props.setRunFilterQuery}
-        showexport={props.showexport ? props.showexport : false}
-        sx={{ gridRow: '1', gridColumn: '6 / 6' }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <CustomToolbar
+          setColumnsButtonEl={props.setColumnsButtonEl}
+          setFilterButtonEl={props.setFilterButtonEl}
+          setFilterActive={props.setFilterActive}
+          isFilterActive={props.isFilterActive}
+          showexport={props.showexport ? props.showexport : false}
+          showRefresh={props.showRefresh ? props.showRefresh : false}
+          setRunFilterQuery={props.setRunFilterQuery}
+          setRunRefresh={props.setRunRefresh}
+          sx={{ gridRow: '1', gridColumn: '6 / 6' }}
+        />
+      </Box>
+
       <Tooltip title='Search'>
         <CustomSearchTextField
           value={props.value}

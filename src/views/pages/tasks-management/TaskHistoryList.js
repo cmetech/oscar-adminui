@@ -114,6 +114,7 @@ const TaskHistoryList = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
@@ -461,6 +462,17 @@ const TaskHistoryList = props => {
     fetchData()
   }, [refetchTrigger, fetchData])
 
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    // Reset the runRefresh flag
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
+
   // Trigger based on sort
   useEffect(() => {
     console.log('Effect Run:', { sortModel, runFilterQuery })
@@ -649,7 +661,9 @@ const TaskHistoryList = props => {
               isFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

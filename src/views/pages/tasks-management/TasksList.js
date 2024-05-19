@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, useRef, forwardRef } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -110,6 +110,7 @@ const TasksList = props => {
   const session = useSession()
   const { t } = useTranslation()
   const theme = useTheme()
+  const hasRunRef = useRef(false)
 
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
@@ -1242,15 +1243,28 @@ const TasksList = props => {
   }, [fetchData, refetchTrigger])
 
   useEffect(() => {
-    if (runRefresh) {
-      fetchData()
+    const registerAndFetchData = async () => {
+      if (runRefresh && !hasRunRef.current) {
+        hasRunRef.current = true
+        try {
+          await axios.post('/api/tasks/register', { timeout: 10000 })
+        } catch (error) {
+          console.error('Error refreshing tasks:', error)
+          toast.error('Failed to refresh tasks')
+        } finally {
+          fetchData()
+          setRunRefresh(false)
+        }
+      }
     }
 
-    // Reset the runRefresh flag
+    registerAndFetchData()
+
+    // Reset the flag in the cleanup function
     return () => {
-      runRefresh && setRunRefresh(false)
+      hasRunRef.current = false
     }
-  }, [fetchData, runRefresh])
+  }, [fetchData, runRefresh, setRunRefresh])
 
   // Trigger based on sort
   useEffect(() => {

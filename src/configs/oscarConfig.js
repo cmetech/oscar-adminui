@@ -3,7 +3,7 @@ const oscarConfig = {
   MIDDLEWARE_URL: `${process.env.NEXT_PUBLIC_API_URL}`,
   MIDDLEWARE_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
   MIDDLEWARE_INVENTORY_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/inventory`,
-  BRANDING_TAGLINE: 'powered by OSCAR'
+  BRANDING_TAGLINE: 'powered by Ericsson'
 }
 
 export default oscarConfig

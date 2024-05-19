@@ -6,7 +6,7 @@
  */
 const themeConfig = {
   // ** Layout Configs
-  templateName: 'OSCAR powered by Ericsson' /* App Name */,
+  templateName: 'OSCAR' /* App Name */,
   layout: 'vertical' /* vertical | horizontal */,
   mode: 'dark' /* light | dark | semi-dark /*! Note: semi-dark value will only work for Vertical Layout */,
   direction: 'ltr' /* ltr | rtl */,

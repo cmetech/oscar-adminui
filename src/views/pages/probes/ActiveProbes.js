@@ -122,6 +122,7 @@ const ActiveProbes = props => {
   const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
@@ -897,11 +898,11 @@ const ActiveProbes = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      console.log('Deleting Probe:', currentProbe)
+      // console.log('Deleting Probe:', currentProbe)
 
       const endpoint = `/api/probes/delete/${currentProbe.id}`
 
-      console.log('DELETE Endpoint:', endpoint)
+      // console.log('DELETE Endpoint:', endpoint)
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
@@ -989,8 +990,8 @@ const ActiveProbes = props => {
 
   // Trigger based on filter application
   useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
+    // console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
+    // console.log('Filter Model:', JSON.stringify(filterModel))
 
     if (runFilterQuery && filterModel.items.length > 0) {
       if (filterMode === 'server') {
@@ -1018,10 +1019,21 @@ const ActiveProbes = props => {
     fetchData()
   }, [fetchData, refetchTrigger])
 
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    // Reset the runRefresh flag
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
+
   // Trigger based on sort
   useEffect(() => {
-    console.log('Effect Run:', { sortModel, runFilterQuery })
-    console.log('Sort Model:', JSON.stringify(sortModel))
+    // console.log('Effect Run:', { sortModel, runFilterQuery })
+    // console.log('Sort Model:', JSON.stringify(sortModel))
 
     if (sortingMode === 'server') {
       fetchData()
@@ -1030,10 +1042,10 @@ const ActiveProbes = props => {
       const column = sortModel[0]?.field
       const sort = sortModel[0]?.sort
 
-      console.log('Column:', column)
-      console.log('Sort:', sort)
+      // console.log('Column:', column)
+      // console.log('Sort:', sort)
 
-      console.log('Rows:', rows)
+      // console.log('Rows:', rows)
 
       if (filteredRows.length > 0) {
         const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
@@ -1087,11 +1099,12 @@ const ActiveProbes = props => {
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
-    console.log('Added IDs:', addedIds)
+    // console.log('Added IDs:', addedIds)
 
     addedIds.forEach(id => {
       const row = rows.find(r => r.id === id)
-      console.log('Added Row:', row)
+
+      // console.log('Added Row:', row)
     })
 
     // Update the row selection model
@@ -1179,7 +1192,9 @@ const ActiveProbes = props => {
               setFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

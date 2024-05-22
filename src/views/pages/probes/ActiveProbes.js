@@ -862,8 +862,13 @@ const ActiveProbes = props => {
 
     const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
 
+    console.log('Probe status:', isCurrentlyEnabled ? 'enabled' : 'disabled')
+    console.log('Current Probe Status:', currentProbe?.status)
+
     // Determine the correct endpoint URL based on the probe's current status
     const endpoint = isCurrentlyEnabled ? `/api/probes/disable/${probeId}` : `/api/probes/enable/${probeId}`
+
+    console.log('Endpoint:', endpoint)
 
     try {
       const response = await axios.post(

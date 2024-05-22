@@ -1,4 +1,4 @@
-// pages/api/probes/disable/[taskId].js
+// pages/api/probes/disable/[probeId].js
 import axios from 'axios'
 import https from 'https'
 import oscarConfig from 'src/configs/oscarConfig'
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   // const payload = req.body
   const payload = {
-    "status": "disabled"
+    status: 'disabled'
   }
   const { probeId } = req.query
 
@@ -28,20 +28,20 @@ export default async function handler(req, res) {
   })
 
   try {
-    const response = await axios({
-      method: 'PUT',
-      url: `${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes/${probeId}`,
-      data: payload,
-      headers: {
-        Authorization: apiToken,
-        Accept: 'application/json'
-      },
-      httpsAgent
-    })
+    const response = await axios.post(
+      `${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes/disable`,
+      [probeId], // Forward the array of probe IDs to the middleware
+      {
+        headers: { 'Content-Type': 'application/json' },
+        httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+      }
+    )
 
-    res.status(200).json(response.data)
+    // Forward the successful response from the middleware to the client
+    return res.status(200).json(response.data)
   } catch (error) {
-    console.error('Error forwarding PUT request to disable probe', error)
-    res.status(error.response?.status || 500).json({ message: error.message })
+    console.error('Error disabling probes:', error)
+
+    return res.status(error.response?.status || 500).json({ message: error.message })
   }
 }

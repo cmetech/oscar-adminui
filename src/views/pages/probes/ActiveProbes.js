@@ -227,14 +227,23 @@ const ActiveProbes = props => {
       renderCell: params => {
         const { row } = params
 
-        let color = 'error'
-        let label = 'UNKN'
-        if (row?.operational_status?.toLowerCase() === 'up') {
+        let color = 'secondary'
+        let label = 'UNKNOWN'
+        let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
+        if (row?.operational_status?.toLowerCase() === 'up' && row?.status?.toLowerCase() === 'enabled') {
           color = 'success'
           label = 'UP'
-        } else {
+        } else if (row?.operational_status?.toLowerCase() === 'down' && row?.status?.toLowerCase() === 'enabled') {
           color = 'error'
           label = 'DOWN'
+        } else if (row?.status?.toLowerCase() === 'disabled') {
+          skin = 'dark'
+          color = 'secondary'
+          label = 'DISABLED'
+        } else {
+          skin = 'dark'
+          color = 'secondary'
+          label = 'UNKNOWN'
         }
 
         return (
@@ -264,8 +273,8 @@ const ActiveProbes = props => {
                 textoverflow='ellipsis'
                 rounded
                 size='medium'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
+                skin={skin}
+                label={label || 'UNKNOWN'}
                 color={color}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },

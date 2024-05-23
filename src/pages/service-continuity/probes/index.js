@@ -567,7 +567,7 @@ const ProbeManager = () => {
 
         // Close the enable modal dialog
         setIsEnableModalOpen(false) // Add this line to close the dialog
-        setSelectedProbIds([]) // Clear the selected Probe IDs
+        setSelectedProbeIds([]) // Clear the selected Probe IDs
       } else {
         toast.error('Error enabling probes')
       }

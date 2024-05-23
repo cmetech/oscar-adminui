@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     try {
       const response = await axios.post(
-        `${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes/disable`,
+        `${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes/enable`,
         probeIds, // Forward the array of probe IDs to the middleware
         {
           headers: { 'Content-Type': 'application/json' },
@@ -18,9 +18,12 @@ export default async function handler(req, res) {
       )
 
       // Forward the successful response from the middleware to the client
-      return res.status(200).json(response.data)
+      return res.status(response.status || 200).json({
+        message: response.data.message,
+        probeids: response.data.probeids
+      })
     } catch (error) {
-      console.error('Error disabling probes:', error)
+      console.error('Error enabling probes:', error)
 
       return res.status(error.response?.status || 500).json({ message: error.message })
     }

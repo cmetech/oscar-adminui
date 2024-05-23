@@ -126,7 +126,8 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
-      1: 'Active Probes',
+      1: 'Active Probes'
+
       //2: 'Probe History'
     }
 
@@ -226,8 +227,9 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
-      1: 'Active Probes',
-     //2: 'Probe History'
+      1: 'Active Probes'
+
+      //2: 'Probe History'
     }
 
     return mapping[tabValue] || ''
@@ -271,7 +273,8 @@ const ConfirmationDisableModal = ({ isOpen, onClose, onConfirm, tab }) => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
-      1: 'Active Probes',
+      1: 'Active Probes'
+
       //2: 'Probe History'
     }
 
@@ -315,7 +318,8 @@ const ConfirmationEnableModal = ({ isOpen, onClose, onConfirm, tab }) => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
-      1: 'Active Probes',
+      1: 'Active Probes'
+
       //2: 'Probe History'
     }
 
@@ -518,13 +522,13 @@ const ProbeManager = () => {
     console.log('Disabling probes', selectedProbeIds)
 
     try {
-      const response = await axios.post('/api/probe/disable', selectedProbeIds)
-      const { Message, ProbeIds } = response.data
+      const response = await axios.post('/api/probes/disable', selectedProbeIds)
+      const { message, probeids } = response.data
 
       if (response.status === 200) {
         // Iterate over ProbeIds and display success message for each
-        ProbeIds.forEach(probeId => {
-          toast.success(`${Message}: ${probeId}`)
+        probeids.forEach(probeId => {
+          toast.success(`${message}: ${probeId}`)
         })
 
         // Trigger re-fetch of the grid data
@@ -548,14 +552,14 @@ const ProbeManager = () => {
     console.log('Enabling probes', selectedProbeIds)
 
     try {
-      const response = await axios.post('/api/probe/enable', selectedProbeIds)
+      const response = await axios.post('/api/probes/enable', selectedProbeIds)
 
       if (response.status === 200) {
-        const { Message, ProbeIds } = response.data
+        const { message, probeids } = response.data
 
         // Iterate over ProbeIds and display success message for each
-        ProbeIds.forEach(probeId => {
-          toast.success(`${Message}: ${probeId}`)
+        probeids.forEach(probeId => {
+          toast.success(`${message}: ${probeId}`)
         })
 
         // Trigger re-fetch of the grid data
@@ -756,7 +760,12 @@ const ProbeManager = () => {
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='assets'>
             {probeTotal == 0 ? (
-              <Tab value='1' label={t('ACtive Probes')} icon={<Icon icon='mdi:arrow-decision-auto' />} iconPosition='start' />
+              <Tab
+                value='1'
+                label={t('ACtive Probes')}
+                icon={<Icon icon='mdi:arrow-decision-auto' />}
+                iconPosition='start'
+              />
             ) : (
               <Tab
                 value='1'
@@ -765,7 +774,6 @@ const ProbeManager = () => {
                 iconPosition='start'
               />
             )}
-            
           </TabList>
           <TabPanel value='1'>
             <ActiveProbesList set_total={setProbeTotal} total={probeTotal} />
@@ -776,7 +784,7 @@ const ProbeManager = () => {
         </TabContext>
       </Grid>
       <DynamicDialogForm open={openModal} handleClose={handleCloseModal} tab={value} />
-      
+
       <ConfirmationDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}

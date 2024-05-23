@@ -296,14 +296,28 @@ const ActiveProbes = props => {
         const { row } = params
         const shouldShowChip = row.target && !row.target.startsWith('http:')
 
-        let color = 'error'
-        let label = 'UNKN'
-        if (row?.ssl_status?.toLowerCase() === 'ok') {
+        let color = 'secondary'
+        let label = 'UNKNOWN'
+        if (
+          row?.operational_status?.toLowerCase() === 'up' &&
+          row?.status?.toLowerCase() === 'enabled' &&
+          row?.ssl_status?.toLowerCase() === 'ok'
+        ) {
           color = 'success'
           label = 'OK'
-        } else {
+        } else if (
+          row?.operational_status?.toLowerCase() === 'down' &&
+          row?.status?.toLowerCase() === 'enabled' &&
+          row?.ssl_status?.toLowerCase() === 'invalid'
+        ) {
           color = 'error'
           label = 'INVALID'
+        } else if (row?.operational_status?.toLowerCase() === 'unknown') {
+          color = 'secondary'
+          label = 'UNKNOWN'
+        } else {
+          color = 'secondary'
+          label = 'UNKNOWN'
         }
 
         return (
@@ -353,6 +367,8 @@ const ActiveProbes = props => {
     {
       flex: 0.015,
       field: 'http_status_code',
+      align: 'center',
+      headerAlign: 'center',
       headerName: t('HTTP CODE'),
       renderCell: params => {
         const { row } = params
@@ -371,7 +387,17 @@ const ActiveProbes = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                width: '100%',
+                overflow: 'hidden',
+                textoverflow: 'ellipsis'
+              }}
+            >
               <Typography title={row?.http_status_code} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {row?.http_status_code}
               </Typography>
@@ -383,6 +409,8 @@ const ActiveProbes = props => {
     {
       flex: 0.015,
       field: 'tls_version',
+      align: 'center',
+      headerAlign: 'center',
       headerName: t('TLS Version'),
       renderCell: params => {
         const { row } = params
@@ -401,7 +429,17 @@ const ActiveProbes = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                width: '100%',
+                overflow: 'hidden',
+                textoverflow: 'ellipsis'
+              }}
+            >
               <Typography title={row?.tls_version} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {row?.tls_version}
               </Typography>

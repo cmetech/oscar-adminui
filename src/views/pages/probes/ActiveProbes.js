@@ -1035,6 +1035,7 @@ const ActiveProbes = props => {
         // Clear the timeout
         clearTimeout(timeoutId)
         setRunFilterQuery(false)
+        setRunRefresh(false)
       }
 
       setLoading(false)

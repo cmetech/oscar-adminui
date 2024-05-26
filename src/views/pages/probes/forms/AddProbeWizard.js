@@ -374,7 +374,7 @@ const allStepValidationSchemas = [
   yup.object() //No validation for the review step
 ]
 
-const AddProbeWizard = ({ onClose }) => {
+const AddProbeWizard = ({ onSuccess }) => {
   // ** States
   const [probeForm, setProbeForm] = useState(initialProbeFormState)
   const [activeStep, setActiveStep] = useState(0)
@@ -550,13 +550,16 @@ const AddProbeWizard = ({ onClose }) => {
 
           if (probe) {
             console.log('Probe successfully created for ', probe.name)
+
+            // Show a success toast
+            toast.success('Probe successfully created')
           } else {
             console.error('Failed to create probe')
             toast.error('Failed to create probe')
           }
 
           // Call onClose to close the modal
-          onClose && onClose()
+          onSuccess && onSuccess()
 
           // Trigger a refetch of the probe list
           setRefetchTrigger(new Date().getTime())

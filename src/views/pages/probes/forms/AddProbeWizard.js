@@ -52,6 +52,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 import { current } from '@reduxjs/toolkit'
+import { Menu } from '@mui/material'
 
 // Define initial state for the server form
 const initialProbeFormState = {
@@ -62,10 +63,26 @@ const initialProbeFormState = {
   target: '',
   host: '',
   port: '',
-  url: ''
+  url: '',
+  schedule: {
+    year: '',
+    month: '',
+    day: '',
+    day_of_week: '',
+    hour: '',
+    minute: '*/5',
+    second: '',
+    start_date: '',
+    end_date: '',
+    timezone: '',
+    jitter: 0
+  },
+  args: [{ value: '' }],
+  kwargs: [{ key: '', value: '' }],
+  payload: ''
 }
 
-const steps = [
+const allSteps = [
   {
     title: 'Probe Type',
     subtitle: 'Type',
@@ -75,6 +92,16 @@ const steps = [
     title: 'Probe Details',
     subtitle: 'Details',
     description: 'Edit the probe details.'
+  },
+  {
+    title: 'Probe Arguments',
+    subtitle: 'Keyword Arguments',
+    description: 'Edit the API Probe Keyword Argument details.'
+  },
+  {
+    title: 'Probe Payload',
+    subtitle: 'API Probe Payload',
+    description: 'Edit the API Probe Payload details.'
   },
   {
     title: 'Review',
@@ -184,7 +211,6 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
           Probe Information
         </Typography>
       </Grid>
-      {/* List all general fields here */}
       <Grid item xs={12} sm={6}>
         <TextfieldStyled
           fullWidth
@@ -218,8 +244,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
       <Grid item xs={12} sm={6}>
         <TextfieldStyled
           fullWidth
-          //label='Target'
-          label={probeForm.type === 'PORT' ? 'HOST' : 'URL'}
+          label={probeForm.type === 'PORT' ? 'HOST' : probeForm.type === 'API' ? 'ENDPOINT' : 'URL'}
           value={probeForm.target !== undefined ? probeForm.target : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
@@ -251,15 +276,65 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
           rows={2}
         />
       </Grid>
-      {/* Add other general fields as needed */}
     </Grid>
   )
 
-  return <Fragment>{renderGeneralSection(probeForm)}</Fragment>
+  const renderArgumentsSection = probeForm => (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+          Arguments
+        </Typography>
+      </Grid>
+      {probeForm.kwargs &&
+        probeForm.kwargs.map((arg, index) => (
+          <Grid item xs={12} sm={6} key={index}>
+            <TextfieldStyled
+              fullWidth
+              label={`Argument ${index + 1}`}
+              value={arg.key !== undefined ? `${arg.key}: ${arg.value}` : ''}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+        ))}
+    </Grid>
+  )
+
+  const renderPayloadSection = probeForm => (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+          Payload
+        </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <TextfieldStyled
+          fullWidth
+          label='Payload'
+          value={probeForm.payload !== undefined ? probeForm.payload : ''}
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+          multiline
+          rows={30}
+        />
+      </Grid>
+    </Grid>
+  )
+
+  return (
+    <Fragment>
+      {renderGeneralSection(probeForm)}
+      {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
+      {probeForm.type === 'API' && renderPayloadSection(probeForm)}
+    </Fragment>
+  )
 }
 
 // Define validation schema
-const stepValidationSchemas = [
+const allStepValidationSchemas = [
   yup.object(), // No validation in select type step
   yup.object({
     type: yup.string().required('Type is required'),
@@ -294,6 +369,8 @@ const stepValidationSchemas = [
       }
     })
   }),
+  yup.object(), //No validation for the arguments step
+  yup.object(), //No validation for the payload step
   yup.object() //No validation for the review step
 ]
 
@@ -312,13 +389,24 @@ const AddProbeWizard = ({ onClose }) => {
   useEffect(() => {
     // Update the probeForm state to reflect the selected probeType
     setProbeForm(prevForm => ({
-      ...prevForm,
+      ...initialProbeFormState,
       type: probeType,
       port: probeType === 'URL' ? '' : prevForm.port
-
-      //target: ''
     }))
+
+    // Reset the active step when probe type changes
+    setActiveStep(0)
   }, [probeType])
+
+  const steps =
+    probeType === 'API'
+      ? allSteps
+      : allSteps.filter(step => step.title !== 'Probe Arguments' && step.title !== 'Probe Payload')
+
+  const stepValidationSchemas =
+    probeType === 'API'
+      ? allStepValidationSchemas
+      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3)
 
   // Validate Form
   const validateForm = async () => {
@@ -376,11 +464,38 @@ const AddProbeWizard = ({ onClose }) => {
     setProbeForm(prevForm => {
       const newForm = { ...prevForm }
 
-      // Top-level field updates
-      newForm[name] = value
+      if (index !== undefined && section) {
+        newForm[section][index][name] = value.toLowerCase()
+      } else {
+        // Top-level field updates
+        newForm[name] = value
+      }
 
       return newForm
     })
+  }
+
+  const addSectionEntry = section => {
+    let newEntry
+    switch (section) {
+      case 'kwargs':
+      case 'metadata':
+        newEntry = { key: '', value: '' }
+        break
+      case 'args':
+        newEntry = { value: '' }
+      default:
+        newEntry = {} // Default case, should not be reached
+    }
+
+    const updatedSection = [...probeForm[section], newEntry]
+    setProbeForm({ ...probeForm, [section]: updatedSection })
+  }
+
+  const removeSectionEntry = (section, index) => {
+    const updatedSection = [...probeForm[section]]
+    updatedSection.splice(index, 1)
+    setProbeForm({ ...probeForm, [section]: updatedSection })
   }
 
   // Handle Stepper
@@ -406,10 +521,25 @@ const AddProbeWizard = ({ onClose }) => {
         }
 
         const payload = {
-          ...probeForm
+          ...probeForm,
+          args: probeForm.args.map(arg => arg.value),
+          kwargs: Object.fromEntries(probeForm.kwargs.map(({ key, value }) => [key, value]))
         }
 
-        //console.log('Payload:', payload)
+        // Conditionally add the payload field to kwargs if type is API
+        if (probeForm.type === 'API') {
+          payload.kwargs['payload'] = probeForm.payload
+          payload['owner'] = 'internal'
+          payload['organization'] = 'internal'
+          delete payload.payload
+        }
+
+        // Remove the payload field if it's not an API type
+        if (probeForm.type !== 'API') {
+          delete payload.payload
+        }
+
+        console.log('Payload:', payload)
 
         // Update the endpoint to point to your Next.js API route
         const endpoint = `/api/probes/add`
@@ -442,6 +572,77 @@ const AddProbeWizard = ({ onClose }) => {
     setProbeForm(initialProbeFormState) // Fallback to initial state if currentServer is not available
     setResetFormFields(false)
     setActiveStep(0)
+  }
+
+  const renderDynamicFormSection = section => {
+    // Determine field labels based on section type
+    const getFieldLabels = section => {
+      switch (section) {
+        case 'kwargs':
+        case 'metadata':
+          return { keyLabel: 'Key', valueLabel: 'Value' }
+        case 'args':
+          return { valueLabel: 'Value' }
+        default:
+          return { keyLabel: 'Key', valueLabel: 'Value' }
+      }
+    }
+
+    const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+
+    // console.log('taskForm:', taskForm)
+    // console.log('section:', section)
+    // console.log('keyLabel:', keyLabel)
+    // console.log('valueLabel:', valueLabel)
+    // console.log('defaultValueLabel:', defaultValueLabel)
+
+    return probeForm[section].map((entry, index) => (
+      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
+        <Grid container spacing={3} alignItems='center'>
+          {['kwargs', 'metadata'].includes(section) && (
+            <Grid item xs={4}>
+              <TextfieldStyled
+                key={`key-${section}-${index}`}
+                fullWidth
+                label={keyLabel}
+                name='key'
+                value={entry.key?.toUpperCase() || ''}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )}
+          {['kwargs', 'metadata', 'args'].includes(section) && (
+            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 4 : 6}>
+              <TextfieldStyled
+                key={`value-${section}-${index}`}
+                fullWidth
+                label={valueLabel}
+                name='value'
+                value={entry.value?.toUpperCase() || ''}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )}
+          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            <IconButton
+              onClick={() => addSectionEntry(section)}
+              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+            >
+              <Icon icon='mdi:plus-circle-outline' />
+            </IconButton>
+            {probeForm[section].length > 1 && (
+              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                <Icon icon='mdi:minus-circle-outline' />
+              </IconButton>
+            )}
+          </Grid>
+        </Grid>
+      </Box>
+    ))
   }
 
   const getStepContent = step => {
@@ -477,7 +678,7 @@ const AddProbeWizard = ({ onClose }) => {
                           </li>
                         </ul>
                       </Fragment>
-                    ) : (
+                    ) : probeType === 'PORT' ? (
                       <Fragment>
                         <strong>PORT</strong> - Port Check probes verify if a specific TCP port on a host is open and
                         listening, which is crucial for service accessibility such as databases and file servers.
@@ -490,7 +691,21 @@ const AddProbeWizard = ({ onClose }) => {
                           </li>
                         </ul>
                       </Fragment>
-                    )}
+                    ) : probeType === 'API' ? (
+                      <Fragment>
+                        <strong>API</strong> - API probes periodically monitor the availability of API endpoints. They
+                        can track the performance, availability, and correctness of API responses.
+                        <ul>
+                          <li>Ensuring that APIs are available and responding correctly.</li>
+                          <li>Monitoring API response times to ensure they meet performance benchmarks.</li>
+                          <li>Checking the correctness of API responses by verifying the returned data.</li>
+                          <li>Tracking the uptime of third-party API services that your application depends on.</li>
+                          <li>
+                            <strong>Example:</strong> https://api.example.com/v1/status
+                          </li>
+                        </ul>
+                      </Fragment>
+                    ) : null}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -504,6 +719,7 @@ const AddProbeWizard = ({ onClose }) => {
                     >
                       <MenuItem value='URL'>URL</MenuItem>
                       <MenuItem value='PORT'>PORT</MenuItem>
+                      <MenuItem value='API'>API</MenuItem>
                     </SelectStyled>
                   </FormControl>
                 </Grid>
@@ -545,24 +761,20 @@ const AddProbeWizard = ({ onClose }) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
+                <TextfieldStyled
                   required
                   id='target'
-                  //name={probeType === 'PORT' ? "HOST" : "URL"}
                   name='target'
-                  label={probeType === 'PORT' ? 'HOST' : 'URL'}
+                  label={probeType === 'PORT' ? 'HOST' : probeType === 'API' ? 'ENDPOINT' : 'URL'}
                   fullWidth
                   autoComplete='off'
-                  //variant="outlined"
                   value={probeForm.target}
                   onChange={handleFormChange}
-
-                  //margin="normal"
                 />
               </Grid>
               {probeType === 'PORT' && (
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <TextfieldStyled
                     id='port'
                     name='port'
                     label='Port'
@@ -614,6 +826,58 @@ const AddProbeWizard = ({ onClose }) => {
           </Fragment>
         )
       case 2:
+        return (
+          <Fragment>
+            {probeType === 'API' ? (
+              <Grid container spacing={3} alignItems='flex-start'>
+                <Grid item xs={12} sm={5}>
+                  <Typography variant='subtitle1' gutterBottom>
+                    Keyword Arguments
+                  </Typography>
+                  {renderDynamicFormSection('kwargs')}
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('kwargs')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Keyword Arguments
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            ) : (
+              <ReviewAndSubmitSection probeForm={probeForm} />
+            )}
+          </Fragment>
+        )
+      case 3:
+        return (
+          <Fragment>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={12}>
+                <TextfieldStyled
+                  fullWidth
+                  label='Payload'
+                  name='payload'
+                  autoComplete='off'
+                  value={probeForm.payload !== undefined ? probeForm.payload : ''}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={30}
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 4:
         return <ReviewAndSubmitSection probeForm={probeForm} />
       default:
         return 'Unknown Step'

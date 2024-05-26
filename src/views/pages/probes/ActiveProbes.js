@@ -298,6 +298,7 @@ const ActiveProbes = props => {
 
         let color = 'secondary'
         let label = 'UNKNOWN'
+        let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
         if (
           row?.operational_status?.toLowerCase() === 'up' &&
           row?.status?.toLowerCase() === 'enabled' &&
@@ -313,9 +314,11 @@ const ActiveProbes = props => {
           color = 'error'
           label = 'INVALID'
         } else if (row?.operational_status?.toLowerCase() === 'unknown') {
+          skin = 'dark'
           color = 'secondary'
           label = 'UNKNOWN'
         } else {
+          skin = 'dark'
           color = 'secondary'
           label = 'UNKNOWN'
         }
@@ -348,7 +351,7 @@ const ActiveProbes = props => {
                   textoverflow='ellipsis'
                   rounded
                   size='medium'
-                  skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                  skin={skin}
                   label={label || 'UNKN'}
                   color={color}
                   sx={{

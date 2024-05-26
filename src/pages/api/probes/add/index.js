@@ -8,21 +8,30 @@ async function handler(req, res) {
     const probeobj = req.body
 
     let target = probeobj.target
-    let type = "httpurl"
+    let type = 'httpurl'
 
-    if (probeobj.type === "PORT") {
-      target = target+":"+probeobj.port
-      type = "tcpport"
-    }  
-    const payload = {
-      "name":probeobj["name"],
-      "description": probeobj["description"],
-      "status": probeobj["status"],
-      "target": target,
-      "type": type
+    if (probeobj.type === 'PORT') {
+      target = target + ':' + probeobj.port
+      type = 'tcpport'
     }
+
+    const payload = {
+      name: probeobj['name'],
+      description: probeobj['description'],
+      status: probeobj['status'],
+      target: target,
+      type: type
+    }
+
+    // Add additional information for API type
+    if (probeobj.type === 'API') {
+      payload.type = probeobj.type.toLowerCase()
+      payload.kwargs = probeobj.kwargs || {}
+      payload.schedule = probeobj.schedule || {}
+    }
+
     //console.log('payload:', payload)
-    
+
     try {
       const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes`, payload, {
         headers: {

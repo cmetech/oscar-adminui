@@ -1047,6 +1047,17 @@ const ActiveProbes = props => {
     [paginationModel, setProbes, setRows]
   )
 
+  // Effect to fetch data initially and start the periodic refresh
+  useEffect(() => {
+    if (!runFilterQuery) {
+      fetchData()
+    }
+
+    const intervalId = setInterval(fetchData, 300000) // Fetch data every 300 seconds (5 minutes)
+
+    return () => clearInterval(intervalId) // Cleanup interval on component unmount
+  }, [fetchData, refetchTrigger, runFilterQuery])
+
   // Trigger based on filter application
   useEffect(() => {
     // console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })

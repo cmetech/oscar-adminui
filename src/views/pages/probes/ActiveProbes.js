@@ -466,13 +466,13 @@ const ActiveProbes = props => {
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'httpurl') {
           label = 'URL PROBE'
-          iconimage = 'mdi:script-text'
+          iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
           label = 'TCP PROBE'
-          iconimage = 'mdi:script-text'
+          iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'api') {
           label = 'API PROBE'
-          iconimage = 'mdi:script-text'
+          iconimage = 'mdi:thermometer-probe'
         }
 
         return (

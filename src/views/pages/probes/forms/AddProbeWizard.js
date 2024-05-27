@@ -279,50 +279,69 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
     </Grid>
   )
 
-  const renderArgumentsSection = probeForm => (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-          Arguments
-        </Typography>
-      </Grid>
-      {probeForm.kwargs &&
-        probeForm.kwargs.map((arg, index) => (
-          <Grid item xs={12} sm={6} key={index}>
+  const renderArgumentsSection = probeForm => {
+    if (probeForm.kwargs && probeForm.kwargs.length > 0) {
+      // Check if there's only one argument and if its key and value are not empty strings
+      if (probeForm.kwargs.length === 1) {
+        const arg = probeForm.kwargs[0]
+        if (arg.key.trim() === '' && arg.value.trim() === '') {
+          return null
+        }
+      }
+
+      return (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+              Arguments
+            </Typography>
+          </Grid>
+          {probeForm.kwargs.map((arg, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <TextfieldStyled
+                fullWidth
+                label={`Argument ${index + 1}`}
+                value={arg.key !== undefined ? `${arg.key}: ${arg.value}` : ''}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )
+    }
+
+    return null // Return null if there are no arguments
+  }
+
+  const renderPayloadSection = probeForm => {
+    if (probeForm.payload && probeForm.payload.trim() !== '') {
+      return (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+              Payload
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
             <TextfieldStyled
               fullWidth
-              label={`Argument ${index + 1}`}
-              value={arg.key !== undefined ? `${arg.key}: ${arg.value}` : ''}
+              label='Payload'
+              value={probeForm.payload !== undefined ? probeForm.payload : ''}
               InputProps={{ readOnly: true }}
               variant='outlined'
               margin='normal'
+              multiline
+              rows={30}
             />
           </Grid>
-        ))}
-    </Grid>
-  )
+        </Grid>
+      )
+    }
 
-  const renderPayloadSection = probeForm => (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-          Payload
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <TextfieldStyled
-          fullWidth
-          label='Payload'
-          value={probeForm.payload !== undefined ? probeForm.payload : ''}
-          InputProps={{ readOnly: true }}
-          variant='outlined'
-          margin='normal'
-          multiline
-          rows={30}
-        />
-      </Grid>
-    </Grid>
-  )
+    return null // Return null if there is no payload
+  }
 
   return (
     <Fragment>

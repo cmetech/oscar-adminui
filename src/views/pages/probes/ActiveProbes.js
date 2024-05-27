@@ -294,7 +294,7 @@ const ActiveProbes = props => {
       headerAlign: 'center',
       renderCell: params => {
         const { row } = params
-        const shouldShowChip = row.target && !row.target.startsWith('http:')
+        const shouldShowChip = row.target && !row.target.startsWith('http:') && row.type !== 'api'
 
         let color = 'secondary'
         let label = 'UNKNOWN'

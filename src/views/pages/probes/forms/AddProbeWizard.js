@@ -580,8 +580,9 @@ const AddProbeWizard = ({ onSuccess }) => {
           // Call onClose to close the modal
           onSuccess && onSuccess()
 
-          // Trigger a refetch of the probe list
-          setRefetchTrigger(new Date().getTime())
+          setTimeout(() => {
+            setRefetchTrigger(Date.now())
+          }, 500) // Adjust the delay as needed
         }
       } catch (error) {
         console.error('Error updating probe details', error)

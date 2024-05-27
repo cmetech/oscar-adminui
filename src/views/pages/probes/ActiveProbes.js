@@ -465,10 +465,13 @@ const ActiveProbes = props => {
         let label = 'UNKN'
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'httpurl') {
-          label = 'HTTP URL'
+          label = 'URL PROBE'
           iconimage = 'mdi:script-text'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
-          label = 'TCP PORT'
+          label = 'TCP PROBE'
+          iconimage = 'mdi:script-text'
+        } else if (row?.type?.toLowerCase() === 'api') {
+          label = 'API PROBE'
           iconimage = 'mdi:script-text'
         }
 

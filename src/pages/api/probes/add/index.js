@@ -7,6 +7,8 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     const probeobj = req.body
 
+    console.log('probeobj:', probeobj)
+
     let target = probeobj.target
     let type = 'httpurl'
 
@@ -30,7 +32,7 @@ async function handler(req, res) {
       payload.schedule = probeobj.schedule || {}
     }
 
-    //console.log('payload:', payload)
+    console.log('payload:', payload)
 
     try {
       const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/metricstore/probes`, payload, {

@@ -42,6 +42,7 @@ import Icon from 'src/@core/components/icon'
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 import { useTheme, styled } from '@mui/material/styles'
 import { refetchProbeTriggerAtom } from 'src/lib/atoms'
+import { detectTokensInPayload } from 'src/lib/utils'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -78,7 +79,7 @@ const initialProbeFormState = {
     jitter: 0
   },
   args: [{ value: '' }],
-  kwargs: [{ key: '', value: '' }],
+  kwargs: [],
   payload: ''
 }
 
@@ -108,6 +109,18 @@ const allSteps = [
     subtitle: 'Summary',
     description: 'Review the Server details and submit.'
   }
+]
+
+const wellKnownFakerFunctions = [
+  'name.firstName',
+  'name.lastName',
+  'internet.email',
+  'phone.phoneNumber',
+  'address.streetAddress',
+  'address.city',
+  'address.zipCode'
+
+  // Add more well-known faker functions here
 ]
 
 const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
@@ -507,8 +520,12 @@ const AddProbeWizard = ({ onSuccess }) => {
         newEntry = {} // Default case, should not be reached
     }
 
-    const updatedSection = [...probeForm[section], newEntry]
-    setProbeForm({ ...probeForm, [section]: updatedSection })
+    setProbeForm(prevForm => {
+      // Only add new entry if section is empty
+      const updatedSection = [...prevForm[section], newEntry]
+
+      return { ...prevForm, [section]: updatedSection }
+    })
   }
 
   const removeSectionEntry = (section, index) => {
@@ -526,6 +543,21 @@ const AddProbeWizard = ({ onSuccess }) => {
     const isValid = await validateForm()
     if (!isValid) {
       return // Stop the submission or the next step if the validation fails
+    }
+
+    // If moving from the payload step, pre-populate kwargs with detected tokens
+    if (activeStep === 2) {
+      const tokens = detectTokensInPayload(probeForm.payload)
+      const existingKeys = probeForm.kwargs.map(kwarg => kwarg.key.toLowerCase())
+
+      const newKwargs = tokens
+        .filter(token => !existingKeys.includes(token.toLowerCase()))
+        .map(token => ({ key: token, value: '' }))
+
+      setProbeForm(prevForm => ({
+        ...prevForm,
+        kwargs: [...newKwargs, ...prevForm.kwargs] // Ensure new tokens are added before existing ones
+      }))
     }
 
     setActiveStep(prevActiveStep => prevActiveStep + 1)
@@ -623,7 +655,7 @@ const AddProbeWizard = ({ onSuccess }) => {
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
           {['kwargs', 'metadata'].includes(section) && (
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <TextfieldStyled
                 key={`key-${section}-${index}`}
                 fullWidth
@@ -637,16 +669,22 @@ const AddProbeWizard = ({ onSuccess }) => {
             </Grid>
           )}
           {['kwargs', 'metadata', 'args'].includes(section) && (
-            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 4 : 6}>
-              <TextfieldStyled
-                key={`value-${section}-${index}`}
-                fullWidth
-                label={valueLabel}
-                name='value'
-                value={entry.value?.toUpperCase() || ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
+            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 5 : 5}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownFakerFunctions}
+                value={entry.value.startsWith('faker.') ? entry.value.slice(6) : entry.value}
+                onInputChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={valueLabel} variant='outlined' margin='normal' />
+                )}
               />
             </Grid>
           )}
@@ -875,9 +913,9 @@ const AddProbeWizard = ({ onSuccess }) => {
         return (
           <Fragment>
             <Grid container spacing={3} alignItems='flex-start'>
-              <Grid item xs={12} sm={5}>
+              <Grid item xs={12} sm={8}>
                 <Typography variant='subtitle1' gutterBottom>
-                  Keyword Arguments
+                  Probe Tokens
                 </Typography>
                 {renderDynamicFormSection('kwargs')}
                 <Box>
@@ -893,7 +931,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                     onClick={() => addSectionEntry('kwargs')}
                     style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                   >
-                    Add Keyword Arguments
+                    Add Probe Tokens
                   </Button>
                 </Box>
               </Grid>

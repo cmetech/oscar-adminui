@@ -916,7 +916,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         return (
           <Fragment>
             <Grid container spacing={3} alignItems='flex-start'>
-              <Grid item xs={12} sm={5}>
+              <Grid item xs={12} sm={8}>
                 <Typography variant='subtitle1' gutterBottom>
                   Keyword Arguments
                 </Typography>

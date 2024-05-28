@@ -35,3 +35,15 @@ export const getNestedValue = (obj, path) => {
     return current && current[key] !== undefined ? current[key] : undefined
   }, obj)
 }
+
+export const detectTokensInPayload = payload => {
+  const regex = /{{\s*([^}]+?)\s*}}/g
+  const tokens = new Set()
+  let match
+
+  while ((match = regex.exec(payload)) !== null) {
+    tokens.add(match[1].trim().toUpperCase())
+  }
+
+  return Array.from(tokens)
+}

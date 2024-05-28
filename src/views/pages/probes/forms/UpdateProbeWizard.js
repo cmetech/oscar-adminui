@@ -93,14 +93,14 @@ const allSteps = [
     description: 'Edit the probe details.'
   },
   {
-    title: 'Probe Arguments',
-    subtitle: 'Keyword Arguments',
-    description: 'Edit the API Probe Keyword Argument details.'
-  },
-  {
     title: 'Probe Payload',
     subtitle: 'API Probe Payload',
     description: 'Edit the API Probe Payload details.'
+  },
+  {
+    title: 'Probe Tokens',
+    subtitle: 'Token details',
+    description: 'Provide details for the probe payload template.'
   },
   {
     title: 'Review',
@@ -332,7 +332,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
               variant='outlined'
               margin='normal'
               multiline
-              rows={30}
+              rows={20}
             />
           </Grid>
         </Grid>
@@ -345,8 +345,8 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
   return (
     <Fragment>
       {renderGeneralSection(probeForm)}
-      {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
       {probeForm.type === 'API' && renderPayloadSection(probeForm)}
+      {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
     </Fragment>
   )
 }
@@ -387,8 +387,8 @@ const allStepValidationSchemas = [
       }
     })
   }),
-  yup.object(), //No validation for the arguments step
   yup.object(), //No validation for the payload step
+  yup.object(), //No validation for the tokens step
   yup.object() //No validation for the review step
 ]
 
@@ -422,7 +422,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   const steps =
     probeType === 'API'
       ? allSteps
-      : allSteps.filter(step => step.title !== 'Probe Arguments' && step.title !== 'Probe Payload')
+      : allSteps.filter(step => step.title !== 'Probe Tokens' && step.title !== 'Probe Payload')
 
   const stepValidationSchemas =
     probeType === 'API'
@@ -721,9 +721,9 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               <Grid container spacing={2} style={{ padding: '16px' }}>
                 <Grid item>
                   <Typography variant='body2' gutterBottom>
-                    <strong>Probes</strong>, are designed to monitor services from an external perspective. The are two
-                    types of probes in Oscar: HTTP URL and Port Check. Probe type can't be updated. Please delete and
-                    create a new Probe if different type is desired.
+                    <strong>Probes</strong>, are designed to monitor services from an external perspective. The are
+                    three types of probes in OSCAR: HTTP URL, Port Check, and API probe. Please select the probe type to
+                    get a detailed description of each probe type.
                   </Typography>
                 </Grid>
                 <Grid item>
@@ -754,7 +754,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                           <li>Network security audits to verify that only the expected ports are open.</li>
                           <li>Infrastructure monitoring in both development and production environments.</li>
                           <li>
-                            <strong>Example:</strong> YourServerIP:PortNumber
+                            <strong>Example:</strong> 10.10.10.10:9100
                           </li>
                         </ul>
                       </Fragment>
@@ -893,28 +893,18 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         return (
           <Fragment>
             {probeType === 'API' ? (
-              <Grid container spacing={3} alignItems='flex-start'>
-                <Grid item xs={12} sm={5}>
-                  <Typography variant='subtitle1' gutterBottom>
-                    Keyword Arguments
-                  </Typography>
-                  {renderDynamicFormSection('kwargs')}
-                  <Box>
-                    <Button
-                      startIcon={
-                        <Icon
-                          icon='mdi:plus-circle-outline'
-                          style={{
-                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                          }}
-                        />
-                      }
-                      onClick={() => addSectionEntry('kwargs')}
-                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                    >
-                      Add Keyword Arguments
-                    </Button>
-                  </Box>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    label='Payload'
+                    name='payload'
+                    autoComplete='off'
+                    value={probeForm.payload !== undefined ? probeForm.payload : ''}
+                    onChange={handleFormChange}
+                    multiline
+                    rows={20}
+                  />
                 </Grid>
               </Grid>
             ) : (
@@ -925,18 +915,28 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       case 3:
         return (
           <Fragment>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={12}>
-                <TextfieldStyled
-                  fullWidth
-                  label='Payload'
-                  name='payload'
-                  autoComplete='off'
-                  value={probeForm.payload !== undefined ? probeForm.payload : ''}
-                  onChange={handleFormChange}
-                  multiline
-                  rows={30}
-                />
+            <Grid container spacing={3} alignItems='flex-start'>
+              <Grid item xs={12} sm={5}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Keyword Arguments
+                </Typography>
+                {renderDynamicFormSection('kwargs')}
+                <Box>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('kwargs')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                  >
+                    Add Keyword Arguments
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </Fragment>

@@ -112,13 +112,10 @@ const allSteps = [
 ]
 
 const wellKnownFakerFunctions = [
-  'name.firstName',
-  'name.lastName',
-  'internet.email',
-  'phone.phoneNumber',
-  'address.streetAddress',
-  'address.city',
-  'address.zipCode'
+  'name',
+  'first_name',
+  'last_name',
+  'msisdn'
 
   // Add more well-known faker functions here
 ]

@@ -485,8 +485,8 @@ const AddProbeWizard = ({ onSuccess }) => {
     //console.log("The field being updated = ", name)
 
     // Convert string values to lowercase, except for specific fields
-    if (typeof value === 'string') {
-      value = value.toLowerCase()
+    if (typeof value === 'string' && name !== 'payload' && name !== 'description') {
+      value = value?.toLowerCase()
     }
 
     //console.log('Updating fields '+name+ ' with: '+value)
@@ -494,7 +494,7 @@ const AddProbeWizard = ({ onSuccess }) => {
       const newForm = { ...prevForm }
 
       if (index !== undefined && section) {
-        newForm[section][index][name] = value.toLowerCase()
+        newForm[section][index][name] = value
       } else {
         // Top-level field updates
         newForm[name] = value
@@ -670,7 +670,7 @@ const AddProbeWizard = ({ onSuccess }) => {
               <AutocompleteStyled
                 freeSolo
                 options={wellKnownFakerFunctions}
-                value={entry.value.startsWith('faker.') ? entry.value.slice(6) : entry.value}
+                value={entry.value?.startsWith('faker.') ? entry.value.slice(6) : entry.value || ''}
                 onInputChange={(event, newValue) => {
                   const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
                   handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)

@@ -80,7 +80,9 @@ const initialProbeFormState = {
   },
   args: [{ value: '' }],
   kwargs: [],
-  payload: ''
+  payload: '',
+  payload_type: 'rest',
+  http_method: 'GET'
 }
 
 const allSteps = [
@@ -261,6 +263,30 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
           margin='normal'
         />
       </Grid>
+      {probeForm.type.toLowerCase() === 'api' && (
+        <Fragment>
+          <Grid item xs={12} sm={6}>
+            <TextfieldStyled
+              fullWidth
+              label='Payload Type'
+              value={probeForm.payload_type}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextfieldStyled
+              fullWidth
+              label='HTTP Method'
+              value={probeForm.http_method}
+              InputProps={{ readOnly: true }}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+        </Fragment>
+      )}
       {probeForm.type.toLowerCase() === 'port' && (
         <Grid item xs={12} sm={6}>
           <TextfieldStyled
@@ -580,11 +606,19 @@ const AddProbeWizard = ({ onSuccess }) => {
           payload['owner'] = 'internal'
           payload['organization'] = 'internal'
           delete payload.payload
+
+          payload.kwargs['payload_type'] = probeForm.payload_type
+          delete payload.payload_type
+
+          payload.kwargs['http_method'] = probeForm.http_method
+          delete payload.http_method
         }
 
-        // Remove the payload field if it's not an API type
+        // Remove the payload and payload_type field if it's not an API type
         if (probeForm.type !== 'API') {
           delete payload.payload
+          delete payload.payload_type
+          delete payload.http_method
         }
 
         console.log('Payload:', payload)
@@ -845,6 +879,54 @@ const AddProbeWizard = ({ onSuccess }) => {
                   />
                 </Grid>
               )}
+              {probeType === 'API' && (
+                <Grid item xs={6} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probeapitype-autocomplete'
+                    options={['REST', 'SOAP', 'GRAPHQL']}
+                    value={probeForm.payload_type.toUpperCase()}
+                    onChange={(event, newValue) => {
+                      // Directly calling handleFormChange with a synthetic event object
+                      handleFormChange({ target: { name: 'payload_type', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'payload_type', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Message Type' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='probehttpmethod-autocomplete'
+                  options={['GET', 'POST']}
+                  value={probeForm.http_method?.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo

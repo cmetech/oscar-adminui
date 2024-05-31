@@ -970,13 +970,12 @@ const ActiveProbes = props => {
         setDeleteDialog(false)
 
         // props.set_total(props.total - 1)
+        toast.success('Successfully deleted Probe')
 
         // Wait for a short delay before triggering the refetch
         setTimeout(() => {
           setRefetchTrigger(Date.now())
-        }, 500) // Adjust the delay as needed
-
-        toast.success('Successfully deleted Probe')
+        }, 5000) // Adjust the delay as needed
       }
     } catch (error) {
       console.error('Failed to delete Probe', error)

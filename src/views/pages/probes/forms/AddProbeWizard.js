@@ -82,7 +82,8 @@ const initialProbeFormState = {
   kwargs: [],
   payload: '',
   payload_type: 'rest',
-  http_method: 'GET'
+  http_method: 'GET',
+  http_headers: []
 }
 
 const allSteps = [
@@ -95,6 +96,11 @@ const allSteps = [
     title: 'Probe Details',
     subtitle: 'Details',
     description: 'Edit the probe details.'
+  },
+  {
+    title: 'Probe Headers',
+    subtitle: 'API Headers',
+    description: 'Edit the API Headers.'
   },
   {
     title: 'Probe Payload',
@@ -120,6 +126,16 @@ const wellKnownFakerFunctions = [
   'msisdn'
 
   // Add more well-known faker functions here
+]
+
+const wellKnownHttpHeaders = [
+  'Content-Type',
+  'Accept',
+  'Authorization',
+  'User-Agent',
+  'Referer'
+
+  // Add more well-known HTTP headers here
 ]
 
 const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
@@ -351,6 +367,34 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
     return null // Return null if there are no arguments
   }
 
+  const renderHeadersSection = probeForm => {
+    if (probeForm.http_headers && probeForm.http_headers.length > 0) {
+      return (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+              HTTP Headers
+            </Typography>
+          </Grid>
+          {probeForm.http_headers.map((header, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <TextfieldStyled
+                fullWidth
+                label={`Header ${index + 1}`}
+                value={header.key !== undefined ? `${header.key}: ${header.value}` : ''}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )
+    }
+
+    return null // Return null if there are no headers
+  }
+
   const renderPayloadSection = probeForm => {
     if (probeForm.payload && probeForm.payload.trim() !== '') {
       return (
@@ -382,6 +426,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
   return (
     <Fragment>
       {renderGeneralSection(probeForm)}
+      {probeForm.type === 'API' && renderHeadersSection(probeForm)}
       {probeForm.type === 'API' && renderPayloadSection(probeForm)}
       {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
     </Fragment>
@@ -424,6 +469,26 @@ const allStepValidationSchemas = [
       }
     })
   }),
+  yup.object(), //No validation for the headers step
+  // yup.object({
+  //   payload: yup.string().when('payload_type', {
+  //     is: val => val && val.toLowerCase() !== 'soap',
+  //     then: yup.string().test('is-json', 'Payload must be valid JSON', value => {
+  //       if (!value || value.trim() === '') {
+  //         return true
+  //       }
+  //       try {
+  //         console.log('Yup Payload:', value)
+  //         JSON.parse(value)
+
+  //         return true
+  //       } catch (err) {
+  //         return false
+  //       }
+  //     }),
+  //     otherwise: yup.string() // No validation for SOAP payloads
+  //   })
+  // }),
   yup.object(), //No validation for the payload step
   yup.object(), //No validation for the tokens step
   yup.object() //No validation for the review step
@@ -456,12 +521,14 @@ const AddProbeWizard = ({ onSuccess }) => {
   const steps =
     probeType === 'API'
       ? allSteps
-      : allSteps.filter(step => step.title !== 'Probe Tokens' && step.title !== 'Probe Payload')
+      : allSteps.filter(
+          step => step.title !== 'Probe Headers' && step.title !== 'Probe Tokens' && step.title !== 'Probe Payload'
+        )
 
   const stepValidationSchemas =
     probeType === 'API'
       ? allStepValidationSchemas
-      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3)
+      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3 && index !== 4)
 
   // Validate Form
   const validateForm = async () => {
@@ -470,7 +537,9 @@ const AddProbeWizard = ({ onSuccess }) => {
       const formData = {
         type: probeType, // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
         port: probeForm.port, // Make sure 'probeForm.port' exists and holds the current port number from the form
-        target: probeForm.target
+        target: probeForm.target,
+        payload: probeForm.payload,
+        payload_type: probeForm.payload_type
       }
 
       const validationSchema = stepValidationSchemas[activeStep]
@@ -533,6 +602,7 @@ const AddProbeWizard = ({ onSuccess }) => {
   const addSectionEntry = section => {
     let newEntry
     switch (section) {
+      case 'http_headers':
       case 'kwargs':
       case 'metadata':
         newEntry = { key: '', value: '' }
@@ -569,7 +639,7 @@ const AddProbeWizard = ({ onSuccess }) => {
     }
 
     // If moving from the payload step, pre-populate kwargs with detected tokens
-    if (activeStep === 2) {
+    if (activeStep === 3) {
       const tokens = detectTokensInPayload(probeForm.payload)
       const existingKeys = probeForm.kwargs.map(kwarg => kwarg.key.toLowerCase())
 
@@ -614,11 +684,21 @@ const AddProbeWizard = ({ onSuccess }) => {
           delete payload.http_method
         }
 
+        // Add Headers to Kwargs
+        if (probeForm.http_headers && probeForm.http_headers.length > 0) {
+          const headersDict = Object.fromEntries(probeForm.http_headers.map(({ key, value }) => [key, value]))
+          payload.kwargs['__http_headers__'] = JSON.stringify(headersDict)
+
+          // Delete the http_headers field
+          delete payload.http_headers
+        }
+
         // Remove the payload and payload_type field if it's not an API type
         if (probeForm.type !== 'API') {
           delete payload.payload
           delete payload.payload_type
           delete payload.http_method
+          delete payload.http_headers
         }
 
         console.log('Payload:', payload)
@@ -645,7 +725,7 @@ const AddProbeWizard = ({ onSuccess }) => {
 
           setTimeout(() => {
             setRefetchTrigger(Date.now())
-          }, 500) // Adjust the delay as needed
+          }, 2000) // Adjust the delay as needed
         }
       } catch (error) {
         console.error('Error updating probe details', error)
@@ -664,6 +744,7 @@ const AddProbeWizard = ({ onSuccess }) => {
     // Determine field labels based on section type
     const getFieldLabels = section => {
       switch (section) {
+        case 'http_headers':
         case 'kwargs':
         case 'metadata':
           return { keyLabel: 'Key', valueLabel: 'Value' }
@@ -685,7 +766,24 @@ const AddProbeWizard = ({ onSuccess }) => {
     return probeForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          {['kwargs', 'metadata'].includes(section) && (
+          {['http_headers'].includes(section) ? (
+            <Grid item xs={5}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownHttpHeaders}
+                value={entry.key || ''}
+                onInputChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={keyLabel} variant='outlined' margin='normal' />
+                )}
+              />
+            </Grid>
+          ) : (
             <Grid item xs={5}>
               <TextfieldStyled
                 key={`key-${section}-${index}`}
@@ -699,8 +797,21 @@ const AddProbeWizard = ({ onSuccess }) => {
               />
             </Grid>
           )}
-          {['kwargs', 'metadata', 'args'].includes(section) && (
-            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 5 : 5}>
+          {section === 'http_headers' ? (
+            <Grid item xs={5}>
+              <TextfieldStyled
+                key={`value-${section}-${index}`}
+                fullWidth
+                label={valueLabel}
+                name='value'
+                value={entry.value || ''}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          ) : (
+            <Grid item xs={5}>
               <AutocompleteStyled
                 freeSolo
                 options={wellKnownFakerFunctions}
@@ -971,16 +1082,26 @@ const AddProbeWizard = ({ onSuccess }) => {
             {probeType === 'API' ? (
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    label='Payload'
-                    name='payload'
-                    autoComplete='off'
-                    value={probeForm.payload !== undefined ? probeForm.payload : ''}
-                    onChange={handleFormChange}
-                    multiline
-                    rows={20}
-                  />
+                  <Typography variant='subtitle1' gutterBottom>
+                    Probe Headers
+                  </Typography>
+                  {renderDynamicFormSection('http_headers')}
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('http_headers')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Probe Headers
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             ) : (
@@ -989,6 +1110,27 @@ const AddProbeWizard = ({ onSuccess }) => {
           </Fragment>
         )
       case 3:
+        return (
+          <Fragment>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={12}>
+                <TextfieldStyled
+                  fullWidth
+                  label='Payload'
+                  name='payload'
+                  autoComplete='off'
+                  value={probeForm.payload !== undefined ? probeForm.payload : ''}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={20}
+                  error={Boolean(formErrors?.payload)}
+                  helperText={formErrors?.payload}
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 4:
         return (
           <Fragment>
             <Grid container spacing={3} alignItems='flex-start'>
@@ -1017,7 +1159,7 @@ const AddProbeWizard = ({ onSuccess }) => {
             </Grid>
           </Fragment>
         )
-      case 4:
+      case 5:
         return <ReviewAndSubmitSection probeForm={probeForm} />
       default:
         return 'Unknown Step'

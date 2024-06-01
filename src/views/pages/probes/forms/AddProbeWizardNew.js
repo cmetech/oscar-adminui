@@ -42,6 +42,7 @@ import Icon from 'src/@core/components/icon'
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 import { useTheme, styled } from '@mui/material/styles'
 import { refetchProbeTriggerAtom } from 'src/lib/atoms'
+import { detectTokensInPayload } from 'src/lib/utils'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -52,8 +53,9 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 import { current } from '@reduxjs/toolkit'
+import { Menu } from '@mui/material'
 
-// Define initial state for the probe form
+// Define initial state for the server form
 const initialProbeFormState = {
   name: '',
   type: '',
@@ -77,10 +79,11 @@ const initialProbeFormState = {
     jitter: 0
   },
   args: [{ value: '' }],
-  kwargs: [{ key: '', value: '' }],
+  kwargs: [],
   payload: '',
   payload_type: 'rest',
-  http_method: 'GET'
+  http_method: 'GET',
+  http_headers: []
 }
 
 const allSteps = [
@@ -93,6 +96,11 @@ const allSteps = [
     title: 'Probe Details',
     subtitle: 'Details',
     description: 'Edit the probe details.'
+  },
+  {
+    title: 'Probe Headers',
+    subtitle: 'API Headers',
+    description: 'Edit the API Headers.'
   },
   {
     title: 'Probe Payload',
@@ -109,6 +117,24 @@ const allSteps = [
     subtitle: 'Summary',
     description: 'Review the Server details and submit.'
   }
+]
+
+const wellKnownFakerFunctions = [
+  'name.firstName',
+  'name.lastName',
+  'phone.number'
+
+  // Add more well-known faker functions here
+]
+
+const wellKnownHttpHeaders = [
+  'Content-Type',
+  'Accept',
+  'Authorization',
+  'User-Agent',
+  'Referer'
+
+  // Add more well-known HTTP headers here
 ]
 
 const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
@@ -383,9 +409,7 @@ const allStepValidationSchemas = [
   yup.object({
     type: yup.string().required('Type is required'),
     port: yup.string().when('type', (typeValue, schema) => {
-      //console.log("Type Value in .when():", typeValue);
       if (typeValue[0] === 'PORT') {
-        //console.log("checking for port since typevalue = port")
         return schema
           .required('Port is required')
           .matches(/^\d+$/, 'Only numbers are allowed')
@@ -395,7 +419,6 @@ const allStepValidationSchemas = [
             return !isNaN(num) && num >= 1 && num <= 65535
           })
       } else {
-        //console.log("Ignoring port check typevalue = port as its url")
         return schema.notRequired()
       }
     }),
@@ -408,52 +431,51 @@ const allStepValidationSchemas = [
             'Must be a valid IP address'
           )
       } else {
-        //console.log("Ignoring target check typevalue = port as its url");
         return schema.notRequired()
       }
     })
   }),
-  yup.object(), //No validation for the payload step
-  yup.object(), //No validation for the tokens step
-  yup.object() //No validation for the review step
+  yup.object(), // No validation for the headers step
+  yup.object(), // No validation for the payload step
+  yup.object(), // No validation for the tokens step
+  yup.object() // No validation for the review step
 ]
 
-const UpdateProbeWizard = ({ onClose, ...props }) => {
-  const { currentProbe, rows, setRows } = props
-
+const AddProbeWizard = ({ onSuccess }) => {
   // ** States
   const [probeForm, setProbeForm] = useState(initialProbeFormState)
   const [activeStep, setActiveStep] = useState(0)
-
-  const [probeType, setProbeType] = useState(() => {
-    const probeType = currentProbe.type.trim().toLowerCase()
-    if (probeType === 'api') {
-      return 'API'
-    } else if (probeType === 'httpurl') {
-      return 'URL'
-    } else if (probeType === 'tcpport') {
-      return 'PORT'
-    } else {
-      return 'UNKNOWN' // or handle any other default case
-    }
-  })
-
+  const [probeType, setProbeType] = useState('URL')
   const [resetFormFields, setResetFormFields] = useState(false)
-  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
   const [formErrors, setFormErrors] = useState({})
+  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
 
+  useEffect(() => {
+    // Update the probeForm state to reflect the selected probeType
+    setProbeForm(prevForm => ({
+      ...initialProbeFormState,
+      type: probeType,
+      port: probeType === 'URL' ? '' : prevForm.port
+    }))
+
+    // Reset the active step when probe type changes
+    setActiveStep(0)
+  }, [probeType])
+
   const steps =
     probeType === 'API'
       ? allSteps
-      : allSteps.filter(step => step.title !== 'Probe Tokens' && step.title !== 'Probe Payload')
+      : allSteps.filter(
+          step => step.title !== 'Probe Headers' && step.title !== 'Probe Tokens' && step.title !== 'Probe Payload'
+        )
 
   const stepValidationSchemas =
     probeType === 'API'
       ? allStepValidationSchemas
-      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3)
+      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3 && index !== 4)
 
   // Validate Form
   const validateForm = async () => {
@@ -486,7 +508,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         setFormErrors(transformedErrors)
       } else {
         // Handle cases where inner does not exist or is empty
-        //console.error("Validation failed without specific field errors:", yupError);
         setFormErrors({ general: yupError.message || 'An unknown error occurred' })
       }
 
@@ -494,66 +515,22 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     }
   }
 
-  useEffect(() => {
-    if (currentProbe && Object.keys(currentProbe).length > 0) {
-      const updatedProbeForm = {
-        ...initialProbeFormState,
-        name: currentProbe.name || '',
-        type:
-          currentProbe.type.trim().toLowerCase() === 'httpurl'
-            ? 'URL'
-            : currentProbe.type.trim().toLowerCase() === 'api'
-            ? 'API'
-            : 'PORT',
-        description: currentProbe.description || '',
-        target: currentProbe.target,
-        status: currentProbe.status,
-        id: currentProbe.id
-      }
-      if (updatedProbeForm.type && updatedProbeForm.type === 'PORT') {
-        const portinfo = updatedProbeForm.target.split(':')
-
-        if (portinfo.length > 1) {
-          updatedProbeForm.port = portinfo[1]
-          updatedProbeForm.target = portinfo[0]
-        } else {
-          updatedProbeForm.port = 0
-          updatedProbeForm.target = portinfo[0]
-        }
-      }
-
-      // If the probe type is API, update the relevant fields
-      if (updatedProbeForm.type === 'API') {
-        updatedProbeForm.schedule = currentProbe.schedule || initialProbeFormState.schedule
-        updatedProbeForm.kwargs = currentProbe.kwargs || initialProbeFormState.kwargs
-        updatedProbeForm.payload = currentProbe.payload || initialProbeFormState.payload
-      }
-
-      // Update the probeForm state to reflect the selected probeType
-      setProbeForm(updatedProbeForm)
-      setProbeType(updatedProbeForm.type)
-    }
-  }, [currentProbe])
-
   const handleFormChange = (event, index, section) => {
     // Handling both synthetic events and direct value assignments from Autocomplete
     const target = event.target || event
     const name = target.name
     let value = target.value
 
-    //console.log("The field being updated = ", name)
-
     // Convert string values to lowercase, except for specific fields
     if (typeof value === 'string' && name !== 'payload' && name !== 'description') {
       value = value?.toLowerCase()
     }
 
-    //console.log('Updating fields '+name+ ' with: '+value)
     setProbeForm(prevForm => {
       const newForm = { ...prevForm }
 
       if (index !== undefined && section) {
-        newForm[section][index][name] = value.toLowerCase()
+        newForm[section][index][name] = value
       } else {
         // Top-level field updates
         newForm[name] = value
@@ -566,6 +543,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   const addSectionEntry = section => {
     let newEntry
     switch (section) {
+      case 'http_headers':
       case 'kwargs':
       case 'metadata':
         newEntry = { key: '', value: '' }
@@ -576,8 +554,12 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         newEntry = {} // Default case, should not be reached
     }
 
-    const updatedSection = [...probeForm[section], newEntry]
-    setProbeForm({ ...probeForm, [section]: updatedSection })
+    setProbeForm(prevForm => {
+      // Only add new entry if section is empty
+      const updatedSection = [...prevForm[section], newEntry]
+
+      return { ...prevForm, [section]: updatedSection }
+    })
   }
 
   const removeSectionEntry = (section, index) => {
@@ -588,7 +570,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
   // Handle Stepper
   const handleBack = () => {
-    //console.log("handleback step number = ", activeStep)
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
@@ -596,6 +577,21 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     const isValid = await validateForm()
     if (!isValid) {
       return // Stop the submission or the next step if the validation fails
+    }
+
+    // If moving from the payload step, pre-populate kwargs with detected tokens
+    if (activeStep === 3) {
+      const tokens = detectTokensInPayload(probeForm.payload)
+      const existingKeys = probeForm.kwargs.map(kwarg => kwarg.key.toLowerCase())
+
+      const newKwargs = tokens
+        .filter(token => !existingKeys.includes(token.toLowerCase()))
+        .map(token => ({ key: token, value: '' }))
+
+      setProbeForm(prevForm => ({
+        ...prevForm,
+        kwargs: [...newKwargs, ...prevForm.kwargs] // Ensure new tokens are added before existing ones
+      }))
     }
 
     setActiveStep(prevActiveStep => prevActiveStep + 1)
@@ -629,31 +625,44 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
           delete payload.http_method
         }
 
+        // Add Headers to Kwargs
+        if (probeForm.http_headers && probeForm.http_headers.length > 0) {
+          const headersDict = Object.fromEntries(probeForm.http_headers.map(({ key, value }) => [key, value]))
+          payload.kwargs['__http_headers__'] = headersDict
+
+          // Delete the http_headers field
+          delete payload.http_headers
+        }
+
         // Remove the payload and payload_type field if it's not an API type
         if (probeForm.type !== 'API') {
           delete payload.payload
           delete payload.payload_type
           delete payload.http_method
+          delete payload.http_headers
         }
 
         console.log('Payload:', payload)
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/probes/update/${currentProbe.id}`
+        const endpoint = `/api/probes/add`
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.data) {
           const probe = response.data
 
           if (probe) {
-            console.log('Probe successfully updated for ', probe.name)
+            console.log('Probe successfully created for ', probe.name)
+
+            // Show a success toast
+            toast.success('Probe successfully created')
           } else {
-            console.error('Failed to update probe')
-            toast.error('Failed to update probe')
+            console.error('Failed to create probe')
+            toast.error('Failed to create probe')
           }
 
           // Call onClose to close the modal
-          onClose && onClose()
+          onSuccess && onSuccess()
 
           setTimeout(() => {
             setRefetchTrigger(Date.now())
@@ -666,31 +675,9 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     }
   }
 
-  //Not being used as its not required
   const handleReset = () => {
-    if (currentProbe && Object.keys(currentProbe).length > 0) {
-      const resetProbeForm = {
-        ...initialProbeFormState,
-        name: currentProbe.name || '',
-        type: currentProbe.type.trim().toLowerCase() === 'httpurl' ? 'URL' : 'PORT',
-        description: currentProbe.description || '',
-        target: currentProbe.target,
-        status: currentProbe.status,
-        id: currentProbe.id
-      }
-      if (resetProbeForm.type && resetProbeForm.type === 'PORT') {
-        const portinfo = resetProbeForm.target.split(':')
-
-        if (portinfo.length > 1) {
-          resetProbeForm.port = portinfo[1]
-          resetProbeForm.target = portinfo[0]
-        } else {
-          resetProbeForm.port = 0
-          resetProbeForm.target = portinfo[0]
-        }
-      }
-      setProbeForm(resetProbeForm)
-    }
+    setProbeForm(initialProbeFormState) // Fallback to initial state if currentServer is not available
+    setResetFormFields(false)
     setActiveStep(0)
   }
 
@@ -698,6 +685,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     // Determine field labels based on section type
     const getFieldLabels = section => {
       switch (section) {
+        case 'http_headers':
         case 'kwargs':
         case 'metadata':
           return { keyLabel: 'Key', valueLabel: 'Value' }
@@ -708,16 +696,30 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       }
     }
 
-    const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+    const { keyLabel, valueLabel } = getFieldLabels(section)
 
-    // Ensure that probeForm[section] is an array
-    const sectionData = Array.isArray(probeForm[section]) ? probeForm[section] : []
-
-    return sectionData.map((entry, index) => (
+    return probeForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          {['kwargs', 'metadata'].includes(section) && (
-            <Grid item xs={4}>
+          {['http_headers'].includes(section) ? (
+            <Grid item xs={6}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownHttpHeaders}
+                value={entry.key || ''}
+                onInputChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={keyLabel} variant='outlined' margin='normal' />
+                )}
+              />
+            </Grid>
+          ) : (
+            <Grid item xs={6}>
               <TextfieldStyled
                 key={`key-${section}-${index}`}
                 fullWidth
@@ -730,21 +732,40 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               />
             </Grid>
           )}
-          {['kwargs', 'metadata', 'args'].includes(section) && (
-            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 4 : 6}>
+          {section === 'http_headers' ? (
+            <Grid item xs={5}>
               <TextfieldStyled
                 key={`value-${section}-${index}`}
                 fullWidth
                 label={valueLabel}
                 name='value'
-                value={entry.value?.toUpperCase() || ''}
+                value={entry.value || ''}
                 onChange={e => handleFormChange(e, index, section)}
                 variant='outlined'
                 margin='normal'
               />
             </Grid>
+          ) : (
+            <Grid item xs={5}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownFakerFunctions}
+                value={entry.value?.startsWith('faker.') ? entry.value.slice(6) : entry.value || ''}
+                onInputChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={valueLabel} variant='outlined' margin='normal' />
+                )}
+              />
+            </Grid>
           )}
-          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+          <Grid item xs={1} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton
               onClick={() => addSectionEntry(section)}
               style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
@@ -825,19 +846,20 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     ) : null}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextfieldStyled
-                    required
-                    id='type'
-                    name='type'
-                    label='Type'
-                    fullWidth
-                    autoComplete='off'
-                    value={probeType?.toUpperCase() || ''}
-                    InputProps={{
-                      readOnly: true // This makes the field read-only
-                    }}
-                  />
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth margin='normal'>
+                    <InputLabelStyled id='probe-type-label'>Probe Type</InputLabelStyled>
+                    <SelectStyled
+                      labelId='probe-type-label'
+                      value={probeType}
+                      onChange={e => setProbeType(e.target.value)}
+                      label='Probe Type'
+                    >
+                      <MenuItem value='URL'>URL</MenuItem>
+                      <MenuItem value='PORT'>PORT</MenuItem>
+                      <MenuItem value='API'>API</MenuItem>
+                    </SelectStyled>
+                  </FormControl>
                 </Grid>
               </Grid>
             </Grid>
@@ -890,7 +912,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               </Grid>
               {probeType === 'PORT' && (
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <TextfieldStyled
                     id='port'
                     name='port'
                     label='Port'
@@ -898,9 +920,59 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     type='number'
                     value={probeForm.port}
                     onChange={handleFormChange}
+                    error={Boolean(formErrors?.port)}
+                    helperText={formErrors?.port}
                   />
                 </Grid>
               )}
+              {probeType === 'API' && (
+                <Grid item xs={6} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probeapitype-autocomplete'
+                    options={['REST', 'SOAP', 'GRAPHQL']}
+                    value={probeForm.payload_type.toUpperCase()}
+                    onChange={(event, newValue) => {
+                      // Directly calling handleFormChange with a synthetic event object
+                      handleFormChange({ target: { name: 'payload_type', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'payload_type', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Message Type' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='probehttpmethod-autocomplete'
+                  options={['GET', 'POST']}
+                  value={probeForm.http_method?.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -945,16 +1017,26 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
             {probeType === 'API' ? (
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    label='Payload'
-                    name='payload'
-                    autoComplete='off'
-                    value={probeForm.payload !== undefined ? probeForm.payload : ''}
-                    onChange={handleFormChange}
-                    multiline
-                    rows={20}
-                  />
+                  <Typography variant='subtitle1' gutterBottom>
+                    Probe Headers
+                  </Typography>
+                  {renderDynamicFormSection('http_headers')}
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('http_headers')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Probe Headers
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             ) : (
@@ -965,10 +1047,29 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       case 3:
         return (
           <Fragment>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={12}>
+                <TextfieldStyled
+                  fullWidth
+                  label='Payload'
+                  name='payload'
+                  autoComplete='off'
+                  value={probeForm.payload !== undefined ? probeForm.payload : ''}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={20}
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 4:
+        return (
+          <Fragment>
             <Grid container spacing={3} alignItems='flex-start'>
               <Grid item xs={12} sm={8}>
                 <Typography variant='subtitle1' gutterBottom>
-                  Keyword Arguments
+                  Probe Tokens
                 </Typography>
                 {renderDynamicFormSection('kwargs')}
                 <Box>
@@ -984,14 +1085,14 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     onClick={() => addSectionEntry('kwargs')}
                     style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                   >
-                    Add Keyword Arguments
+                    Add Probe Tokens
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </Fragment>
         )
-      case 4:
+      case 5:
         return <ReviewAndSubmitSection probeForm={probeForm} />
       default:
         return 'Unknown Step'
@@ -1004,6 +1105,11 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         <Fragment>
           <Typography>Probe details have been submitted.</Typography>
           <ReviewAndSubmitSection probeForm={probeForm} />
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button size='large' variant='contained' onClick={handleReset}>
+              Reset
+            </Button>
+          </Box>
         </Fragment>
       )
     } else {
@@ -1087,4 +1193,4 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   )
 }
 
-export default UpdateProbeWizard
+export default AddProbeWizard

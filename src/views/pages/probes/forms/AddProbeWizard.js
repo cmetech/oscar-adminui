@@ -470,25 +470,6 @@ const allStepValidationSchemas = [
     })
   }),
   yup.object(), //No validation for the headers step
-  // yup.object({
-  //   payload: yup.string().when('payload_type', {
-  //     is: val => val && val.toLowerCase() !== 'soap',
-  //     then: yup.string().test('is-json', 'Payload must be valid JSON', value => {
-  //       if (!value || value.trim() === '') {
-  //         return true
-  //       }
-  //       try {
-  //         console.log('Yup Payload:', value)
-  //         JSON.parse(value)
-
-  //         return true
-  //       } catch (err) {
-  //         return false
-  //       }
-  //     }),
-  //     otherwise: yup.string() // No validation for SOAP payloads
-  //   })
-  // }),
   yup.object(), //No validation for the payload step
   yup.object(), //No validation for the tokens step
   yup.object() //No validation for the review step

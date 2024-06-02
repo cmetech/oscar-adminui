@@ -65,6 +65,7 @@ const initialProbeFormState = {
   host: '',
   port: '',
   url: '',
+  ssl_verification: 'NO',
   schedule: {
     year: '',
     month: '',
@@ -663,6 +664,12 @@ const AddProbeWizard = ({ onSuccess }) => {
 
           payload.kwargs['http_method'] = probeForm.http_method
           delete payload.http_method
+
+          // Add SSL Verification to Kwargs
+          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes'
+
+          // Remove the ssl_verification field from the payload
+          delete payload.ssl_verification
         }
 
         // Add Headers to Kwargs
@@ -680,6 +687,7 @@ const AddProbeWizard = ({ onSuccess }) => {
           delete payload.payload_type
           delete payload.http_method
           delete payload.http_headers
+          delete payload.ssl_verification
         }
 
         console.log('Payload:', payload)
@@ -1039,6 +1047,29 @@ const AddProbeWizard = ({ onSuccess }) => {
                   }}
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Status' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='probesslverification-autocomplete'
+                  options={['YES', 'NO']}
+                  value={probeForm.ssl_verification}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>

@@ -63,6 +63,7 @@ const initialProbeFormState = {
   host: '',
   port: '',
   url: '',
+  ssl_verification: '',
   schedule: {
     year: '',
     month: '',
@@ -80,7 +81,8 @@ const initialProbeFormState = {
   kwargs: [{ key: '', value: '' }],
   payload: '',
   payload_type: 'rest',
-  http_method: 'GET'
+  http_method: 'GET',
+  http_headers: []
 }
 
 const allSteps = [
@@ -93,6 +95,11 @@ const allSteps = [
     title: 'Probe Details',
     subtitle: 'Details',
     description: 'Edit the probe details.'
+  },
+  {
+    title: 'Probe Headers',
+    subtitle: 'API Headers',
+    description: 'Edit the API Headers.'
   },
   {
     title: 'Probe Payload',
@@ -109,6 +116,25 @@ const allSteps = [
     subtitle: 'Summary',
     description: 'Review the Server details and submit.'
   }
+]
+
+const wellKnownFakerFunctions = [
+  'name',
+  'first_name',
+  'last_name',
+  'msisdn'
+
+  // Add more well-known faker functions here
+]
+
+const wellKnownHttpHeaders = [
+  'Content-Type',
+  'Accept',
+  'Authorization',
+  'User-Agent',
+  'Referer'
+
+  // Add more well-known HTTP headers here
 ]
 
 const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
@@ -340,6 +366,34 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
     return null // Return null if there are no arguments
   }
 
+  const renderHeadersSection = probeForm => {
+    if (probeForm.http_headers && probeForm.http_headers.length > 0) {
+      return (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+              HTTP Headers
+            </Typography>
+          </Grid>
+          {probeForm.http_headers.map((header, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <TextfieldStyled
+                fullWidth
+                label={`Header ${index + 1}`}
+                value={header.key !== undefined ? `${header.key}: ${header.value}` : ''}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )
+    }
+
+    return null // Return null if there are no headers
+  }
+
   const renderPayloadSection = probeForm => {
     if (probeForm.payload && probeForm.payload.trim() !== '') {
       return (
@@ -371,6 +425,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
   return (
     <Fragment>
       {renderGeneralSection(probeForm)}
+      {probeForm.type === 'API' && renderHeadersSection(probeForm)}
       {probeForm.type === 'API' && renderPayloadSection(probeForm)}
       {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
     </Fragment>
@@ -448,12 +503,14 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   const steps =
     probeType === 'API'
       ? allSteps
-      : allSteps.filter(step => step.title !== 'Probe Tokens' && step.title !== 'Probe Payload')
+      : allSteps.filter(
+          step => step.title !== 'Probe Headers' && step.title !== 'Probe Tokens' && step.title !== 'Probe Payload'
+        )
 
   const stepValidationSchemas =
     probeType === 'API'
       ? allStepValidationSchemas
-      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3)
+      : allStepValidationSchemas.filter((schema, index) => index !== 2 && index !== 3 && index !== 4)
 
   // Validate Form
   const validateForm = async () => {
@@ -462,7 +519,9 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       const formData = {
         type: probeType, // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
         port: probeForm.port, // Make sure 'probeForm.port' exists and holds the current port number from the form
-        target: probeForm.target
+        target: probeForm.target,
+        payload: probeForm.payload,
+        payload_type: probeForm.payload_type
       }
 
       const validationSchema = stepValidationSchemas[activeStep]
@@ -566,6 +625,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   const addSectionEntry = section => {
     let newEntry
     switch (section) {
+      case 'http_headers':
       case 'kwargs':
       case 'metadata':
         newEntry = { key: '', value: '' }
@@ -627,6 +687,21 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
           payload.kwargs['http_method'] = probeForm.http_method
           delete payload.http_method
+
+          // Add SSL Verification to Kwargs
+          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes'
+
+          // Remove the ssl_verification field from the payload
+          delete payload.ssl_verification
+        }
+
+        // Add Headers to Kwargs
+        if (probeForm.http_headers && probeForm.http_headers.length > 0) {
+          const headersDict = Object.fromEntries(probeForm.http_headers.map(({ key, value }) => [key, value]))
+          payload.kwargs['__http_headers__'] = JSON.stringify(headersDict)
+
+          // Delete the http_headers field
+          delete payload.http_headers
         }
 
         // Remove the payload and payload_type field if it's not an API type
@@ -634,6 +709,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
           delete payload.payload
           delete payload.payload_type
           delete payload.http_method
+          delete payload.http_headers
+          delete payload.ssl_verification
         }
 
         console.log('Payload:', payload)
@@ -698,6 +775,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     // Determine field labels based on section type
     const getFieldLabels = section => {
       switch (section) {
+        case 'http_headers':
         case 'kwargs':
         case 'metadata':
           return { keyLabel: 'Key', valueLabel: 'Value' }
@@ -716,8 +794,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     return sectionData.map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          {['kwargs', 'metadata'].includes(section) && (
-            <Grid item xs={4}>
+          {['http_headers', 'kwargs', 'metadata'].includes(section) && (
+            <Grid item xs={5}>
               <TextfieldStyled
                 key={`key-${section}-${index}`}
                 fullWidth
@@ -730,8 +808,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               />
             </Grid>
           )}
-          {['kwargs', 'metadata', 'args'].includes(section) && (
-            <Grid item xs={['kwargs', 'metadata'].includes(section) ? 4 : 6}>
+          {['http_headers', 'kwargs', 'metadata', 'args'].includes(section) && (
+            <Grid item xs={5}>
               <TextfieldStyled
                 key={`value-${section}-${index}`}
                 fullWidth
@@ -901,6 +979,54 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   />
                 </Grid>
               )}
+              {probeType === 'API' && (
+                <Grid item xs={6} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probeapitype-autocomplete'
+                    options={['REST', 'SOAP', 'GRAPHQL']}
+                    value={probeForm.payload_type.toUpperCase()}
+                    onChange={(event, newValue) => {
+                      // Directly calling handleFormChange with a synthetic event object
+                      handleFormChange({ target: { name: 'payload_type', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'payload_type', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Message Type' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='probehttpmethod-autocomplete'
+                  options={['GET', 'POST']}
+                  value={probeForm.http_method?.toUpperCase()}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -921,6 +1047,29 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   }}
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Status' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='probesslverification-autocomplete'
+                  options={['YES', 'NO']}
+                  value={probeForm.ssl_verification}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
                   )}
                 />
               </Grid>
@@ -945,16 +1094,26 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
             {probeType === 'API' ? (
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    label='Payload'
-                    name='payload'
-                    autoComplete='off'
-                    value={probeForm.payload !== undefined ? probeForm.payload : ''}
-                    onChange={handleFormChange}
-                    multiline
-                    rows={20}
-                  />
+                  <Typography variant='subtitle1' gutterBottom>
+                    Probe Headers
+                  </Typography>
+                  {renderDynamicFormSection('http_headers')}
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('http_headers')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Probe Headers
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             ) : (
@@ -965,10 +1124,31 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       case 3:
         return (
           <Fragment>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={12}>
+                <TextfieldStyled
+                  fullWidth
+                  label='Payload'
+                  name='payload'
+                  autoComplete='off'
+                  value={probeForm.payload !== undefined ? probeForm.payload : ''}
+                  onChange={handleFormChange}
+                  multiline
+                  rows={20}
+                  error={Boolean(formErrors?.payload)}
+                  helperText={formErrors?.payload}
+                />
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+      case 4:
+        return (
+          <Fragment>
             <Grid container spacing={3} alignItems='flex-start'>
               <Grid item xs={12} sm={8}>
                 <Typography variant='subtitle1' gutterBottom>
-                  Keyword Arguments
+                  Probe Tokens
                 </Typography>
                 {renderDynamicFormSection('kwargs')}
                 <Box>
@@ -984,14 +1164,14 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     onClick={() => addSectionEntry('kwargs')}
                     style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                   >
-                    Add Keyword Arguments
+                    Add Probe Tokens
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </Fragment>
         )
-      case 4:
+      case 5:
         return <ReviewAndSubmitSection probeForm={probeForm} />
       default:
         return 'Unknown Step'

@@ -71,6 +71,7 @@ import UpdateProbeWizard from 'src/views/pages/probes/forms/UpdateProbeWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import ProbeDetailPanel from 'src/views/pages/probes/ProbeDetailPanel'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -142,6 +143,13 @@ const ActiveProbes = props => {
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
   const [currentProbe, setCurrentProbe] = useState(null)
+
+  const getDetailPanelContent = useCallback(({ row }) => <ProbeDetailPanel row={row} />, [])
+  const getDetailPanelHeight = useCallback(() => 600, [])
+
+  const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
+    setDetailPanelExpandedRowIds(newIds)
+  }, [])
 
   // column definitions
   const columns = [
@@ -1238,6 +1246,10 @@ const ActiveProbes = props => {
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
+          getDetailPanelHeight={getDetailPanelHeight}
+          getDetailPanelContent={getDetailPanelContent}
+          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
           rowSelectionModel={rowSelectionModel}
           loading={loading}

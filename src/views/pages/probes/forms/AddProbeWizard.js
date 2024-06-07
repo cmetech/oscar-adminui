@@ -666,7 +666,7 @@ const AddProbeWizard = ({ onSuccess }) => {
           delete payload.http_method
 
           // Add SSL Verification to Kwargs
-          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes'
+          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes' ? 'true' : 'false'
 
           // Remove the ssl_verification field from the payload
           delete payload.ssl_verification

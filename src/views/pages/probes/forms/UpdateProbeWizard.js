@@ -78,7 +78,7 @@ const initialProbeFormState = {
     jitter: 0
   },
   args: [{ value: '' }],
-  kwargs: [{ key: '', value: '' }],
+  kwargs: {},
   payload: '',
   payload_type: 'rest',
   http_method: 'GET',
@@ -612,10 +612,11 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     setProbeForm(prevForm => {
       const newForm = { ...prevForm }
 
-      if (index !== undefined && section) {
+      if (section === 'kwargs' && name) {
+        newForm[section] = { ...newForm[section], [name]: value }
+      } else if (index !== undefined && section) {
         newForm[section][index][name] = value
       } else {
-        // Top-level field updates
         newForm[name] = value
       }
 
@@ -728,6 +729,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
           if (probe) {
             console.log('Probe successfully updated for ', probe.name)
+
             // Show a success toast
             toast.success('Probe successfully updated')
           } else {
@@ -764,97 +766,111 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       }
     }
 
-    const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+    const { keyLabel, valueLabel } = getFieldLabels(section)
 
-    // console.log('taskForm:', taskForm)
-    // console.log('section:', section)
-    // console.log('keyLabel:', keyLabel)
-    // console.log('valueLabel:', valueLabel)
-    // console.log('defaultValueLabel:', defaultValueLabel)
+    const entries =
+      section === 'kwargs'
+        ? Object.entries(probeForm[section]).filter(
+            ([key]) => !['__endpoint__', '__http_headers__', '__ssl_verification__'].includes(key.toLowerCase())
+          )
+        : probeForm[section]
 
-    return probeForm[section].map((entry, index) => (
-      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-        <Grid container spacing={3} alignItems='center'>
-          {['http_headers'].includes(section) ? (
-            <Grid item xs={5}>
-              <AutocompleteStyled
-                freeSolo
-                options={wellKnownHttpHeaders}
-                value={entry.key || ''}
-                onInputChange={(event, newValue) => {
-                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
-                }}
-                onChange={(event, newValue) => {
-                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
-                }}
-                renderInput={params => (
-                  <TextfieldStyled {...params} fullWidth label={keyLabel} variant='outlined' margin='normal' />
-                )}
-              />
-            </Grid>
-          ) : (
-            <Grid item xs={5}>
-              <TextfieldStyled
-                key={`key-${section}-${index}`}
-                fullWidth
-                label={keyLabel}
-                name='key'
-                value={entry.key?.toUpperCase() || ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
-          {section === 'http_headers' ? (
-            <Grid item xs={5}>
-              <TextfieldStyled
-                key={`value-${section}-${index}`}
-                fullWidth
-                label={valueLabel}
-                name='value'
-                value={entry.value || ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          ) : (
-            <Grid item xs={5}>
-              <AutocompleteStyled
-                freeSolo
-                options={wellKnownFakerFunctions}
-                value={entry.value?.startsWith('faker.') ? entry.value.slice(6) : entry.value || ''}
-                onInputChange={(event, newValue) => {
-                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
-                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
-                }}
-                onChange={(event, newValue) => {
-                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
-                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
-                }}
-                renderInput={params => (
-                  <TextfieldStyled {...params} fullWidth label={valueLabel} variant='outlined' margin='normal' />
-                )}
-              />
-            </Grid>
-          )}
-          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton
-              onClick={() => addSectionEntry(section)}
-              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-            >
-              <Icon icon='mdi:plus-circle-outline' />
-            </IconButton>
-            {probeForm[section].length > 1 && (
-              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                <Icon icon='mdi:minus-circle-outline' />
-              </IconButton>
+    return entries.map((entry, index) => {
+      const key = section === 'kwargs' ? entry[0] : entry.key
+      const value = section === 'kwargs' ? entry[1] : entry.value
+
+      return (
+        <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
+          <Grid container spacing={3} alignItems='center'>
+            {['http_headers'].includes(section) ? (
+              <Grid item xs={5}>
+                <AutocompleteStyled
+                  freeSolo
+                  options={wellKnownHttpHeaders}
+                  value={key || ''}
+                  onInputChange={(event, newValue) => {
+                    handleFormChange(
+                      { target: { name: section === 'kwargs' ? key : 'key', value: newValue } },
+                      index,
+                      section
+                    )
+                  }}
+                  onChange={(event, newValue) => {
+                    handleFormChange(
+                      { target: { name: section === 'kwargs' ? key : 'key', value: newValue } },
+                      index,
+                      section
+                    )
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} fullWidth label={keyLabel} variant='outlined' margin='normal' />
+                  )}
+                />
+              </Grid>
+            ) : (
+              <Grid item xs={5}>
+                <TextfieldStyled
+                  key={`key-${section}-${index}`}
+                  fullWidth
+                  label={keyLabel}
+                  name={section === 'kwargs' ? key : 'key'}
+                  value={key?.toUpperCase() || ''}
+                  onChange={e => handleFormChange(e, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                />
+              </Grid>
             )}
+            {section === 'http_headers' ? (
+              <Grid item xs={5}>
+                <TextfieldStyled
+                  key={`value-${section}-${index}`}
+                  fullWidth
+                  label={valueLabel}
+                  name='value'
+                  value={value || ''}
+                  onChange={e => handleFormChange(e, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                />
+              </Grid>
+            ) : (
+              <Grid item xs={5}>
+                <AutocompleteStyled
+                  freeSolo
+                  options={wellKnownFakerFunctions}
+                  value={value?.startsWith('faker.') ? value.slice(6) : value || ''}
+                  onInputChange={(event, newValue) => {
+                    const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                    handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                  }}
+                  onChange={(event, newValue) => {
+                    const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                    handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} fullWidth label={valueLabel} variant='outlined' margin='normal' />
+                  )}
+                />
+              </Grid>
+            )}
+            <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <IconButton
+                onClick={() => addSectionEntry(section)}
+                style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+              >
+                <Icon icon='mdi:plus-circle-outline' />
+              </IconButton>
+              {entries.length > 1 && (
+                <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                  <Icon icon='mdi:minus-circle-outline' />
+                </IconButton>
+              )}
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
-    ))
+        </Box>
+      )
+    })
   }
 
   const getStepContent = step => {

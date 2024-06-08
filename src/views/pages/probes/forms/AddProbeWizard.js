@@ -745,7 +745,7 @@ const AddProbeWizard = ({ onSuccess }) => {
 
     const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
 
-    // console.log('taskForm:', taskForm)
+    // console.log('probeForm:', probeForm)
     // console.log('section:', section)
     // console.log('keyLabel:', keyLabel)
     // console.log('valueLabel:', valueLabel)

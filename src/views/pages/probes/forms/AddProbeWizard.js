@@ -53,9 +53,8 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 import { current } from '@reduxjs/toolkit'
-import { Menu } from '@mui/material'
 
-// Define initial state for the server form
+// Define initial state for the probe form
 const initialProbeFormState = {
   name: '',
   type: '',

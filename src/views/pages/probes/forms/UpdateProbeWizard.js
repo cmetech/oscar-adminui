@@ -63,7 +63,7 @@ const initialProbeFormState = {
   host: '',
   port: '',
   url: '',
-  ssl_verification: '',
+  ssl_verification: 'NO',
   schedule: {
     year: '',
     month: '',
@@ -468,6 +468,7 @@ const allStepValidationSchemas = [
       }
     })
   }),
+  yup.object(), //No validation for the headers step
   yup.object(), //No validation for the payload step
   yup.object(), //No validation for the tokens step
   yup.object() //No validation for the review step
@@ -494,8 +495,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
   })
 
   const [resetFormFields, setResetFormFields] = useState(false)
-  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
   const [formErrors, setFormErrors] = useState({})
+  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -612,7 +613,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       const newForm = { ...prevForm }
 
       if (index !== undefined && section) {
-        newForm[section][index][name] = value.toLowerCase()
+        newForm[section][index][name] = value
       } else {
         // Top-level field updates
         newForm[name] = value
@@ -636,8 +637,12 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         newEntry = {} // Default case, should not be reached
     }
 
-    const updatedSection = [...probeForm[section], newEntry]
-    setProbeForm({ ...probeForm, [section]: updatedSection })
+    setProbeForm(prevForm => {
+      // Only add new entry if section is empty
+      const updatedSection = [...prevForm[section], newEntry]
+
+      return { ...prevForm, [section]: updatedSection }
+    })
   }
 
   const removeSectionEntry = (section, index) => {
@@ -648,7 +653,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
   // Handle Stepper
   const handleBack = () => {
-    //console.log("handleback step number = ", activeStep)
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
@@ -689,7 +693,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
           delete payload.http_method
 
           // Add SSL Verification to Kwargs
-          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes'
+          payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes' ? 'true' : 'false'
 
           // Remove the ssl_verification field from the payload
           delete payload.ssl_verification
@@ -724,6 +728,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
           if (probe) {
             console.log('Probe successfully updated for ', probe.name)
+            // Show a success toast
+            toast.success('Probe successfully updated')
           } else {
             console.error('Failed to update probe')
             toast.error('Failed to update probe')
@@ -743,34 +749,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     }
   }
 
-  //Not being used as its not required
-  const handleReset = () => {
-    if (currentProbe && Object.keys(currentProbe).length > 0) {
-      const resetProbeForm = {
-        ...initialProbeFormState,
-        name: currentProbe.name || '',
-        type: currentProbe.type.trim().toLowerCase() === 'httpurl' ? 'URL' : 'PORT',
-        description: currentProbe.description || '',
-        target: currentProbe.target,
-        status: currentProbe.status,
-        id: currentProbe.id
-      }
-      if (resetProbeForm.type && resetProbeForm.type === 'PORT') {
-        const portinfo = resetProbeForm.target.split(':')
-
-        if (portinfo.length > 1) {
-          resetProbeForm.port = portinfo[1]
-          resetProbeForm.target = portinfo[0]
-        } else {
-          resetProbeForm.port = 0
-          resetProbeForm.target = portinfo[0]
-        }
-      }
-      setProbeForm(resetProbeForm)
-    }
-    setActiveStep(0)
-  }
-
   const renderDynamicFormSection = section => {
     // Determine field labels based on section type
     const getFieldLabels = section => {
@@ -788,13 +766,33 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
 
     const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
 
-    // Ensure that probeForm[section] is an array
-    const sectionData = Array.isArray(probeForm[section]) ? probeForm[section] : []
+    // console.log('taskForm:', taskForm)
+    // console.log('section:', section)
+    // console.log('keyLabel:', keyLabel)
+    // console.log('valueLabel:', valueLabel)
+    // console.log('defaultValueLabel:', defaultValueLabel)
 
-    return sectionData.map((entry, index) => (
+    return probeForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          {['http_headers', 'kwargs', 'metadata'].includes(section) && (
+          {['http_headers'].includes(section) ? (
+            <Grid item xs={5}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownHttpHeaders}
+                value={entry.key || ''}
+                onInputChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'key', value: newValue } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={keyLabel} variant='outlined' margin='normal' />
+                )}
+              />
+            </Grid>
+          ) : (
             <Grid item xs={5}>
               <TextfieldStyled
                 key={`key-${section}-${index}`}
@@ -808,17 +806,36 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               />
             </Grid>
           )}
-          {['http_headers', 'kwargs', 'metadata', 'args'].includes(section) && (
+          {section === 'http_headers' ? (
             <Grid item xs={5}>
               <TextfieldStyled
                 key={`value-${section}-${index}`}
                 fullWidth
                 label={valueLabel}
                 name='value'
-                value={entry.value?.toUpperCase() || ''}
+                value={entry.value || ''}
                 onChange={e => handleFormChange(e, index, section)}
                 variant='outlined'
                 margin='normal'
+              />
+            </Grid>
+          ) : (
+            <Grid item xs={5}>
+              <AutocompleteStyled
+                freeSolo
+                options={wellKnownFakerFunctions}
+                value={entry.value?.startsWith('faker.') ? entry.value.slice(6) : entry.value || ''}
+                onInputChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                onChange={(event, newValue) => {
+                  const valueToStore = wellKnownFakerFunctions.includes(newValue) ? `faker.${newValue}` : newValue
+                  handleFormChange({ target: { name: 'value', value: valueToStore } }, index, section)
+                }}
+                renderInput={params => (
+                  <TextfieldStyled {...params} fullWidth label={valueLabel} variant='outlined' margin='normal' />
+                )}
               />
             </Grid>
           )}
@@ -968,7 +985,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               </Grid>
               {probeType === 'PORT' && (
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <TextfieldStyled
                     id='port'
                     name='port'
                     label='Port'
@@ -976,6 +993,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     type='number'
                     value={probeForm.port}
                     onChange={handleFormChange}
+                    error={Boolean(formErrors?.port)}
+                    helperText={formErrors?.port}
                   />
                 </Grid>
               )}

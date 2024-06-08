@@ -799,7 +799,7 @@ const DatacentersList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No SLOs found'
+              message: 'No Datacenters found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

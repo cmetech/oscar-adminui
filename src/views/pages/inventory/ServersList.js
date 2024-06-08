@@ -815,7 +815,7 @@ const ServersList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No SLOs found'
+              message: 'No Servers found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

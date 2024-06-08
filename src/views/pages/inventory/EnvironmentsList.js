@@ -763,7 +763,7 @@ const EnvironmentsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No SLOs found'
+              message: 'No Environments found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

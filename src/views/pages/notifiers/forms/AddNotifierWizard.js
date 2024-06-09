@@ -55,19 +55,6 @@ const initialNotifierFormState = {
   type: 'email', // default to email notifier
   status: 'enabled',
   description: '',
-  schedule: {
-    year: '',
-    month: '',
-    day: '',
-    day_of_week: '',
-    hour: '',
-    minute: '',
-    second: '',
-    start_date: '',
-    end_date: '',
-    timezone: '',
-    jitter: 0
-  },
   email_addresses: [''],
   webhook_url: ''
 }
@@ -82,11 +69,6 @@ const steps = [
     title: 'Notifier Details',
     subtitle: 'Details',
     description: 'Edit the notifier details.'
-  },
-  {
-    title: 'Notifier Schedule',
-    subtitle: 'Schedule',
-    description: 'Edit the notifier schedule.'
   },
   {
     title: 'Review',
@@ -172,18 +154,23 @@ const AddNotifierWizard = ({ onSuccess }) => {
 
   const stepValidationSchemas = [
     yup.object(), // No validation for the type step
-    yup.object({
-      name: yup.string().required('Name is required'),
-      email_addresses: yup.array().when('type', {
-        is: 'email',
-        then: yup.array().of(yup.string().email('Must be a valid email')).required('At least one email is required')
-      }),
-      webhook_url: yup.string().when('type', {
-        is: 'webhook',
-        then: yup.string().url('Must be a valid URL').required('Webhook URL is required')
-      })
-    }),
-    yup.object(), // No validation for the schedule step
+    // yup.object({
+    //   name: yup.string().required('Name is required'),
+    //   email_addresses: yup.array().when('type', {
+    //     is: 'email',
+    //     then: yup
+    //       .array()
+    //       .of(yup.string().email('Must be a valid email').required('At least one email is required'))
+    //       .required('At least one email is required'),
+    //     otherwise: yup.array().notRequired()
+    //   }),
+    //   webhook_url: yup.string().when('type', {
+    //     is: 'webhook',
+    //     then: yup.string().url('Must be a valid URL').required('Webhook URL is required'),
+    //     otherwise: yup.string().notRequired()
+    //   })
+    // }),
+    yup.object(),
     yup.object() // No validation for the review step
   ]
 
@@ -191,18 +178,28 @@ const AddNotifierWizard = ({ onSuccess }) => {
   const validateForm = async () => {
     try {
       const validationSchema = stepValidationSchemas[activeStep]
+
+      console.log('Validating form:', notifierForm) // Log form data before validation
       await validationSchema.validate(notifierForm, { abortEarly: false })
       setFormErrors({})
 
       return true
     } catch (yupError) {
-      const transformedErrors = yupError.inner.reduce(
-        (acc, currentError) => ({
-          ...acc,
-          [currentError.path]: currentError.message
-        }),
-        {}
-      )
+      console.log('Yup Validation Error:', yupError)
+
+      const transformedErrors = yupError.inner
+        ? yupError.inner.reduce(
+            (acc, currentError) => ({
+              ...acc,
+              [currentError.path]: currentError.message
+            }),
+            {}
+          )
+        : {}
+
+      // Log the validation errors for debugging
+      console.log('Validation Errors:', transformedErrors)
+
       setFormErrors(transformedErrors)
 
       return false
@@ -218,7 +215,11 @@ const AddNotifierWizard = ({ onSuccess }) => {
       const newForm = { ...prevForm }
 
       if (index !== undefined && section) {
-        newForm[section][index][name] = value
+        if (section === 'email_addresses') {
+          newForm[section][index] = value
+        } else {
+          newForm[section][index][name] = value
+        }
       } else {
         newForm[name] = value
       }
@@ -249,6 +250,9 @@ const AddNotifierWizard = ({ onSuccess }) => {
   const handleNext = async () => {
     const isValid = await validateForm()
     if (!isValid) {
+      console.log('Form is not valid')
+      console.log('Form:', notifierForm)
+
       return
     }
 
@@ -304,34 +308,37 @@ const AddNotifierWizard = ({ onSuccess }) => {
     }
 
     return notifierForm[section].map((entry, index) => (
-      <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-        <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={8}>
-            <TextfieldStyled
-              fullWidth
-              label={sectionTitles[section]}
-              name={section}
-              value={entry}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
-          <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <IconButton
-              onClick={() => addSectionEntry(section)}
-              style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-            >
-              <Icon icon='mdi:plus-circle-outline' />
-            </IconButton>
-            {notifierForm[section].length > 1 && (
-              <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                <Icon icon='mdi:minus-circle-outline' />
+      <Grid item xs={12} key={`${index}-${resetFormFields}`}>
+        <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
+          <Grid container spacing={3} alignItems='center'>
+            <Grid item xs={8}>
+              <TextfieldStyled
+                key={`key-${section}-${index}`}
+                fullWidth
+                label={sectionTitles[section]}
+                name={section}
+                value={entry}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+            <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <IconButton
+                onClick={() => addSectionEntry(section)}
+                style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+              >
+                <Icon icon='mdi:plus-circle-outline' />
               </IconButton>
-            )}
+              {notifierForm[section].length > 1 && (
+                <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                  <Icon icon='mdi:minus-circle-outline' />
+                </IconButton>
+              )}
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
+        </Box>
+      </Grid>
     ))
   }
 
@@ -433,18 +440,6 @@ const AddNotifierWizard = ({ onSuccess }) => {
             </Fragment>
           )
         case 2:
-          return (
-            <ScheduleSection
-              taskForm={notifierForm}
-              handleFormChange={handleFormChange}
-              dateRange={[notifierForm.schedule.start_date, notifierForm.schedule.end_date]}
-              setDateRange={newRange => {
-                handleFormChange({ target: { name: 'schedule.start_date', value: newRange[0] } }, null, 'schedule')
-                handleFormChange({ target: { name: 'schedule.end_date', value: newRange[1] } }, null, 'schedule')
-              }}
-            />
-          )
-        case 3:
           return <ReviewAndSubmitSection taskForm={notifierForm} />
         default:
           return 'Unknown Step'
@@ -540,186 +535,6 @@ const AddNotifierWizard = ({ onSuccess }) => {
       <Card sx={{ mt: 4, minHeight: 500 }}>
         <CardContent>{renderContent()}</CardContent>
       </Card>
-    </Fragment>
-  )
-}
-
-const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }) => {
-  const [showDocumentation, setShowDocumentation] = useState(false)
-  const toggleDocumentation = () => setShowDocumentation(!showDocumentation)
-
-  // Get list of timezones from moment-timezone
-  const timezones = moment.tz.names()
-
-  // Handler for timezone change in Autocomplete
-  const handleTimezoneChange = (event, newValue) => {
-    handleFormChange({ target: { name: 'schedule.timezone', value: newValue } }, null, 'schedule')
-  }
-
-  return (
-    <Fragment>
-      <Grid container direction='column' spacing={2}>
-        {/* Clickable Text to Toggle Visibility */}
-        <Grid
-          item
-          style={{
-            cursor: 'pointer',
-            paddingLeft: '27px',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <IconButton onClick={toggleDocumentation}>
-            {showDocumentation ? <Icon icon='mdi:expand-less' /> : <Icon icon='mdi:expand-more' />}
-          </IconButton>
-          <Typography variant='body1' onClick={toggleDocumentation}>
-            {showDocumentation ? 'Hide Schedule Instructions' : 'Show Schedule Instructions'}
-          </Typography>
-        </Grid>
-        {showDocumentation && (
-          <Grid container spacing={2} style={{ padding: '16px' }}>
-            <Grid item>
-              <Typography variant='body2' gutterBottom>
-                <strong>Schedule your task</strong> with precision using flexible cron-style expressions. This section
-                allows you to define when and how often your task should run, similar to scheduling jobs in UNIX-like
-                systems.
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant='body2' gutterBottom>
-                Define <strong>start and end dates</strong> to control the active period of your task schedule. Input
-                dates in ISO 8601 format or select them using the provided date pickers.
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant='body2' gutterBottom>
-                Not all fields are mandatory. Specify only the ones you need. Unspecified fields default to their
-                broadest setting, allowing the task to run more frequently. For instance, leaving the{' '}
-                <strong>day</strong> field empty schedules the task to run every day of the month.
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant='body2' gutterBottom>
-                Use the <strong>Expression Types</strong> below to refine your schedule:
-                <ul>
-                  <li>
-                    <strong>*</strong> - Run at every possible time/value.
-                  </li>
-                  <li>
-                    <strong>*/a</strong> - Run at every <em>a</em> interval.
-                  </li>
-                  <li>
-                    <strong>a-b</strong> - Run within a range from <em>a</em> to <em>b</em>.
-                  </li>
-                  <li>
-                    <strong>a-b/c</strong> - Run within a range at every <em>c</em> interval.
-                  </li>
-                  <li>And more, including combinations of expressions separated by commas.</li>
-                </ul>
-              </Typography>
-            </Grid>
-            <Grid item marginBottom={4}>
-              <Typography variant='body2' gutterBottom>
-                Abbreviated English month names (<strong>jan</strong> – <strong>dec</strong>) and weekday names (
-                <strong>mon</strong> – <strong>sun</strong>) are also supported.
-              </Typography>
-            </Grid>
-          </Grid>
-        )}
-      </Grid>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='year'
-            name='year'
-            label='Year'
-            fullWidth
-            value={taskForm.schedule.year}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='month'
-            name='month'
-            label='Month'
-            fullWidth
-            value={taskForm.schedule.month}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='day'
-            name='day'
-            label='Day'
-            fullWidth
-            value={taskForm.schedule.day}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='hour'
-            name='hour'
-            label='Hour'
-            fullWidth
-            value={taskForm.schedule.hour}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='minute'
-            name='minute'
-            label='Minute'
-            fullWidth
-            value={taskForm.schedule.minute}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextfieldStyled
-            id='second'
-            name='second'
-            label='Second'
-            fullWidth
-            value={taskForm.schedule.second}
-            onChange={e => handleFormChange(e, null, 'schedule')}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <DateRangePicker
-            localeText={{ start: 'Start Date', end: 'End Date' }}
-            value={dateRange}
-            onChange={newValue => {
-              setDateRange(newValue)
-            }}
-            renderInput={(startProps, endProps) => (
-              <Fragment>
-                <TextfieldStyled {...startProps} />
-                <Box sx={{ mx: 2 }}> to </Box>
-                <TextfieldStyled {...endProps} />
-              </Fragment>
-            )}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <AutocompleteStyled
-            id='timezone'
-            options={timezones}
-            getOptionLabel={option => option}
-            renderInput={params => <TextfieldStyled {...params} label='Timezone' />}
-            value={taskForm.schedule.timezone}
-            onChange={handleTimezoneChange}
-            autoComplete
-            includeInputInList
-            freeSolo
-            clearOnBlur
-          />
-        </Grid>
-      </Grid>
     </Fragment>
   )
 }
@@ -831,42 +646,11 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
     return null
   }
 
-  const renderScheduleSection = schedule => (
-    <Fragment>
-      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-        Schedule Information
-      </Typography>
-      <Grid container spacing={2}>
-        {Object.entries(schedule).map(([key, value], index) => {
-          const label = key
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
-          const formattedValue = typeof value === 'object' && value !== null ? value.toLocaleString() : value
-
-          return (
-            <Grid item xs={12} sm={6} key={`schedule-${index}`}>
-              <TextfieldStyled
-                fullWidth
-                label={label}
-                value={formattedValue !== undefined ? formattedValue : ''}
-                InputProps={{ readOnly: true }}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )
-        })}
-      </Grid>
-    </Fragment>
-  )
-
   return (
     <Fragment>
       {renderGeneralSection(taskForm)}
       {taskForm.type === 'email' && renderEmailSection(taskForm)}
       {taskForm.type === 'webhook' && renderWebhookSection(taskForm)}
-      {taskForm.schedule && renderScheduleSection(taskForm.schedule)}
     </Fragment>
   )
 }

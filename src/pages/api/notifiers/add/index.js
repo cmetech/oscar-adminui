@@ -7,14 +7,21 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     const notifier = req.body
 
+    // Transform email addresses if the type is email
+    let emailNotifier = null
+    if (notifier.type === 'email') {
+      emailNotifier = {
+        email_addresses: notifier.email_addresses.map(email => ({ email }))
+      }
+    }
+
     const payload = {
       name: notifier.name,
       description: notifier.description,
       type: notifier.type,
       status: notifier.status,
-      email_notifier: notifier.email_notifier,
-      webhook_notifier: notifier.webhook_notifier,
-      schedule: notifier.schedule
+      email_notifier: emailNotifier,
+      webhook_notifier: notifier.type === 'webhook' ? { url: notifier.webhook_url } : null
     }
 
     try {

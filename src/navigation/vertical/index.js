@@ -169,6 +169,13 @@ const navigation = () => {
           icon: 'mdi:server-network',
           action: 'manage',
           subject: 'settings-nav'
+        },
+        {
+          title: 'Notifiers',
+          path: '/management/application/notifiers',
+          icon: 'mdi:server-network',
+          action: 'manage',
+          subject: 'settings-nav'
         }
       ]
     },

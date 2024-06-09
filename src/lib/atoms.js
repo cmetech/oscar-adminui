@@ -33,7 +33,13 @@ export const refetchSubcomponentTriggerAtom = atom(0)
 
 export const refetchTaskTriggerAtom = atom(0)
 
+export const refetchNotifierTriggerAtom = atom(0)
+
 export const alertIdsAtom = atom([])
+
+export const notifierIdsAtom = atom([])
+
+export const notifiersAtom = atom([])
 
 export const alertsAtom = atom([])
 

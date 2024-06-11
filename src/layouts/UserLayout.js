@@ -165,7 +165,7 @@ const AppBrand = () => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-            src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_RGB.png'}
+            src={theme.palette.mode == 'dark' ? '/images/SMART2D_170x34_White.png' : '/images/SMART2D_170x34_Black.png'}
             alt='logo'
             width='170px'
             height='40px'

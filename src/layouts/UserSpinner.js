@@ -34,7 +34,7 @@ const UserFallbackSpinner = ({ sx }) => {
         <img src='/images/oscar.png' width='200' height='200' alt='spinner' />
         {navCollapsed ? (
           <Box
-            bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
+            bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', marginLeft: 3, marginTop: 2 }}
             src={theme.palette.mode == 'dark' ? '/images/ECON_RGB_WHITE_48px.png' : '/images/ECON_RGB_BLACK_48px.png'}
@@ -44,10 +44,10 @@ const UserFallbackSpinner = ({ sx }) => {
           />
         ) : (
           <Box
-            bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
+            bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-            src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_RGB.png'}
+            src={theme.palette.mode == 'dark' ? '/images/SMART2D_170x34_White.png' : '/images/SMART2D_170x34_Black.png'}
             alt='logo'
             width='170px'
             height='40px'

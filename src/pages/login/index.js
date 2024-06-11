@@ -240,7 +240,11 @@ const LoginPage = ({ csrfToken, providers }) => {
                   bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
                   component='img'
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
-                  src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}
+                  src={
+                    theme.palette.mode == 'dark'
+                      ? '/images/SMART2D_170x34_White.png'
+                      : '/images/SMART2D_170x34_Black.png'
+                  }
                   alt='logo'
                 />
                 <Typography

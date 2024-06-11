@@ -88,7 +88,7 @@ const AppBarContent = props => {
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box
-        bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
+        bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
         component='img'
         sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
         src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}

@@ -237,7 +237,7 @@ const LoginPage = ({ csrfToken, providers }) => {
               >
                 {/* <i className='icon icon-econ' /> */}
                 <Box
-                  bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : 'F4F5FA'}
+                  bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
                   component='img'
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                   src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}

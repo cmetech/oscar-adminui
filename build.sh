@@ -7,12 +7,12 @@ case "$os_name" in
     Darwin)
         # If OS is Darwin, process files for arm64
         PLATFORM="linux/arm64"
-        IMAGE_NAME="oscar/adminui-arm64"
+        IMAGE_NAME="cmetech/adminui-arm64"
         ;;
     Linux)
         # If OS is Linux, process files for amd64
         PLATFORM="linux/amd64"
-        IMAGE_NAME="oscar/adminui-amd64"
+        IMAGE_NAME="cmetech/adminui-amd64"
         ;;
     *)
         echo "Unknown operating system: $os_name"

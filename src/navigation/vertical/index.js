@@ -124,7 +124,7 @@ const navigation = () => {
           subject: 'all',
           externalLink: true,
           openInNewTab: true,
-          badgeContent: 'NiFi',
+          badgeContent: 'BPMS',
           badgeColor: 'info'
         }
       ]

@@ -26,11 +26,11 @@ PLATFORM=""
 case "$os_name" in
     Darwin)
         # If OS is Darwin, process files for arm64
-        PLATFORM="linux/arm64"
+        PLATFORM="arm64"
         ;;
     Linux)
         # If OS is Linux, process files for amd64
-        PLATFORM="linux/amd64"
+        PLATFORM="amd64"
         ;;
     *)
         echo "Unknown operating system: $os_name"

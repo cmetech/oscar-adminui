@@ -20,8 +20,25 @@ done
 
 # Initialize default values
 TAG="${OSCARADMINUI_VERSION}"
-PLATFORMS="linux/amd64,linux/arm64"
-IMAGE_NAME="${NAMESPACE}/${OSCARADMINUI_SERVICENAME}"
+os_name=$(uname -s)
+PLATFORM=""
+
+case "$os_name" in
+    Darwin)
+        # If OS is Darwin, process files for arm64
+        PLATFORM="linux/arm64"
+        ;;
+    Linux)
+        # If OS is Linux, process files for amd64
+        PLATFORM="linux/amd64"
+        ;;
+    *)
+        echo "Unknown operating system: $os_name"
+        exit 1
+        ;;
+esac
+
+IMAGE_NAME="${NAMESPACE}/${OSCARADMINUI_SERVICENAME}-${PLATFORM}"
 PUSH=false
 
 echo "Initializing Docker build script..."
@@ -33,18 +50,9 @@ echo "Default TAG: ${TAG}"
 while getopts "ct:p" opt; do
   case $opt in
     c)
-      # Remove the docker image for all platforms
-      docker buildx rm mybuilder 2>/dev/null || true
-      docker buildx create --use --name mybuilder
-      docker buildx inspect --bootstrap
-      if docker buildx imagetools inspect "${IMAGE_NAME}:${TAG}" >/dev/null 2>&1; then
-        echo "Removing image ${IMAGE_NAME}:${TAG} from the registry..."
-        docker buildx imagetools rm "${IMAGE_NAME}:${TAG}"
-        docker rmi -f "${IMAGE_NAME}:${TAG}"
-      else
-        echo "Image ${IMAGE_NAME}:${TAG} not found. Skipping removal."
-      fi
-      docker buildx rm mybuilder
+      # Remove the docker image
+      echo "Removing image ${IMAGE_NAME}:${TAG} from the local Docker daemon..."
+      docker rmi -f "${IMAGE_NAME}:${TAG}"
       exit 0
       ;;
     t)
@@ -65,53 +73,19 @@ while getopts "ct:p" opt; do
   esac
 done
 
-echo "Ensuring Buildx is initialized..."
-# Ensure Buildx is initialized
-docker buildx rm mybuilder 2>/dev/null || true
-docker buildx create --use --name mybuilder
-docker buildx inspect --bootstrap
-
-# Function to clean up temporary files and builders
-cleanup() {
-  echo "Cleaning up..."
-  docker buildx rm mybuilder
-  echo "Docker build script completed successfully."
-}
-
-# Trap exit to ensure cleanup
-trap cleanup EXIT
-
-# Build the Docker image for each platform
-if $PUSH; then
-  echo "Building and pushing Docker image ${IMAGE_NAME}:${TAG} for platforms ${PLATFORMS[*]}..."
-  docker buildx build --platform "$(IFS=,; echo "${PLATFORMS[*]}")" -t "${IMAGE_NAME}:${TAG}" --push .
-  echo "Pulling the image ${IMAGE_NAME}:${TAG} back to the local Docker daemon..."
-  docker pull "${IMAGE_NAME}:${TAG}"
-else
-  os_name=$(uname -s)
-  PLATFORM=""
-
-  case "$os_name" in
-      Darwin)
-          # If OS is Darwin, process files for arm64
-          PLATFORM="linux/arm64"
-          ;;
-      Linux)
-          # If OS is Linux, process files for amd64
-          PLATFORM="linux/amd64"
-          ;;
-      *)
-          echo "Unknown operating system: $os_name"
-          ;;
-  esac
-
-  echo "Building Docker image ${IMAGE_NAME}:${TAG} for platform ${PLATFORM}..."
-  docker build -t "${IMAGE_NAME}:${TAG}" .
-fi
+# Build the Docker image
+echo "Building Docker image ${IMAGE_NAME}:${TAG} for platform ${PLATFORM}..."
+docker build -t "${IMAGE_NAME}:${TAG}" .
 
 # Verify if the image is available locally
 if docker images | grep -q "${IMAGE_NAME}\s*${TAG}"; then
   echo "Docker image ${IMAGE_NAME}:${TAG} successfully built and available locally."
+
+  # Push the image if the push flag is set
+  if $PUSH; then
+    echo "Pushing Docker image ${IMAGE_NAME}:${TAG} to the registry..."
+    docker push "${IMAGE_NAME}:${TAG}"
+  fi
 else
   echo "Error: Docker image ${IMAGE_NAME}:${TAG} not found in local repository."
   exit 1

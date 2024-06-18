@@ -35,10 +35,13 @@ const ResponsiveMkDocsEmbed = ({ src }) => {
 const DocsPage = () => {
   const theme = useTheme()
 
+  const docs_host = process.env.MKDOCS_HOST || 'localhost'
+  const docs_port = process.env.MKDOCS_PORT || '8005'
+
   return (
     <Container maxWidth='false' disableGutters={true} sx={{ p: 0, m: 0, height: '100vh', width: '100vw' }}>
       {/* Other components can go here */}
-      <ResponsiveMkDocsEmbed src={`http://${process.env.MKDOCS_HOST}:${process.env.MKDOCS_PORT}?theme=${theme.palette.mode}`} />
+      <ResponsiveMkDocsEmbed src={`http://${docs_host}:${docs_port}?theme=${theme.palette.mode}`} />
       {/* More components */}
     </Container>
   )

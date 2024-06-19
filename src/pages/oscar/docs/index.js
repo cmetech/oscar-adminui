@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
+import getConfig from 'next/config'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
@@ -8,6 +9,8 @@ import { styled, useTheme } from '@mui/material/styles'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
+
+const { publicRuntimeConfig } = getConfig()
 
 const ResponsiveMkDocsEmbed = ({ src }) => {
   return (
@@ -35,8 +38,8 @@ const ResponsiveMkDocsEmbed = ({ src }) => {
 const DocsPage = () => {
   const theme = useTheme()
 
-  const docs_host = process.env.MKDOCS_HOST || 'localhost'
-  const docs_port = process.env.MKDOCS_PORT || '8005'
+  const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
+  const docs_port = publicRuntimeConfig.MKDOCS_PORT || '8005'
 
   return (
     <Container maxWidth='false' disableGutters={true} sx={{ p: 0, m: 0, height: '100vh', width: '100vw' }}>

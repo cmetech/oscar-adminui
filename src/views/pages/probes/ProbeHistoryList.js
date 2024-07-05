@@ -634,7 +634,7 @@ const TaskHistoryList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Records found'
+              message: 'No Probes found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

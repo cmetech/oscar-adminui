@@ -117,7 +117,7 @@ const navigation = () => {
           subject: 'all'
         },
         {
-          title: 'BPMS',
+          title: 'Workflows',
           path: '/api/oscar/bpms',
           icon: 'mdi:workflow',
           action: 'read',

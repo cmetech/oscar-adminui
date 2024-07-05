@@ -699,7 +699,7 @@ const AlertsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Records found'
+              message: 'No Alerts found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

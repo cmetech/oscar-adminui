@@ -2,7 +2,7 @@
 import { getSession } from 'next-auth/react'
 
 export default async function handler(req, res) {
-  const workflowEngine = process.env.WORKFLOW_ENGINE || 'mageai';
+  const workflowEngine = process.env.WORKFLOW_ENGINE || 'airflow';
 
   let redirectUrl;
 
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       break;
     default:
       // Fallback to mageai if the workflow engine type is invalid
-      redirectUrl = `http://${process.env.MAGEAI_HOST}:${process.env.MAGEAI_PORT}`;
+      redirectUrl = `https://${process.env.AIRFLOW_HOST}:${process.env.AIRFLOW_PORT}`;
       break;
   }
 

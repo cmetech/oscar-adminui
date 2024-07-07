@@ -237,7 +237,19 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog 
+      open={isOpen}
+      onClose={onClose}
+      slotProps={{
+        backdrop: {
+          sx: {
+            '& .MuiModal-backdrop': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)' // Adjust the alpha value to control darkness
+            }
+          }
+        }
+      }}
+    >
       <DialogTitle>{t('Confirm Action')}</DialogTitle>
       <DialogContent>
         <DialogContentText>{t('Delete all selected?')}</DialogContentText>

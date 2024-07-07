@@ -5,36 +5,38 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 // ** Hooks Import
-// import { useAuth } from 'src/hooks/useAuth'
 import { useSession } from 'next-auth/react'
 
-const AuthGuard = props => {
+import UserFallbackSpinner from 'src/layouts/UserSpinner'
+
+const AuthGuard = (props) => {
   const { children, fallback } = props
 
-  // const auth = useAuth()
-  const session = useSession()
+  const { status } = useSession()
   const router = useRouter()
-  useEffect(
-    () => {
-      if (!router.isReady) {
-        return
-      }
-      if (session.status === 'unauthenticated') {
-        if (router.asPath !== '/') {
-          router.replace({
-            pathname: '/login',
-            query: { returnUrl: router.asPath }
-          })
-        } else {
-          router.replace('/login')
-        }
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router.route, session.status]
-  )
-  if (session.status !== 'authenticated') {
-    return fallback
+
+  useEffect(() => {
+    if (!router.isReady) return
+
+    if (status === 'unauthenticated' && router.pathname !== '/login') {
+      console.log('Unauthenticated, redirecting to login')
+      router.replace({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      })
+    }
+  }, [router.isReady, status, router])
+
+  if (status === 'loading') {
+    return
+    //return <UserFallbackSpinner />
+    //return fallback || <p>Loading...</p>
+  }
+
+  if (status !== 'authenticated' && router.pathname !== '/login') {
+    return
+    //return <UserFallbackSpinner />
+    //return fallback || null
   }
 
   return <>{children}</>

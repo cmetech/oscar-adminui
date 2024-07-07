@@ -20,6 +20,7 @@ import Icon from 'src/@core/components/icon'
 // ** Context
 // import { useAuth } from 'src/hooks/useAuth'
 import { signOut, useSession } from 'next-auth/react'
+import { keycloakSessionLogOut } from 'src/lib/utils'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -43,7 +44,23 @@ const UserDropdown = props => {
   // const { logout } = useAuth()
 
   const userSession = useSession()
-  const userName = userSession?.data?.user?.name || 'John Doe'
+
+  // Added loading state handling
+  if (userSession.status === 'loading') {
+    //return <p>Loading...</p> // or your preferred loading indicator
+    return
+  }
+
+  // Added error handling if no user session found
+  if (!userSession?.user && !userSession?.data?.user) {
+    //return <p>No user session found</p> // or your preferred error handling
+    return
+  }
+
+
+  const user = userSession.user || userSession.data.user
+  const userName = user.name || 'John Doe'
+
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
   // ** Vars
@@ -76,11 +93,21 @@ const UserDropdown = props => {
     }
   }
 
-  const handleLogout = () => {
+
+  const handleLogout1 = () => {
     signOut({ callbackUrl: '/', redirect: false }).then(() => {
       router.asPath = '/'
     })
     handleDropdownClose()
+  } 
+
+
+  const handleLogout = () => {
+    console.log("in handleLogout, about to signout")
+    keycloakSessionLogOut().then(() => signOut({ callbackUrl: '/', redirect: false }).then(() => {
+      router.asPath = '/'
+    }))
+    handleDropdownClose();
   }
 
   return (
@@ -129,7 +156,7 @@ const UserDropdown = props => {
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 600 }}>{userName}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                {userSession.data.user.role}
+                {user.role}
               </Typography>
             </Box>
           </Box>

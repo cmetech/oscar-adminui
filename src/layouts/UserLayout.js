@@ -34,6 +34,8 @@ import UserFooterContent from './components/shared-components/footer/UserFooterC
 import VerticalAppBarContent from './components/vertical/AppBarContent'
 import HorizontalAppBarContent from './components/horizontal/AppBarContent'
 
+import UserFallbackSpinner from 'src/layouts/UserSpinner'
+
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
 import themeConfig from 'src/configs/themeConfig'
@@ -194,7 +196,23 @@ const User = () => {
   }))
 
   const userSession = useSession()
-  const userFullName = userSession?.data?.user?.name || 'John Doe'
+
+  console.log("User session is: ", userSession)
+
+  // Added loading state handling
+  if (userSession.status === 'loading') {
+    return
+  }
+
+  // Added error handling if no user session found
+  if (!userSession?.user && !userSession?.data?.user) {
+    return
+  }
+
+  
+
+  const user = userSession.user || userSession.data.user
+  const userFullName = user.name || 'John Doe'
   const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
   return (
@@ -218,9 +236,9 @@ const User = () => {
           <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
           <Stack direction='row' alignItems='center' spacing={0.5}>
             <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-              {userSession.data.user.role}
+              {user.role}
             </Typography>
-            {userSession.data.user.role === 'admin' ? (
+            {user.role === 'admin' ? (
               <Icon icon='mdi:shield-crown-outline' color='success' sx={{ width: 10, height: 10, ml: 0.5 }} />
             ) : null}
           </Stack>

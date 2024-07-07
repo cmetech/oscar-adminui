@@ -96,7 +96,9 @@
     "stylis-plugin-rtl": "2.1.1",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
-    "yup": "^1.1.1"
+    "yup": "^1.1.1",
+    "jwt-decode": "^3.1.2",
+    "cryptr": "^6.3.0"
   },
   "devDependencies": {
     "@iconify/react": "^4.1.0",

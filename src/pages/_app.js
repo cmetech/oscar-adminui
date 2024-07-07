@@ -1,6 +1,8 @@
 // ** Next Imports
 import Head from 'next/head'
-import { Router } from 'next/router'
+//import { Router } from 'next/router'
+import { Router, useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
 
 // ** Loader Import
 import NProgress from 'nprogress'
@@ -113,6 +115,14 @@ const App = props => {
   const guestGuard = Component.guestGuard ?? false
   const aclAbilities = Component.acl ?? defaultACLObj
 
+  const router = useRouter()
+
+  // Add logging to trace routing
+  useEffect(() => {
+    console.log('Rupesh Navigating to:', router.asPath)
+  }, [router.asPath])
+
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -130,11 +140,15 @@ const App = props => {
                 {({ settings }) => {
                   return (
                     <ThemeComponent settings={settings}>
-                      <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                        <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                          {getLayout(<Component {...pageProps} />)}
-                        </AclGuard>
-                      </Guard>
+                      {router.pathname === '/login' ? (
+                        getLayout(<Component {...pageProps} />)
+                      ) : (
+                        <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                          <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                            {getLayout(<Component {...pageProps} />)}
+                          </AclGuard>
+                        </Guard>
+                      )}
                       <ReactHotToast>
                         <Toaster
                           position={settings.toastPosition}

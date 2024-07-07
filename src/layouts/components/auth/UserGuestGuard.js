@@ -23,6 +23,12 @@ const GuestGuard = props => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.route, session.status])
+
+  if (session.status === 'loading') {
+    //return fallback || <p>Loading...</p> // or your preferred loading indicator
+    return
+  }
+
   if (session.status === 'unauthenticated') {
     return <>{children}</>
   } else {

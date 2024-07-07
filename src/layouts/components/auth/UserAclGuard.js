@@ -50,6 +50,11 @@ const AclGuard = props => {
     }
   }
 
+  if (session.status === 'loading') {
+    //return <UserFallbackSpinner />
+    return;
+  }
+
   // If guest guard or no guard is true or any error page
   if (guestGuard || router.route === '/404' || router.route === '/500' || !authGuard) {
     // If user is logged in and his ability is built

@@ -1,45 +1,78 @@
 // ** Third Party Imports
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import Auth0Provider from 'next-auth/providers/auth0'
+import KeycloakProvider from 'next-auth/providers/keycloak'
+import jwt_decode from "jwt-decode";
+import { encrypt } from "src/lib/utils";
 
 import { v4 as uuidv4 } from 'uuid'
 
 import axios from 'axios'
 import https from 'https'
-import formData from 'form-data'
-import { fi } from 'date-fns/locale'
-import { time } from 'console'
+
+// Add logging for environment variables
+console.log('KEYCLOAK_CLIENT_ID:', process.env.KEYCLOAK_CLIENT_ID)
+console.log('KEYCLOAK_CLIENT_SECRET:', process.env.KEYCLOAK_CLIENT_SECRET)
+console.log('KEYCLOAK_ISSUER:', process.env.KEYCLOAK_ISSUER)
+console.log('NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET)
+console.log('NODE_TLS_REJECT_UNAUTHORIZED:', process.env.NODE_TLS_REJECT_UNAUTHORIZED)
+console.log('NEXTAUTH_URL', process.env.NEXTAUTH_URL)
+
+
+// this will refresh an expired access token, when needed
+async function refreshAccessToken(token) {
+  try {
+    const resp = await fetch(`${process.env.REFRESH_TOKEN_URL}`, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: process.env.KEYCLOAK_CLIENT_ID,
+        client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+      }),
+      method: "POST",
+    });
+    const refreshToken = await resp.json();
+    if (!resp.ok) throw refreshToken;
+
+    return {
+      ...token,
+      access_token: refreshToken.access_token,
+      decoded: jwt_decode(refreshToken.access_token),
+      id_token: refreshToken.id_token,
+      expires_at: Math.floor(Date.now() / 1000) + refreshToken.expires_in,
+      refresh_token: refreshToken.refresh_token,
+    };
+  } catch (error) {
+    console.error('Error refreshing access token', error);
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+    };
+  }
+}
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false // This bypasses SSL certificate validation (use only in development)
+})
 
 export const authOptions = {
-  // ** Configure one or more authentication providers
-  // ** Please refer to https://next-auth.js.org/configuration/options#providers for more `providers` options
   providers: [
+    /*
     CredentialsProvider({
-      // ** The name to display on the sign in form (e.g. 'Sign in with...')
       id: 'oscar',
       name: 'OscarAppAuth',
       type: 'credentials',
-
-      /*
-       * As we are using our own Sign-in page, we do not need to change
-       * username or password attributes manually in following credentials object.
-       */
       credentials: {},
-
       async authorize(credentials) {
         try {
-          // Use URLSearchParams to construct x-www-form-urlencoded data
           const params = new URLSearchParams()
-          params.append('username', credentials.email) // Make sure to use 'username' as the key if that's what your backend expects
+          params.append('username', credentials.email)
           params.append('password', credentials.password)
 
-          // Create an instance of https.Agent for the request to bypass SSL certificate errors
           const httpsAgent = new https.Agent({
             rejectUnauthorized: false // Remember, this is for development only!
           })
 
-          // Perform the login API call and return the token
           const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/login`, params, {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
@@ -47,7 +80,6 @@ export const authOptions = {
             httpsAgent
           })
 
-          // Retrieve the current user logged in
           if (response.status === 200 && response.data.access_token) {
             const accessToken = response.data.access_token
 
@@ -67,8 +99,6 @@ export const authOptions = {
                   token_type: response.data.token_type
                 }
 
-                // console.log(userWithToken) // Process user details
-
                 return userWithToken
               }
             } catch (error) {
@@ -80,105 +110,167 @@ export const authOptions = {
           throw new Error('NextAuth - Authorize: Auth Error')
         }
       }
-    }),
+    }),*/
 
-    // ** ...add more providers here
-    Auth0Provider({
-      clientId: process.env.AUTH0_ID || 'YOUR_AUTH0',
-      clientSecret: process.env.AUTH0_SECRET || 'ffff',
-      issuer: process.env.AUTH0_ISSUER || 'issuer'
+    KeycloakProvider({
+      clientId: process.env.KEYCLOAK_CLIENT_ID,
+      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+      issuer: process.env.KEYCLOAK_ISSUER,
+      httpOptions: {
+        agent: httpsAgent,
+        timeout: 10000 // Increase the timeout to 10 seconds
+      }
     })
   ],
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
   session: {
-    /*
-     * Choose how you want to save the user session.
-     * The default is `jwt`, an encrypted JWT (JWE) stored in the session cookie.
-     * If you use an `adapter` however, NextAuth default it to `database` instead.
-     * You can still force a JWT session by explicitly defining `jwt`.
-     * When using `database`, the session cookie will only contain a `sessionToken` value,
-     * which is used to look up the session in the database.
-     */
     strategy: 'jwt',
-
-    // ** Seconds - How long until an idle session expires and is no longer valid
-    maxAge: 30 * 24 * 60 * 60 // ** 30 days
+    maxAge: 30 * 24 * 60 * 60 // 30 days
   },
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#pages for more `pages` options
   pages: {
     signIn: '/login',
     signOut: '/login',
     error: '/404'
   },
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#callbacks for more `callbacks` options
   callbacks: {
-    /*
-     * While using `jwt` as a strategy, `jwt()` callback will be called before
-     * the `session()` callback. So we have to add custom parameters in `token`
-     * via `jwt()` callback to make them accessible in the `session()` callback
-     */
-    async jwt({ token, user, session }) {
-      // console.log('JWT Callback', { token, user, session })
-      if (user) {
-        // Extract API token from the response
-        const apiToken = user.access_token
+    async jwt({ token, account, user, profile }) {
+      const nowTimeStamp = Math.floor(Date.now() / 1000);
 
-        // Add API token to JWT
+      console.log('JWT Callback: token', token)
+      console.log('JWT Callback: user', user)
+      console.log('JWT Callback: account', account)
+
+      if (account && user) {
+        // account is only available the first time this callback is called on a new session (after the user signs in)
+        const apiToken = account.access_token
+        token.decoded = jwt_decode(account.access_token);
+        token.access_token = account.access_token;
+        token.id_token = account.id_token;
+        token.expires_at = account.expires_at;
+        token.refresh_token = account.refresh_token;
+
+        const updatedToken = {
+          ...token,
+          apiToken, 
+          role: token.decoded?.realm_access?.roles.includes('admin') ? 'admin' : 'admin',
+          name: user?.name ?? 'Default',
+          firstName: token.decoded?.given_name ?? 'Default First Name',
+          lastName: token.decoded?.family_name ?? 'Default Last Name',
+          username: token.decoded?.preferred_username ?? 'Default Username',
+          organization: user?.organization ?? 'Default Organization',
+          timezone: user?.timezone ?? 'UTC',
+        };
+
+        console.log("JWT Callback: roles for user", token.decoded.realm_access.roles)
+        console.log('JWT Callback: updated token with account', updatedToken)
+        return updatedToken;
+      } else if (nowTimeStamp < token.expires_at) {
+        console.log('JWT Callback: returning existing token', token)
+        return token;
+        // token has not expired yet, return it
+        return token;
+      } else {
+        // token is expired, try to refresh it
+        console.log("Token has expired. Will refresh...")
+        try {
+          const refreshedToken = await refreshAccessToken(token);
+          console.log("Token is refreshed.")
+          return refreshedToken;
+        } catch (error) {
+          console.error("Error refreshing access token", error);
+          return { ...token, error: "RefreshAccessTokenError" };
+        }
+      }
+    },
+    
+    async session({ session, token }) {
+      //console.log('Session Callback: session', session)
+      console.log('Session Callback: token', token)
+      // Send properties to the client
+      //session.access_token = encrypt(token.access_token); // see utils/sessionTokenAccessor.js
+      //session.id_token = encrypt(token.id_token);  // see utils/sessionTokenAccessor.js
+      session.access_token = token.access_token; // see utils/sessionTokenAccessor.js
+      session.id_token = token.id_token;  // see utils/sessionTokenAccessor.js
+      session.roles = token.decoded.realm_access.roles;
+      session.error = token.error; 
+      session.refresh_token = token.refresh_token;
+      
+      const updatedSession = {
+        ...session,
+        user: {
+          ...session.user,
+          role: token.role,
+          username: token.username,
+          apiToken: token.apiToken,
+          firstName: token.firstName,
+          lastName: token.lastName,
+          organization: token.organization,
+          timezone: token.timezone,
+          jwt: token,
+        },
+        sessionID: uuidv4(),
+      }
+      console.log('Session Callback: updated session', updatedSession)
+
+      return updatedSession;
+    }
+  },
+
+
+/*
+    async jwt({ token, user, account, profile }) {
+      if (account && user) {
+        const apiToken = account.access_token
+        token.decoded = jwt_decode(account.access_token);
+        token.access_token = account.access_token;
+        token.id_token = account.id_token;
+        token.expires_at = account.expires_at;
+        token.refresh_token = account.refresh_token;
+
         const updatedToken = {
           ...token,
           apiToken,
-          role: user.is_superuser ? 'admin' : 'regular',
+          role: user.is_superuser ? 'admin' : 'admin',
           name: user.first_name + ' ' + user.last_name,
           firstName: user.first_name,
           lastName: user.last_name,
           organization: user.organization,
           timezone: user.timezone,
-          username: user.username
+          username: user.username,
         }
 
-        // Log the updated token object
-        // console.log('Updated Token', updatedToken)
-
-        // Return the updated token object
         return updatedToken
       }
 
       return token
     },
-    async session({ session, token, user }) {
-      // console.log('Session Callback', { session, token, user })
-      if (session.user) {
-        // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
-        const updatedSession = {
-          ...session,
-          user: {
-            ...session.user,
-            role: token.role,
-            username: token.username,
-            apiToken: token.apiToken,
-            firstName: token.first_name,
-            lastName: token.last_name,
-            organization: token.organization,
-            timezone: token.timezone,
-            username: token.username,
-            jwt: token
-          },
-          sessionID: uuidv4()
-        }
+    async session({ session, token }) {
+      session.access_token = token.access_token; // see utils/sessionTokenAccessor.js
+      session.id_token = token.id_token;  // see utils/sessionTokenAccessor.js
+      session.roles = token.decoded.realm_access.roles;
+      session.error = token.error;
 
-        // Log the updated session object
-        // console.log('Updated Session', updatedSession)
-
-        // Return the updated session object
-        return updatedSession
+      const updatedSession = {
+        ...session,
+        user: {
+          ...session.user,
+          //role: token.role,
+          username: token.username,
+          apiToken: token.apiToken,
+          firstName: token.firstName,
+          lastName: token.lastName,
+          organization: token.organization,
+          timezone: token.timezone,
+          jwt: token,
+        },
+        sessionID: uuidv4(),
       }
 
-      return session
+      return updatedSession
     }
-  },
+  },*/
 
   secret: process.env.NEXTAUTH_SECRET
 }

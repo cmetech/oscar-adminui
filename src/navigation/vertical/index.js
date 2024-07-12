@@ -118,14 +118,10 @@ const navigation = () => {
         },
         {
           title: 'Workflows',
-          path: '/api/oscar/bpms',
+          path: '/service-continuity/workflows',
           icon: 'mdi:workflow',
           action: 'read',
-          subject: 'all',
-          externalLink: true,
-          openInNewTab: true,
-          badgeContent: 'BPMS',
-          badgeColor: 'info'
+          subject: 'all'
         }
       ]
     },

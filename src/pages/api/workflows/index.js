@@ -24,14 +24,14 @@ async function handler(req, res) {
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       });
 
-      if (response?.data) {
-        res.status(response.status || 200).json(response.data);
+      if (response?.status === 200 && response.data) {
+        res.status(200).json(response.data);
       } else {
-        res.status(500).json({ message: 'No response - An error occurred' });
+        res.status(500).json({ total_entries: 0, dags: [] });
       }
     } catch (error) {
       console.error('Error fetching DAGs:', error);
-      res.status(error.response?.status || 500).json({ message: error.message });
+      res.status(500).json({ total_entries: 0, dags: [] });
     }
   } else {
     res.setHeader('Allow', ['GET']);

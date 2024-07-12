@@ -56,3 +56,9 @@ export const probeIdsAtom = atom([])
 export const refetchProbeTriggerAtom = atom(0)
 
 export const showOscarChatAtom = atom(false)
+
+export const workflowIdsAtom = atom([])
+
+export const workflowsAtom = atom([])
+
+export const refetchWorkflowTriggerAtom = atom(0)

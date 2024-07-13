@@ -67,7 +67,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
-import TaskDetailPanel from 'src/views/pages/tasks-management/TaskDetailPanel'
+import WorkflowDetailPanel from 'src/views/pages/workflow-management/WorkflowDetailPanel'
 import { workflowIdsAtom, workflowsAtom, refetchWorkflowTriggerAtom } from 'src/lib/atoms'
 import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
@@ -133,11 +133,11 @@ const WorkflowsList = props => {
   const [disableDialog, setDisableDialog] = useState(false)
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
-  const [currentTask, setCurrentTask] = useState(null)
+  const [currentWorkflow, setCurrentWorkflow] = useState(null)
 
   const memoizedSortModel = useMemo(() => sortModel, [sortModel]);
 
-  const getDetailPanelContent = useCallback(({ row }) => <TaskDetailPanel row={row} />, [])
+  const getDetailPanelContent = useCallback(({ row }) => <WorkflowDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
   const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
@@ -147,7 +147,7 @@ const WorkflowsList = props => {
   // column definitions
   const columns = [
     {
-      flex: 0.03,
+      flex: 0.06,
       field: 'dag_id',
       headerName: 'Name',
       renderCell: params => {
@@ -198,63 +198,7 @@ const WorkflowsList = props => {
       }
     },
     {
-      flex: 0.015,
-      field: 'status',
-      headerName: 'Status',
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: params => {
-        const { row } = params
-        const isPaused = row?.is_paused
-        const isActive = row?.is_active
-        let color = 'error'
-        let label = 'DISABLED'
-        if (isActive && !isPaused) {
-          color = 'success'
-          label = 'ENABLED'
-        }
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                width: '100%',
-                overflow: 'hidden',
-                textoverflow: 'ellipsis'
-              }}
-            >
-              <CustomChip
-                title={label}
-                overflow='hidden'
-                textoverflow='ellipsis'
-                rounded
-                size='medium'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label}
-                color={color}
-                sx={{
-                  '& .MuiChip-label': { textTransform: 'capitalize' },
-                  width: '120px'
-                }}
-              />
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.03,
+      flex: 0.02,
       minWidth: 100,
       field: 'schedule_interval',
       headerName: 'Schedule Interval',
@@ -306,7 +250,7 @@ const WorkflowsList = props => {
       }
     },
     {
-      flex: 0.02,
+      flex: 0.03,
       minWidth: 60,
       field: 'next_dagrun',
       headerName: 'Next Run',
@@ -352,6 +296,8 @@ const WorkflowsList = props => {
       minWidth: 200,
       renderCell: params => {
         const { row } = params
+        const isPaused = row?.is_paused
+        const isActive = row?.is_active
 
         return (
           <Box
@@ -366,23 +312,11 @@ const WorkflowsList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
-                title='Schedule Task'
-                aria-label='Schedule Task'
-                color='info'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setScheduleDialog(true)
-                }}
-              >
-                <Icon icon='mdi:clock-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Run Task'
-                aria-label='Run Task'
+                title='Run Workflow'
+                aria-label='Run Workflow'
                 color='warning'
                 onClick={() => {
-                  setCurrentTask(row)
+                  setCurrentWorkflow(row)
                   setRunDialog(true)
                 }}
               >
@@ -390,15 +324,15 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
+                title={isActive && !isPaused ? 'Disable Task' : 'Enable Task'}
+                aria-label={isActive && !isPaused ? 'Disable Task' : 'Enable Task'}
+                color={isActive && !isPaused ? 'success' : 'secondary'}
                 onClick={() => {
-                  setCurrentTask(row)
+                  setCurrentWorkflow(row)
                   setDisableDialog(true)
                 }}
               >
-                <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+                <Icon icon={isActive && !isPaused ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
               </IconButton>
               <IconButton
                 size='small'
@@ -406,7 +340,7 @@ const WorkflowsList = props => {
                 color='secondary'
                 aria-label='Edit Task'
                 onClick={() => {
-                  setCurrentTask(row)
+                  setCurrentWorkflow(row)
                   setEditDialog(true)
                 }}
               >
@@ -418,7 +352,7 @@ const WorkflowsList = props => {
                 aria-label='Delete Task'
                 color='error'
                 onClick={() => {
-                  setCurrentTask(row)
+                  setCurrentWorkflow(row)
                   setDeleteDialog(true)
                 }}
               >
@@ -466,7 +400,7 @@ const WorkflowsList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+              {currentWorkflow?.dag_display_name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -478,7 +412,7 @@ const WorkflowsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentTask?.id ?? ''}
+              {currentWorkflow?.dag_id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -496,9 +430,9 @@ const WorkflowsList = props => {
             </Typography>
             <Typography variant='body2'>Updates to workflow information will be effective immediately.</Typography>
           </Box>
-          {currentTask && (
+          {currentWorkflow && (
             <UpdateTaskWizard
-              currentTask={currentTask}
+              currentWorkflow={currentWorkflow}
               rows={rows}
               setRows={setRows}
               onClose={handleUpdateDialogClose}
@@ -523,7 +457,7 @@ const WorkflowsList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+              {currentWorkflow?.dag_display_name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -535,7 +469,7 @@ const WorkflowsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentTask?.id ?? ''}
+              {currentWorkflow?.dag_id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -574,13 +508,13 @@ const WorkflowsList = props => {
 
   const DisableDialog = () => {
     // Determine if the task is currently enabled
-    const isTaskEnabled = currentTask?.status?.toLowerCase() === 'enabled'
+    const isEnabled = currentWorkflow?.is_active && !currentWorkflow?.is_paused
 
     // Determine the dialog title text based on the task status
-    const dialogTitleText = isTaskEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
+    const dialogTitleText = isEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
 
     // Determine the action button text based on the task status
-    const actionButtonText = isTaskEnabled ? 'Disable' : 'Enable'
+    const actionButtonText = isEnabled ? 'Disable' : 'Enable'
 
     return (
       <Dialog
@@ -595,7 +529,7 @@ const WorkflowsList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+              {currentWorkflow?.dag_display_name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -607,7 +541,7 @@ const WorkflowsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentTask?.id ?? ''}
+              {currentWorkflow?.id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -627,7 +561,7 @@ const WorkflowsList = props => {
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
                   {dialogTitleText}
-                  {currentTask?.name}
+                  {currentWorkflow?.dag_display_name}
                 </Typography>
               </Box>
             </Stack>
@@ -659,7 +593,7 @@ const WorkflowsList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+              {currentWorkflow?.dag_display_name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -671,7 +605,7 @@ const WorkflowsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentTask?.id ?? ''}
+              {currentWorkflow?.dag_id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
@@ -722,7 +656,7 @@ const WorkflowsList = props => {
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+              {currentWorkflow?.dag_display_name?.toUpperCase() ?? ''}
             </Typography>
             <Typography
               noWrap
@@ -734,11 +668,11 @@ const WorkflowsList = props => {
                     : theme.palette.customColors.brandYellow
               }}
             >
-              {currentTask?.id ?? ''}
+              {currentWorkflow?.dag_id ?? ''}
             </Typography>
           </Box>
         </DialogTitle>
-        {currentTask?.prompts?.length ? (
+        {currentWorkflow?.prompts?.length ? (
           <DialogContent>
             <IconButton
               size='small'
@@ -747,7 +681,7 @@ const WorkflowsList = props => {
             >
               <Icon icon='mdi:close' />
             </IconButton>
-            <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
+            <RunTaskWizard currentWorkflow={currentWorkflow} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
           </DialogContent>
         ) : (
           <>
@@ -784,7 +718,7 @@ const WorkflowsList = props => {
   }
 
   const handleScheduleDialogSubmit = async () => {
-    const taskId = currentTask?.id
+    const taskId = currentWorkflow?.dag_id
 
     if (!taskId) {
       console.error('Task ID is undefined')
@@ -829,7 +763,7 @@ const WorkflowsList = props => {
   }
 
   const handleRunDialogSubmit = async () => {
-    const taskId = currentTask?.id
+    const taskId = currentWorkflow?.dag_id
 
     if (!taskId) {
       console.error('Task ID is undefined')
@@ -874,12 +808,12 @@ const WorkflowsList = props => {
   }
 
   const handleDisableDialogSubmit = async () => {
-    const isCurrentlyEnabled = currentTask?.status === 'enabled'
-    const taskId = currentTask?.id
+    const isCurrentlyEnabled = currentWorkflow?.is_active && !currentWorkflow?.is_paused
+    const workflowId = currentWorkflow?.dag_id
 
-    if (!taskId) {
-      console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+    if (!workflowId) {
+      console.error('Workflow ID is undefined')
+      toast.error('Workflow ID is undefined or invalid')
 
       return
     }
@@ -887,7 +821,7 @@ const WorkflowsList = props => {
     const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
 
     // Determine the correct endpoint URL based on the task's current status
-    const endpoint = isCurrentlyEnabled ? `/api/tasks/disable/${taskId}` : `/api/tasks/enable/${taskId}`
+    const endpoint = isCurrentlyEnabled ? `/api/workflows/disable/${workflowId}` : `/api/workflows/enable/${workflowId}`
 
     try {
       const response = await axios.post(
@@ -904,18 +838,20 @@ const WorkflowsList = props => {
         // Assuming 200 is your success status code
         // Update UI to reflect the task's new status
         const newStatus = isCurrentlyEnabled ? 'disabled' : 'enabled'
-        const updatedRows = rows.map(row => (row.id === taskId ? { ...row, status: newStatus } : row))
+        const updatedRows = rows.map(row => (row.dag_id === workflowId ? { ...row, status: newStatus } : row))
         setRows(updatedRows)
 
+        setRefetchTrigger(Date.now())
+
         // Show success message
-        toast.success(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
+        toast.success(`Workflow ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Workflow`)
       }
     } catch (error) {
-      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`, error)
-      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Workflow`, error)
+      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Workflow`)
     }
 
     // Close the dialog
@@ -931,15 +867,15 @@ const WorkflowsList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      // console.log('Deleting Task:', currentTask)
+      // console.log('Deleting Task:', currentWorkflow)
 
-      const endpoint = `/api/tasks/delete/${currentTask.id}`
+      const endpoint = `/api/workflows/${currentWorkflow.dag_id}`
 
       console.log('DELETE Endpoint:', endpoint)
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.id !== currentTask.id)
+        const updatedRows = rows.filter(row => row.id !== currentWorkflow.dag_id)
 
         setRows(updatedRows)
         setDeleteDialog(false)

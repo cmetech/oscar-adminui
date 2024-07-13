@@ -5,7 +5,11 @@ import oscarConfig from 'src/configs/oscarConfig';
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query;
-    const { limit = '100', offset = '0', order_by = '' } = query;
+    const { limit = '100', page = '0', order_by = '' } = query;
+
+    const itemsPerPage = parseInt(limit, 10);
+    const pageNumber = parseInt(page, 10);
+    const offset = itemsPerPage * pageNumber;
 
     const queryStringParameters = {
       limit: limit,

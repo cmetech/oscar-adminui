@@ -162,8 +162,8 @@ const WorkflowsList = props => {
               height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography title={row?.dag_id?.toUpperCase()} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+              <Typography title={row?.dag_id?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {row?.dag_id?.toUpperCase()}
               </Typography>
             </Box>
@@ -188,8 +188,8 @@ const WorkflowsList = props => {
               height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography title={owner.toUpperCase()} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+              <Typography title={owner.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {owner.toUpperCase()}
               </Typography>
             </Box>
@@ -231,13 +231,13 @@ const WorkflowsList = props => {
                 justifyContent: 'center',
                 width: '100%',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                textoverflow: 'ellipsis'
               }}
             >
               <CustomChip
                 title={label}
                 overflow='hidden'
-                textOverflow='ellipsis'
+                textoverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
@@ -270,8 +270,8 @@ const WorkflowsList = props => {
               height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography title={row?.schedule_interval?.value} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+              <Typography title={row?.schedule_interval?.value} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {row?.schedule_interval?.value}
               </Typography>
             </Box>
@@ -296,8 +296,8 @@ const WorkflowsList = props => {
               height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography title={row?.timetable_description} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+              <Typography title={row?.timetable_description} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                 {row?.timetable_description}
               </Typography>
             </Box>
@@ -332,8 +332,8 @@ const WorkflowsList = props => {
                 height: '100%'
               }}
             >
-              <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
                   {humanReadableDate}
                 </Typography>
               </Box>
@@ -968,12 +968,15 @@ const WorkflowsList = props => {
 
   const fetchData = useCallback(async (filter_model = {}) => {
     setLoading(true);
+    console.log('Pagination Model:', paginationModel)
+    console.log('Sorting Model:', memoizedSortModel)
+
     try {
       const response = await axios.get('/api/workflows', {
         params: {
           sort: memoizedSortModel[0]?.sort || 'asc',
           order_by: memoizedSortModel[0]?.field || 'dag_id',
-          offset: paginationModel.page + 1,
+          page: paginationModel.page,
           limit: paginationModel.pageSize,
           filter: JSON.stringify(filter_model),
         },
@@ -1002,7 +1005,7 @@ const WorkflowsList = props => {
       setRunRefresh(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginationModel]);
+  }, [paginationModel.page, paginationModel.pageSize]);
 
   // Effect to fetch data initially and start the periodic refresh
   useEffect(() => {
@@ -1083,7 +1086,7 @@ const WorkflowsList = props => {
 
     if (sortingMode === 'server') {
       console.log('Sort Model:', JSON.stringify(sortModel))
-      // fetchData()
+      fetchData()
     } else {
       // client side sorting
       const column = sortModel[0]?.field
@@ -1111,7 +1114,7 @@ const WorkflowsList = props => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoizedSortModel])
+  }, [memoizedSortModel[0]?.field, memoizedSortModel[0]?.sort, runFilterQuery]) // Triggered by sort changes
 
   const handleAction = event => {
     setAction(event.target.value)

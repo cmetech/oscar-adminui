@@ -3,7 +3,7 @@ import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'r
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
+import { workflowIdsAtom, refetchWorkflowTriggerAtom } from 'src/lib/atoms'
 import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
@@ -53,9 +53,8 @@ import ExcelJS from 'exceljs'
 import Icon from 'src/@core/components/icon'
 
 // ** Views
-import TasksList from 'src/views/pages/tasks-management/TasksList'
 import WorkflowsList from 'src/views/pages/workflow-management/WorkflowsList'
-import TaskHistoryList from 'src/views/pages/tasks-management/TaskHistoryList'
+import WorkflowHistory from 'src/views/pages/workflow-management/WorkflowHistory'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
 import { CustomDateTimeRangePicker } from 'src/lib/styled-components'
@@ -623,20 +622,15 @@ const WorkflowsManager = () => {
   const theme = useTheme()
 
   const [value, setValue] = useState('1')
-  const [taskTotal, setTaskTotal] = useState(0)
-  const [datacenterTotal, setDatacenterTotal] = useState(0)
-  const [environmentTotal, setEnvironmentTotal] = useState(0)
-  const [serverTotal, setServerTotal] = useState(0)
-  const [componentTotal, setComponentTotal] = useState(0)
-  const [subcomponentTotal, setSubcomponentTotal] = useState(0)
+  const [workflowTotal, setTaskTotal] = useState(0)
   const [openModal, setOpenModal] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [openUploadDialog, setOpenUploadDialog] = useState(false)
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
   const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
-  const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
-  const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+  const [selectedWorkflowIds, setSelectedWorkflowIds] = useAtom(workflowIdsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchWorkflowTriggerAtom)
 
   const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
   const [onAccept, setOnAccept] = useState(value)
@@ -1014,12 +1008,12 @@ const WorkflowsManager = () => {
         </Box>
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='assets'>
-            {taskTotal == 0 ? (
+            {workflowTotal == 0 ? (
               <Tab value='1' label={t('Workflows')} icon={<Icon icon='mdi:workflow' />} iconPosition='start' />
             ) : (
               <Tab
                 value='1'
-                label={`${t('Workflows')} (${taskTotal})`}
+                label={`${t('Workflows')} (${workflowTotal})`}
                 icon={<Icon icon='mdi:workflow' />}
                 iconPosition='start'
               />
@@ -1027,10 +1021,10 @@ const WorkflowsManager = () => {
             <Tab value='2' label={t('Workflow History')} icon={<Icon icon='mdi:history' />} iconPosition='start' />
           </TabList>
           <TabPanel value='1'>
-            <WorkflowsList set_total={setTaskTotal} total={taskTotal} />
+            <WorkflowsList set_total={setTaskTotal} total={workflowTotal} />
           </TabPanel>
           <TabPanel value='2'>
-            <TaskHistoryList dateRange={dateRange} onAccept={onAccept} />
+            <WorkflowHistory dateRange={dateRange} onAccept={onAccept} />
           </TabPanel>
         </TabContext>
       </Grid>

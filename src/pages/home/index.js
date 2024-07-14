@@ -101,9 +101,11 @@ const Home = () => {
     imageText:
       'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
     actions: [
-      { text: 'View Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
-      { text: 'View SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
-      { text: 'View Probes', icon: 'mdi:eye-circle-outline', link: '/service-continuity/probes' }
+      { text: 'Probes', icon: 'mdi:eye-circle-outline', link: '/service-continuity/probes' },
+      { text: 'SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
+      { text: 'Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
+      { text: 'Workflows', icon: 'mdi:workflow', link: '/service-continuity/workflows' },
+      
     ]
   }
 

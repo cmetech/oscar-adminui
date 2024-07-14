@@ -263,7 +263,7 @@ const WorkflowHistory = props => {
     } finally {
       setLoading(false)
     }
-  }, [paginationModel.page, paginationModel.pageSize, sortModel[0]?.field, sortModel[0]?.sort, props.startDate, props.endDate])
+  }, [paginationModel.page, paginationModel.pageSize, sortModel[0]?.field, sortModel[0]?.sort, props.startDate, props.endDate, props.onAccept])
 
   useEffect(() => {
     fetchData()

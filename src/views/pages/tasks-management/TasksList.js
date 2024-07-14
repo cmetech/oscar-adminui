@@ -525,6 +525,7 @@ const TasksList = props => {
       minWidth: 200,
       renderCell: params => {
         const { row } = params
+        const isActive = row?.status.toLowerCase() === 'enabled'
 
         return (
           <Box
@@ -558,6 +559,7 @@ const TasksList = props => {
                   setCurrentTask(row)
                   setRunDialog(true)
                 }}
+                disabled={!isActive}
               >
                 <Icon icon='mdi:play-circle-outline' />
               </IconButton>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import https from 'https';
 import oscarConfig from 'src/configs/oscarConfig';
 
 export default async function handler(req, res) {
@@ -13,19 +13,19 @@ export default async function handler(req, res) {
 
   try {
     // Make a request to the middleware
-    const response = await axios.post(
-      `${oscarConfig.MIDDLEWARE_API_URL}/workflows/${workflow_id}`,
-      req.body, // Pass any additional data from the request body
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/workflows/${workflow_id}`, req.body, {
+      timeout: 30000,
+      httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY }),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
-    // Return the response from the middleware
-    return res.status(response.status).json(response.data);
-
+    if (response?.data) {
+      res.status(response.status || 200).json(response.data);
+    } else {
+      res.status(response.status).json({ message: 'No response - An error occurred' });
+    }
   } catch (error) {
     console.error('Error triggering workflow:', error.response?.data || error.message);
     

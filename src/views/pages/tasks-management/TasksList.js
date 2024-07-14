@@ -1194,7 +1194,7 @@ const TasksList = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, setTasks, setRows]
+    [paginationModel.page, paginationModel.pageSize]
   )
 
   // Effect to fetch data initially and start the periodic refresh
@@ -1303,7 +1303,7 @@ const TasksList = props => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortModel])
+  }, [sortModel[0]?.field, sortModel[0]?.sort])
 
   const handleAction = event => {
     setAction(event.target.value)

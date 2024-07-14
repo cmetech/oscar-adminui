@@ -547,6 +547,7 @@ const TasksList = props => {
                   setCurrentTask(row)
                   setScheduleDialog(true)
                 }}
+                disabled={!isActive}
               >
                 <Icon icon='mdi:clock-outline' />
               </IconButton>

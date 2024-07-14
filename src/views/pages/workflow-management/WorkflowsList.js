@@ -173,32 +173,6 @@ const WorkflowsList = props => {
     },
     {
       flex: 0.02,
-      field: 'owners',
-      headerName: 'Owner',
-      renderCell: params => {
-        const { row } = params
-        const owner = row?.owners?.length ? row.owners[0] : 'Unknown'
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={owner.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {owner.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.02,
       minWidth: 100,
       field: 'schedule_interval',
       headerName: 'Schedule Interval',

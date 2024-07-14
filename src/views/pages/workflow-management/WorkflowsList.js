@@ -1190,7 +1190,7 @@ const WorkflowsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Tasks found'
+              message: 'No Workflows found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

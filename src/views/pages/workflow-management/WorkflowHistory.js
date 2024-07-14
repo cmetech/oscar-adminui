@@ -4,16 +4,19 @@ import { useSession } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import axios from 'axios'
-import { parseISO, formatInTimeZone, utcToZonedTime } from 'date-fns-tz'
 import { CustomDataGrid } from 'src/lib/styled-components'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomChip from 'src/@core/components/mui/chip'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-import WorkflowHistoryDetailPanel from './WorkflowHistoryDetailPanel'
+import WorkflowHistoryDetailPanel from 'src/views/pages/workflow-management/WorkflowHistoryDetailPanel'
 import { set } from 'lodash'
 import toast from 'react-hot-toast'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+import { todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
 
 const WorkflowHistory = props => {
@@ -38,25 +41,55 @@ const WorkflowHistory = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
 
+  
+
   const columns = [
     {
       flex: 0.2,
       field: 'dag_id',
-      headerName: t('DAG ID'),
+      headerName: t('Name'),
       renderCell: params => (
-        <Typography noWrap>{params.row.dag_id}</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            width: '100%',
+            height: '100%'
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+              {params.row?.dag_id?.toUpperCase()}
+            </Typography>
+          </Box>
+        </Box>
       )
     },
     {
       flex: 0.2,
-      field: 'run_id',
-      headerName: t('Run ID'),
+      field: 'note',
+      headerName: t('Description'),
       renderCell: params => (
-        <Typography noWrap>{params.row.run_id}</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            width: '100%',
+            height: '100%'
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+              {params.row.note}
+            </Typography>
+          </Box>
+        </Box>
       )
     },
     {
-      flex: 0.15,
+      flex: 0.1,
       field: 'state',
       headerName: t('State'),
       renderCell: params => {
@@ -76,13 +109,25 @@ const WorkflowHistory = props => {
             color = 'default'
         }
         return (
-          <CustomChip
-            rounded
-            size='small'
-            skin='light'
-            color={color}
-            label={row.state}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                color={color}
+                label={row.state.toUpperCase()}
+              />
+            </Box>
+          </Box>
         )
       }
     },
@@ -93,9 +138,21 @@ const WorkflowHistory = props => {
       renderCell: params => {
         const date = parseISO(params.row.execution_date)
         return (
-          <Typography noWrap>
-            {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
+              </Typography>
+            </Box>
+          </Box>
         )
       }
     },
@@ -106,9 +163,21 @@ const WorkflowHistory = props => {
       renderCell: params => {
         const date = parseISO(params.row.start_date)
         return (
-          <Typography noWrap>
-            {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
+              </Typography>
+            </Box>
+          </Box>
         )
       }
     },
@@ -119,25 +188,63 @@ const WorkflowHistory = props => {
       renderCell: params => {
         const date = params.row.end_date ? parseISO(params.row.end_date) : null
         return (
-          <Typography noWrap>
-            {date ? formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz') : 'N/A'}
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
+                {date ? formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz') : 'N/A'}
+              </Typography>
+            </Box>
+          </Box>
         )
       }
     }
   ]
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(
+    async filterModel => {
+
+    // Default start and end times to the last 24 hours if not defined
+    let [startDate, endDate] = []
+    if (props.onAccept == true) {
+      ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+    } else {
+      ;[startDate, endDate] = props.onAccept
+    }
+
+    // Assuming props.dateRange contains Date objects or is undefined
+    console.log('onAccept:', props.onAccept)
+    console.log('Start Date:', startDate)
+    console.log('End Date:', endDate)
+
+    const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+    const endTime = endDate?.toISOString() || new Date().toISOString()
+
+    // console.log('Start Time:', startTime)
+    // console.log('End Time:', endTime)
+    // console.log('Search Value:', searchValue)
+    // console.log('Sort:', sortModel[0]?.sort)
+    // console.log('Sort Column:', sortModel[0]?.field)
+    // console.log('Page:', paginationModel.page)
+    // console.log('Page Size:', paginationModel.pageSize)
+
     setLoading(true)
     try {
       const response = await axios.post('/api/workflows/history', {
         dag_ids: [],
-        state: [],
+        states: [],
         order_by: sortModel[0]?.field || 'execution_date',
         page_offset: paginationModel.page * paginationModel.pageSize,
         page_limit: paginationModel.pageSize,
-        execution_date_gte: props.startDate?.toISOString(),
-        execution_date_lte: props.endDate?.toISOString()
+        execution_date_gte: startTime,
+        execution_date_lte: endTime
       })
 
       if (response.status === 200) {
@@ -170,16 +277,12 @@ const WorkflowHistory = props => {
     setFilterModel(newModel)
   }
 
-  const getDetailPanelContent = useCallback(
-    ({ row }) => <WorkflowHistoryDetailPanel row={row} />,
-    []
-  )
+  const getDetailPanelContent = useCallback(({ row }) => <WorkflowHistoryDetailPanel row={row} />, [])
+  const getDetailPanelHeight = useCallback(() => 600, [])
 
-  const handleDetailPanelExpandedRowIdsChange = ids => {
-    set
-    
-    DetailPanelExpandedRowIds(ids)
-  }
+  const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
+    setDetailPanelExpandedRowIds(newIds)
+  }, [])
 
   // Hidden columns
   const hiddenFields = []
@@ -195,6 +298,7 @@ const WorkflowHistory = props => {
       <Card>
         <CardHeader title={t('Workflow History')} />
         <CustomDataGrid
+          getRowId={(row) => row.dag_id}
           autoHeight
           rows={rows}
           columns={columns}
@@ -210,10 +314,10 @@ const WorkflowHistory = props => {
           onSortModelChange={handleSortModelChange}
           filterModel={filterModel}
           onFilterModelChange={handleFilterModelChange}
-          getDetailPanelContent={getDetailPanelContent}
-          getDetailPanelHeight={() => 400}
-          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
-          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
+          // getDetailPanelContent={getDetailPanelContent}
+         // getDetailPanelHeight={() => 400}
+          // detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          // onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,

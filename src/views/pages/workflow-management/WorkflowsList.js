@@ -1164,7 +1164,7 @@ const WorkflowsList = props => {
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
-          getRowId={(row) => row.dag_display_name}
+          getRowId={(row) => row.dag_id}
           localeText={{
             toolbarColumns: t('Columns'),
             toolbarFilters: t('Filters')

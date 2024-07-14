@@ -4,8 +4,9 @@ import oscarConfig from 'src/configs/oscarConfig';
 
 async function handler(req, res) {
   if (req.method === 'POST') {
+    console.log('Request body:', req.body);
     try {
-      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/history`, req.body, {
+      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/workflows/history`, req.body, {
         timeout: 30000,
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY }),
         headers: {

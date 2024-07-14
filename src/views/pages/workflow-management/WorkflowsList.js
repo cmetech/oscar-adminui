@@ -319,13 +319,14 @@ const WorkflowsList = props => {
                   setCurrentWorkflow(row)
                   setRunDialog(true)
                 }}
+                disabled={!isActive || isPaused}
               >
                 <Icon icon='mdi:play-circle-outline' />
               </IconButton>
               <IconButton
                 size='small'
-                title={isActive && !isPaused ? 'Disable Task' : 'Enable Task'}
-                aria-label={isActive && !isPaused ? 'Disable Task' : 'Enable Task'}
+                title={isActive && !isPaused ? 'Disable Workflow' : 'Enable Workflow'}
+                aria-label={isActive && !isPaused ? 'Disable Workflow' : 'Enable Workflow'}
                 color={isActive && !isPaused ? 'success' : 'secondary'}
                 onClick={() => {
                   setCurrentWorkflow(row)
@@ -336,9 +337,9 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Edit Task'
+                title='Edit Workflow'
                 color='secondary'
-                aria-label='Edit Task'
+                aria-label='Edit Workflow'
                 onClick={() => {
                   setCurrentWorkflow(row)
                   setEditDialog(true)
@@ -348,8 +349,8 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Task'
-                aria-label='Delete Task'
+                title='Delete Workflow'
+                aria-label='Delete Workflow'
                 color='error'
                 onClick={() => {
                   setCurrentWorkflow(row)
@@ -672,47 +673,32 @@ const WorkflowsList = props => {
             </Typography>
           </Box>
         </DialogTitle>
-        {currentWorkflow?.prompts?.length ? (
-          <DialogContent>
-            <IconButton
-              size='small'
-              onClick={() => handleRunDialogClose()}
-              sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-            >
-              <Icon icon='mdi:close' />
-            </IconButton>
-            <RunTaskWizard currentWorkflow={currentWorkflow} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
-          </DialogContent>
-        ) : (
-          <>
-            <DialogContent>
-              <IconButton
-                size='small'
-                onClick={() => handleRunDialogClose()}
-                sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-              >
-                <Icon icon='mdi:close' />
-              </IconButton>
-              <Box sx={{ mb: 8, textAlign: 'center' }}>
-                <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-                  <Box>
-                    <Typography variant='h5' justifyContent='center' alignContent='center'>
-                      Please confirm that you want to run this workflow.
-                    </Typography>
-                  </Box>
-                </Stack>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleRunDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box>
+                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                  Please confirm that you want to run this workflow.
+                </Typography>
               </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
-                Run
-              </Button>
-              <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
-                Cancel
-              </Button>
-            </DialogActions>
-          </>
-        )}
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
+            Run
+          </Button>
+          <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
+            Cancel
+          </Button>
+        </DialogActions>
       </Dialog>
     )
   }
@@ -763,11 +749,11 @@ const WorkflowsList = props => {
   }
 
   const handleRunDialogSubmit = async () => {
-    const taskId = currentWorkflow?.dag_id
+    const workflow_id = currentWorkflow?.dag_id
 
-    if (!taskId) {
-      console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+    if (!workflow_id) {
+      console.error('Workflow ID is undefined')
+      toast.error('Workflow ID is undefined or invalid')
 
       return
     }
@@ -780,12 +766,16 @@ const WorkflowsList = props => {
     }
 
     // Determine the correct endpoint URL based on the task's current status
-    const endpoint = `/api/tasks/run/${taskId}`
+    const endpoint = `/api/workflows/run/${workflow_id}`
 
     try {
       const response = await axios.post(
         endpoint,
-        [], // No body is required for these requests
+        {
+          note: "Manually triggered execution",
+          // You can include any additional data here if needed
+          conf: {},
+        },
         {
           headers
         }
@@ -793,14 +783,14 @@ const WorkflowsList = props => {
 
       if (response.status === 200) {
         // Show success message
-        toast.success(`Task Successfully Run`)
+        toast.success(`Workflow Successfully Run`)
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to Run Task`)
+        toast.error(`Failed to Run Workflow`)
       }
     } catch (error) {
-      console.error(`Failed to Run Task`, error)
-      toast.error(`Failed to Run Task`)
+      console.error(`Failed to Run Workflow`, error)
+      toast.error(`Failed to Run Workflow`)
     }
 
     // Close the dialog
@@ -1113,26 +1103,6 @@ const WorkflowsList = props => {
     }
   }
 
-  const handleRegisterTasks = async () => {
-    console.log('Registering Tasks')
-    try {
-      const response = await axios.post('/api/tasks/register', {})
-
-      // Handle success response
-      console.log('Tasks successfully registered:', response.data)
-
-      // Optionally, use a UI notification library to inform the user
-      // For example, if you're using react-hot-toast
-      toast.success('Tasks successfully registered')
-    } catch (error) {
-      console.error('Error registering tasks:', error)
-
-      // Handle error response
-      // Optionally, use a UI notification library to inform the user about the error
-      toast.error('Failed to register tasks')
-    }
-  }
-
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
@@ -1432,7 +1402,6 @@ const WorkflowsList = props => {
             }
           }}
         />
-        <ScheduleDialog />
         <RunDialog />
         <DisableDialog />
         <EditDialog />

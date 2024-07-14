@@ -210,61 +210,63 @@ const WorkflowHistory = props => {
 
   const fetchData = useCallback(
     async filterModel => {
-
-    // Default start and end times to the last 24 hours if not defined
-    let [startDate, endDate] = []
-    if (props.onAccept == true) {
-      ;[startDate, endDate] = [yesterdayRounded, todayRounded]
-    } else {
-      ;[startDate, endDate] = props.onAccept
-    }
-
-    // Assuming props.dateRange contains Date objects or is undefined
-    console.log('onAccept:', props.onAccept)
-    console.log('Start Date:', startDate)
-    console.log('End Date:', endDate)
-
-    const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-    const endTime = endDate?.toISOString() || new Date().toISOString()
-
-    // console.log('Start Time:', startTime)
-    // console.log('End Time:', endTime)
-    // console.log('Search Value:', searchValue)
-    // console.log('Sort:', sortModel[0]?.sort)
-    // console.log('Sort Column:', sortModel[0]?.field)
-    // console.log('Page:', paginationModel.page)
-    // console.log('Page Size:', paginationModel.pageSize)
-
-    setLoading(true)
-    try {
-      const response = await axios.post('/api/workflows/history', {
-        dag_ids: [],
-        states: [],
-        order_by: sortModel[0]?.field || 'execution_date',
-        page_offset: paginationModel.page * paginationModel.pageSize,
-        page_limit: paginationModel.pageSize,
-        execution_date_gte: startTime,
-        execution_date_lte: endTime
-      })
-
-      if (response.status === 200) {
-        setRows(response.data.dag_runs || [])
-        setRowCount(response.data.total_entries || 0)
+      // Default start and end times to the last 24 hours if not defined
+      let startDate, endDate;
+  
+      if (props.onAccept === true) {
+        startDate = yesterdayRounded;
+        endDate = todayRounded;
+      } else if (Array.isArray(props.onAccept) && props.onAccept.length === 2) {
+        [startDate, endDate] = props.onAccept;
       } else {
-        setRows([])
-        setRowCount(0)
-        toast.error(t('Error fetching workflow history'))
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        endDate = new Date();
       }
-    } catch (error) {
-      console.error('Error fetching workflow history:', error)
-      setRows([]);
-      setRowCount(0);
-      toast.error(t('Error fetching workflow history'))
-    } finally {
-      setLoading(false)
-    }
-  }, [paginationModel.page, paginationModel.pageSize, sortModel[0]?.field, sortModel[0]?.sort, props.startDate, props.endDate, props.onAccept])
-
+  
+      // Ensure startDate and endDate are Date objects
+      startDate = startDate instanceof Date ? startDate : new Date(startDate);
+      endDate = endDate instanceof Date ? endDate : new Date(endDate);
+  
+      console.log('onAccept:', props.onAccept)
+      console.log('Start Date:', startDate)
+      console.log('End Date:', endDate)
+  
+      const startTime = startDate.toISOString()
+      const endTime = endDate.toISOString()
+  
+      // ... rest of the function remains the same
+  
+      setLoading(true)
+      try {
+        const response = await axios.post('/api/workflows/history', {
+          dag_ids: [],
+          states: [],
+          order_by: sortModel[0]?.field || 'execution_date',
+          page_offset: paginationModel.page * paginationModel.pageSize,
+          page_limit: paginationModel.pageSize,
+          execution_date_gte: startTime,
+          execution_date_lte: endTime
+        })
+  
+        if (response.status === 200) {
+          setRows(response.data.dag_runs || [])
+          setRowCount(response.data.total_entries || 0)
+        } else {
+          setRows([])
+          setRowCount(0)
+          toast.error(t('Error fetching workflow history'))
+        }
+      } catch (error) {
+        console.error('Error fetching workflow history:', error)
+        setRows([]);
+        setRowCount(0);
+        toast.error(t('Error fetching workflow history'))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [paginationModel.page, paginationModel.pageSize, sortModel[0]?.field, sortModel[0]?.sort, props.onAccept, t]
+  )
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -298,7 +300,7 @@ const WorkflowHistory = props => {
       <Card>
         <CardHeader title={t('Workflow History')} />
         <CustomDataGrid
-          getRowId={(row) => row.dag_id}
+          getRowId={(row) => `${row.dag_id}_${row.dag_run_id}`}
           autoHeight
           rows={rows}
           columns={columns}
@@ -314,10 +316,10 @@ const WorkflowHistory = props => {
           onSortModelChange={handleSortModelChange}
           filterModel={filterModel}
           onFilterModelChange={handleFilterModelChange}
-          // getDetailPanelContent={getDetailPanelContent}
-         // getDetailPanelHeight={() => 400}
-          // detailPanelExpandedRowIds={detailPanelExpandedRowIds}
-          // onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
+          getDetailPanelContent={getDetailPanelContent}
+          getDetailPanelHeight={() => 400}
+          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,

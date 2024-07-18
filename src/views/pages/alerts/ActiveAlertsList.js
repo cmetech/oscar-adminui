@@ -498,9 +498,9 @@ const ActiveAlertsList = props => {
         })
         
         if (response.status === 200) {
-          setRowCount(res.data.total_records || 0)
-          setRows(res.data.records || [])
-          props.set_total(res.data.total_records)
+          setRowCount(response.data.total_records || 0)
+          setRows(response.data.records || [])
+          props.set_total(response.data.total_records)
         } else {
           setRows([])
           setRowCount(0)

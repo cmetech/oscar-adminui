@@ -517,11 +517,11 @@ const AlertsList = props => {
         })
         
         if (response.status === 200) {
-          console.log('total_pages', res.data.total_pages)
-          console.log('total_records', res.data.total_records)
-          setRowCount(res.data.total_records || 0)
-          setRows(res.data.records || [])
-          props.set_total(res.data.total_records)
+          console.log('total_pages', response.data.total_pages)
+          console.log('total_records', response.data.total_records)
+          setRowCount(response.data.total_records || 0)
+          setRows(response.data.records || [])
+          props.set_total(response.data.total_records)
         } else {
           console.log('Error fetching data')
           setRows([])

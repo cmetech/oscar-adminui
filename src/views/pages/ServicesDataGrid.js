@@ -292,10 +292,6 @@ const ServicesDataGrid = props => {
     }
   ]
 
-  const getRowId = row => {
-    return row.service
-  }
-
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
   }, [rowCount, setRowCountState])
@@ -443,7 +439,7 @@ const ServicesDataGrid = props => {
               }
             }
           }}
-          getRowId={getRowId}
+          getRowId={(row) => row.service}
           autoHeight={true}
           rows={filteredRows.length ? filteredRows : rows}
           apiRef={dgApiRef}

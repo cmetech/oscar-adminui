@@ -46,8 +46,18 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+
+# Copy the entrypoint script to the image to dynaically set the environment variables
 COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
 COPY --from=builder --chown=nextjs:nodejs /app/.env.production ./.env.production
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -61,5 +71,5 @@ ENV PORT 4100
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 
-CMD ["node", "server.js"]
+CMD HOSTNAME="0.0.0.0" node server.js
 

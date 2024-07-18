@@ -1,13 +1,6 @@
 const navigation = () => {
   return [
     {
-      title: 'Overview',
-      path: '/home',
-      icon: 'mdi:telescope',
-      action: 'read',
-      subject: 'all'
-    },
-    {
       sectionTitle: 'Observability',
       action: 'read',
       subject: 'all'
@@ -53,7 +46,7 @@ const navigation = () => {
         },
         {
           title: 'Monitoring',
-          path: '/api/oscar/ui?path=d/rYdddlPWk/node-metrics?orgId=1',
+          path: '/api/oscar/ui?path=d/bdkxfkrhtor28b/server-monitoring?orgId=1',
           icon: 'mdi:monitor-eye',
           action: 'manage',
           subject: 'settings-nav',
@@ -98,9 +91,17 @@ const navigation = () => {
     {
       title: 'Availability',
       icon: 'mdi:list-status',
-      path: '/service-continuity/availability',
       action: 'read',
-      subject: 'all'
+      subject: 'all',
+      children: [
+        {
+          title: 'Probes',
+          path: '/service-continuity/probes',
+          icon: 'mdi:monitor-eye',
+          action: 'manage',
+          subject: 'settings-nav'
+        }
+      ]
     },
     {
       title: 'Automations',
@@ -117,7 +118,7 @@ const navigation = () => {
         },
         {
           title: 'Workflows',
-          path: '#',
+          path: '/service-continuity/workflows',
           icon: 'mdi:workflow',
           action: 'read',
           subject: 'all'
@@ -148,15 +149,6 @@ const navigation = () => {
       badgeColor: 'error'
     },
     {
-      title: 'AI Assistant',
-      icon: 'mdi:brain',
-      path: '/oscar',
-      action: 'read',
-      subject: 'all',
-      badgeContent: 'Future',
-      badgeColor: 'error'
-    },
-    {
       sectionTitle: 'Runtime',
       action: 'manage',
       subject: 'admin-section'
@@ -173,7 +165,21 @@ const navigation = () => {
           icon: 'mdi:server-network',
           action: 'manage',
           subject: 'settings-nav'
-        }
+        },
+        {
+          title: 'Notifiers',
+          path: '/management/application/notifiers',
+          icon: 'mdi:notifications-active',
+          action: 'manage',
+          subject: 'settings-nav'
+        },
+        {
+          title: 'Connections',
+          path: '/management/application/connections',
+          icon: 'mdi:transit-connection-variant',
+          action: 'manage',
+          subject: 'settings-nav'
+        },
       ]
     },
     {

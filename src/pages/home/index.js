@@ -58,10 +58,12 @@ const Home = () => {
       title: 'Observe',
       description:
         'Collect, Consolidate, and Aggregate data from logs, metrics and events for comprehensive system insights',
-      link: '/observability/alerts',
+      link: '/api/oscar/ui?path=explore',
       icon: 'mdi:eye',
       baseColorDark: '#FCE282',
-      baseColorLight: '#FAD22D'
+      baseColorLight: '#FAD22D',
+      externalLink: true,
+      openInNewTab: true
     },
     {
       title: 'Detect',
@@ -75,7 +77,7 @@ const Home = () => {
       title: 'Analyze',
       description:
         'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
-      link: '/api/oscar/ui?path=explore',
+      link: '/api/oscar/ui?path=d/bdkxfkrhtor28b/server-monitoring?orgId=1',
       icon: 'mdi:brain',
       baseColorDark: '#70DBAA',
       baseColorLight: '#0C9B5B',
@@ -84,8 +86,8 @@ const Home = () => {
     },
     {
       title: 'Automate',
-      description: 'Easily Run Jobs, Synthetic Monitors, AI Pipelines, Business Process and Data ETL Workflows',
-      link: '/service-continuity/tasks',
+      description: 'Easily perform complex Business Process automations, data ETL Workflows, and AI/ML based pipelines',
+      link: '/service-continuity/workflows',
       icon: 'mdi:touch-reading',
       baseColorDark: '#81BAF3',
       baseColorLight: '#4D97ED'
@@ -93,7 +95,7 @@ const Home = () => {
   ]
 
   const middleSection = {
-    title: 'Get Started',
+    title: 'Let\'s Get Started',
     text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
     imageUrl: '/images/oscar.png',
     imageTitle: 'OSCAR Academy',
@@ -111,16 +113,10 @@ const Home = () => {
 
   const managementTools = [
     {
-      title: 'Security',
-      description: 'Manage your security settings',
-      link: '#',
-      icon: 'mdi:application-cog'
-    },
-    {
-      title: 'Runtime',
-      description: 'Monitor OSCAR services for runtime issues',
-      link: '/management/application/services',
-      icon: 'mdi:heart-pulse'
+      title: 'Connections',
+      description: 'Manage your connection settings',
+      link: '/management/application/connections',
+      icon: 'mdi:transit-connection-variant'
     },
     {
       title: 'Inventory',
@@ -129,10 +125,16 @@ const Home = () => {
       icon: 'mdi:server-network'
     },
     {
-      title: 'AI/ML',
-      description: 'Train, deploy and run AI pipelines and ML models',
-      link: '#',
-      icon: 'mdi:brain'
+      title: 'Notifiers',
+      description: 'Manage your notifier settings',
+      link: '/management/application/notifiers',
+      icon: 'mdi:notifications-active'
+    },
+    {
+      title: 'Runtime',
+      description: 'Monitor OSCAR services for runtime issues',
+      link: '/management/application/services',
+      icon: 'mdi:heart-pulse'
     }
   ]
 

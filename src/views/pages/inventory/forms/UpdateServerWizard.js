@@ -409,7 +409,7 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
         componentName: currentServer.component_name || '',
         datacenterName: currentServer.datacenter_name || '',
         environmentName: currentServer.environment_name || '',
-        status: currentServer.status || 'Active',
+        status: currentServer.status || 'ACTIVE',
         metadata: currentServer.metadata || [{ key: '', value: '' }],
         networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
       }
@@ -596,8 +596,8 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
                   value={serverForm.status}
                   onChange={handleFormChange}
                 >
-                  <option value='Active'>Active</option>
-                  <option value='Inactive'>Inactive</option>
+                  <option value='ACTIVE'>ACTIVE</option>
+                  <option value='INACTIVE'>INACTIVE</option>
                 </TextfieldStyled>
               </Grid>
             </Grid>

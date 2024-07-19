@@ -349,8 +349,10 @@ const AddConnectionWizard = ({ onSuccess }) => {
             toast.error('Failed to create connection')
           }
 
-          // Call onClose to close the modal
-          onClose && onClose()
+          // Call onSuccess to close the form
+          if (onSuccess) {
+            onSuccess()
+          }
 
           setTimeout(() => {
             setRefetchTrigger(new Date().getTime())

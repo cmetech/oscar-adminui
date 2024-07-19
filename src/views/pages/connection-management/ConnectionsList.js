@@ -63,6 +63,7 @@ const ConnectionsList = props => {
   const [rows, setRows] = useState([])
   const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
+  const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
   const [sortModel, setSortModel] = useState([{ field: 'connection_id', sort: 'asc' }])
@@ -323,14 +324,106 @@ const ConnectionsList = props => {
         }
       })
       setRows(response.data.connections)
+      setRowCount(response.data.total_entries)
       props.set_total(response.data.total_entries)
+      setConnections(response.data.connections)
     } catch (error) {
       console.error('Failed to fetch connections:', error)
       toast.error('Failed to fetch connections')
     } finally {
       setLoading(false)
+      setRunFilterQuery(false)
+      setRunRefresh(false)
     }
-  }, [paginationModel.page, paginationModel.pageSize, sortModel, props])
+  }, [paginationModel.page, paginationModel.pageSize, setRows])
+
+  useEffect(() => {
+    if (!runFilterQuery) {
+      fetchConnections()
+    }
+
+    const intervalId = setInterval(fetchConnections, 300000)
+
+    return () => clearInterval(intervalId)
+  }, [fetchConnections, refetchTrigger, runFilterQuery])
+
+  useEffect(() => {
+    if (runFilterQuery && filterModel.items.length > 0) {
+      if (filterMode === 'server') {
+        fetchConnections(filterModel)
+      } else {
+      }
+      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
+      if (filterMode === 'server') {
+        fetchConnections(filterModel)
+      } else {
+      }
+      setRunFilterQueryCount(0)
+    } else {
+      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterModel, runFilterQuery])
+
+  useEffect(() => {
+    fetchConnections()
+  }, [fetchConnections, refetchTrigger])
+
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchConnections, runRefresh])
+
+  useEffect(() => {
+    if (sortingMode === 'server') {
+      fetchConnections()
+    } else {
+      const column = sortModel[0]?.field
+      const sort = sortModel[0]?.sort
+
+      if (filteredRows.length > 0) {
+        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setFilteredRows(dataToFilter)
+      } else {
+        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
+        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
+        setRows(dataToFilter)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortModel])
+
+  const handleSearch = value => {
+    setSearchValue(value)
+    const searchRegex = new RegExp(escapeRegExp(value), 'i')
+
+    const filteredRows = rows.filter(row => {
+      const searchFields = ['id', 'name', 'port', 'type', 'description']
+
+      return searchFields.some(field => {
+        const fieldValue = getNestedValue(row, field)
+
+        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
+      })
+    })
+
+    if (value.length) {
+      setFilteredRows(filteredRows)
+      setRowCount(filteredRows.length)
+      props.set_total(filteredRows.length)
+    } else {
+      setFilteredRows([])
+      setRowCount(rows.length)
+      props.set_total(rows.length)
+    }
+  }
 
   useEffect(() => {
     fetchConnections()
@@ -520,6 +613,17 @@ const ConnectionsList = props => {
       toast.error('Failed to delete Connection')
     }
   }
+  const handleRowSelection = newRowSelectionModel => {
+    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
+
+    addedIds.forEach(id => {
+      const row = rows.find(r => r.id === id)
+    })
+
+    setRowSelectionModel(newRowSelectionModel)
+
+    setConnectionsIds(newRowSelectionModel)
+  }
 
   // Hidden columns
   const hiddenFields = []
@@ -551,6 +655,7 @@ const ConnectionsList = props => {
           rows={filteredRows.length ? filteredRows : rows}
           rowCount={rowCountState}
           columns={columns}
+          checkboxSelection={true}
           disableRowSelectionOnClick
           filterMode={filterMode}
           filterModel={filterModel}
@@ -570,7 +675,10 @@ const ConnectionsList = props => {
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
+          onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
+          rowSelectionModel={rowSelectionModel}
           loading={loading}
+          keepNonExistentRowsSelected
           slotProps={{
             baseButton: {
               variant: 'outlined'

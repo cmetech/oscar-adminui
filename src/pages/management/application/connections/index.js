@@ -123,6 +123,7 @@ const MoreActionsDropdown = ({ onDelete, onTest, tabValue }) => {
             onTest()
             handleDropdownClose()
           }}
+          disabled={true}
         >
           <Box sx={styles}>
             <Icon icon='mdi:connection' />

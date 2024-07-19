@@ -183,8 +183,8 @@ const AddConnectionWizard = ({ onSuccess }) => {
     yup.object().shape({
       extra: yup.array().of(
         yup.object().shape({
-          key: yup.string().required('Key is required'),
-          value: yup.string().required('Value is required')
+          key: yup.string(),
+          value: yup.string()
         })
       )
     }),

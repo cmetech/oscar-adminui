@@ -405,7 +405,7 @@ const ConnectionsList = props => {
         <DialogContent>
           <IconButton
             size='small'
-            onClick={() => handleUpdateDialogClose()}
+            onClick={() => handleEditDialogClose()}
             sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
@@ -418,10 +418,8 @@ const ConnectionsList = props => {
           </Box>
           {currentConnection && (
             <UpdateConnectionWizard
-              connection={currentConnection}
-              rows={rows}
-              setRows={setRows}
-              onClose={handleEditDialogClose}
+              connectionData={currentConnection}
+              onSuccess={handleEditDialogClose}
             />
           )}
         </DialogContent>

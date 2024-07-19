@@ -126,15 +126,6 @@ const navigation = () => {
       ]
     },
     {
-      title: 'Security',
-      path: '#',
-      icon: 'mdi:security',
-      action: 'manage',
-      subject: 'settings-nav',
-      badgeContent: 'Future',
-      badgeColor: 'error'
-    },
-    {
       sectionTitle: 'AI/Analytics',
       action: 'manage',
       subject: 'admin-section'

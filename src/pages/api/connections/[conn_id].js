@@ -35,7 +35,24 @@ async function handler(req, res) {
     }
   } else if (req.method === 'PUT') {
     try {
-      const response = await axios.put(`${oscarConfig.MIDDLEWARE_API_URL}/workflows/connections/${conn_id}`, req.body, {
+      const formattedBody = {
+        connection_id: req.body.name, // Rename 'name' to 'connection_id'
+        conn_type: req.body.type, // Rename 'type' to 'conn_type'
+        description: req.body.description || null,
+        host: req.body.host || null,
+        login: req.body.login || null,
+        schema: req.body.schema || null,
+        port: req.body.port ? parseInt(req.body.port, 10) : null,
+        password: req.body.password,
+        extra: req.body.extra || null
+      };
+
+      // If extra is a valid JSON string, we keep it as is. If it's an object, we stringify it.
+      if (formattedBody.extra && typeof formattedBody.extra === 'object') {
+        formattedBody.extra = JSON.stringify(formattedBody.extra).replace(/"/g, "'");
+      }
+
+      const response = await axios.put(`${oscarConfig.MIDDLEWARE_API_URL}/workflows/connections/${conn_id}`, formattedBody, {
         timeout: 30000,
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY }),
         headers: {

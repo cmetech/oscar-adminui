@@ -62,3 +62,9 @@ export const workflowIdsAtom = atom([])
 export const workflowsAtom = atom([])
 
 export const refetchWorkflowTriggerAtom = atom(0)
+
+export const connectionsAtom = atom([])
+
+export const connectionsIdsAtom = atom([])
+
+export const refetchConnectionsTriggerAtom = atom(0)

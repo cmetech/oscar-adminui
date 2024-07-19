@@ -35,7 +35,31 @@ async function handler(req, res) {
     }
   } else if (req.method === 'POST') {
     try {
-      const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/workflows/connections`, req.body, {
+      console.log('Incoming request body:', req.body);
+
+      // Format the data before sending to the middleware
+      const formattedBody = {
+        connection_id: req.body.name, // Rename 'name' to 'connection_id'
+        conn_type: req.body.type, // Rename 'type' to 'conn_type'
+        description: req.body.description || null,
+        host: req.body.host || null,
+        login: req.body.login || null,
+        schema: req.body.schema || null,
+        port: req.body.port ? parseInt(req.body.port, 10) : null, // Convert port to integer or null
+        password: req.body.password,
+        extra: req.body.extra ? JSON.parse(req.body.extra) : null // Parse the extra field if it exists
+      };
+
+      console.log('Formatted request body:', formattedBody);
+
+      const url = `${oscarConfig.MIDDLEWARE_API_URL}/workflows/connections`;
+      console.log('Posting to URL:', url);
+
+      // Stringify the entire body to ensure proper JSON formatting
+      const jsonBody = JSON.stringify(formattedBody);
+      console.log('JSON body being sent:', jsonBody);
+
+      const response = await axios.post(url, jsonBody, {
         timeout: 30000,
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY }),
         headers: {
@@ -44,13 +68,29 @@ async function handler(req, res) {
       });
 
       if (response?.data) {
+        console.log('Successful response:', response.data);
         res.status(response.status || 201).json(response.data);
       } else {
+        console.error('No response data received');
         res.status(500).json({ message: 'No response - An error occurred' });
       }
     } catch (error) {
       console.error('Error creating connection:', error);
-      res.status(error.response?.status || 500).json({ message: error.message });
+      
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+
+      res.status(error.response?.status || 500).json({ 
+        message: error.message,
+        details: error.response?.data || 'No additional details available'
+      });
     }
   } else {
     res.setHeader('Allow', ['GET', 'POST']);

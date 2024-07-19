@@ -47,8 +47,13 @@ async function handler(req, res) {
         schema: req.body.schema || null,
         port: req.body.port ? parseInt(req.body.port, 10) : null, // Convert port to integer or null
         password: req.body.password,
-        extra: req.body.extra ? JSON.parse(req.body.extra) : null // Parse the extra field if it exists
+        extra: req.body.extra || null // Keep extra as a string
       };
+
+      // If extra is a valid JSON string, we keep it as is. If it's an object, we stringify it.
+      if (formattedBody.extra && typeof formattedBody.extra === 'object') {
+        formattedBody.extra = JSON.stringify(formattedBody.extra).replace(/"/g, "'");
+      }
 
       console.log('Formatted request body:', formattedBody);
 

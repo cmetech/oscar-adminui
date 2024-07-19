@@ -863,7 +863,7 @@ const WorkflowsManager = () => {
           <Box display='flex' alignItems='center'>
             {value === '1' && (
               <Fragment>
-                <Button
+                {/* <Button
                   variant='contained'
                   color='secondary'
                   sx={{ marginRight: 1 }}
@@ -871,13 +871,13 @@ const WorkflowsManager = () => {
                   onClick={handleOpenModal}
                 >
                   {getDynamicText(value)}
-                </Button>
+                </Button> */}
                 <MoreActionsDropdown
                   onDelete={handleDelete}
-                  onExport={handleExport}
+                  // onExport={handleExport}
                   onEnable={handleEnable}
                   onDisable={handleDisable}
-                  onUpload={handleUpload}
+                  // onUpload={handleUpload}
                   tabValue={value}
                 />
               </Fragment>

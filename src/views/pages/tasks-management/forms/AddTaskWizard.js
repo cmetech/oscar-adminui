@@ -80,6 +80,9 @@ const initialTaskFormState = {
   prompts: [{ prompt: '', default_value: '', value: '' }],
   hosts: [{ ip_address: '' }],
   datacenter: '',
+  promptForCredentials: false,
+  promptForAPIKey: false,
+  promptForSudoCredentials: false,
   environments: [],
   components: []
 }
@@ -524,6 +527,32 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
       <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
         Prompts
       </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <FormControlLabel
+            control={
+              <CheckboxStyled
+                checked={taskForm.promptForCredentials}
+                InputProps={{ readOnly: true }}
+                name='promptForCredentials'
+              />
+            }
+            label='Prompt for Credentials?'
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <FormControlLabel
+            control={
+              <CheckboxStyled
+                checked={taskForm.promptForAPIKey}
+                InputProps={{ readOnly: true }}
+                name='promptForAPIKey'
+              />
+            }
+            label='Prompt for APIKey?'
+          />
+        </Grid>
+      </Grid>
       {prompts.map((prompt, index) => (
         <Grid container spacing={2} key={`prompt-${index}`}>
           <Grid item xs={12} sm={6}>
@@ -1244,6 +1273,38 @@ const AddTaskWizard = ({ onClose }) => {
       case 4:
         return (
           <Fragment>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <FormControlLabel
+                  control={
+                    <CheckboxStyled
+                      checked={taskForm.promptForCredentials}
+                      onChange={() =>
+                        handleFormChange({
+                          target: { name: 'promptForCredentials', value: !taskForm.promptForCredentials }
+                        })
+                      }
+                      name='promptForCredentials'
+                    />
+                  }
+                  label='Prompt for Credentials?'
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControlLabel
+                  control={
+                    <CheckboxStyled
+                      checked={taskForm.promptForAPIKey}
+                      onChange={() =>
+                        handleFormChange({ target: { name: 'promptForAPIKey', value: !taskForm.promptForAPIKey } })
+                      }
+                      name='promptForAPIKey'
+                    />
+                  }
+                  label='Prompt for APIKey?'
+                />
+              </Grid>
+            </Grid>
             <Stack direction='column' spacing={1}>
               {renderDynamicFormSection('prompts')}
               <Box>

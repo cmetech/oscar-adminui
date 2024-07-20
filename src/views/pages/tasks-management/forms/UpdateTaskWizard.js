@@ -82,6 +82,7 @@ const initialTaskFormState = {
   datacenter: '',
   promptForCredentials: false,
   promptForAPIKey: false,
+  promptForSudoCredentials: false,
   environments: [],
   components: []
 }

@@ -48,6 +48,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+import { validate } from 'uuid'
 
 const steps = [
   {
@@ -153,7 +154,7 @@ const generatePromptsValidationSchema = prompts => {
 
 const promptSchema = yup.object().shape({
   prompt: yup.string().required(), // Technically not validated but included for completeness
-  default_value: yup.string(), // Included for completeness; validation not needed
+  default_value: yup.string().nullable(), // Included for completeness; validation not needed
   value: yup.string().required('Value is required') // User must provide a value or accept the default
 })
 
@@ -212,6 +213,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
   const handlePromptInputChange = (e, index) => {
     const newValues = { ...userPromptValues, [index]: e.target.value }
     setUserPromptValues(newValues)
+    validateField(index, e.target.value)
   }
 
   const handleReset = () => {
@@ -262,11 +264,10 @@ const RunTaskWizard = ({ onClose, ...props }) => {
         // TODO: Allow for Hosts to be provided to override the default host
 
         // Build the payload
-        const payload = currentTask.prompts.map((prompt, index) => ({
-          prompt: prompt.prompt,
-          default_value: prompt.default_value,
-          value: userPromptValues[index] || prompt.default_value // Use the user-provided value or fallback to the default value
-        }))
+        const payload = {
+          prompts,
+          user_data: null // Add user_data if needed
+        }
 
         console.log('Payload', payload)
 

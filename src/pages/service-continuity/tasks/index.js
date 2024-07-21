@@ -4,7 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -637,7 +637,8 @@ const TasksManager = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  // const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
 
   const handleDelete = () => {
@@ -892,7 +893,7 @@ const TasksManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRounded]}
+                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}

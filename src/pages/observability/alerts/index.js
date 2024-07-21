@@ -1,7 +1,7 @@
 // ** React Imports
 import { useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -58,7 +58,7 @@ const Alerts = () => {
   const [value, setValue] = useState('1')
   const [alertGroupTotal, setAlertGroupTotal] = useState(0)
   const [activeAlertsTotal, setActiveAlertsTotal] = useState(0)
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
 
   const handleChange = (event, newValue) => {
@@ -80,7 +80,7 @@ const Alerts = () => {
               calendars={2}
               closeOnSelect={false}
               value={dateRange}
-              defaultValue={[yesterdayRounded, todayRounded]}
+              defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
               views={['day', 'hours']}
               timeSteps={{ minute: 10 }}
               viewRenderers={{ hours: renderDigitalClockTimeView }}

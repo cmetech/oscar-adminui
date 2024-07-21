@@ -42,6 +42,8 @@ export const today = dayjs()
 
 export const todayRounded = roundDownToNearest10Min(today)
 
+export const todayRoundedPlus1hour = todayRounded.add(1, 'hour');
+
 export const yesterday = dayjs().subtract(1, 'day')
 
 export const yesterdayRounded = roundToNearest10Min(yesterday)

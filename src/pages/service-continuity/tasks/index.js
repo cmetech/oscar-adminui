@@ -112,8 +112,44 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
   }
 }))
 
+const RegisterTaskForm = ({ onClose, onSubmit }) => {
+  const [taskName, setTaskName] = useState('')
+  const { t } = useTranslation()
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit(taskName)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="taskName"
+          label={t('Task Name')}
+          type="text"
+          fullWidth
+          variant="outlined"
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary">
+          {t('Cancel')}
+        </Button>
+        <Button type="submit" color="primary" variant="contained">
+          {t('Submit')}
+        </Button>
+      </DialogActions>
+    </form>
+  )
+}
+
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, onRegister, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
 
@@ -225,6 +261,18 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
           <Box sx={styles}>
             <Icon icon='mdi:file-export-outline' />
             {t('Export')}
+          </Box>
+        </MenuItem>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onRegister()
+            handleDropdownClose()
+          }}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:playlist-plus' />
+            {t('Register Task')}
           </Box>
         </MenuItem>
         {/* <MenuItem
@@ -417,6 +465,87 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
           startIcon={<Icon icon='mdi:file-export' />}
         >
           {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+const RegisterTaskDialog = ({ open, onClose, onSuccess }) => {
+  const [taskName, setTaskName] = useState('')
+  const { t } = useTranslation()
+
+  const handleClose = () => {
+    setTaskName('')
+    onClose()
+  }
+
+  const handleSubmit = async () => {
+    if (!taskName.trim()) {
+      toast.error('Please enter a task name.')
+      return
+    }
+
+    try {
+      const response = await axios.post(`/api/tasks/register/${encodeURIComponent(taskName)}`, {})
+      if (response.status === 200) {
+        toast.success(response.data.message || `Task "${taskName}" registered successfully`)
+        setTaskName('')
+        onSuccess()
+      } else {
+        toast.error('Error registering task')
+      }
+    } catch (error) {
+      console.error('Error registering task:', error)
+      toast.error(`Error registering task: ${error.response?.data?.message || error.message}`)
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>
+        <Typography variant='h6'>{t('Register Task')}</Typography>
+        <IconButton
+          size='small'
+          onClick={handleClose}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="taskName"
+          label={t('Task Name')}
+          type="text"
+          fullWidth
+          variant="outlined"
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+          sx={{ mt: 2 }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='primary'
+          autoFocus
+          startIcon={<Icon icon='mdi:check' />}
+        >
+          {t('Register')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -641,6 +770,12 @@ const TasksManager = () => {
   const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
 
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+
+  const handleRegister = () => {
+    setIsRegisterModalOpen(true)
+  }
+
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
   }
@@ -673,12 +808,21 @@ const TasksManager = () => {
     setOpenUploadDialog(false)
   }
 
+  const handleCloseRegisterModal = () => {
+    setIsRegisterModalOpen(false)
+  }
+
   const handleCloseDisableModal = () => {
     setIsDisableModalOpen(false)
   }
 
   const handleCloseEnableModal = () => {
     setIsEnableModalOpen(false)
+  }
+
+  const handleRegisterSuccess = () => {
+    setIsRegisterModalOpen(false)
+    setRefetchTrigger(Date.now()) // Trigger a refetch of the task list
   }
 
   const handleConfirmDelete = async () => {
@@ -884,6 +1028,7 @@ const TasksManager = () => {
                   onEnable={handleEnable}
                   onDisable={handleDisable}
                   onUpload={handleUpload}
+                  onRegister={handleRegister}
                   tabValue={value}
                 />
               </Fragment>
@@ -1071,6 +1216,12 @@ const TasksManager = () => {
         onClose={handleCloseEnableModal}
         onConfirm={handleConfirmEnable}
         tab={value}
+      />
+
+      <RegisterTaskDialog
+        open={isRegisterModalOpen}
+        onClose={handleCloseRegisterModal}
+        onSuccess={handleRegisterSuccess}
       />
     </Grid>
   )

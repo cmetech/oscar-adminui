@@ -87,18 +87,18 @@ const ShortcutsDropdown = props => {
     setAnchorEl(null)
   }
 
-  const handleShortcutClick = useCallback(async shortcut => {
+  const handleShortcutClick = useCallback(async (event, shortcut) => {
     handleDropdownClose()
     if (shortcut.externalLink) {
+      event.preventDefault() // Prevent the default link behavior
       if (shortcut.openInNewTab) {
         // Opens the URL in a new tab
-        window.open(shortcut.url, '_blank')
+        window.open(shortcut.url, '_blank', 'noopener,noreferrer')
       } else {
         // Redirects in the current tab
         window.location.href = shortcut.url
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -144,7 +144,7 @@ const ShortcutsDropdown = props => {
                 item
                 xs={6}
                 key={shortcut.title}
-                onClick={() => handleShortcutClick(shortcut)}
+                onClick={(event) => handleShortcutClick(event, shortcut)}
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
               >
                 <Box
@@ -158,6 +158,11 @@ const ShortcutsDropdown = props => {
                     textDecoration: 'none',
                     flexDirection: 'column',
                     justifyContent: 'center'
+                  }}
+                  onClick={(event) => {
+                    if (shortcut.externalLink && shortcut.openInNewTab) {
+                      event.preventDefault()
+                    }
                   }}
                 >
                   <CustomAvatar skin='light' color='secondary' sx={{ mb: 2, width: 50, height: 50 }}>

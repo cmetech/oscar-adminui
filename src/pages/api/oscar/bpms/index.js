@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       break;
     default:
       // Fallback to mageai if the workflow engine type is invalid
-      redirectUrl = `https://${process.env.AIRFLOW_HOST}:${process.env.AIRFLOW_PORT}`;
+      redirectUrl = `https://${process.env.AIRFLOW_HOST}:${process.env.AIRFLOW_PORT}/airflow`;
       break;
   }
 

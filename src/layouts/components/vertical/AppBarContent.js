@@ -4,6 +4,7 @@ import IconButton from '@mui/material/IconButton'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Link from '@mui/material/Link'
 import Chip from '@mui/material/Chip'
+import getConfig from 'next/config'
 
 import { useRouter } from 'next/router'
 import { useTheme } from '@mui/material/styles'
@@ -64,35 +65,6 @@ const notifications = [
     subtitle: '25 hrs ago',
     avatarImg: '/images/misc/chart.png',
     title: 'Finance report has been generated'
-  }
-]
-
-const shortcuts = [
-  {
-    title: 'Users',
-    url: '/management/security/users',
-    subtitle: 'Manage Users',
-    icon: 'mdi:account-outline'
-  },
-  {
-    title: 'Help Center',
-    subtitle: 'FAQs & Articles',
-    icon: 'mdi:help-circle-outline',
-    url: '/oscar/docs'
-  },
-  {
-    title: 'Tasks',
-    subtitle: 'Manage Tasks',
-    icon: 'mdi:subtasks',
-    url: '/service-continuity/tasks/'
-  },
-  {
-    title: 'Log Explorer',
-    subtitle: 'Explore Logs',
-    icon: 'mdi:math-log',
-    url: '/api/oscar/ui?path=explore',
-    externalLink: true,
-    openInNewTab: true
   }
 ]
 
@@ -157,6 +129,40 @@ const CustomBreadcrumbs = () => {
 const AppBarContent = props => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
+  const { publicRuntimeConfig } = getConfig()
+  const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
+  const theme = useTheme()
+
+  const shortcuts = [
+    {
+      title: 'Users',
+      url: '/management/security/users',
+      subtitle: 'Manage Users',
+      icon: 'mdi:account-outline'
+    },
+    {
+      title: 'Academy',
+      subtitle: 'FAQs & Articles',
+      icon: 'mdi:help-circle-outline',
+      url: `https://${docs_host}/docs/?theme=${theme.palette.mode}`,
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Tasks',
+      subtitle: 'Manage Tasks',
+      icon: 'mdi:subtasks',
+      url: '/service-continuity/tasks/'
+    },
+    {
+      title: 'Log Explorer',
+      subtitle: 'Explore Logs',
+      icon: 'mdi:math-log',
+      url: '/api/oscar/ui?path=explore',
+      externalLink: true,
+      openInNewTab: true
+    }
+  ]
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

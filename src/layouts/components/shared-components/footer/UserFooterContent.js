@@ -8,6 +8,7 @@ import { styled } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import Icon from '@mui/material/Icon'
 import { useTranslation } from 'react-i18next'
+import getConfig from 'next/config'
 
 const StyledLink = styled(Link)({
   display: 'flex',
@@ -16,12 +17,16 @@ const StyledLink = styled(Link)({
   color: '#FFFFFF'
 })
 
+const { publicRuntimeConfig } = getConfig()
+
 const UserFooterContent = props => {
   // ** Var
   const hidden = useMediaQuery(theme => theme.breakpoints.down('md'))
   const theme = props.theme
 
   const { t } = useTranslation()
+
+  const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -42,7 +47,15 @@ const UserFooterContent = props => {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>
           <Stack direction='row' spacing={3}>
             <Button variant='contained' color='primary'>
-              <StyledLink href='/oscar/docs'>{t('Academy')}</StyledLink>
+              <Link 
+                href={`https://${docs_host}/docs/?theme=${theme.palette.mode}`}
+                passHref
+                legacyBehavior
+              >
+                <StyledLink target="_blank" rel="noopener noreferrer">
+                  {t('Academy')}
+                </StyledLink>
+              </Link>
             </Button>
             <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Feedback')}</StyledLink>

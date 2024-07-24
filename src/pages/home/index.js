@@ -15,6 +15,7 @@ import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
 import { styled, useTheme } from '@mui/material/styles'
 import { useSession } from 'next-auth/react'
+import getConfig from 'next/config'
 
 function createGradient(baseColor, themeMode, intensity = 30) {
   const adjustIntensity = themeMode === 'dark' ? intensity : intensity + 20 // Darker gradient in light mode
@@ -49,6 +50,8 @@ const Home = () => {
   const theme = useTheme()
   const middleSectionColor = theme.palette.mode === 'dark' ? '#FFCA64' : '#444'
   const { data: session } = useSession()
+  const { publicRuntimeConfig } = getConfig()
+  const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
 
   const userName = session?.user?.name || 'John Doe'
   const firstName = userName.split(' ')[0]
@@ -99,7 +102,7 @@ const Home = () => {
     text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
     imageUrl: '/images/oscar.png',
     imageTitle: 'OSCAR Academy',
-    link: '/oscar/docs',
+    link: `https://${docs_host}/docs/?theme=${theme.palette.mode}`,
     imageText:
       'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
     actions: [
@@ -315,6 +318,8 @@ const Home = () => {
                   startIcon={<Icon icon='mdi:school' fontSize={20} />}
                   sx={{ mt: 4, mb: 2 }}
                   href={middleSection.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Explore OSCAR Academy
                 </Button>

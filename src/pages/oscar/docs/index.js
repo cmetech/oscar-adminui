@@ -44,7 +44,7 @@ const DocsPage = () => {
   return (
     <Container maxWidth='false' disableGutters={true} sx={{ p: 0, m: 0, height: '100vh', width: '100vw' }}>
       {/* Other components can go here */}
-      <ResponsiveMkDocsEmbed src={`http://${docs_host}:${docs_port}?theme=${theme.palette.mode}`} />
+      <ResponsiveMkDocsEmbed src={`https://${docs_host}:${docs_port}/docs/?theme=${theme.palette.mode}`} />
       {/* More components */}
     </Container>
   )

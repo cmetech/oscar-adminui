@@ -31,7 +31,8 @@ module.exports = {
   publicRuntimeConfig: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     MKDOCS_HOST: process.env.DOMAIN,
-    MKDOCS_PORT: process.env.MKDOCS_PORT
+    MKDOCS_PORT: process.env.MKDOCS_PORT,
+    DOMAIN: process.env.DOMAIN
   },
 
   output: 'standalone'

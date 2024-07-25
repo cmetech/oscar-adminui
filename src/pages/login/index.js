@@ -144,8 +144,8 @@ const schema = yup.object().shape({
 })
 
 const defaultValues = {
-  password: 'admin',
-  email: 'corey.ellis@ericsson.com'
+  password: '$spl2019@$$',
+  email: 'admin@oscar.com'
 }
 
 const LoginPage = ({ csrfToken, providers }) => {
@@ -274,7 +274,7 @@ const LoginPage = ({ csrfToken, providers }) => {
                         onBlur={onBlur}
                         onChange={onChange}
                         error={Boolean(errors.email)}
-                        placeholder='corey.ellis@ericsson.com'
+                        placeholder='admin@oscar.com'
                       />
                     )}
                   />

@@ -131,6 +131,7 @@ const AppBarContent = props => {
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
+  const domain = publicRuntimeConfig.DOMAIN || 'localhost'
   const theme = useTheme()
 
   const shortcuts = [
@@ -149,10 +150,12 @@ const AppBarContent = props => {
       openInNewTab: true
     },
     {
-      title: 'Tasks',
-      subtitle: 'Manage Tasks',
-      icon: 'mdi:subtasks',
-      url: '/service-continuity/tasks/'
+      title: 'Workflows',
+      subtitle: 'Manage Workflows',
+      icon: 'mdi:workflow',
+      url: `https://${domain}/airflow`,
+      externalLink: true,
+      openInNewTab: true
     },
     {
       title: 'Log Explorer',

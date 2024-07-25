@@ -144,7 +144,7 @@ const AppBarContent = props => {
       title: 'Academy',
       subtitle: 'FAQs & Articles',
       icon: 'mdi:help-circle-outline',
-      url: `https://${docs_host}/docs/?theme=${theme.palette.mode}`,
+      url: `https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`,
       externalLink: true,
       openInNewTab: true
     },

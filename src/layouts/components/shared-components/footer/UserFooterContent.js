@@ -48,7 +48,7 @@ const UserFooterContent = props => {
           <Stack direction='row' spacing={3}>
             <Button variant='contained' color='primary'>
               <Link 
-                href={`https://${docs_host}/docs/?theme=${theme.palette.mode}`}
+                href={`https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`}
                 passHref
                 legacyBehavior
               >

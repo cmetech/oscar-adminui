@@ -102,7 +102,7 @@ const Home = () => {
     text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
     imageUrl: '/images/oscar.png',
     imageTitle: 'OSCAR Academy',
-    link: `https://${docs_host}/docs/?theme=${theme.palette.mode}`,
+    link: `https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`,
     imageText:
       'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
     actions: [

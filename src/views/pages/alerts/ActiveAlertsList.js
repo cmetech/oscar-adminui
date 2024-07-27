@@ -115,6 +115,7 @@ const ActiveAlertsList = props => {
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
@@ -513,6 +514,7 @@ const ActiveAlertsList = props => {
         toast.error('Error fetching alerts')
       } finally {
         setLoading(false)
+        setRunRefresh(false)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -522,6 +524,16 @@ const ActiveAlertsList = props => {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    if (runRefresh) {
+      fetchData()
+    }
+
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchData, runRefresh])
 
   // Trigger based on sort
   useEffect(() => {
@@ -713,7 +725,9 @@ const ActiveAlertsList = props => {
               isFilterActive,
               setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

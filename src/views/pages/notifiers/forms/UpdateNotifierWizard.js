@@ -194,12 +194,18 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
           Authorization: `Bearer ${apiToken}`
         }
 
+        // Ensure notifierForm and email_addresses are defined
+        const emailAddresses = notifierForm?.email_addresses ?? []
+
+        // Transform email addresses
         const payload = {
           ...notifierForm,
-          email_addresses: notifierForm.email_addresses.filter(email => email.trim() !== '')
+          email_addresses: emailAddresses.filter(email => email.trim() !== '')
         }
 
-        const endpoint = `/api/notifiers/update/${currentNotifier.id}`
+        console.log('Notifier form payload', payload)
+
+        const endpoint = `/api/notifiers/update/${currentNotifier.name}`
         const response = await axios.put(endpoint, payload, { headers })
 
         if (response.data) {
@@ -247,25 +253,15 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='notifier-type-autocomplete'
-                  options={['email', 'webhook']}
+              <TextfieldStyled
+                  required
+                  id='name'
+                  name='name'
+                  label='Notifier Name'
+                  fullWidth
+                  autoComplete='off'
                   value={notifierForm.type.toUpperCase()}
-                  onChange={(event, newValue) => {
-                    handleFormChange({ target: { name: 'type', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'type', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Notifier Type' fullWidth required autoComplete='off' />
-                  )}
+                  disabled
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -369,9 +365,9 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                     name='webhook_url'
                     autoComplete='off'
                     value={notifierForm.webhook_url !== undefined ? notifierForm.webhook_url : ''}
-                    onChange={handleFormChange}
                     error={Boolean(formErrors?.webhook_url)}
                     helperText={formErrors?.webhook_url}
+                    disabled
                   />
                 </Grid>
               )}
@@ -383,6 +379,26 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
       default:
         return 'Unknown Step'
     }
+  }
+
+  const handleReset = () => {
+    if (currentNotifier && Object.keys(currentNotifier).length > 0) {
+      const resetNotifierForm = {
+        ...initialNotifierFormState,
+        name: currentNotifier.name || '',
+        type: currentNotifier.type || '',
+        status: currentNotifier.status || 'enabled',
+        description: currentNotifier.description || '',
+        email_addresses: currentNotifier.email_addresses || [''],
+        webhook_url: currentNotifier.webhook_url || ''
+      }
+
+      setNotifierForm(currentNotifier)
+    } else {
+      setNotifierForm(initialNotifierFormState)
+    }
+    setResetFormFields(false)
+    setActiveStep(0)
   }
 
   const renderDynamicFormSection = section => {

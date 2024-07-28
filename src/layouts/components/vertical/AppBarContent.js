@@ -136,12 +136,6 @@ const AppBarContent = props => {
 
   const shortcuts = [
     {
-      title: 'Users',
-      url: '/management/security/users',
-      subtitle: 'Manage Users',
-      icon: 'mdi:account-outline'
-    },
-    {
       title: 'Academy',
       subtitle: 'FAQs & Articles',
       icon: 'mdi:help-circle-outline',
@@ -162,6 +156,14 @@ const AppBarContent = props => {
       subtitle: 'Explore Logs',
       icon: 'mdi:math-log',
       url: '/api/oscar/ui?path=explore',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Monitor Workers',
+      url: `https://${domain}:5555/flower/`,
+      subtitle: 'Celery Flower',
+      icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
     }

@@ -152,10 +152,14 @@ const navigation = () => {
       children: [
         {
           title: 'Services',
-          path: '/management/application/services',
+          path: '/api/oscar/services',
           icon: 'mdi:server-network',
-          action: 'manage',
-          subject: 'settings-nav'
+          action: 'read',
+          subject: 'all',
+          externalLink: true,
+          openInNewTab: true,
+          badgeContent: 'Portainer',
+          badgeColor: 'info'
         },
         {
           title: 'Notifiers',

@@ -30,9 +30,9 @@ module.exports = {
   // Will be available on both server and client
   publicRuntimeConfig: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    MKDOCS_HOST: process.env.DOMAIN,
+    MKDOCS_HOST: process.env.DETECTED_IP,
     MKDOCS_PORT: process.env.MKDOCS_PORT,
-    DOMAIN: process.env.DOMAIN
+    DETECTED_IP: process.env.DETECTED_IP
   },
 
   output: 'standalone'

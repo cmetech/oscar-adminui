@@ -131,7 +131,7 @@ const AppBarContent = props => {
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
-  const domain = publicRuntimeConfig.DOMAIN || 'localhost'
+  const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'
   const theme = useTheme()
 
   const shortcuts = [

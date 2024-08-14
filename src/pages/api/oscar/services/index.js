@@ -6,6 +6,6 @@ export default async function handler(req, res) {
 
   console.log('path', path)
 
-  const oscarServicesUi = `https://${process.env.DOMAIN}/ext/portainer/`
+  const oscarServicesUi = `https://${process.env.DETECTED_IP}/ext/portainer/`
   res.redirect(oscarServicesUi)
 }

@@ -373,48 +373,51 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
 
     try {
       setIsUploading(true)
+      let simulatedProgress = 0
+
+      // Start the simulation before the request is sent
+      const simulateProcessing = setInterval(() => {
+        simulatedProgress += Math.random() * 10 // Increment progress by a random amount each time
+        if (simulatedProgress >= 90) {
+          simulatedProgress = 90 // Cap simulated progress at 90% to leave room for real completion
+        }
+        setUploadProgress(simulatedProgress)
+      }, 500)
+
       const response = await axios.post('/api/inventory/servers/bulk', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
-        onUploadProgress: progressEvent => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(progress)
-        }
+        // onUploadProgress: progressEvent => {
+        //   const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        //   setUploadProgress(progress)
+        // }
       })
+
+      // Clear the simulation and set progress to 100% when done
+      clearInterval(simulateProcessing)
+      setUploadProgress(100)
 
       // Handle response here
       if (response.status === 200 && response.data) {
         const { requested_count, processed_count } = response.data
-
-        let simulatedProgress = 80
-        const simulateProcessing = setInterval(() => {
-          simulatedProgress += Math.random() * 5
-          if (simulatedProgress >= 100) {
-            clearInterval(simulateProcessing)
-            setUploadProgress(100)
-            toast.success(`Upload complete: ${processed_count} out of ${requested_count} servers processed successfully.`)
-            setTimeout(() => {
-              setRefetchTrigger(new Date().getTime())
-              onClose() // Close the dialog after a short delay
-            }, 1000)
-          } else {
-            setUploadProgress(simulatedProgress)
-          }
-        }, 100)
+        toast.success(`Upload complete: ${processed_count} out of ${requested_count} servers processed successfully.`)
+        setRefetchTrigger(new Date().getTime())
       } else {
         toast.success('Upload complete.')
-        setTimeout(() => {
-          setRefetchTrigger(new Date().getTime())
-          onClose() // Close the dialog after a short delay
-        }, 1000)
       }
 
       setFileName('')
       setFile(null)
       setIsUploading(false)
+
+      setTimeout(() => {
+        onClose() // Close the dialog after a short delay
+      }, 1000)
     } catch (error) {
+      clearInterval(simulateProcessing) // Clear the simulation in case of an error
       console.error('Error uploading file:', error)
+      setIsUploading(false)
       toast.error('Error uploading file')
     }
   }

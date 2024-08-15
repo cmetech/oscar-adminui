@@ -132,14 +132,23 @@ const AppBarContent = props => {
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
   const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'
-  const theme = useTheme()
+
+  // Determine the root domain or IP from the URL
+  const [rootDomain, setRootDomain] = useState(domain)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      setRootDomain(hostname)
+    }
+  }, [domain])
 
   const shortcuts = [
     {
       title: 'Academy',
       subtitle: 'FAQs & Articles',
       icon: 'mdi:help-circle-outline',
-      url: `https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`,
+      url: `https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`,
       externalLink: true,
       openInNewTab: true
     },
@@ -147,7 +156,7 @@ const AppBarContent = props => {
       title: 'Workflows',
       subtitle: 'Manage Workflows',
       icon: 'mdi:workflow',
-      url: `https://${domain}/airflow`,
+      url: `https://${rootDomain}/airflow`,
       externalLink: true,
       openInNewTab: true
     },
@@ -161,7 +170,7 @@ const AppBarContent = props => {
     },
     {
       title: 'Monitor Workers',
-      url: `https://${domain}:5555/flower/`,
+      url: `https://${rootDomain}:5555/flower/`,
       subtitle: 'Celery Flower',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,

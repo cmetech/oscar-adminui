@@ -55,7 +55,7 @@ async function handler(req, res) {
       httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
     })
 
-    if (response.status === 201 && response.data) {
+    if (response.status === 200 && response.data) {
       // Delete the uploaded file after successful upload
       fs.unlinkSync(filePath)
 

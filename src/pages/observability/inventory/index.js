@@ -237,7 +237,7 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
   }
 
   return (
-    <Dialog 
+    <Dialog
       open={isOpen}
       onClose={onClose}
       slotProps={{
@@ -330,6 +330,9 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
 const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
   const [file, setFile] = useState(null)
   const [fileName, setFileName] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   const fileInputRef = useRef(null)
 
@@ -351,6 +354,8 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
   const handleClose = () => {
     setFile(null)
     setFileName('')
+    setUploadProgress(0)
+    setIsUploading(false)
     onClose()
   }
 
@@ -367,19 +372,47 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
     formData.append('file', file)
 
     try {
-      // Replace '/api/inventory/servers/bulk' with your Next.js API route that proxies the request
+      setIsUploading(true)
       const response = await axios.post('/api/inventory/servers/bulk', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: progressEvent => {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          setUploadProgress(progress)
         }
       })
 
       // Handle response here
-      console.log(response.data)
+      if (response.status === 200 && response.data) {
+        const { requested_count, processed_count } = response.data
+
+        let simulatedProgress = 80
+        const simulateProcessing = setInterval(() => {
+          simulatedProgress += Math.random() * 5
+          if (simulatedProgress >= 100) {
+            clearInterval(simulateProcessing)
+            setUploadProgress(100)
+            toast.success(`Upload complete: ${processed_count} out of ${requested_count} servers processed successfully.`)
+            setTimeout(() => {
+              setRefetchTrigger(new Date().getTime())
+              onClose() // Close the dialog after a short delay
+            }, 1000)
+          } else {
+            setUploadProgress(simulatedProgress)
+          }
+        }, 100)
+      } else {
+        toast.success('Upload complete.')
+        setTimeout(() => {
+          setRefetchTrigger(new Date().getTime())
+          onClose() // Close the dialog after a short delay
+        }, 1000)
+      }
+
       setFileName('')
       setFile(null)
-      onClose() // Close the dialog on success
-      toast.success('Server are being uploaded and processed.')
+      setIsUploading(false)
     } catch (error) {
       console.error('Error uploading file:', error)
       toast.error('Error uploading file')
@@ -405,13 +438,22 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           style={{ display: 'none' }} // Hide the input
         />
         {/* Custom styled button */}
-        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary'>
+        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary' disabled={isUploading}>
           {t('Choose File')}
         </Button>
         {fileName && (
           <Typography variant='subtitle1' sx={{ mt: 2 }}>
             Selected file: {fileName}
           </Typography>
+        )}
+
+        {isUploading && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant='determinate' value={uploadProgress} />
+            <Typography variant='subtitle2' align='center'>
+              {Math.round(uploadProgress)}% uploaded
+            </Typography>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>
@@ -421,6 +463,7 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           variant='outlined'
           color='secondary'
           startIcon={<Icon icon='mdi:close' />}
+          disabled={isUploading}
         >
           {t('Cancel')}
         </Button>
@@ -431,8 +474,9 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           color='warning'
           autoFocus
           startIcon={<Icon icon='mdi:upload-multiple' />}
+          disabled={isUploading || !file}
         >
-          {t('Upload')}
+          {isUploading ? t('Uploading...') : t('Upload')}
         </Button>
       </DialogActions>
     </Dialog>

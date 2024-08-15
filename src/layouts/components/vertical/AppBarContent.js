@@ -130,6 +130,7 @@ const CustomBreadcrumbs = () => {
 const AppBarContent = props => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
+  const theme = useTheme()
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
   const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'

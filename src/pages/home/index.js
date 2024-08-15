@@ -1,4 +1,4 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import BlankLayoutWithAppBar from 'src//layouts/UserBlankLayoutWithAppBar'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
@@ -53,6 +53,16 @@ const Home = () => {
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
 
+  // Determine the root domain or IP from the URL
+  const [rootDomain, setRootDomain] = useState(docs_host)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      setRootDomain(hostname)
+    }
+  }, [docs_host])
+
   const userName = session?.user?.name || 'John Doe'
   const firstName = userName.split(' ')[0]
 
@@ -102,7 +112,7 @@ const Home = () => {
     text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
     imageUrl: '/images/oscar.png',
     imageTitle: 'OSCAR Academy',
-    link: `https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`,
+    link: `https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`,
     imageText:
       'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
     actions: [

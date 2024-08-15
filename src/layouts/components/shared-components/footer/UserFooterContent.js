@@ -1,4 +1,5 @@
 // ** MUI Imports
+import { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Link from 'next/link'
 import Typography from '@mui/material/Typography'
@@ -28,6 +29,16 @@ const UserFooterContent = props => {
 
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
 
+  // Determine the root domain or IP from the URL
+  const [rootDomain, setRootDomain] = useState(docs_host)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      setRootDomain(hostname)
+    }
+  }, [docs_host])
+
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
       <Typography
@@ -47,8 +58,8 @@ const UserFooterContent = props => {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>
           <Stack direction='row' spacing={3}>
             <Button variant='contained' color='primary'>
-              <Link 
-                href={`https://${docs_host}/ext/docs/?theme=${theme.palette.mode}`}
+              <Link
+                href={`https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`}
                 passHref
                 legacyBehavior
               >

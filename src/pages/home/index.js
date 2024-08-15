@@ -110,7 +110,7 @@ const Home = () => {
       { text: 'SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
       { text: 'Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
       { text: 'Workflows', icon: 'mdi:workflow', link: '/service-continuity/workflows' },
-      
+
     ]
   }
 
@@ -136,7 +136,7 @@ const Home = () => {
     {
       title: 'Runtime',
       description: 'Monitor OSCAR services for runtime issues',
-      link: '/management/application/services',
+      link: '/api/oscar/services',
       icon: 'mdi:heart-pulse'
     }
   ]

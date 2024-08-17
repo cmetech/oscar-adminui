@@ -197,6 +197,11 @@ const User = () => {
   const userFullName = userSession?.data?.user?.name || 'John Doe'
   const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
+  const userRoles = userSession?.data?.user?.roles || [];
+
+  const firstRole = userRoles.length > 0 ? userRoles[0] : 'User';
+  const isAdmin = userRoles.includes('admin');
+
   return (
     <Box sx={{ py: 2, px: 4, mb: 2.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -218,11 +223,11 @@ const User = () => {
           <Typography sx={{ fontWeight: 600 }}>{userFullName}</Typography>
           <Stack direction='row' alignItems='center' spacing={0.5}>
             <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-              {userSession.data.user.role}
+              {firstRole}
             </Typography>
-            {userSession.data.user.role === 'admin' ? (
+            {isAdmin && (
               <Icon icon='mdi:shield-crown-outline' color='success' sx={{ width: 10, height: 10, ml: 0.5 }} />
-            ) : null}
+            )}
           </Stack>
         </Box>
       </Box>

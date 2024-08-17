@@ -30,21 +30,22 @@ const AclGuard = props => {
 
   // ** Hooks
   // const auth = useAuth()
-  const session = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
 
   // ** Vars
   let ability
+
   useEffect(() => {
-    if (session?.data?.user && session?.data?.user.role && !guestGuard && router.route === '/') {
-      const homeRoute = getHomeRoute(session?.data?.user.role)
+    if (session?.user && session?.user.roles && !guestGuard && router.route === '/') {
+      const homeRoute = getHomeRoute(session?.user.roles)
       router.replace(homeRoute)
     }
-  }, [session?.data?.user, guestGuard, router])
+  }, [session?.user, guestGuard, router])
 
   // User is logged in, build ability for the user based on his role
-  if (session?.data?.user && !ability) {
-    ability = buildAbilityFor(session?.data?.user.role, aclAbilities.subject)
+  if (session?.user && !ability) {
+    ability = buildAbilityFor(session?.user.roles, aclAbilities.subject)
     if (router.route === '/') {
       return <UserFallbackSpinner />
     }
@@ -53,7 +54,7 @@ const AclGuard = props => {
   // If guest guard or no guard is true or any error page
   if (guestGuard || router.route === '/404' || router.route === '/500' || !authGuard) {
     // If user is logged in and his ability is built
-    if (session?.data?.user && ability) {
+    if (session?.user && ability) {
       return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>
     } else {
       // If user is not logged in (render pages like login, register etc..)
@@ -62,7 +63,7 @@ const AclGuard = props => {
   }
 
   // Check the access of current user and render pages
-  if (ability && session?.data?.user && ability.can(aclAbilities.action, aclAbilities.subject)) {
+  if (ability && session?.user && ability.can(aclAbilities.action, aclAbilities.subject)) {
     if (router.route === '/') {
       return <UserFallbackSpinner />
     }

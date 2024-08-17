@@ -35,7 +35,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 // import { useAuth } from 'src/hooks/useAuth'
 
 import { useRouter } from 'next/router'
-import { getCsrfToken, getProviders, signIn } from 'next-auth/react'
+import { getProviders, signIn } from 'next-auth/react'
 import useBgColor from 'src/@core/hooks/useBgColor'
 import { useSettings } from 'src/@core/hooks/useSettings'
 
@@ -139,8 +139,8 @@ const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
 }))
 
 const schema = yup.object().shape({
-  email: yup.string().email().required(),
-  password: yup.string().min(5).required()
+  email: yup.string().email('Must be a valid email').required('Email is required'),
+  password: yup.string().min(5, 'Password must be at least 5 characters').required('Password is required')
 })
 
 const defaultValues = {
@@ -177,24 +177,39 @@ const LoginPage = ({ csrfToken, providers }) => {
   // console.log('CSRF: ' + csrfToken)
   // console.log('Providers: ' + JSON.stringify(providers))
 
-  const onSubmit = data => {
+  const onSubmit = async (data) => {
     const { email, password } = data
 
-    signIn('oscar', { email, password, redirect: false }).then(res => {
-      if (res && res.ok) {
+    try {
+      const res = await signIn('oscar', { email, password, redirect: false })
+      console.log('Sign in response:', res)
+
+      if (res?.ok) {
         const returnUrl = router.query.returnUrl
         const redirectUrl = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-
+        console.log('Login successful, redirecting to:', redirectUrl)
         router.replace(redirectUrl)
       } else {
+        console.error('Login failed:', res?.error)
         setError('email', {
           type: 'manual',
           message: 'Email or Password is invalid'
         })
       }
-    })
+    } catch (error) {
+      console.error('An error occurred during sign in:', error)
+      setError('email', {
+        type: 'manual',
+        message: 'An unexpected error occurred'
+      })
+    }
   }
+
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
+
+  const handleKeycloakLogin = () => {
+    signIn('keycloak', { callbackUrl: '/' })
+  }
 
   return (
     <Box
@@ -257,8 +272,20 @@ const LoginPage = ({ csrfToken, providers }) => {
                   {/* {themeConfig.templateName} */}
                 </Typography>
               </Box>
+              <Button
+                fullWidth
+                size='large'
+                variant='outlined'
+                color='warning'
+                onClick={handleKeycloakLogin}
+                sx={{ mb: 2 }}
+                startIcon={<Icon icon='mdi:shield' />}
+              >
+                Login with Keycloak
+              </Button>
+              <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
               <Box sx={{ mb: 6 }}>
-                <Typography variant='h6'>Please sign-in to your account</Typography>
+                <Typography variant='h6'>Please sign-in using local account</Typography>
               </Box>
               <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
                 <FormControl fullWidth sx={{ mb: 4 }}>
@@ -319,30 +346,19 @@ const LoginPage = ({ csrfToken, providers }) => {
                 </FormControl>
                 <Box
                   sx={{
+                    mt: 2,
                     mb: 4,
                     display: 'flex',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    justifyContent: 'space-between'
+                    justifyContent: 'flex-end'
                   }}
                 >
-                  <FormControlLabel
-                    label='Remember Me'
-                    control={<CheckboxStyled checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
-                  />
                   <LinkStyled href='/forgot-password'>Forgot Password?</LinkStyled>
                 </Box>
-                <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }}>
+                <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 2 }}>
                   Login
                 </Button>
-                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Typography variant='body2' sx={{ mr: 2 }}>
-                    New on our platform?
-                  </Typography>
-                  <Typography variant='body2'>
-                    <LinkStyled href='/register'>Create an account</LinkStyled>
-                  </Typography>
-                </Box>
               </form>
             </BoxWrapper>
           </Box>
@@ -355,15 +371,3 @@ LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
 LoginPage.guestGuard = true
 
 export default LoginPage
-
-export async function getServerSideProps(context) {
-  const providers = await getProviders()
-  const csrfToken = await getCsrfToken(context)
-
-  return {
-    props: {
-      providers,
-      csrfToken
-    }
-  }
-}

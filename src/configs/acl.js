@@ -7,23 +7,29 @@ export const AppAbility = Ability
  * We have just shown Admin and Client rules for demo purpose where
  * admin can manage everything and client can just visit ACL page
  */
-const defineRulesFor = (role, subject) => {
+const defineRulesFor = (roles, subject) => {
   const { can, rules } = new AbilityBuilder(AppAbility)
-  if (role === 'admin') {
+
+  if (roles.includes('admin')) {
     can('manage', 'all')
-  } else if (role === 'regular') {
+  } else if (roles.includes('regular')) {
     can(['read'], 'all')
   } else {
+    // For any other role
     can(['read', 'create', 'update', 'delete'], subject)
   }
+
+  // You can add more specific rules for other roles here
+  // For example:
+  // if (roles.includes('editor')) {
+  //   can(['read', 'create', 'update'], 'article')
+  // }
 
   return rules
 }
 
-export const buildAbilityFor = (role, subject) => {
-  return new AppAbility(defineRulesFor(role, subject), {
-    // https://casl.js.org/v5/en/guide/subject-type-detection
-    // @ts-ignore
+export const buildAbilityFor = (roles, subject) => {
+  return new AppAbility(defineRulesFor(roles, subject), {
     detectSubjectType: object => object.type
   })
 }

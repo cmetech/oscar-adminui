@@ -3,6 +3,7 @@ import { useState, Fragment } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
+import getConfig from 'next/config'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -17,9 +18,8 @@ import Typography from '@mui/material/Typography'
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
-// ** Context
-// import { useAuth } from 'src/hooks/useAuth'
 import { signOut, useSession } from 'next-auth/react'
+import axios from 'axios'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -36,14 +36,15 @@ const UserDropdown = props => {
 
   // ** States
   const [anchorEl, setAnchorEl] = useState(null)
+  const { publicRuntimeConfig } = getConfig()
 
   // ** Hooks
   const router = useRouter()
 
   // const { logout } = useAuth()
 
-  const userSession = useSession()
-  const userName = userSession?.data?.user?.name || 'John Doe'
+  const { data: session } = useSession()
+  const userName = session.user?.name || 'John Doe'
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
   // ** Vars
@@ -76,12 +77,27 @@ const UserDropdown = props => {
     }
   }
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/', redirect: false }).then(() => {
-      router.asPath = '/'
-    })
-    handleDropdownClose()
-  }
+  const handleLogout = async () => {
+    try {
+      if (session?.provider === 'keycloak') {
+        console.log('Session', session)
+        await axios.post('/api/logout', {
+          refreshToken: session.refreshToken || session.user?.refreshToken
+        });
+      }
+
+      await signOut({ callbackUrl: '/', redirect: false });
+      router.push('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      }
+    }
+
+    handleDropdownClose();
+  };
 
   return (
     <Fragment>
@@ -129,7 +145,7 @@ const UserDropdown = props => {
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 600 }}>{userName}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                {userSession.data.user.role}
+                {session.user.role}
               </Typography>
             </Box>
           </Box>

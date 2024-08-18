@@ -304,41 +304,41 @@ export const authOptions = {
             provider: account.provider,
             roles: profile.roles,
           }
-        }
-      } else if (account.provider === 'azure-ad') {
-        // Use jwt-decode to decode the access token
-        const decodedToken = jwtDecode(account.access_token);
+        } else if (account.provider === 'azure-ad') {
+          // Use jwt-decode to decode the access token
+          const decodedToken = jwtDecode(account.access_token);
 
-        console.log('Decoded Token:', decodedToken);
-        const client_id = profile.aud
+          console.log('Decoded Token:', decodedToken);
+          const client_id = profile.aud
 
-        console.log('Decoded Token:', decodedToken);
-        console.log('Client ID:', client_id);
+          console.log('Decoded Token:', decodedToken);
+          console.log('Client ID:', client_id);
 
-        // Extract the roles from the decoded token
-        const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
-        console.log('Roles:', roles);
+          // Extract the roles from the decoded token
+          const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
+          console.log('Roles:', roles);
 
-        // Azure AD Auth
-        const updatedToken = {
-          ...token,
-          sub: token.sub,
-          firstName: profile.given_name,
-          lastName: profile.family_name,
-          organization: profile.organization ? 'ericsson' : 'ericsson',
-          timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
-          username: profile.preferred_username,
-          idToken: account.id_token,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expires_at: account.expires_in,
-          refreshTokenExpires: account.refresh_token_expires_in,
-          provider: account.provider,
-          roles: profile.roles,
+          // Azure AD Auth
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+            organization: profile.organization ? 'ericsson' : 'ericsson',
+            timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+            username: profile.preferred_username,
+            idToken: account.id_token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expires_at: account.expires_in,
+            refreshTokenExpires: account.refresh_token_expires_in,
+            provider: account.provider,
+            roles: profile.roles,
+          }
         }
       } else {
-        if (token && token.provider) {
-          if (token.provider === 'keycloak') {
+        if (token && token?.provider) {
+          if (token?.provider === 'keycloak') {
             if (token.expires_at && token.expires_at - nowTimeStamp < 60) {
               console.log('Token is about to expire. Refreshing...')
               return refreshAccessToken(token)

@@ -395,7 +395,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
       // Add cases for other tabs with different fields
       default:
-        return <Typography>Form not configured for this tab.</Typography>
+        return <Typography>{t('Form not configured for this tab.')}</Typography>
     }
   }
 
@@ -428,7 +428,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
           <Typography variant='h5' sx={{ mb: 3 }}>
             {getDynamicSubTitle(tab)}
           </Typography>
-          <Typography variant='body2'>Information submitted will be effective immediately.</Typography>
+          <Typography variant='body2'>{t('Information submitted will be effective immediately.')}</Typography>
         </Box>
         {dynamicFields()}
       </DialogContent>
@@ -497,10 +497,10 @@ const ProbeManager = () => {
       // Handle results
       results.forEach(result => {
         if (result.success) {
-          toast.success(`Probe ${result.probeId} deleted successfully`)
+          toast.success(t('Probe {{probeId}} deleted successfully', { probeId: result.probeId }))
         } else {
           console.error(`Error deleting probe ${result.probeId}:`, result.error)
-          toast.error(`Failed to delete probe ${result.probeId}`)
+          toast.error(t('Failed to delete probe {{probeId}}', { probeId: result.probeId }))
         }
       })
 
@@ -512,7 +512,7 @@ const ProbeManager = () => {
     } catch (error) {
       // This catch block may not be necessary since individual errors are caught above
       console.error('Unexpected error during probe deletion:', error)
-      toast.error('An unexpected error occurred during probe deletion')
+      toast.error(t('An unexpected error occurred during probe deletion'))
     }
 
     setIsDeleteModalOpen(false)
@@ -538,10 +538,10 @@ const ProbeManager = () => {
         setIsDisableModalOpen(false) // Add this line to close the dialog
         setSelectedProbeIds([]) // Clear the selected probe IDs
       } else {
-        toast.error('Error disabling probes')
+        toast.error(t('Error disabling probes'))
       }
     } catch (error) {
-      toast.error(`Error disabling probes: ${error.response?.data?.message || error.message}`)
+      toast.error(t('Error disabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message }))
 
       // Close the disable modal dialog
       setIsDisableModalOpen(false) // Add this line to close the dialog
@@ -569,10 +569,10 @@ const ProbeManager = () => {
         setIsEnableModalOpen(false) // Add this line to close the dialog
         setSelectedProbeIds([]) // Clear the selected Probe IDs
       } else {
-        toast.error('Error enabling probes')
+        toast.error(t('Error enabling probes'))
       }
     } catch (error) {
-      toast.error(`Error enabling probes: ${error.response?.data?.message || error.message}`)
+      toast.error(t('Error enabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message }))
 
       setIsEnableModalOpen(false)
     }
@@ -762,7 +762,7 @@ const ProbeManager = () => {
             {probeTotal == 0 ? (
               <Tab
                 value='1'
-                label={t('ACtive Probes')}
+                label={t('Active Probes')}
                 icon={<Icon icon='mdi:arrow-decision-auto' />}
                 iconPosition='start'
               />

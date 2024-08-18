@@ -545,7 +545,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
       // Add cases for other tabs with different fields
       default:
-        return <Typography>Form not configured for this tab.</Typography>
+        return <Typography>{t('Form not configured for this tab.')}</Typography>
     }
   }
 
@@ -578,7 +578,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
           <Typography variant='h5' sx={{ mb: 3 }}>
             {getDynamicSubTitle(tab)}
           </Typography>
-          <Typography variant='body2'>Information submitted will be effective immediately.</Typography>
+          <Typography variant='body2'>{t('Information submitted will be effective immediately.')}</Typography>
         </Box>
         {dynamicFields()}
       </DialogContent>
@@ -629,10 +629,10 @@ const SLO = () => {
       // Handle results
       results.forEach(result => {
         if (result.success) {
-          toast.success(`SLO ${result.sloId} deleted successfully`)
+          toast.success(t('SLO {{sloId}} deleted successfully', { sloId: result.sloId }))
         } else {
           console.error(`Error deleting SLO ${result.sloId}:`, result.error)
-          toast.error(`Failed to delete SLO ${result.sloId}`)
+          toast.error(t('Failed to delete SLO {{sloId}}', { sloId: result.sloId }))
         }
       })
 
@@ -644,7 +644,7 @@ const SLO = () => {
     } catch (error) {
       // This catch block may not be necessary since individual errors are caught above
       console.error('Unexpected error during SLO deletion:', error)
-      toast.error('An unexpected error occurred during SLO deletion')
+      toast.error(t('An unexpected error occurred during SLO deletion'))
     }
 
     setIsDeleteModalOpen(false)

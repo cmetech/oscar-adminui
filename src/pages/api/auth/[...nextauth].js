@@ -331,16 +331,18 @@ export const authOptions = {
           idToken: account.id_token,
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
-          expires_at: account.expires_at,
+          expires_at: account.expires_in,
           refreshTokenExpires: account.refresh_token_expires_in,
           provider: account.provider,
           roles: profile.roles,
         }
       } else {
-        if (token.provider === 'keycloak') {
-          if (token.expires_at && token.expires_at - nowTimeStamp < 60) {
-            console.log('Token is about to expire. Refreshing...')
-            return refreshAccessToken(token)
+        if (token && token.provider) {
+          if (token.provider === 'keycloak') {
+            if (token.expires_at && token.expires_at - nowTimeStamp < 60) {
+              console.log('Token is about to expire. Refreshing...')
+              return refreshAccessToken(token)
+            }
           }
         }
       }
@@ -369,9 +371,11 @@ export const authOptions = {
       session.expires_at = token.expires_at
 
       // Add idToken if the provider is Keycloak
-      if (token.provider === 'keycloak') {
-        session.idToken = token.idToken
-        session.refreshToken = token.refreshToken
+      if (token && token.provider) {
+        if (token.provider === 'keycloak') {
+          session.idToken = token.idToken
+          session.refreshToken = token.refreshToken
+        }
       }
 
       return session

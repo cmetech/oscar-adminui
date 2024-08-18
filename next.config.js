@@ -32,7 +32,8 @@ module.exports = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     MKDOCS_HOST: process.env.DETECTED_IP,
     MKDOCS_PORT: process.env.MKDOCS_PORT,
-    DETECTED_IP: process.env.DETECTED_IP
+    DETECTED_IP: process.env.DETECTED_IP,
+    KEYCLOAK_ENABLED: process.env.KEYCLOAK_ENABLED
   },
 
   output: 'standalone'

@@ -35,6 +35,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 // import { useAuth } from 'src/hooks/useAuth'
 
 import { useRouter } from 'next/router'
+import getConfig from 'next/config'
 import { getProviders, signIn } from 'next-auth/react'
 import useBgColor from 'src/@core/hooks/useBgColor'
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -163,6 +164,9 @@ const LoginPage = ({ csrfToken, providers }) => {
   // ** Vars
   const { skin } = settings
 
+  const { publicRuntimeConfig } = getConfig()
+  const keycloak_enabled = publicRuntimeConfig.KEYCLOAK_ENABLED === 'true'
+
   const {
     control,
     setError,
@@ -272,18 +276,22 @@ const LoginPage = ({ csrfToken, providers }) => {
                   {/* {themeConfig.templateName} */}
                 </Typography>
               </Box>
-              <Button
-                fullWidth
-                size='large'
-                variant='outlined'
-                color='warning'
-                onClick={handleKeycloakLogin}
-                sx={{ mb: 2 }}
-                startIcon={<Icon icon='mdi:shield' />}
-              >
-                Login with Keycloak
-              </Button>
-              <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
+              {keycloak_enabled && (
+                <>
+                  <Button
+                    fullWidth
+                    size='large'
+                    variant='outlined'
+                    color='warning'
+                    onClick={handleKeycloakLogin}
+                    sx={{ mb: 2 }}
+                    startIcon={<Icon icon='mdi:shield' />}
+                  >
+                    Login with Keycloak
+                  </Button>
+                  <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
+                </>
+              )}
               <Box sx={{ mb: 6 }}>
                 <Typography variant='h6'>Please sign-in using local account</Typography>
               </Box>

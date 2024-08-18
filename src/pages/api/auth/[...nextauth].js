@@ -3,6 +3,7 @@ import NextAuth from 'next-auth'
 import { jwtDecode } from 'jwt-decode'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import KeycloakProvider from 'next-auth/providers/keycloak'
+import AzureProvider from 'next-auth/providers/azure-ad'
 
 import axios from 'axios'
 import https from 'https'
@@ -127,6 +128,23 @@ export const authOptions = {
       issuer: process.env.KEYCLOAK_ISSUER,
       authorization: {
         params: { scope: "openid email profile roles" }
+      },
+      httpOptions: {
+        agent: new https.Agent({
+          rejectUnauthorized: false
+        }),
+        timeout: 10000
+      }
+    }),
+
+    AzureProvider({
+      clientId: process.env.AZURE_CLIENT_ID,
+      clientSecret: process.env.AZURE_CLIENT_SECRET,
+      tenantId: process.env.AZURE_TENANT_ID,
+      authorization: {
+        params: {
+          scope: 'openid email profile roles'
+        }
       },
       httpOptions: {
         agent: new https.Agent({

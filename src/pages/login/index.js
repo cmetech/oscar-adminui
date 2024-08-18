@@ -166,6 +166,8 @@ const LoginPage = ({ csrfToken, providers }) => {
 
   const { publicRuntimeConfig } = getConfig()
   const keycloak_enabled = publicRuntimeConfig.KEYCLOAK_ENABLED === 'true'
+  const azure_ad_enabled = publicRuntimeConfig.AZURE_ENABLED === 'true'
+  const showDivider = keycloak_enabled || azure_ad_enabled
 
   const {
     control,
@@ -213,6 +215,10 @@ const LoginPage = ({ csrfToken, providers }) => {
 
   const handleKeycloakLogin = () => {
     signIn('keycloak', { callbackUrl: '/' })
+  }
+
+  const handleAzureLogin = () => {
+    signIn('azure-ad', { callbackUrl: '/' })
   }
 
   return (
@@ -277,20 +283,33 @@ const LoginPage = ({ csrfToken, providers }) => {
                 </Typography>
               </Box>
               {keycloak_enabled && (
-                <>
-                  <Button
-                    fullWidth
-                    size='large'
-                    variant='outlined'
-                    color='warning'
-                    onClick={handleKeycloakLogin}
-                    sx={{ mb: 2 }}
-                    startIcon={<Icon icon='mdi:shield' />}
-                  >
-                    Login with Keycloak
-                  </Button>
-                  <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
-                </>
+                <Button
+                  fullWidth
+                  size='large'
+                  variant='outlined'
+                  color='warning'
+                  onClick={handleKeycloakLogin}
+                  sx={{ mb: 2 }}
+                  startIcon={<Icon icon='mdi:shield' />}
+                >
+                  Login with Keycloak
+                </Button>
+              )}
+              {azure_ad_enabled && (
+                <Button
+                  fullWidth
+                  size='large'
+                  variant='outlined'
+                  color='info'
+                  onClick={handleAzureLogin}
+                  sx={{ mb: 2 }}
+                  startIcon={<Icon icon='mdi:microsoft' />}
+                >
+                  Login with Azure AD
+                </Button>
+              )}
+              {showDivider && (
+                <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
               )}
               <Box sx={{ mb: 6 }}>
                 <Typography variant='h6'>Please sign-in using local account</Typography>

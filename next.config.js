@@ -33,7 +33,8 @@ module.exports = {
     MKDOCS_HOST: process.env.DETECTED_IP,
     MKDOCS_PORT: process.env.MKDOCS_PORT,
     DETECTED_IP: process.env.DETECTED_IP,
-    KEYCLOAK_ENABLED: process.env.KEYCLOAK_ENABLED
+    KEYCLOAK_ENABLED: process.env.KEYCLOAK_ENABLED,
+    AZURE_ENABLED: process.env.AZURE_ENABLED,
   },
 
   output: 'standalone'

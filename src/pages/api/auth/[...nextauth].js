@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import KeycloakProvider from 'next-auth/providers/keycloak'
 import AzureADB2CProvider from 'next-auth/providers/azure-ad-b2c'
+import AzureADProvider from "next-auth/providers/azure-ad"
 
 import axios from 'axios'
 import https from 'https'
@@ -137,11 +138,10 @@ export const authOptions = {
       }
     }),
 
-    AzureADB2CProvider({
+    AzureADProvider({
       clientId: process.env.AZURE_CLIENT_ID,
       clientSecret: process.env.AZURE_CLIENT_SECRET,
       tenantId: process.env.AZURE_TENANT_ID,
-      primaryUserFlow: process.env.AZURE_PRIMARY_USER_FLOW,
       authorization: {
         params: {
           scope: 'openid offline_access email profile roles'
@@ -154,6 +154,26 @@ export const authOptions = {
         timeout: 10000
       }
     })
+
+    // AzureADB2CProvider({
+    //   clientId: process.env.AZURE_CLIENT_ID,
+    //   clientSecret: process.env.AZURE_CLIENT_SECRET,
+    //   tenantId: process.env.AZURE_TENANT_ID,
+    //   primaryUserFlow: process.env.AZURE_PRIMARY_USER_FLOW,
+    //   authorization: {
+    //     params: {
+    //       scope: 'openid offline_access email profile roles'
+    //     }
+    //   },
+    //   httpOptions: {
+    //     agent: new https.Agent({
+    //       rejectUnauthorized: false
+    //     }),
+    //     timeout: 10000
+    //   }
+    // })
+
+    // ** ...add more providers here
   ],
 
   // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
@@ -284,6 +304,37 @@ export const authOptions = {
             provider: account.provider,
             roles: profile.roles,
           }
+        }
+      } else if (account.provider === 'azure-ad') {
+        // Use jwt-decode to decode the access token
+        const decodedToken = jwtDecode(account.access_token);
+
+        console.log('Decoded Token:', decodedToken);
+        const client_id = profile.aud
+
+        console.log('Decoded Token:', decodedToken);
+        console.log('Client ID:', client_id);
+
+        // Extract the roles from the decoded token
+        const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
+        console.log('Roles:', roles);
+
+        // Azure AD Auth
+        const updatedToken = {
+          ...token,
+          sub: token.sub,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          organization: profile.organization ? 'ericsson' : 'ericsson',
+          timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+          username: profile.preferred_username,
+          idToken: account.id_token,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          expires_at: account.expires_at,
+          refreshTokenExpires: account.refresh_token_expires_in,
+          provider: account.provider,
+          roles: profile.roles,
         }
       } else {
         if (token.provider === 'keycloak') {

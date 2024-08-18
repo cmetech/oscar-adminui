@@ -188,9 +188,7 @@ const navigation = () => {
           icon: 'mdi:account-multiple',
           path: '/management/security/users',
           action: 'manage',
-          subject: 'settings-nav',
-          badgeContent: 'Keycloak',
-          badgeColor: 'error'
+          subject: 'settings-nav'
         }
       ]
     }

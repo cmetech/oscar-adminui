@@ -3,7 +3,7 @@ import NextAuth from 'next-auth'
 import { jwtDecode } from 'jwt-decode'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import KeycloakProvider from 'next-auth/providers/keycloak'
-import AzureProvider from 'next-auth/providers/azure-ad'
+import AzureADB2CProvider from 'next-auth/providers/azure-ad-b2c'
 
 import axios from 'axios'
 import https from 'https'
@@ -137,13 +137,14 @@ export const authOptions = {
       }
     }),
 
-    AzureProvider({
+    AzureADB2CProvider({
       clientId: process.env.AZURE_CLIENT_ID,
       clientSecret: process.env.AZURE_CLIENT_SECRET,
       tenantId: process.env.AZURE_TENANT_ID,
+      primaryUserFlow: process.env.AZURE_PRIMARY_USER_FLOW,
       authorization: {
         params: {
-          scope: 'openid email profile roles'
+          scope: 'openid offline_access email profile roles'
         }
       },
       httpOptions: {
@@ -252,7 +253,37 @@ export const authOptions = {
 
           console.log('Keycloak Auth: updatedToken', updatedToken)
           return updatedToken
-        }
+        } else if (account.provider === 'azure-ad-b2c') {
+          // Use jwt-decode to decode the access token
+          const decodedToken = jwtDecode(account.access_token);
+
+          console.log('Decoded Token:', decodedToken);
+          const client_id = profile.aud
+
+          console.log('Decoded Token:', decodedToken);
+          console.log('Client ID:', client_id);
+
+          // Extract the roles from the decoded token
+          const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
+          console.log('Roles:', roles);
+
+          // Azure AD Auth
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+            organization: profile.organization ? 'ericsson' : 'ericsson',
+            timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+            username: profile.preferred_username,
+            idToken: account.id_token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expires_at: account.expires_at,
+            refreshTokenExpires: account.refresh_token_expires_in,
+            provider: account.provider,
+            roles: profile.roles,
+          }
       } else {
         if (token.provider === 'keycloak') {
           if (token.expires_at && token.expires_at - nowTimeStamp < 60) {

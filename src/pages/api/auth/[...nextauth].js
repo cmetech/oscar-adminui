@@ -9,6 +9,7 @@ import AzureADProvider from "next-auth/providers/azure-ad"
 import axios from 'axios'
 import https from 'https'
 
+const node_env = process.env.NODE_ENV || 'production'
 async function refreshAccessToken(token) {
   try {
     const httpsAgent = new https.Agent({
@@ -209,10 +210,12 @@ export const authOptions = {
     async jwt({ token, user, account, profile }) {
       const nowTimeStamp = Math.floor(Date.now() / 1000);
 
-      console.log('JWT Callback: token', token)
-      console.log('JWT Callback: user', user)
-      console.log('JWT Callback: account', account)
-      console.log('JWT Callback: profile', profile)
+      if (node_env === 'development') {
+        console.log('JWT Callback: token', token)
+        console.log('JWT Callback: user', user)
+        console.log('JWT Callback: account', account)
+        console.log('JWT Callback: profile', profile)
+      }
 
       if (account && user) {
         const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 days in seconds
@@ -236,22 +239,22 @@ export const authOptions = {
             provider: account.provider,
           }
 
-          console.log('Oscar Auth: updatedToken', updatedToken)
+          node_env === 'development' && console.log('Oscar Auth: updatedToken', updatedToken || 'undefined')
           return updatedToken
 
         } else if (account.provider === 'keycloak') {
           // Use jwt-decode to decode the access token
           const decodedToken = jwtDecode(account.access_token);
 
-          console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
           const client_id = profile.aud
 
-          console.log('Decoded Token:', decodedToken);
-          console.log('Client ID:', client_id);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Client ID:', client_id);
 
           // Extract the roles from the decoded token
           const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
-          console.log('Roles:', roles);
+          node_env === 'development' && console.log('Roles:', roles);
 
           // Keycloak Auth
           const updatedToken = {
@@ -271,21 +274,21 @@ export const authOptions = {
             roles: roles,
           }
 
-          console.log('Keycloak Auth: updatedToken', updatedToken)
+          node_env === 'development' && console.log('Keycloak Auth: updatedToken', updatedToken)
           return updatedToken
         } else if (account.provider === 'azure-ad-b2c') {
           // Use jwt-decode to decode the access token
           const decodedToken = jwtDecode(account.access_token);
 
-          console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
           const client_id = profile.aud
 
-          console.log('Decoded Token:', decodedToken);
-          console.log('Client ID:', client_id);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Client ID:', client_id);
 
           // Extract the roles from the decoded token
           const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
-          console.log('Roles:', roles);
+          node_env === 'development' && console.log('Roles:', roles);
 
           // Azure AD Auth
           const updatedToken = {
@@ -308,15 +311,15 @@ export const authOptions = {
           // Use jwt-decode to decode the access token
           const decodedToken = jwtDecode(account.access_token);
 
-          console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
           const client_id = profile.aud
 
-          console.log('Decoded Token:', decodedToken);
-          console.log('Client ID:', client_id);
+          node_env === 'development' && console.log('Decoded Token:', decodedToken);
+          node_env === 'development' && console.log('Client ID:', client_id);
 
           // Extract the roles from the decoded token
           const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
-          console.log('Roles:', roles);
+          node_env === 'development' && console.log('Roles:', roles);
 
           // Azure AD Auth
           const updatedToken = {
@@ -351,8 +354,8 @@ export const authOptions = {
     },
 
     async session({ session, token }) {
-      console.log('Session Callback: session', session)
-      console.log('Session Callback: token', token)
+      node_env === 'development' && console.log('Session Callback: session', session)
+      node_env === 'development' && console.log('Session Callback: token', token)
 
       session.user = {
         id: token.sub,

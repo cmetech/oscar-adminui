@@ -35,6 +35,7 @@ module.exports = {
     DETECTED_IP: process.env.DETECTED_IP,
     KEYCLOAK_ENABLED: process.env.KEYCLOAK_ENABLED,
     AZURE_ENABLED: process.env.AZURE_ENABLED,
+    NODE_ENV: process.env.NODE_ENV,
   },
 
   output: 'standalone'

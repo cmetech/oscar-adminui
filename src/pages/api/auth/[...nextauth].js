@@ -284,6 +284,7 @@ export const authOptions = {
             provider: account.provider,
             roles: profile.roles,
           }
+        }
       } else {
         if (token.provider === 'keycloak') {
           if (token.expires_at && token.expires_at - nowTimeStamp < 60) {
@@ -295,6 +296,7 @@ export const authOptions = {
 
       return token
     },
+
     async session({ session, token }) {
       console.log('Session Callback: session', session)
       console.log('Session Callback: token', token)

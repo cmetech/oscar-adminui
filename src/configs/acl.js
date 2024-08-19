@@ -1,6 +1,6 @@
-import { AbilityBuilder, Ability } from '@casl/ability'
+import { AbilityBuilder, createMongoAbility } from '@casl/ability'
 
-export const AppAbility = Ability
+export const AppAbility = createMongoAbility
 
 /**
  * Please define your own Ability rules according to your app requirements.
@@ -12,11 +12,11 @@ const defineRulesFor = (roles, subject) => {
 
   if (roles.includes('admin')) {
     can('manage', 'all')
-  } else if (roles.includes('regular')) {
-    can(['read'], 'all')
+  } else if (roles.includes('super')) {
+    can('read', 'all')
   } else {
     // For any other role
-    can(['read', 'create', 'update', 'delete'], subject)
+    can('read', 'all')
   }
 
   // You can add more specific rules for other roles here

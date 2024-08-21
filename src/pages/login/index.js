@@ -165,8 +165,8 @@ const LoginPage = ({ csrfToken, providers }) => {
   const { skin } = settings
 
   const { publicRuntimeConfig } = getConfig()
-  const keycloak_enabled = publicRuntimeConfig.KEYCLOAK_ENABLED === 'true'
-  const azure_ad_enabled = publicRuntimeConfig.AZURE_ENABLED === 'true'
+  const keycloak_enabled = publicRuntimeConfig.KEYCLOAK_ENABLE === 'true'
+  const azure_ad_enabled = publicRuntimeConfig.AZURE_ENABLE === 'true'
   const showDivider = keycloak_enabled || azure_ad_enabled
 
   const {

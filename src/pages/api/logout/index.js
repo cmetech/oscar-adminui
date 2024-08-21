@@ -12,8 +12,8 @@ export default async function handler(req, res) {
       }
 
       const keycloakIssuer = process.env.KEYCLOAK_ISSUER;
-      const keycloakClientId = process.env.KEYCLOAK_CLIENT_ID;
-      const keycloakClientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
+      const keycloakClientId = process.env.OSCAR_CLIENT_ID;
+      const keycloakClientSecret = process.env.OSCAR_CLIENT_SECRET;
 
       const keycloakLogoutUrl = `${keycloakIssuer}/protocol/openid-connect/logout`;
 

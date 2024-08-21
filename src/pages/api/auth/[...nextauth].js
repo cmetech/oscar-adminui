@@ -19,8 +19,8 @@ async function refreshAccessToken(token) {
     const response = await axios.post(
       `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
       new URLSearchParams({
-        client_id: process.env.KEYCLOAK_CLIENT_ID,
-        client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+        client_id: process.env.OSCAR_CLIENT_ID,
+        client_secret: process.env.OSCAR_CLIENT_SECRET,
         grant_type: 'refresh_token',
         refresh_token: token.refreshToken,
       }),
@@ -125,8 +125,8 @@ export const authOptions = {
 
     // ** ...add more providers here
     KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+      clientId: process.env.OSCAR_CLIENT_ID,
+      clientSecret: process.env.OSCAR_CLIENT_SECRET,
       issuer: process.env.KEYCLOAK_ISSUER,
       authorization: {
         params: { scope: "openid email profile roles" }

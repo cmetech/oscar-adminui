@@ -69,7 +69,7 @@ USER nextjs
 EXPOSE 4100
 ENV PORT 4100
 
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+# ENTRYPOINT [ "/app/entrypoint.sh" ]
 
 CMD HOSTNAME="0.0.0.0" node server.js
 

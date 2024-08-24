@@ -320,7 +320,7 @@ const ConnectionsManager = () => {
 
 ConnectionsManager.acl = {
   action: 'manage',
-  subject: 'connections-page'
+  subject: 'connections'
 }
 
 export default ConnectionsManager

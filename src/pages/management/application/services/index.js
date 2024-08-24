@@ -31,8 +31,8 @@ const ServicesDashboard = () => {
 }
 
 ServicesDashboard.acl = {
-  action: 'read',
-  subject: 'services-page'
+  action: 'manage',
+  subject: 'services'
 }
 
 export default ServicesDashboard

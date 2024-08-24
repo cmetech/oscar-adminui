@@ -34,22 +34,22 @@ const navigation = () => {
     {
       title: 'Infrastructure',
       icon: 'mdi:collections',
-      action: 'manage',
-      subject: 'infra-nav',
+      action: 'read',
+      subject: 'all',
       children: [
         {
           title: 'Inventory',
           path: '/observability/inventory',
           icon: 'mdi:server-network',
-          action: 'manage',
-          subject: 'settings-nav'
+          action: 'read',
+          subject: 'all'
         },
         {
           title: 'Monitoring',
           path: '/api/oscar/ui?path=d/bdkxfkrhtor28b/server-monitoring?orgId=1',
           icon: 'mdi:monitor-eye',
-          action: 'manage',
-          subject: 'settings-nav',
+          action: 'read',
+          subject: 'all',
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Grafana',
@@ -98,8 +98,8 @@ const navigation = () => {
           title: 'Probes',
           path: '/service-continuity/probes',
           icon: 'mdi:monitor-eye',
-          action: 'manage',
-          subject: 'settings-nav'
+          action: 'read',
+          subject: 'all'
         }
       ]
     },
@@ -127,8 +127,8 @@ const navigation = () => {
     },
     {
       sectionTitle: 'AI/Analytics',
-      action: 'manage',
-      subject: 'admin-section'
+      action: 'read',
+      subject: 'all'
     },
     {
       title: 'Anomaly Detection',
@@ -142,20 +142,20 @@ const navigation = () => {
     {
       sectionTitle: 'Runtime',
       action: 'manage',
-      subject: 'admin-section'
+      subject: 'runtime'
     },
     {
       title: 'Application',
       icon: 'mdi:application-cog',
       action: 'manage',
-      subject: 'settings-nav',
+      subject: 'runtime',
       children: [
         {
           title: 'Services',
           path: '/api/oscar/services',
           icon: 'mdi:server-network',
-          action: 'read',
-          subject: 'all',
+          action: 'manage',
+          subject: 'runtime',
           externalLink: true,
           openInNewTab: true,
           badgeContent: 'Portainer',
@@ -166,14 +166,14 @@ const navigation = () => {
           path: '/management/application/notifiers',
           icon: 'mdi:notifications-active',
           action: 'manage',
-          subject: 'settings-nav'
+          subject: 'runtime'
         },
         {
           title: 'Connections',
           path: '/management/application/connections',
           icon: 'mdi:transit-connection-variant',
           action: 'manage',
-          subject: 'settings-nav'
+          subject: 'runtime'
         },
       ]
     },
@@ -181,14 +181,14 @@ const navigation = () => {
       title: 'Settings',
       icon: 'mdi:cog',
       action: 'manage',
-      subject: 'settings-nav',
+      subject: 'runtime',
       children: [
         {
           title: 'Users',
           icon: 'mdi:account-multiple',
           path: '/management/security/users',
           action: 'manage',
-          subject: 'settings-nav'
+          subject: 'runtime'
         }
       ]
     }

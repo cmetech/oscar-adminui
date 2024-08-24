@@ -91,7 +91,7 @@ const Settings = () => {
 
 Settings.acl = {
   action: 'manage',
-  subject: 'settings-page'
+  subject: 'security'
 }
 
 export default Settings

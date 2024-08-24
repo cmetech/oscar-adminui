@@ -10,20 +10,20 @@ export const AppAbility = createMongoAbility
 const defineRulesFor = (roles, subject) => {
   const { can, rules } = new AbilityBuilder(AppAbility)
 
-  if (roles.includes('admin')) {
-    can('manage', 'all')
-  } else if (roles.includes('super')) {
-    can('read', 'all')
-  } else {
-    // For any other role
-    can('read', 'all')
-  }
-
-  // You can add more specific rules for other roles here
-  // For example:
-  // if (roles.includes('editor')) {
-  //   can(['read', 'create', 'update'], 'article')
-  // }
+  // Check each role in the list of roles
+  roles.forEach(role => {
+    if (role === 'admin') {
+      can('manage', 'all')
+    } else if (role === 'super') {
+      can('read', 'all')
+    } else if (role === 'editor') {
+      can(['read', 'create', 'update'], ['inventory', 'task', 'probes', 'workflow', 'slo'])
+      cannot('delete', ['inventory', 'task', 'probes', 'workflow', 'slo']) // Example: Editors can't delete inventory
+    } else if (role === 'viewer') {
+      can('read', ['inventory', 'task', 'probes', 'workflow', 'slo'])
+    }
+    // You can add more roles here as needed
+  });
 
   return rules
 }

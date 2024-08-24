@@ -10,6 +10,21 @@ import axios from 'axios'
 import https from 'https'
 
 const node_env = process.env.NODE_ENV || 'production'
+
+function extractRoles(decodedToken, client_id) {
+  const realmRoles = decodedToken?.realm_access?.roles || [];
+  const resourceRoles = decodedToken?.resource_access?.[client_id]?.roles || [];
+  const accountRoles = decodedToken?.resource_access?.account?.roles || [];
+
+  // Combine all roles and remove duplicates
+  const allRoles = [...new Set([...realmRoles, ...resourceRoles, ...accountRoles])];
+
+  console.log('All Roles:', allRoles);
+
+  return allRoles;
+}
+
+
 async function refreshAccessToken(token) {
   try {
     const httpsAgent = new https.Agent({
@@ -246,15 +261,15 @@ export const authOptions = {
           // Use jwt-decode to decode the access token
           const decodedToken = jwtDecode(account.access_token);
 
-          node_env === 'development' && console.log('Decoded Token:', decodedToken);
+          console.log('Decoded Token:', decodedToken);
           const client_id = profile.aud
 
-          node_env === 'development' && console.log('Decoded Token:', decodedToken);
-          node_env === 'development' && console.log('Client ID:', client_id);
+          console.log('Decoded Token:', decodedToken);
+          console.log('Client ID:', client_id);
 
           // Extract the roles from the decoded token
-          const roles = decodedToken?.resource_access?.[client_id]?.roles || [];
-          node_env === 'development' && console.log('Roles:', roles);
+          const roles = extractRoles(decodedToken, client_id) || [];
+          console.log('Roles:', roles);
 
           // Keycloak Auth
           const updatedToken = {
@@ -274,7 +289,7 @@ export const authOptions = {
             roles: roles,
           }
 
-          node_env === 'development' && console.log('Keycloak Auth: updatedToken', updatedToken)
+          console.log('Keycloak Auth: updatedToken', updatedToken)
           return updatedToken
         } else if (account.provider === 'azure-ad-b2c') {
           // Use jwt-decode to decode the access token
@@ -380,6 +395,8 @@ export const authOptions = {
           session.refreshToken = token.refreshToken
         }
       }
+
+      console.log('Session Callback: session', session)
 
       return session
     }

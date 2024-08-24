@@ -17,10 +17,10 @@ const defineRulesFor = (roles, subject) => {
     } else if (role === 'super') {
       can('read', 'all')
     } else if (role === 'editor') {
-      can(['read', 'create', 'update'], ['inventory', 'task', 'probes', 'workflow', 'slo'])
-      cannot('delete', ['inventory', 'task', 'probes', 'workflow', 'slo']) // Example: Editors can't delete inventory
+      can(['read', 'create', 'update'], ['inventory', 'task', 'probes', 'workflow', 'slo', 'home'])
+      cannot('delete', 'all') // Example: Editors can't delete inventory
     } else if (role === 'viewer') {
-      can('read', ['inventory', 'task', 'probes', 'workflow', 'slo'])
+      can('read', ['inventory', 'task', 'probes', 'workflow', 'slo', 'home'])
     }
     // You can add more roles here as needed
   });

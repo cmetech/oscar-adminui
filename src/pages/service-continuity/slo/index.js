@@ -855,8 +855,8 @@ const SLO = () => {
 }
 
 SLO.acl = {
-  action: 'manage',
-  subject: 'slo-page'
+  action: 'read',
+  subject: 'slo'
 }
 
 export default SLO

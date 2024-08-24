@@ -240,8 +240,8 @@ const Alerts = () => {
 }
 
 Alerts.acl = {
-  action: 'manage',
-  subject: 'alerts-page'
+  action: 'read',
+  subject: 'alerts'
 }
 
 export default Alerts

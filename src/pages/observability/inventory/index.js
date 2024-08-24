@@ -887,8 +887,8 @@ const Settings = () => {
 }
 
 Settings.acl = {
-  action: 'manage',
-  subject: 'settings-page'
+  action: 'read',
+  subject: 'inventory'
 }
 
 export default Settings

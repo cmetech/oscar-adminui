@@ -1228,8 +1228,8 @@ const TasksManager = () => {
 }
 
 TasksManager.acl = {
-  action: 'manage',
-  subject: 'tasks-page'
+  action: 'read',
+  subject: 'tasks'
 }
 
 export default TasksManager

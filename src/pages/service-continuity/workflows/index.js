@@ -1071,8 +1071,8 @@ const WorkflowsManager = () => {
 }
 
 WorkflowsManager.acl = {
-  action: 'manage',
-  subject: 'workflows-page'
+  action: 'read',
+  subject: 'workflows'
 }
 
 export default WorkflowsManager

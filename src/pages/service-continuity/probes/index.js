@@ -811,8 +811,8 @@ const ProbeManager = () => {
 }
 
 ProbeManager.acl = {
-  action: 'manage',
-  subject: 'probes-page'
+  action: 'read',
+  subject: 'probes'
 }
 
 export default ProbeManager

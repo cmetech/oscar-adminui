@@ -8,6 +8,7 @@ export const AppAbility = createMongoAbility
  * admin can manage everything and client can just visit ACL page
  */
 const defineRulesFor = (roles, subject) => {
+  console.log('ACL.js roles', roles)
   const { can, rules } = new AbilityBuilder(AppAbility)
 
   // Check each role in the list of roles
@@ -17,10 +18,10 @@ const defineRulesFor = (roles, subject) => {
     } else if (role === 'super') {
       can('read', 'all')
     } else if (role === 'editor') {
-      can(['read', 'create', 'update'], ['inventory', 'task', 'probes', 'workflow', 'slo', 'home'])
+      can(['read', 'create', 'update'], ['alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home'])
       cannot('delete', 'all') // Example: Editors can't delete inventory
     } else if (role === 'viewer') {
-      can('read', ['inventory', 'task', 'probes', 'workflow', 'slo', 'home'])
+      can('read', ['alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home'])
     }
     // You can add more roles here as needed
   });

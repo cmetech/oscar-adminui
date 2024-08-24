@@ -1051,8 +1051,8 @@ const LogExplorer = () => {
 }
 
 LogExplorer.acl = {
-  action: 'manage',
-  subject: 'logexplorer-page'
+  action: 'read',
+  subject: 'inventory'
 }
 
 export default LogExplorer

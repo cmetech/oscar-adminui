@@ -223,7 +223,7 @@ export const authOptions = {
 
         if (account.provider === 'oscar') {
           // Oscar Auth
-          const roles = user.is_superuser ? ['admin'] : ['regular'];
+          const roles = user.is_superuser ? ['admin'] : ['viewer'];
           const updatedToken = {
             ...token,
             sub: token.sub,

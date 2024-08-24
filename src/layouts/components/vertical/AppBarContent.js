@@ -24,6 +24,8 @@ import UserNotificationDropdown from 'src/layouts/components/UserNotificationDro
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
 import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
 
+import { AbilityContext } from 'src/layouts/components/acl/Can'
+
 const notifications = [
   {
     meta: 'Today',
@@ -138,6 +140,8 @@ const AppBarContent = props => {
   // Determine the root domain or IP from the URL
   const [rootDomain, setRootDomain] = useState(domain)
 
+  const ability = useContext(AbilityContext)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname
@@ -197,7 +201,9 @@ const AppBarContent = props => {
         <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
-        <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} />
+        {ability?.can('manage', 'all') ? (
+          <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} />
+        ) : null }
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>

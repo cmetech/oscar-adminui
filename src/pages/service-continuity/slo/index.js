@@ -511,6 +511,7 @@ const TaskUploadDialog = ({ open, onClose, onSuccess, tab }) => {
 const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   const { register, handleSubmit, reset } = useForm()
   const theme = useTheme()
+  const { t } = useTranslation()
 
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {

@@ -94,6 +94,9 @@ const UserDropdown = props => {
         console.error('Error response:', error.response.data);
         console.error('Error status:', error.response.status);
       }
+      console.error('Continuing with logout... for local session');
+      await signOut({ callbackUrl: '/', redirect: false });
+      router.push('/');
     }
 
     handleDropdownClose();

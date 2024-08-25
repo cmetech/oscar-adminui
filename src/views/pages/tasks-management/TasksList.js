@@ -528,79 +528,72 @@ const TasksList = props => {
         const isActive = row?.status.toLowerCase() === 'enabled'
 
         return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <IconButton
-                size='small'
-                title='Schedule Task'
-                aria-label='Schedule Task'
-                color='info'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setScheduleDialog(true)
-                }}
-                disabled={!isActive}
-              >
-                <Icon icon='mdi:clock-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Run Task'
-                aria-label='Run Task'
-                color='warning'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setRunDialog(true)
-                }}
-                disabled={!isActive}
-              >
-                <Icon icon='mdi:play-circle-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
-                onClick={() => {
-                  setCurrentTask(row)
-                  setDisableDialog(true)
-                }}
-              >
-                <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Edit Task'
-                color='secondary'
-                aria-label='Edit Task'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setEditDialog(true)
-                }}
-              >
-                <Icon icon='mdi:account-edit' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Delete Task'
-                aria-label='Delete Task'
-                color='error'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setDeleteDialog(true)
-                }}
-              >
-                <Icon icon='mdi:delete-forever' />
-              </IconButton>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+            <IconButton
+              size='small'
+              title='Schedule Task'
+              aria-label='Schedule Task'
+              color='info'
+              onClick={() => {
+                setCurrentTask(row)
+                setScheduleDialog(true)
+              }}
+              disabled={!isActive || !ability.can('schedule', 'tasks')}
+            >
+              <Icon icon='mdi:clock-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Run Task'
+              aria-label='Run Task'
+              color='warning'
+              onClick={() => {
+                setCurrentTask(row)
+                setRunDialog(true)
+              }}
+              disabled={!isActive || !ability.can('run', 'tasks')}
+            >
+              <Icon icon='mdi:play-circle-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
+              onClick={() => {
+                setCurrentTask(row)
+                setDisableDialog(true)
+              }}
+              disabled={!ability.can('update', 'tasks')}
+            >
+              <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Edit Task'
+              color='secondary'
+              aria-label='Edit Task'
+              onClick={() => {
+                setCurrentTask(row)
+                setEditDialog(true)
+              }}
+              disabled={!ability.can('update', 'tasks')}
+            >
+              <Icon icon='mdi:account-edit' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Delete Task'
+              aria-label='Delete Task'
+              color='error'
+              onClick={() => {
+                setCurrentTask(row)
+                setDeleteDialog(true)
+              }}
+              disabled={!ability.can('delete', 'tasks')}
+            >
+              <Icon icon='mdi:delete-forever' />
+            </IconButton>
           </Box>
         )
       }

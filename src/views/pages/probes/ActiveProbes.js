@@ -654,6 +654,7 @@ const ActiveProbes = props => {
                   setCurrentProbe(row)
                   setDisableDialog(true)
                 }}
+                disabled={!ability.can('update', 'probes')}
               >
                 <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
               </IconButton>
@@ -666,6 +667,7 @@ const ActiveProbes = props => {
                   setCurrentProbe(row)
                   setEditDialog(true)
                 }}
+                disabled={!ability.can('update', 'probes')}
               >
                 <Icon icon='mdi:account-edit' />
               </IconButton>
@@ -678,6 +680,7 @@ const ActiveProbes = props => {
                   setCurrentProbe(row)
                   setDeleteDialog(true)
                 }}
+                disabled={!ability.can('delete', 'probes')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>

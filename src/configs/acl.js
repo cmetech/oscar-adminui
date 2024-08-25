@@ -9,21 +9,23 @@ export const AppAbility = createMongoAbility
  */
 const defineRulesFor = (roles, subject) => {
   console.log('ACL.js roles', roles)
-  const { can, rules } = new AbilityBuilder(AppAbility)
+  const { can, cannot, rules } = new AbilityBuilder(AppAbility)
 
-  // Check each role in the list of roles
   roles.forEach(role => {
     if (role === 'admin') {
       can('manage', 'all')
     } else if (role === 'super') {
       can('read', 'all')
     } else if (role === 'editor') {
-      can(['read', 'create', 'update'], ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home'])
-      cannot('delete', 'all') // Example: Editors can't delete inventory
+      can(['read', 'create', 'update'], ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home', 'datacenters', 'environments', 'servers', 'components', 'subcomponents'])
+      can('run', 'tasks')
+      can('schedule', 'tasks')
+      cannot('delete', 'all')
     } else if (role === 'viewer') {
-      can('read', ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home'])
+      can('read', ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home', 'datacenters', 'environments', 'servers'])
+      cannot(['create', 'update', 'delete', 'run', 'schedule'], ['tasks', 'datacenters', 'environments', 'servers'])
+      cannot('read', ['components', 'subcomponents'])
     }
-    // You can add more roles here as needed
   });
 
   return rules

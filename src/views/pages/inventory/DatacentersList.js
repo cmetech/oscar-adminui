@@ -413,7 +413,7 @@ const DatacentersList = props => {
     {
       field: 'actions',
       headerName: t('Actions'),
-      type: 'string',
+      align: 'left',
       flex: 0.025,
       minWidth: 10,
       renderCell: params => {
@@ -436,8 +436,9 @@ const DatacentersList = props => {
                   setCurrentDatacenter(params.row)
                   setOpenDialog(true)
                 }}
+                disabled={!ability.can('update', 'datacenters')}
               >
-                <Icon icon='mdi:file-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'
@@ -448,6 +449,7 @@ const DatacentersList = props => {
                   setCurrentDatacenter(params.row)
                   setDeleteDialog(true)
                 }}
+                disabled={!ability.can('delete', 'datacenters')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>

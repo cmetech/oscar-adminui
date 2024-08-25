@@ -152,6 +152,7 @@ const RegisterTaskForm = ({ onClose, onSubmit }) => {
 const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, onRegister, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -215,6 +216,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -229,6 +231,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onEnable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:plus-box' />
@@ -243,6 +246,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onDisable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:minus-box' />
@@ -251,12 +255,12 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
           </MenuItem>
         )}
         <MenuItem
-          disabled
           sx={{ p: 0 }}
           onClick={() => {
             onExport()
             handleDropdownClose()
           }}
+          disabled={!ability.can('read', 'tasks')}
         >
           <Box sx={styles}>
             <Icon icon='mdi:file-export-outline' />
@@ -269,6 +273,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
             onRegister()
             handleDropdownClose()
           }}
+          disabled={!ability.can('create', 'tasks')}
         >
           <Box sx={styles}>
             <Icon icon='mdi:playlist-plus' />
@@ -1019,6 +1024,7 @@ const TasksManager = () => {
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}
                   onClick={handleOpenModal}
+                  disabled={!ability.can('create', 'tasks')}
                 >
                   {getDynamicText(value)}
                 </Button>

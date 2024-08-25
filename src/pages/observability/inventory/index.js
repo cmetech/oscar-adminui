@@ -114,6 +114,7 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -178,9 +179,10 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDelete()
+              onDelete && onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', getDynamicTitle(tabValue).toLowerCase())}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -194,6 +196,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             onExport()
             handleDropdownClose()
           }}
+          disabled={!ability.can('read', getDynamicTitle(tabValue).toLowerCase())}
         >
           <Box sx={styles}>
             <Icon icon='mdi:file-export-outline' />
@@ -207,6 +210,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
               onUpload()
               handleDropdownClose()
             }}
+            disabled={!ability.can('create', 'servers')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:upload' />
@@ -766,76 +770,65 @@ const Settings = () => {
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
           <Typography variant='h4'>{t('Inventory Management')}</Typography>
           <Box display='flex' alignItems='center'>
-            <Button
-              variant='contained'
-              color='secondary'
-              sx={{ marginRight: 1 }}
-              startIcon={<Icon icon='mdi:plus' />}
-              onClick={handleOpenModal}
-            >
-              {getDynamicText(value)}
-            </Button>
-            <MoreActionsDropdown
-              onDelete={handleDelete}
-              onExport={handleExport}
-              onUpload={handleUpload}
-              tabValue={value}
-            />
+            {['1', '2', '3'].includes(value) && (
+              <Fragment>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  sx={{ marginRight: 1 }}
+                  startIcon={<Icon icon='mdi:plus' />}
+                  onClick={handleOpenModal}
+                  disabled={!ability.can('create', getDynamicText(value).toLowerCase())}
+                >
+                  {getDynamicText(value)}
+                </Button>
+                <MoreActionsDropdown
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  onUpload={handleUpload}
+                  tabValue={value}
+                />
+              </Fragment>
+            )}
           </Box>
         </Box>
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='assets'>
-            {datacenterTotal == 0 ? (
-              <Tab value='1' label={t('Datacenters')} icon={<Icon icon='mdi:office-building' />} iconPosition='start' />
-            ) : (
-              <Tab
-                value='1'
-                label={`${t('Datacenters')} (${datacenterTotal})`}
-                icon={<Icon icon='mdi:office-building' />}
-                iconPosition='start'
-              />
-            )}
-            {environmentTotal == 0 ? (
-              <Tab
-                value='2'
-                label={t('Environments')}
-                icon={<Icon icon='mdi:file-table-box-multiple' />}
-                iconPosition='start'
-              />
-            ) : (
-              <Tab
-                value='2'
-                label={`${t('Environments')} (${environmentTotal})`}
-                icon={<Icon icon='mdi:file-table-box-multiple' />}
-                iconPosition='start'
-              />
-            )}
-            {serverTotal == 0 ? (
-              <Tab value='3' label={t('Servers')} icon={<Icon icon='mdi:server' />} iconPosition='start' />
-            ) : (
-              <Tab
-                value='3'
-                label={`${t('Servers')} (${serverTotal})`}
-                icon={<Icon icon='mdi:server' />}
-                iconPosition='start'
-              />
-            )}
-            {componentTotal == 0 ? (
-              <Tab value='4' label={t('Components')} icon={<Icon icon='mdi:group' />} iconPosition='start' />
-            ) : (
+            {/* Datacenters Tab */}
+            <Tab
+              value='1'
+              label={datacenterTotal == 0 ? t('Datacenters') : `${t('Datacenters')} (${datacenterTotal})`}
+              icon={<Icon icon='mdi:database' />}
+              iconPosition='start'
+            />
+            {/* Environments Tab */}
+            <Tab
+              value='2'
+              label={environmentTotal == 0 ? t('Environments') : `${t('Environments')} (${environmentTotal})`}
+              icon={<Icon icon='mdi:file-table-box-multiple' />}
+              iconPosition='start'
+            />
+            {/* Servers Tab */}
+            <Tab
+              value='3'
+              label={serverTotal == 0 ? t('Servers') : `${t('Servers')} (${serverTotal})`}
+              icon={<Icon icon='mdi:server' />}
+              iconPosition='start'
+            />
+            {/* Components Tab - Hidden for viewers */}
+            {ability.can('read', 'components') && (
               <Tab
                 value='4'
-                label={`${t('Components')} (${componentTotal})`}
+                label={componentTotal == 0 ? t('Components') : `${t('Components')} (${componentTotal})`}
                 icon={<Icon icon='mdi:group' />}
                 iconPosition='start'
               />
             )}
-            {subcomponentTotal == 0 ? (
-              <Tab value='5' label={t('Subcomponents')} icon={<Icon icon='mdi:select-group' />} iconPosition='start' />
-            ) : (
+            {/* Subcomponents Tab - Hidden for viewers */}
+            {ability.can('read', 'subcomponents') && (
               <Tab
                 value='5'
-                label={`${t('Subcomponents')} (${subcomponentTotal})`}
+                label={subcomponentTotal == 0 ? t('Subcomponents') : `${t('Subcomponents')} (${subcomponentTotal})`}
                 icon={<Icon icon='mdi:select-group' />}
                 iconPosition='start'
               />

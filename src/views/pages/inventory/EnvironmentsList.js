@@ -372,8 +372,8 @@ const EnvironmentsList = props => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
-      type: 'string',
+      headerName: t('Actions'),
+      align: 'left',
       flex: 0.025,
       minWidth: 10,
       renderCell: params => {
@@ -396,8 +396,9 @@ const EnvironmentsList = props => {
                   setCurrentEnvironment(params.row)
                   setOpenDialog(true)
                 }}
+                disabled={!ability.can('update', 'environments')}
               >
-                <Icon icon='mdi:file-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'
@@ -408,6 +409,7 @@ const EnvironmentsList = props => {
                   setCurrentEnvironment(params.row)
                   setDeleteDialog(true)
                 }}
+                disabled={!ability.can('delete', 'environments')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>

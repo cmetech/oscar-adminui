@@ -116,6 +116,7 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -177,9 +178,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDelete()
+              onDelete && onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -191,9 +193,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onEnable()
+              onEnable && onEnable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:plus-box' />
@@ -205,9 +208,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDisable()
+              onDisable && onDisable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:minus-box' />
@@ -623,6 +627,7 @@ const ProbeManager = () => {
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}
                   onClick={handleOpenModal}
+                  disabled={!ability.can('create', 'probes')}
                 >
                   {getDynamicText(value)}
                 </Button>

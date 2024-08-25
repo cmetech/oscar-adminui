@@ -411,18 +411,20 @@ const ServersList = props => {
                   setCurrentServer(params.row)
                   setEditDialog(true)
                 }}
+                disabled={!ability.can('update', 'servers')}
               >
-                <Icon icon='mdi:account-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete User'
-                aria-label='Delete User'
+                title='Delete Server'
+                aria-label='Delete Server'
                 color='error'
                 onClick={() => {
                   setCurrentServer(params.row)
                   setDeleteDialog(true)
                 }}
+                disabled={!ability.can('delete', 'servers')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>

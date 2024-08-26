@@ -113,7 +113,7 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
   const ability = useContext(AbilityContext)
@@ -128,7 +128,6 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
   const getDynamicTitle = tabValue => {
     const mapping = {
       1: 'Active Probes'
-
       //2: 'Probe History'
     }
 
@@ -160,6 +159,7 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
 
   // Define tabs where the Delete menu item should be shown
   const deletableTabs = ['1']
+  const showUploadProbesTab = tabValue === '1'
 
   return (
     <Fragment>
@@ -216,6 +216,21 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
             <Box sx={styles}>
               <Icon icon='mdi:minus-box' />
               {t('Disable')} {t(getDynamicTitle(tabValue))}
+            </Box>
+          </MenuItem>
+        )}
+        {showUploadProbesTab && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onUpload()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('create', 'probes')}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:upload' />
+              {t('Upload Probes')}
             </Box>
           </MenuItem>
         )}
@@ -441,6 +456,154 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   )
 }
 
+const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
+
+  const fileInputRef = useRef(null)
+  const { t } = useTranslation()
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = event => {
+    const file = event.target.files[0]
+    if (file) {
+      setFile(file)
+      setFileName(file.name)
+    } else {
+      setFile(null)
+      setFileName('')
+    }
+  }
+
+  const handleClose = () => {
+    setFile(null)
+    setFileName('')
+    setUploadProgress(0)
+    setIsUploading(false)
+    onClose()
+  }
+
+  const handleSubmit = async () => {
+    if (!file) {
+      toast.error('Please select a file to upload.')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      setIsUploading(true)
+      let simulatedProgress = 0
+
+      const simulateProcessing = setInterval(() => {
+        simulatedProgress += Math.random() * 10
+        if (simulatedProgress >= 90) {
+          simulatedProgress = 90
+        }
+        setUploadProgress(simulatedProgress)
+      }, 500)
+
+      const response = await axios.post('/api/probes/bulk', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      clearInterval(simulateProcessing)
+      setUploadProgress(100)
+
+      if (response.status === 200 && response.data) {
+        const { requested_count, processed_count } = response.data
+        toast.success(`Upload complete: ${processed_count} out of ${requested_count} probes processed successfully.`)
+        setRefetchTrigger(new Date().getTime())
+      } else {
+        toast.success('Upload complete.')
+      }
+
+      setFileName('')
+      setFile(null)
+      setIsUploading(false)
+
+      setTimeout(() => {
+        onClose()
+      }, 1000)
+    } catch (error) {
+      clearInterval(simulateProcessing)
+      console.error('Error uploading file:', error)
+      setIsUploading(false)
+      toast.error('Error uploading file')
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{t('Upload Probes')}</DialogTitle>
+      <DialogContent>
+        <IconButton
+          size='small'
+          onClick={() => handleClose()}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+        <input
+          type='file'
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary' disabled={isUploading}>
+          {t('Choose File')}
+        </Button>
+        {fileName && (
+          <Typography variant='subtitle1' sx={{ mt: 2 }}>
+            Selected file: {fileName}
+          </Typography>
+        )}
+
+        {isUploading && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant='determinate' value={uploadProgress} />
+            <Typography variant='subtitle2' align='center'>
+              {Math.round(uploadProgress)}% uploaded
+            </Typography>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+          disabled={isUploading}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:upload-multiple' />}
+          disabled={isUploading || !file}
+        >
+          {isUploading ? t('Uploading...') : t('Upload')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
 const ProbeManager = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -459,6 +622,8 @@ const ProbeManager = () => {
 
   const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
+
+  const [openUploadDialog, setOpenUploadDialog] = useState(false)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -613,6 +778,14 @@ const ProbeManager = () => {
     setOnAccept(value)
   }
 
+  const handleUpload = () => {
+    setOpenUploadDialog(true)
+  }
+
+  const handleCloseUploadDialog = () => {
+    setOpenUploadDialog(false)
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -635,6 +808,7 @@ const ProbeManager = () => {
                   onDelete={handleDelete}
                   onEnable={handleEnable}
                   onDisable={handleDisable}
+                  onUpload={handleUpload}
                   tabValue={value}
                 />
               </Fragment>
@@ -811,6 +985,14 @@ const ProbeManager = () => {
         onConfirm={handleConfirmEnable}
         tab={value}
       />
+
+      <ProbeUploadDialog
+        open={openUploadDialog}
+        onClose={handleCloseUploadDialog}
+        onSuccess={() => {
+          setOpenUploadDialog(false)
+        }}
+      />
     </Grid>
   )
 }
@@ -821,3 +1003,4 @@ ProbeManager.acl = {
 }
 
 export default ProbeManager
+

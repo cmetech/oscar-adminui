@@ -13,8 +13,9 @@ import Tab from '@mui/material/Tab'
 import MuiTabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
+import Button from '@mui/material/Button'  // Import Button
 
-import { styled, useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -64,22 +65,42 @@ const Settings = () => {
     setValue(newValue)
   }
 
+
+  const handleAddUser = () => {
+    // TO DO logic for dialogue Add User
+    console.log('Add User button clicked')
+  }
+
   return (
-    <Grid container spacing={6}>
+    <Grid container spacing={6} alignItems="center">
       <Grid item xs={12}>
         <TabContext value={value}>
-          <TabList onChange={handleChange} aria-label='users'>
-            {userTotal == 0 ? (
-              <Tab value='1' label={t('Users')} icon={<Icon icon='mdi:user' />} iconPosition='start' />
-            ) : (
-              <Tab
-                value='1'
-                label={`${t('Users')} (${userTotal})`}
-                icon={<Icon icon='mdi:users' />}
-                iconPosition='start'
-              />
-            )}
-          </TabList>
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+              <TabList onChange={handleChange} aria-label='users'>
+                {userTotal == 0 ? (
+                  <Tab value='1' label={t('Users')} icon={<Icon icon='mdi:user' />} iconPosition='start' />
+                ) : (
+                  <Tab
+                    value='1'
+                    label={`${t('Users')} (${userTotal})`}
+                    icon={<Icon icon='mdi:users' />}
+                    iconPosition='start'
+                  />
+                )}
+              </TabList>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Icon icon='mdi:user-plus' />}
+                onClick={handleAddUser}
+              >
+                {t('Add User')}
+              </Button>
+            </Grid>
+          </Grid>
           <TabPanel value='1'>
             <UsersList set_user_total={setUserTotal} />
           </TabPanel>

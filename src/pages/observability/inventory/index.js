@@ -375,12 +375,14 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
     const formData = new FormData()
     formData.append('file', file)
 
+    const simulateProcessing = null
+
     try {
       setIsUploading(true)
       let simulatedProgress = 0
 
       // Start the simulation before the request is sent
-      const simulateProcessing = setInterval(() => {
+      simulateProcessing = setInterval(() => {
         simulatedProgress += Math.random() * 10 // Increment progress by a random amount each time
         if (simulatedProgress >= 90) {
           simulatedProgress = 90 // Cap simulated progress at 90% to leave room for real completion
@@ -419,7 +421,12 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
         onClose() // Close the dialog after a short delay
       }, 1000)
     } catch (error) {
-      clearInterval(simulateProcessing) // Clear the simulation in case of an error
+
+      // Clear the simulation in case of an error if not null
+      if (simulateProcessing) {
+        clearInterval(simulateProcessing) // Clear the simulation in case of an error
+      }
+
       console.error('Error uploading file:', error)
       setIsUploading(false)
       toast.error('Error uploading file')

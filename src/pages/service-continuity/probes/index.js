@@ -498,6 +498,8 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
     const formData = new FormData()
     formData.append('file', file)
 
+    const simulateProcessing = null
+
     try {
       setIsUploading(true)
       let simulatedProgress = 0
@@ -535,7 +537,10 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
         onClose()
       }, 1000)
     } catch (error) {
-      clearInterval(simulateProcessing)
+      // Clear the simulation in case of an error if not null
+      if (simulateProcessing) {
+        clearInterval(simulateProcessing) // Clear the simulation in case of an error
+      }
       console.error('Error uploading file:', error)
       setIsUploading(false)
       toast.error('Error uploading file')

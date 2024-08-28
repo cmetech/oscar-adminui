@@ -47,7 +47,7 @@ async function handler(req, res) {
 
     // console.log('FormData Headers:', formData.getHeaders())
 
-    const response = await axios.post(`${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/probes/upload`, formData, {
+    const response = await axios.post(`${oscarConfig.MIDDLWARE_METRICSTORE_API_URL}/probes/upload`, formData, {
       headers: {
         ...formData.getHeaders(),
         'Content-Type': 'multipart/form-data'

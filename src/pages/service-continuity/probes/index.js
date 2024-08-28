@@ -498,7 +498,7 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
     const formData = new FormData()
     formData.append('file', file)
 
-    const simulateProcessing = null
+    let simulateProcessing = null
 
     try {
       setIsUploading(true)

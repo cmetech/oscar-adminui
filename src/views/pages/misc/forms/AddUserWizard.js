@@ -102,7 +102,9 @@ const AddUserWizard = props => {
   const [isVerified, setIsVerified] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
-
+  
+  const [dataAddInd, setDataAddInd] = useState(0)
+    
   const theme = useTheme()
   const session = useSession()
 
@@ -125,7 +127,8 @@ const AddUserWizard = props => {
   }
 
   const handleBack = () => {
-    setActiveStep(prevActiveStep => prevActiveStep - 1)
+      setActiveStep(prevActiveStep => prevActiveStep - 1)
+      setDataAddInd(0)
   }
 
   const handleNext = async () => {
@@ -133,6 +136,7 @@ const AddUserWizard = props => {
     if (!isValid) return
 
     setActiveStep(prevActiveStep => prevActiveStep + 1)
+
     if (activeStep === steps.length - 1) {
       try {
         const apiToken = session?.data?.user?.apiToken
@@ -141,11 +145,11 @@ const AddUserWizard = props => {
           Authorization: `Bearer ${apiToken}`
         }
         const payload = {
-          username,
+          username: username,
           first_name: firstName,
           last_name: lastName,
-          email,
-          password,
+          email: email,
+          password: password,
           is_active: isActive,
           is_superuser: isSuperUser,
           is_verified: isVerified
@@ -158,7 +162,8 @@ const AddUserWizard = props => {
         if (response.data) {
           const newUser = response.data
           setRows(prevRows => [...prevRows, newUser]) // Use setRows from props
-          toast.success('User added successfully')
+            toast.success('User added successfully')
+            setDataAddInd(1)
         }
       } catch (error) {
         console.error('Error adding new user', error)
@@ -177,6 +182,7 @@ const AddUserWizard = props => {
     setIsSuperUser(false)
     setIsVerified(false)
     setActiveStep(0)
+    setDataAddInd(0)  
   }
 
   const handleInputChange = setter => event => {
@@ -331,36 +337,125 @@ const AddUserWizard = props => {
     }
   }
 
-  return (
-    <Box>
-      <Stepper activeStep={activeStep}>
-        {steps.map((step, index) => (
-          <Step key={index}>
-            <StepLabel>{step.title}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      {activeStep === steps.length ? (
+  const renderContent = () => {
+    if (activeStep === steps.length || dataAddInd === 1) {
+      
+
+      return(
         <Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you're finished</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleReset}>Reset</Button>
-          </Box>
-        </Fragment>
-      ) : (
-        <Fragment>
-          {getStepContent(activeStep)}
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button color='inherit' disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-              Back
+          <Typography>New user details have been submitted.</Typography>
+          <Grid container spacing={1}>
+            <Grid item xs={4}>
+              <Typography
+                variant='h6'
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  textDecoration: 'underline',
+                  color:
+                    theme.palette.mode === 'light'
+                      ? theme.palette.customColors.brandBlack
+                      : theme.palette.customColors.brandYellow
+                }}
+              >
+                General Information
+              </Typography>
+              <Grid item xs={12}>
+                <Typography>
+                  Name:{' '}
+                  <strong>
+                    {firstName} {lastName}
+                  </strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Username: <strong>{username}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Status: <strong>{isActive.toString()}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Is Admin: <strong>{isSuperUser.toString()}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Is Verified: <strong>{isVerified.toString()}</strong>
+                </Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button size='large' variant='contained' onClick={handleReset}>
+              Reset
             </Button>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleNext}>{activeStep === steps.length - 1 ? 'Finish' : 'Next'}</Button>
           </Box>
         </Fragment>
-      )}
-    </Box>
+      )
+    } else {
+      
+      return(
+        <form onSubmit={e => e.preventDefault()}>
+            <Grid container spacing={5}>
+              <Grid item xs={12}>
+                <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {steps[activeStep].title}
+                </Typography>
+                <Typography variant='caption' component='p' paddingBottom={5}>
+                  {steps[activeStep].description}
+                </Typography>
+              </Grid>
+              {getStepContent(activeStep)}
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Button
+                  size='large'
+                  variant='outlined'
+                  color='secondary'
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                >
+                  Back
+                </Button>
+                <Button size='large' variant='contained' onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+                </Button>
+              </Grid>
+            </Grid>
+          </form> 
+          )
+    }
+
+  }
+
+  return (
+    <Fragment>
+      <StepperWrapper>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((step, index) => {
+            return (
+              <Step key={index}>
+                <StepLabel StepIconComponent={StepperCustomDot}>
+                  <div className='step-label'>
+                    <div>
+                      <Typography className='step-title'>{step.title}</Typography>
+                      <Typography className='step-subtitle'>{step.subtitle}</Typography>
+                    </div>
+                  </div>
+                </StepLabel>
+              </Step>
+            )
+          })}
+        </Stepper>
+      </StepperWrapper>
+      <Card sx={{ mt: 4, minHeight: 500 }}>
+        <CardContent>{renderContent()}</CardContent>
+      </Card>
+    </Fragment>
   )
 }
 

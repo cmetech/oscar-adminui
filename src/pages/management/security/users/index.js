@@ -1,5 +1,5 @@
 // ** React Imports
-import { useContext, useState, useEffect, useCallback, forwardRef  } from 'react'
+import { useContext, useState, useEffect, useCallback, forwardRef, Fragment } from 'react'
 import getConfig from 'next/config'
 import { useTranslation } from 'react-i18next'
 
@@ -134,38 +134,44 @@ const Settings = () => {
   }
 
   return (
-    <Grid container spacing={6} alignItems="center">
+    <Grid container spacing={6}>
       <Grid item xs={12}>
-        <TabContext value={value}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <TabList onChange={handleChange} aria-label='users'>
-                {userTotal == 0 ? (
-                  <Tab value='1' label={t('Users')} icon={<Icon icon='mdi:user' />} iconPosition='start' />
-                ) : (
-                  <Tab
-                    value='1'
-                    label={`${t('Users')} (${userTotal})`}
-                    icon={<Icon icon='mdi:users' />}
-                    iconPosition='start'
-                  />
-                )}
-              </TabList>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Icon icon='mdi:user-plus' />}
-                onClick={() => {
+        <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
+          <Typography variant='h4'>{t('User Management')}</Typography>
+          <Box display='flex' alignItems='center'>
+            {value === '1' && (
+              <Fragment>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  sx={{ marginRight: 1 }}
+                  startIcon={<Icon icon='mdi:user-plus' />}
+                  onClick={() => {
                   //setCurrentUser(params.row)
                   setOpenDialog(true)
-                }}
-              >
-                {t('Add User')}
-              </Button>
-            </Grid>
-          </Grid>
+                  }}
+                  disabled={!ability.can('create', 'user')}
+                >
+                  {t('Add User')}
+                </Button>
+              </Fragment>
+            )}
+            
+          </Box>
+        </Box>
+        <TabContext value={value}>
+          <TabList onChange={handleChange} aria-label='users'>
+            {userTotal == 0 ? (
+              <Tab value='1' label={t('Users')} icon={<Icon icon='mdi:user' />} iconPosition='start' />
+            ) : (
+              <Tab
+                value='1'
+                label={`${t('Users')} (${userTotal})`}
+                icon={<Icon icon='mdi:users' />}
+                iconPosition='start'
+              />
+            )}
+          </TabList>
           <TabPanel value='1'>
             <UsersList set_user_total={setUserTotal} />
           </TabPanel>

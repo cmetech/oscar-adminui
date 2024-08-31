@@ -171,7 +171,7 @@ const AppBarContent = props => {
     {
       title: 'Reverse Proxy',
       subtitle: 'Explore Routes',
-      icon: 'mdi:math-log',
+      icon: 'mdi:router',
       url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
       externalLink: true,
       openInNewTab: true

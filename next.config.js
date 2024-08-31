@@ -36,6 +36,8 @@ module.exports = {
     KEYCLOAK_ENABLE: process.env.KEYCLOAK_ENABLE,
     AZURE_ENABLE: process.env.AZURE_ENABLE,
     NODE_ENV: process.env.NODE_ENV,
+    FLOWER_PORT: process.env.FLOWER_PORT,
+    REVERSEPROXY_DASHBOARD_PORT: process.env.REVERSEPROXY_DASHBOARD_PORT,
   },
 
   output: 'standalone'

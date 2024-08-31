@@ -136,6 +136,8 @@ const AppBarContent = props => {
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
   const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'
+  const flower_port = publicRuntimeConfig.FLOWER_PORT || '5555'
+  const reverseproxy_dashboard_port = publicRuntimeConfig.REVERSEPROXY_DASHBOARD_PORT || '8443'
 
   // Determine the root domain or IP from the URL
   const [rootDomain, setRootDomain] = useState(domain)
@@ -167,16 +169,16 @@ const AppBarContent = props => {
       openInNewTab: true
     },
     {
-      title: 'Log Explorer',
-      subtitle: 'Explore Logs',
+      title: 'Reverse Proxy',
+      subtitle: 'Explore Routes',
       icon: 'mdi:math-log',
-      url: '/api/oscar/ui?path=explore',
+      url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
       externalLink: true,
       openInNewTab: true
     },
     {
       title: 'Monitor Workers',
-      url: `https://${rootDomain}:5555/flower/`,
+      url: `https://${rootDomain}:${flower_port}/flower/`,
       subtitle: 'Celery Flower',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,

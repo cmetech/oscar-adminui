@@ -102,9 +102,7 @@ const AddUserWizard = props => {
   const [isVerified, setIsVerified] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
-  
-  const [dataAddInd, setDataAddInd] = useState(0)
-    
+      
   const theme = useTheme()
   const session = useSession()
 
@@ -128,7 +126,6 @@ const AddUserWizard = props => {
 
   const handleBack = () => {
       setActiveStep(prevActiveStep => prevActiveStep - 1)
-      setDataAddInd(0)
   }
 
   const handleNext = async () => {
@@ -163,7 +160,6 @@ const AddUserWizard = props => {
           const newUser = response.data
           setRows(prevRows => [...prevRows, newUser]) // Use setRows from props
             toast.success('User added successfully')
-            setDataAddInd(1)
         }
       } catch (error) {
         console.error('Error adding new user', error)
@@ -181,8 +177,7 @@ const AddUserWizard = props => {
     setIsActive(false)
     setIsSuperUser(false)
     setIsVerified(false)
-    setActiveStep(0)
-    setDataAddInd(0)  
+    setActiveStep(0) 
   }
 
   const handleInputChange = setter => event => {
@@ -338,64 +333,65 @@ const AddUserWizard = props => {
   }
 
   const renderContent = () => {
-    if (activeStep === steps.length || dataAddInd === 1) {
-      
+    if (activeStep === steps.length) {
 
-      return(
-        <Fragment>
-          <Typography>New user details have been submitted.</Typography>
-          <Grid container spacing={1}>
-            <Grid item xs={4}>
-              <Typography
-                variant='h6'
-                sx={{
-                  mt: 2,
-                  mb: 1,
-                  textDecoration: 'underline',
-                  color:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.customColors.brandBlack
-                      : theme.palette.customColors.brandYellow
-                }}
-              >
-                General Information
-              </Typography>
-              <Grid item xs={12}>
-                <Typography>
-                  Name:{' '}
-                  <strong>
-                    {firstName} {lastName}
-                  </strong>
+      return (
+        <form  onload ={e => e.preventDefault()}>
+          <Fragment>
+            <Typography>New user details have been submitted.</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={4}>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    mt: 2,
+                    mb: 1,
+                    textDecoration: 'underline',
+                    color:
+                      theme.palette.mode === 'light'
+                        ? theme.palette.customColors.brandBlack
+                        : theme.palette.customColors.brandYellow
+                  }}
+                >
+                  General Information
                 </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Username: <strong>{username}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Status: <strong>{isActive.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Admin: <strong>{isSuperUser.toString()}</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Is Verified: <strong>{isVerified.toString()}</strong>
-                </Typography>
+                <Grid item xs={12}>
+                  <Typography>
+                    Name:{' '}
+                    <strong>
+                      {firstName} {lastName}
+                    </strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    Username: <strong>{username}</strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    Status: <strong>{isActive.toString()}</strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    Is Admin: <strong>{isSuperUser.toString()}</strong>
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    Is Verified: <strong>{isVerified.toString()}</strong>
+                  </Typography>
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button size='large' variant='contained' onClick={handleReset}>
-              Reset
-            </Button>
-          </Box>
-        </Fragment>
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button size='large' variant='contained' onClick={handleReset}>
+                Reset
+              </Button>
+            </Box>
+            </Fragment>
+          </form>
       )
     } else {
       

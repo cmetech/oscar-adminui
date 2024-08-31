@@ -310,7 +310,7 @@ const ConnectionsList = props => {
       }
     }
   ]
-  
+
 
   const fetchConnections = useCallback(async () => {
     setLoading(true)
@@ -687,7 +687,7 @@ const ConnectionsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Workflows found'
+              message: 'No Connections found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

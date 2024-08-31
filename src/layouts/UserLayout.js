@@ -199,8 +199,9 @@ const User = () => {
 
   const userRoles = userSession?.data?.user?.roles || [];
 
-  const firstRole = userRoles.length > 0 ? userRoles[0] : 'User';
   const isAdmin = userRoles.includes('admin');
+  const isEditor = userRoles.includes('Editor');
+  const firstRole = isAdmin ? 'admin' : isEditor ? 'Editor' : 'viewer';
 
   return (
     <Box sx={{ py: 2, px: 4, mb: 2.5 }}>

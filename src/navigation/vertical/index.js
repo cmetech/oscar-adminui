@@ -131,8 +131,8 @@ const navigation = () => {
       subject: 'nav'
     },
     {
-      title: 'Anomaly Detection',
-      icon: 'mdi:smoke-detector-variant-alert',
+      title: 'Data Loader',
+      icon: 'mdi:upload',
       path: '#',
       action: 'read',
       subject: 'nav',

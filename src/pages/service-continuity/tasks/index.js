@@ -124,7 +124,7 @@ const RegisterTaskForm = ({ onClose, onSubmit }) => {
   return (
     <form onSubmit={handleSubmit}>
       <DialogContent>
-        <TextField
+        <TextfieldStyled
           autoFocus
           margin="dense"
           id="taskName"
@@ -519,7 +519,7 @@ const RegisterTaskDialog = ({ open, onClose, onSuccess }) => {
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        <TextField
+        <TextfieldStyled
           autoFocus
           margin="dense"
           id="taskName"

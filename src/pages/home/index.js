@@ -16,6 +16,7 @@ import Paper from '@mui/material/Paper'
 import { styled, useTheme } from '@mui/material/styles'
 import { useSession } from 'next-auth/react'
 import getConfig from 'next/config'
+import { useTranslation } from 'react-i18next'
 
 function createGradient(baseColor, themeMode, intensity = 30) {
   const adjustIntensity = themeMode === 'dark' ? intensity : intensity + 20 // Darker gradient in light mode
@@ -52,6 +53,7 @@ const Home = () => {
   const { data: session } = useSession()
   const { publicRuntimeConfig } = getConfig()
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
+  const { t } = useTranslation()
 
   // Determine the root domain or IP from the URL
   const [rootDomain, setRootDomain] = useState(docs_host)
@@ -68,9 +70,8 @@ const Home = () => {
 
   const cards = [
     {
-      title: 'Observe',
-      description:
-        'Collect, Consolidate, and Aggregate data from logs, metrics and events for comprehensive system insights',
+      title: t('observe-title'),
+      description: t('observe-body'),
       link: '/api/oscar/ui?path=explore',
       icon: 'mdi:eye',
       baseColorDark: '#FCE282',
@@ -79,17 +80,16 @@ const Home = () => {
       openInNewTab: true
     },
     {
-      title: 'Detect',
-      description: 'AI/ML techniques to identify anomalies and pinpoint the root cause of service continuity issues',
+      title: t('detect-title'),
+      description: t('detect-body'),
       link: '/service-continuity/slo',
       icon: 'mdi:ear-hearing',
       baseColorDark: '#CEADE2',
       baseColorLight: '#AF78D2'
     },
     {
-      title: 'Analyze',
-      description:
-        'Explore, Visualize, and Predict potential issues and resource capacity constraints for proactive measures',
+      title: t('analyze-title'),
+      description: t('analyze-body'),
       link: '/api/oscar/ui?path=d/bdkxfkrhtor28b/server-monitoring?orgId=1',
       icon: 'mdi:brain',
       baseColorDark: '#70DBAA',
@@ -98,8 +98,8 @@ const Home = () => {
       openInNewTab: true
     },
     {
-      title: 'Automate',
-      description: 'Easily perform complex Business Process automations, data ETL Workflows, and AI/ML based pipelines',
+      title: t('automate-title'),
+      description: t('automate-body'),
       link: '/service-continuity/workflows',
       icon: 'mdi:touch-reading',
       baseColorDark: '#81BAF3',
@@ -108,44 +108,42 @@ const Home = () => {
   ]
 
   const middleSection = {
-    title: 'Let\'s Get Started',
-    text: 'OSCAR allows for Observability and ensures Service Continuity by leveraging AI powered Runtime deployed on a containerized environment. Get started with the following:',
+    title: t('get-started-title'),
+    text: t('get-started-body'),
     imageUrl: '/images/oscar.png',
-    imageTitle: 'OSCAR Academy',
+    imageTitle: t('oscar-academy-title'),
     link: `https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`,
-    imageText:
-      'Offers comprehensive tutorials and resources to help you manage and operate effectively. Find step-by-step instructions to common tasks.',
+    imageText: t('oscar-academy-body'),
     actions: [
-      { text: 'Probes', icon: 'mdi:eye-circle-outline', link: '/service-continuity/probes' },
-      { text: 'SLOs', icon: 'mdi:target', link: '/service-continuity/slo' },
-      { text: 'Tasks', icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
-      { text: 'Workflows', icon: 'mdi:workflow', link: '/service-continuity/workflows' },
-
+      { text: t('probes-action'), icon: 'mdi:eye-circle-outline', link: '/service-continuity/probes' },
+      { text: t('slos-action'), icon: 'mdi:target', link: '/service-continuity/slo' },
+      { text: t('tasks-action'), icon: 'mdi:subtasks', link: '/service-continuity/tasks' },
+      { text: t('workflows-action'), icon: 'mdi:workflow', link: '/service-continuity/workflows' },
     ]
   }
 
   const managementTools = [
     {
-      title: 'Connections',
-      description: 'Manage your connection settings',
+      title: t('connections-title'),
+      description: t('connections-body'),
       link: '/management/application/connections',
       icon: 'mdi:transit-connection-variant'
     },
     {
-      title: 'Inventory',
-      description: 'Manage your server inventory',
+      title: t('inventory-title'),
+      description: t('inventory-body'),
       link: '/observability/inventory',
       icon: 'mdi:server-network'
     },
     {
-      title: 'Notifiers',
-      description: 'Manage your notifier settings',
+      title: t('notifiers-title'),
+      description: t('notifiers-body'),
       link: '/management/application/notifiers',
       icon: 'mdi:notifications-active'
     },
     {
-      title: 'Runtime',
-      description: 'Monitor OSCAR services for runtime issues',
+      title: t('runtime-title'),
+      description: t('runtime-body'),
       link: '/api/oscar/services',
       icon: 'mdi:heart-pulse'
     }
@@ -162,7 +160,7 @@ const Home = () => {
       }}
     >
       <Typography variant='h4' sx={{ mb: 6, textAlign: 'left', fontWeight: 900 }}>
-        Hi {firstName}, I'm OSCAR - I Can ...
+        {t('Hi')} {firstName}, {t("I'm")} OSCAR - {t('I Can')} ...
       </Typography>
       <Grid container spacing={8}>
         {cards.map((card, index) => (
@@ -262,17 +260,30 @@ const Home = () => {
             {middleSection.title}
           </Typography>
           <Typography sx={{ mb: 2 }}>
-            <span style={{ fontWeight: 'bold', color: middleSectionColor }}>OSCAR</span> allows for{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>O</span>
-            <strong>bservability</strong> and ensures{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>S</span>
-            <strong>ervice</strong>{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>C</span>
-            <strong>ontinuity</strong> by leveraging{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>A</span>
-            <strong>I</strong> powered{' '}
-            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>R</span>
-            <strong>untime</strong> deployed on a containerized environment. Get started with the following:
+            <span style={{ fontWeight: 'bold', color: middleSectionColor }}>OSCAR</span>{' '}
+            {t('allows for')}{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>
+              {t('O')}
+            </span>
+            <strong>{t('observability')}</strong> {t('and ensures')}{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>
+              {t('S')}
+            </span>
+            <strong>{t('service-home')}</strong>{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>
+              {t('C')}
+            </span>
+            <strong>{t('continuity')}</strong> {t('by leveraging')}{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>
+              {t('A')}
+            </span>
+            <strong>I</strong>{' '}
+            {t('powered')}{' '}
+            <span style={{ fontWeight: 'bold', textDecoration: 'underline', color: middleSectionColor }}>
+              {t('R')}
+            </span>
+            <strong>{t('runtime')}</strong> {t('deployed on a containerized environment')}.{' '}
+            {t('Get started with the following')}:
           </Typography>
           {middleSection.actions.map(action => (
             <Button
@@ -331,7 +342,7 @@ const Home = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Explore OSCAR Academy
+                  {t('explore-oscar-academy')}
                 </Button>
               </Grid>
             </Grid>
@@ -340,7 +351,7 @@ const Home = () => {
       </Grid>
       <Divider sx={{ mt: 4, mb: 4 }} />
       <Typography variant='h5' sx={{ mt: 20, mb: 4, textAlign: 'left', fontWeight: 900 }}>
-        Management
+        {t('Management')}
       </Typography>
       <Grid container spacing={2}>
         {managementTools.map((tool, index) => (

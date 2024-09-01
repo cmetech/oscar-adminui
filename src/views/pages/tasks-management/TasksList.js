@@ -858,7 +858,7 @@ const TasksList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to schedule this task.
+                  {t('Please confirm that you want to schedule this task.')}
                 </Typography>
               </Box>
             </Stack>
@@ -866,10 +866,10 @@ const TasksList = props => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleScheduleDialogSubmit} color='primary'>
-            Schedule
+            {t('Schedule')}
           </Button>
           <Button variant='outlined' onClick={handleScheduleDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -931,7 +931,7 @@ const TasksList = props => {
                 <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
                   <Box>
                     <Typography variant='h5' justifyContent='center' alignContent='center'>
-                      Please confirm that you want to run this task.
+                      {t('Please confirm that you want to run this task.')}
                     </Typography>
                   </Box>
                 </Stack>
@@ -939,10 +939,10 @@ const TasksList = props => {
             </DialogContent>
             <DialogActions>
               <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
-                Run
+                {t('Run')}
               </Button>
               <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
-                Cancel
+                {t('Cancel')}
               </Button>
             </DialogActions>
           </>
@@ -956,7 +956,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -982,14 +982,14 @@ const TasksList = props => {
 
       if (response.status === 200) {
         // Show success message
-        toast.success(`Task Successfully Scheduled`)
+        toast.success(t('Task Successfully Scheduled'))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to Schedule Task`)
+        toast.error(t('Failed to Schedule Task'))
       }
     } catch (error) {
-      console.error(`Failed to Schedule Task`, error)
-      toast.error(`Failed to Schedule Task`)
+      console.error(t('Failed to Schedule Task'), error)
+      toast.error(t('Failed to Schedule Task'))
     }
 
     // Close the dialog
@@ -1001,7 +1001,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -1027,14 +1027,14 @@ const TasksList = props => {
 
       if (response.status === 200) {
         // Show success message
-        toast.success(`Task Successfully Run`)
+        toast.success(t('Task Successfully Run'))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to Run Task`)
+        toast.error(t('Failed to Run Task'))
       }
     } catch (error) {
-      console.error(`Failed to Run Task`, error)
-      toast.error(`Failed to Run Task`)
+      console.error(t('Failed to Run Task'), error)
+      toast.error(t('Failed to Run Task'))
     }
 
     // Close the dialog
@@ -1047,7 +1047,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -1076,14 +1076,14 @@ const TasksList = props => {
         setRows(updatedRows)
 
         // Show success message
-        toast.success(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
+        toast.success(t(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+        toast.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`))
       }
     } catch (error) {
-      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`, error)
-      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+      console.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`), error)
+      toast.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`))
     }
 
     // Close the dialog
@@ -1116,11 +1116,11 @@ const TasksList = props => {
 
         setRefetchTrigger(Date.now())
 
-        toast.success('Successfully deleted Task')
+        toast.success(t('Successfully deleted Task'))
       }
     } catch (error) {
-      console.error('Failed to delete Task', error)
-      toast.error('Failed to delete Task')
+      console.error(t('Failed to delete Task'), error)
+      toast.error(t('Failed to delete Task'))
     }
   }
 
@@ -1171,8 +1171,8 @@ const TasksList = props => {
         props.set_total(response.data.total_records)
         setTasks(response.data.records)
       } catch (error) {
-        console.error('Failed to fetch tasks:', error)
-        toast.error('Failed to fetch tasks')
+        console.error(t('Failed to fetch tasks'), error)
+        toast.error(t('Failed to fetch tasks'))
       } finally {
         // Mark the request as completed
         requestCompleted = true
@@ -1245,8 +1245,8 @@ const TasksList = props => {
         try {
           await axios.post('/api/tasks/register', { timeout: 10000 })
         } catch (error) {
-          console.error('Error refreshing tasks:', error)
-          toast.error('Failed to refresh tasks')
+          console.error(t('Error refreshing tasks'), error)
+          toast.error(t('Failed to refresh tasks'))
         } finally {
           fetchData()
           setRunRefresh(false)
@@ -1369,13 +1369,13 @@ const TasksList = props => {
 
       // Optionally, use a UI notification library to inform the user
       // For example, if you're using react-hot-toast
-      toast.success('Tasks successfully registered')
+      toast.success(t('Tasks successfully registered'))
     } catch (error) {
-      console.error('Error registering tasks:', error)
+      console.error(t('Error registering tasks'), error)
 
       // Handle error response
       // Optionally, use a UI notification library to inform the user about the error
-      toast.error('Failed to register tasks')
+      toast.error(t('Failed to register tasks'))
     }
   }
 
@@ -1465,10 +1465,10 @@ const TasksList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Tasks found'
+              message: t('No Tasks found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,

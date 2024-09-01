@@ -186,7 +186,7 @@ const TaskDetailPanel = ({ row }) => {
     <Box sx={{ m: 5 }}>
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <TabList onChange={handleChange} aria-label='Task details tabs'>
+          <TabList onChange={handleChange} aria-label={t('Task details tabs')}>
             <Tab label={t('Args')} value='1' />
             <Tab label={t('Kwargs')} value='2' />
             <Tab label={t('Metadata')} value='3' />
@@ -221,10 +221,10 @@ const TaskDetailPanel = ({ row }) => {
                 variant: 'outlined'
               },
               noRowsOverlay: {
-                message: 'No Arguments Found'
+                message: t('No Arguments Found')
               },
               noResultsOverlay: {
-                message: 'No Results Found'
+                message: t('No Results Found')
               },
               toolbar: {
                 showQuickFilter: true
@@ -460,10 +460,10 @@ const TaskDetailPanel = ({ row }) => {
                 variant: 'outlined'
               },
               noRowsOverlay: {
-                message: 'No Keyword Arguments Found'
+                message: t('No Keyword Arguments Found')
               },
               noResultsOverlay: {
-                message: 'No Results Found'
+                message: t('No Results Found')
               },
               toolbar: {
                 showQuickFilter: true
@@ -699,10 +699,10 @@ const TaskDetailPanel = ({ row }) => {
                 variant: 'outlined'
               },
               noRowsOverlay: {
-                message: 'No Metadata Found'
+                message: t('No Metadata Found')
               },
               noResultsOverlay: {
-                message: 'No Results Found'
+                message: t('No Results Found')
               },
               toolbar: {
                 showQuickFilter: true
@@ -938,10 +938,10 @@ const TaskDetailPanel = ({ row }) => {
                 variant: 'outlined'
               },
               noRowsOverlay: {
-                message: 'No Host Information Found'
+                message: t('No Host Information Found')
               },
               noResultsOverlay: {
-                message: 'No Results Found'
+                message: t('No Results Found')
               },
               toolbar: {
                 showQuickFilter: true
@@ -1154,7 +1154,7 @@ const TaskDetailPanel = ({ row }) => {
         {row.schedule && (
           <TabPanel value='schedule'>
             <Typography variant='h6' sx={{ marginBottom: 2 }}>
-              Schedule Details:
+              {t('Schedule Details:')}
             </Typography>
             {scheduleDetails.map(({ key, value }) => (
               <Typography key={key} variant='body1'>{`${key}: ${value}`}</Typography>
@@ -1190,10 +1190,10 @@ const TaskDetailPanel = ({ row }) => {
                   variant: 'outlined'
                 },
                 noRowsOverlay: {
-                  message: 'No Schedule Information Found'
+                  message: t('No Schedule Information Found')
                 },
                 noResultsOverlay: {
-                  message: 'No Results Found'
+                  message: t('No Results Found')
                 },
                 toolbar: {
                   showQuickFilter: true

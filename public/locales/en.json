@@ -129,5 +129,13 @@
     "Timetable Description": "Timetable Description",
     "Next Run": "Next Run",
     "No Workflows found": "No Workflows found",
-    "No Results Found": "No Results Found"
+    "No Results Found": "No Results Found",
+    "Upload Probes": "Upload Probes",
+    "Choose File": "Choose File",
+    "Selected file:": "Selected file:",
+    "uploaded": "uploaded",
+    "Uploading...": "Uploading...",
+    "Upload": "Upload",
+    "Disable all selected?": "Disable all selected?",
+    "Enable all selected?": "Enable all selected?"
 }

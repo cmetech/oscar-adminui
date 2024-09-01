@@ -569,7 +569,7 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
         </Button>
         {fileName && (
           <Typography variant='subtitle1' sx={{ mt: 2 }}>
-            Selected file: {fileName}
+            {t('Selected file:')} {fileName}
           </Typography>
         )}
 
@@ -577,7 +577,7 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
           <Box sx={{ width: '100%', mt: 2 }}>
             <LinearProgress variant='determinate' value={uploadProgress} />
             <Typography variant='subtitle2' align='center'>
-              {Math.round(uploadProgress)}% uploaded
+              {Math.round(uploadProgress)}% {t('uploaded')}
             </Typography>
           </Box>
         )}

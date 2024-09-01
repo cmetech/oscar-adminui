@@ -129,5 +129,13 @@
     "Timetable Description": "Descripción del Horario",
     "Next Run": "Próxima Ejecución",
     "No Workflows found": "No se encontraron flujos de trabajo",
-    "No Results Found": "No se encontraron resultados"
+    "No Results Found": "No se encontraron resultados",
+    "Upload Probes": "Cargar Sondas",
+    "Choose File": "Elegir Archivo",
+    "Selected file:": "Archivo seleccionado:",
+    "uploaded": "cargado",
+    "Uploading...": "Cargando...",
+    "Upload": "Cargar",
+    "Disable all selected?": "¿Deshabilitar todos los seleccionados?",
+    "Enable all selected?": "¿Habilitar todos los seleccionados?"
 }

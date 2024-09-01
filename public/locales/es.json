@@ -119,5 +119,15 @@
     "Settings": "Configuración",
     "SLO {{sloId}} deleted successfully": "SLO {{sloId}} eliminado exitosamente",
     "Failed to delete SLO {{sloId}}": "Error al eliminar el SLO {{sloId}}",
-    "An unexpected error occurred during SLO deletion": "Ocurrió un error inesperado durante la eliminación del SLO"
+    "An unexpected error occurred during SLO deletion": "Ocurrió un error inesperado durante la eliminación del SLO",
+    "Connection ID": "ID de Conexión",
+    "Connection Type": "Tipo de Conexión",
+    "Host": "Host",
+    "Port": "Puerto",
+    "Schema": "Esquema",
+    "Schedule Interval": "Intervalo de Programación",
+    "Timetable Description": "Descripción del Horario",
+    "Next Run": "Próxima Ejecución",
+    "No Workflows found": "No se encontraron flujos de trabajo",
+    "No Results Found": "No se encontraron resultados"
 }

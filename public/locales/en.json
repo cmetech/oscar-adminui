@@ -119,5 +119,15 @@
     "Settings": "Settings",
     "SLO {{sloId}} deleted successfully": "SLO {{sloId}} deleted successfully",
     "Failed to delete SLO {{sloId}}": "Failed to delete SLO {{sloId}}",
-    "An unexpected error occurred during SLO deletion": "An unexpected error occurred during SLO deletion"
+    "An unexpected error occurred during SLO deletion": "An unexpected error occurred during SLO deletion",
+    "Connection ID": "Connection ID",
+    "Connection Type": "Connection Type",
+    "Host": "Host",
+    "Port": "Port",
+    "Schema": "Schema",
+    "Schedule Interval": "Schedule Interval",
+    "Timetable Description": "Timetable Description",
+    "Next Run": "Next Run",
+    "No Workflows found": "No Workflows found",
+    "No Results Found": "No Results Found"
 }

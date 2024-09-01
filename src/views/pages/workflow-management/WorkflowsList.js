@@ -149,7 +149,7 @@ const WorkflowsList = props => {
     {
       flex: 0.06,
       field: 'dag_id',
-      headerName: 'Name',
+      headerName: t('Name'),
       renderCell: params => {
         const { row } = params
         return (
@@ -175,7 +175,7 @@ const WorkflowsList = props => {
       flex: 0.02,
       minWidth: 100,
       field: 'schedule_interval',
-      headerName: 'Schedule Interval',
+      headerName: t('Schedule Interval'),
       renderCell: params => {
         const { row } = params
         return (
@@ -201,7 +201,7 @@ const WorkflowsList = props => {
       flex: 0.03,
       minWidth: 100,
       field: 'timetable_description',
-      headerName: 'Timetable Description',
+      headerName: t('Timetable Description'),
       renderCell: params => {
         const { row } = params
         return (
@@ -227,19 +227,19 @@ const WorkflowsList = props => {
       flex: 0.03,
       minWidth: 60,
       field: 'next_dagrun',
-      headerName: 'Next Run',
+      headerName: t('Next Run'),
       renderCell: params => {
         const { row } = params
-  
+
         const timezone = session?.data?.user?.timezone || 'US/Eastern'
-  
+
         if (row?.next_dagrun && !isNaN(new Date(row.next_dagrun).getTime())) {
           const humanReadableDate = formatInTimeZone(
             utcToZonedTime(parseISO(row.next_dagrun), timezone),
             timezone,
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
-  
+
           return (
             <Box
               sx={{
@@ -286,8 +286,8 @@ const WorkflowsList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
-                title='Run Workflow'
-                aria-label='Run Workflow'
+                title={t('Run Workflow')}
+                aria-label={t('Run Workflow')}
                 color='warning'
                 onClick={() => {
                   setCurrentWorkflow(row)
@@ -299,8 +299,8 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title={isActive && !isPaused ? 'Disable Workflow' : 'Enable Workflow'}
-                aria-label={isActive && !isPaused ? 'Disable Workflow' : 'Enable Workflow'}
+                title={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
+                aria-label={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
                 color={isActive && !isPaused ? 'success' : 'secondary'}
                 onClick={() => {
                   setCurrentWorkflow(row)
@@ -311,9 +311,9 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Edit Workflow'
+                title={t('Edit Workflow')}
                 color='secondary'
-                aria-label='Edit Workflow'
+                aria-label={t('Edit Workflow')}
                 onClick={() => {
                   setCurrentWorkflow(row)
                   setEditDialog(true)
@@ -323,8 +323,8 @@ const WorkflowsList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Workflow'
-                aria-label='Delete Workflow'
+                title={t('Delete Workflow')}
+                aria-label={t('Delete Workflow')}
                 color='error'
                 onClick={() => {
                   setCurrentWorkflow(row)
@@ -339,7 +339,7 @@ const WorkflowsList = props => {
       }
     }
   ]
-  
+
 
   const handleUpdateDialogClose = () => {
     setEditDialog(false)
@@ -401,9 +401,9 @@ const WorkflowsList = props => {
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Workflow Information
+              {t('Edit Workflow Information')}
             </Typography>
-            <Typography variant='body2'>Updates to workflow information will be effective immediately.</Typography>
+            <Typography variant='body2'>{t('Updates to workflow information will be effective immediately.')}</Typography>
           </Box>
           {currentWorkflow && (
             <UpdateTaskWizard
@@ -463,7 +463,7 @@ const WorkflowsList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this workflow.
+                  {t('Please confirm that you want to delete this workflow.')}
                 </Typography>
               </Box>
             </Stack>
@@ -471,10 +471,10 @@ const WorkflowsList = props => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
+            {t('Delete')}
           </Button>
           <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -486,10 +486,10 @@ const WorkflowsList = props => {
     const isEnabled = currentWorkflow?.is_active && !currentWorkflow?.is_paused
 
     // Determine the dialog title text based on the task status
-    const dialogTitleText = isEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
+    const dialogTitleText = isEnabled ? t('Please confirm disable of ') : t('Please confirm enable of ')
 
     // Determine the action button text based on the task status
-    const actionButtonText = isEnabled ? 'Disable' : 'Enable'
+    const actionButtonText = isEnabled ? t('Disable') : t('Enable')
 
     return (
       <Dialog
@@ -547,7 +547,7 @@ const WorkflowsList = props => {
             {actionButtonText}
           </Button>
           <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -599,7 +599,7 @@ const WorkflowsList = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to schedule this workflow.
+                  {t('Please confirm that you want to schedule this workflow.')}
                 </Typography>
               </Box>
             </Stack>
@@ -607,10 +607,10 @@ const WorkflowsList = props => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleScheduleDialogSubmit} color='primary'>
-            Schedule
+            {t('Schedule')}
           </Button>
           <Button variant='outlined' onClick={handleScheduleDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -659,7 +659,7 @@ const WorkflowsList = props => {
             <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to run this workflow.
+                  {t('Please confirm that you want to run this workflow.')}
                 </Typography>
               </Box>
             </Stack>
@@ -667,10 +667,10 @@ const WorkflowsList = props => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
-            Run
+            {t('Run')}
           </Button>
           <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1164,10 +1164,10 @@ const WorkflowsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Workflows found'
+              message: t('No Workflows found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,

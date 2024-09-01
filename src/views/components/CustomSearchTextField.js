@@ -1,8 +1,8 @@
 import React, { useState, useEffect, forwardRef } from 'react'
 import { Box, TextField, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
-
 import { useTheme, styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'  // Add this import
 
 const TextfieldStyled = styled(TextField)(({ theme }) => ({
   '& label.Mui-focused': {
@@ -35,6 +35,7 @@ function useDebounce(value, delay) {
 const CustomSearchTextField = forwardRef(({ value, onChange, clearSearch, delay = 500, ...props }, ref) => {
   const [inputValue, setInputValue] = useState(value)
   const debouncedInputValue = useDebounce(inputValue, delay)
+  const { t } = useTranslation()  // Add this line to use the translation function
 
   // When debounced value changes or Enter is pressed
   const handleChange = newValue => {
@@ -73,7 +74,7 @@ const CustomSearchTextField = forwardRef(({ value, onChange, clearSearch, delay 
       value={inputValue}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
-      placeholder='Filter Current Page…'
+      placeholder={t('Filter Current Page')}  // Update this line
       InputProps={{
         startAdornment: (
           <Box sx={{ mr: 2, display: 'flex' }}>

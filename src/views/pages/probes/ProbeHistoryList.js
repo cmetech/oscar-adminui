@@ -238,10 +238,10 @@ const TaskHistoryList = props => {
         let label = 'UNKN'
         if (row?.state?.toUpperCase() === 'SUCCESS') {
           color = 'success'
-          label = 'COMPLETED'
+          label = t('COMPLETED')
         } else {
           color = 'error'
-          label = 'FAILURE'
+          label = t('FAILURE')
         }
 
         return (
@@ -634,10 +634,10 @@ const TaskHistoryList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Probes found'
+              message: t('No Probes found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,

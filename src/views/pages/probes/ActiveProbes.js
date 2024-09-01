@@ -236,22 +236,22 @@ const ActiveProbes = props => {
         const { row } = params
 
         let color = 'secondary'
-        let label = 'UNKNOWN'
+        let label = t('UNKNOWN')
         let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
         if (row?.operational_status?.toLowerCase() === 'up' && row?.status?.toLowerCase() === 'enabled') {
           color = 'success'
-          label = 'UP'
+          label = t('UP')
         } else if (row?.operational_status?.toLowerCase() === 'down' && row?.status?.toLowerCase() === 'enabled') {
           color = 'error'
-          label = 'DOWN'
+          label = t('DOWN')
         } else if (row?.status?.toLowerCase() === 'disabled') {
           skin = 'dark'
           color = 'secondary'
-          label = 'DISABLED'
+          label = t('DISABLED')
         } else {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         }
 
         return (
@@ -282,7 +282,7 @@ const ActiveProbes = props => {
                 rounded
                 size='medium'
                 skin={skin}
-                label={label || 'UNKNOWN'}
+                label={label || t('UNKNOWN')}
                 color={color}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
@@ -305,7 +305,7 @@ const ActiveProbes = props => {
         const shouldShowChip = row.target && !row.target.startsWith('http:') && row.type !== 'api'
 
         let color = 'secondary'
-        let label = 'UNKNOWN'
+        let label = t('UNKNOWN')
         let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
         if (
           row?.operational_status?.toLowerCase() === 'up' &&
@@ -313,22 +313,22 @@ const ActiveProbes = props => {
           row?.ssl_status?.toLowerCase() === 'ok'
         ) {
           color = 'success'
-          label = 'OK'
+          label = t('OK')
         } else if (
           row?.operational_status?.toLowerCase() === 'down' &&
           row?.status?.toLowerCase() === 'enabled' &&
           row?.ssl_status?.toLowerCase() === 'invalid'
         ) {
           color = 'error'
-          label = 'INVALID'
+          label = t('INVALID')
         } else if (row?.operational_status?.toLowerCase() === 'unknown') {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         } else {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         }
 
         return (
@@ -360,7 +360,7 @@ const ActiveProbes = props => {
                   rounded
                   size='medium'
                   skin={skin}
-                  label={label || 'UNKN'}
+                  label={label || t('UNKN')}
                   color={color}
                   sx={{
                     '& .MuiChip-label': { textTransform: 'capitalize' },
@@ -470,16 +470,16 @@ const ActiveProbes = props => {
         const { row } = params
 
         let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
-        let label = 'UNKN'
+        let label = t('UNKN')
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'httpurl') {
-          label = 'URL PROBE'
+          label = t('URL PROBE')
           iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
-          label = 'TCP PROBE'
+          label = t('TCP PROBE')
           iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'api') {
-          label = 'API PROBE'
+          label = t('API PROBE')
           iconimage = 'mdi:thermometer-probe'
         }
 
@@ -511,7 +511,7 @@ const ActiveProbes = props => {
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
+                label={label || t('UNKN')}
                 color={color}
                 icon={<Icon icon={iconimage} />}
                 sx={{
@@ -647,8 +647,8 @@ const ActiveProbes = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
-                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Probe' : 'Enable Probe'}
-                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Probe' : 'Enable Probe'}
+                title={row?.status?.toLowerCase() === 'enabled' ? t('Disable Probe') : t('Enable Probe')}
+                aria-label={row?.status?.toLowerCase() === 'enabled' ? t('Disable Probe') : t('Enable Probe')}
                 color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
                 onClick={() => {
                   setCurrentProbe(row)
@@ -660,9 +660,9 @@ const ActiveProbes = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Edit Probe'
+                title={t('Edit Probe')}
                 color='secondary'
-                aria-label='Edit Probe'
+                aria-label={t('Edit Probe')}
                 onClick={() => {
                   setCurrentProbe(row)
                   setEditDialog(true)
@@ -673,8 +673,8 @@ const ActiveProbes = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Probe'
-                aria-label='Delete Probe'
+                title={t('Delete Probe')}
+                aria-label={t('Delete Probe')}
                 color='error'
                 onClick={() => {
                   setCurrentProbe(row)
@@ -751,9 +751,9 @@ const ActiveProbes = props => {
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Probe Information
+              {t('Edit Probe Information')}
             </Typography>
-            <Typography variant='body2'>Updates to probe information will be effective immediately.</Typography>
+            <Typography variant='body2'>{t('Updates to probe information will be effective immediately.')}</Typography>
           </Box>
           {currentProbe && (
             <UpdateProbeWizard
@@ -813,7 +813,7 @@ const ActiveProbes = props => {
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this probe.
+                  {t('Please confirm that you want to delete this probe.')}
                 </Typography>
               </Box>
             </Stack>
@@ -821,10 +821,10 @@ const ActiveProbes = props => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
+            {t('Delete')}
           </Button>
           <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -836,10 +836,10 @@ const ActiveProbes = props => {
     const isProbeEnabled = currentProbe?.status?.toLowerCase() === 'enabled'
 
     // Determine the dialog title text based on the probe status
-    const dialogTitleText = isProbeEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
+    const dialogTitleText = isProbeEnabled ? t('Please confirm disable of ') : t('Please confirm enable of ')
 
     // Determine the action button text based on the probe status
-    const actionButtonText = isProbeEnabled ? 'Disable' : 'Enable'
+    const actionButtonText = isProbeEnabled ? t('Disable') : t('Enable')
 
     return (
       <Dialog
@@ -897,7 +897,7 @@ const ActiveProbes = props => {
             {actionButtonText}
           </Button>
           <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
-            Cancel
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -910,7 +910,7 @@ const ActiveProbes = props => {
 
     if (!probeId) {
       console.error('Probe ID is undefined')
-      toast.error('Probe ID is undefined or invalid')
+      toast.error(t('Probe ID is undefined or invalid'))
 
       return
     }
@@ -944,14 +944,14 @@ const ActiveProbes = props => {
         setRows(updatedRows)
 
         // Show success message
-        toast.success(`Probe ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
+        toast.success(`${t('Probe')} ${newStatus === 'enabled' ? t('Enabled') : t('Disabled')}`)
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`)
+        toast.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`)
       }
     } catch (error) {
-      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`, error)
-      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`)
+      console.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`, error)
+      toast.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`)
     }
 
     // Close the dialog
@@ -981,7 +981,7 @@ const ActiveProbes = props => {
         setDeleteDialog(false)
 
         // props.set_total(props.total - 1)
-        toast.success('Successfully deleted Probe')
+        toast.success(t('Successfully deleted Probe'))
 
         // Wait for a short delay before triggering the refetch
         setTimeout(() => {
@@ -990,7 +990,7 @@ const ActiveProbes = props => {
       }
     } catch (error) {
       console.error('Failed to delete Probe', error)
-      toast.error('Failed to delete Probe')
+      toast.error(t('Failed to delete Probe'))
     }
   }
 
@@ -1042,7 +1042,7 @@ const ActiveProbes = props => {
         setProbes(response.data.records)
       } catch (error) {
         console.error('Failed to fetch probes:', error)
-        toast.error('Failed to fetch probes')
+        toast.error(t('Failed to fetch probes'))
       } finally {
         // Mark the request as completed
         requestCompleted = true
@@ -1265,10 +1265,10 @@ const ActiveProbes = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Probes found'
+              message: t('No Probes found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,

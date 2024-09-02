@@ -282,32 +282,30 @@ const LoginPage = ({ csrfToken, providers }) => {
                   {/* {themeConfig.templateName} */}
                 </Typography>
               </Box>
-              {keycloak_enabled && (
-                <Button
-                  fullWidth
-                  size='large'
-                  variant='outlined'
-                  color='warning'
-                  onClick={handleKeycloakLogin}
-                  sx={{ mb: 2 }}
-                  startIcon={<Icon icon='mdi:shield' />}
-                >
-                  Login with Keycloak
-                </Button>
-              )}
-              {azure_ad_enabled && (
-                <Button
-                  fullWidth
-                  size='large'
-                  variant='outlined'
-                  color='info'
-                  onClick={handleAzureLogin}
-                  sx={{ mb: 2 }}
-                  startIcon={<Icon icon='mdi:microsoft' />}
-                >
-                  Login with Azure AD
-                </Button>
-              )}
+              <Button
+                fullWidth
+                size='large'
+                variant='outlined'
+                color='warning'
+                onClick={handleKeycloakLogin}
+                sx={{ mb: 2 }}
+                startIcon={<Icon icon='mdi:shield' />}
+                disabled={!keycloak_enabled}
+              >
+                Login with Keycloak
+              </Button>
+              <Button
+                fullWidth
+                size='large'
+                variant='outlined'
+                color='info'
+                onClick={handleAzureLogin}
+                sx={{ mb: 2 }}
+                startIcon={<Icon icon='mdi:microsoft' />}
+                disabled={!azure_ad_enabled}
+              >
+                Login with Azure AD
+              </Button>
               {showDivider && (
                 <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
               )}

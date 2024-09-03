@@ -540,6 +540,7 @@ const UsersList = props => {
                 size='small'
                 title='Delete User'
                 aria-label='Delete User'
+                color='error'
                 onClick={() => {
                   setCurrentUser(params.row)
                   setDeleteDialog(true)

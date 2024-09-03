@@ -25,7 +25,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import FormGroup from '@mui/material/FormGroup'
+import FormGroup from '@mui/material/FormGroup' 
 import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
@@ -80,6 +80,21 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
   }
 }))
 
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
+    color: theme.palette.customColors.accent
+  }
+}))
+
+const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'inherit' // Replace with your hover state border color
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.customColors.accent // Border color when focused
+  }
+}))
+
 // Validation schema using yup
 const validationSchema = yup.object({
   firstName: yup.string().trim().required('First name is required').min(3, 'First name must be at least 3 characters'),
@@ -90,13 +105,14 @@ const validationSchema = yup.object({
 })
 
 const AddUserWizard = props => {
-  const { setRows } = props
+  const { setRows, onSuccess } = props
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [isActive, setIsActive] = useState(false)
   const [isSuperUser, setIsSuperUser] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
@@ -159,7 +175,15 @@ const AddUserWizard = props => {
         if (response.data) {
           const newUser = response.data
           setRows(prevRows => [...prevRows, newUser]) // Use setRows from props
-            toast.success('User added successfully')
+          
+          setActiveStep(null)
+
+          setTimeout(() => {
+            onSuccess()
+          }, 1000)
+          
+          
+          toast.success('User added successfully')
         }
       } catch (error) {
         console.error('Error adding new user', error)
@@ -177,7 +201,7 @@ const AddUserWizard = props => {
     setIsActive(false)
     setIsSuperUser(false)
     setIsVerified(false)
-    setActiveStep(0) 
+    setActiveStep(0)
   }
 
   const handleInputChange = setter => event => {
@@ -186,6 +210,14 @@ const AddUserWizard = props => {
 
   const handleCheckboxChange = setter => event => {
     setter(event.target.checked)
+  }
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault()
   }
 
   const getStepContent = step => {
@@ -244,11 +276,24 @@ const AddUserWizard = props => {
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                  <TextfieldStyled
-                    fullWidth
+                <InputLabelStyled htmlFor="outlined-adornment-password">Password</InputLabelStyled>
+                  <OutlinedInputStyled
+                    id="outlined-adornment-password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={handleInputChange(setPassword)}
-                    type='password'
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                        </IconButton>
+                      </InputAdornment>
+                    }
                     label='Password'
                     error={Boolean(formErrors.password)}
                     helperText={formErrors.password}
@@ -333,10 +378,10 @@ const AddUserWizard = props => {
   }
 
   const renderContent = () => {
-    if (activeStep === steps.length) {
+    if (activeStep === steps.length || activeStep== null) {
 
       return (
-        <form  onload ={e => e.preventDefault()}>
+
           <Fragment>
             <Typography>New user details have been submitted.</Typography>
             <Grid container spacing={1}>
@@ -391,9 +436,9 @@ const AddUserWizard = props => {
               </Button>
             </Box>
             </Fragment>
-          </form>
+
       )
-    } else {
+    } else if(activeStep != null) {
       
       return(
         <form onSubmit={e => e.preventDefault()}>

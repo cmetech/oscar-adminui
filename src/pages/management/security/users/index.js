@@ -89,6 +89,11 @@ const Settings = () => {
     setOpenDialog(false)
   }
 
+  const handleSuccess = () => {
+    handleAddUserDialogClose()
+    //console.log("closing dialog on success")
+  }
+
   
 
   const UserAddDialog = () => {
@@ -101,6 +106,7 @@ const Settings = () => {
           open={openDialog}
           onClose={handleAddUserDialogClose}
           TransitionComponent={Transition}
+          onSuccess={handleSuccess}
           aria-labelledby='form-dialog-title'>
             
         <DialogTitle id='form-dialog-title'>
@@ -125,7 +131,7 @@ const Settings = () => {
             </Typography>
             <Typography variant='body2'>Creates a new User to be effective immediately.</Typography>
           </Box>
-          <AddUserWizard setRows={setRows} />
+          <AddUserWizard setRows={setRows} onSuccess={handleSuccess}/>
         </DialogContent>
 
         </Dialog>
@@ -148,7 +154,9 @@ const Settings = () => {
                   startIcon={<Icon icon='mdi:user-plus' />}
                   onClick={() => {
                   //setCurrentUser(params.row)
-                  setOpenDialog(true)
+                    if (!openDialog) {
+                    setOpenDialog(true)
+                  } 
                   }}
                   disabled={!ability.can('create', 'user')}
                 >

@@ -163,7 +163,7 @@ const AppBarContent = props => {
     {
       title: 'Workflows',
       subtitle: 'Manage Workflows',
-      icon: 'mdi:workflow',
+      icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}/airflow`,
       externalLink: true,
       openInNewTab: true
@@ -171,7 +171,7 @@ const AppBarContent = props => {
     {
       title: 'Reverse Proxy',
       subtitle: 'Explore Routes',
-      icon: 'mdi:router',
+      icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
       externalLink: true,
       openInNewTab: true
@@ -180,6 +180,22 @@ const AppBarContent = props => {
       title: 'Monitor Workers',
       url: `https://${rootDomain}:${flower_port}/flower/`,
       subtitle: 'Celery Flower',
+      icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'VM Agent',
+      url: `https://${rootDomain}/ext/vmagent/`,
+      subtitle: 'Menu',
+      icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Alert Manager',
+      url: `https://${rootDomain}/ext/alertmanager/`,
+      subtitle: 'Menu',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true

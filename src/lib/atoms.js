@@ -9,6 +9,8 @@ export const subcomponentIdsAtom = atom([])
 
 export const taskIdsAtom = atom([])
 
+export const userIdsAtom = atom([])
+
 export const datacentersAtom = atom([])
 
 export const environmentsAtom = atom([])
@@ -32,6 +34,8 @@ export const refetchComponentTriggerAtom = atom(0)
 export const refetchSubcomponentTriggerAtom = atom(0)
 
 export const refetchTaskTriggerAtom = atom(0)
+
+export const refetchUserTriggerAtom = atom(0)
 
 export const refetchNotifierTriggerAtom = atom(0)
 

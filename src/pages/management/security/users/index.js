@@ -1,7 +1,9 @@
 // ** React Imports
 import { useContext, useState, useEffect, useCallback, forwardRef, Fragment } from 'react'
 import getConfig from 'next/config'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
+import { userIdsAtom, refetchUserTriggerAtom } from 'src/lib/atoms'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -20,7 +22,11 @@ import IconButton from '@mui/material/IconButton'
 
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import DialogActions from '@mui/material/DialogActions'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 
 import { styled } from '@mui/material/styles'
 
@@ -38,6 +44,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { set } from 'nprogress'
 import { get } from 'react-hook-form'
 import AddUserWizard from 'src/views/pages/misc/forms/AddUserWizard'
+import { useAtom } from 'jotai'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -79,12 +86,19 @@ const Settings = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
 
+  const [selectedUserIds, setSelectedUserIds] = useAtom(userIdsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchUserTriggerAtom)
+
+  const [openModal, setOpenModal] = useState(false)
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
+  const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
 
   
-
   const handleAddUserDialogClose = () => {
     setOpenDialog(false)
   }
@@ -92,6 +106,263 @@ const Settings = () => {
   const handleSuccess = () => {
     handleAddUserDialogClose()
     //console.log("closing dialog on success")
+  }
+
+  const handleDeactivate = () => {
+    //TO DO handle deactivate logic
+    setIsDisableModalOpen(true)
+    console.log("handle deactivate")
+  }
+
+  const handleDelete = () => {
+    //TO DO handle deactivate logic
+    setIsDeleteModalOpen(true)
+    console.log("handle delete")
+  }
+
+  const handleActivate = () => {
+    //TO DO handle deactivate logic
+    setIsEnableModalOpen(true)
+    console.log("handle activate")
+  }
+
+  const handleOpenModal = () => {
+    setOpenModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setOpenModal(false)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting tasks', selectedUserIds)
+
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleCloseEnableModal = () => {
+    setIsEnableModalOpen(false)
+  }
+
+  const handleConfirmEnable = async () => {
+    console.log('Enabling users', selectedUserIds)
+
+    setIsEnableModalOpen(false)
+  }
+
+  const handleCloseDisableModal = () => {
+    setIsDisableModalOpen(false)
+  }
+
+  const handleConfirmDisable = async () => {
+    console.log('Enabling users', selectedUserIds)
+
+    setIsDisableModalOpen(false)
+  }
+
+  const MoreActionsDropdown = ({ onDeactivate, onDelete , onActivate }) => {
+    const [anchorEl, setAnchorEl] = useState(null)
+    const { t } = useTranslation()
+    const ability = useContext(AbilityContext)
+    const router = useRouter()
+
+    const handleDropdownOpen = event => {
+      setAnchorEl(event.currentTarget)
+    }
+
+    const handleDropdownClose = url => {
+      if (url) {
+        console.log('url', url)
+        router.push(url)
+      }
+      setAnchorEl(null)
+    }
+
+    const styles = {
+      py: 2,
+      px: 4,
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      color: 'text.primary',
+      textDecoration: 'none',
+      '& svg': {
+        mr: 2,
+        fontSize: '1.375rem',
+        color: 'text.primary'
+      }
+    }
+
+    return (
+      <Fragment>
+      <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
+        <Icon icon='mdi:menu' />
+      </IconButton>
+      <Menu
+        id='simple-menu'
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={() => handleDropdownClose()}
+        sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
+      >
+
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onActivate()
+            handleDropdownClose()
+          }}
+          disabled={!ability.can('enable', 'tasks')}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:plus-box' />
+            {t('Enable')}
+          </Box>
+        </MenuItem>
+
+        <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onDeactivate()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('disable', 'tasks')}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:minus-box' />
+              {t('Disable')}
+            </Box>
+
+        </MenuItem>
+
+        <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onDelete()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('delete', 'tasks')}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:delete-forever-outline' />
+              {t('Delete')}
+            </Box>
+          </MenuItem>
+
+          
+
+      </Menu>
+      </Fragment>
+    )
+
+  }
+
+  const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm}) => {
+    const { t } = useTranslation()
+    
+    return (
+      <Dialog open={isOpen} onClose={onClose}>
+        <DialogTitle>{t('Confirm Action')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t('Delete all selected?')}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={onClose}
+            size='large'
+            variant='outlined'
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+          <Button
+            onClick={onConfirm}
+            size='large'
+            variant='contained'
+            color='error'
+            autoFocus
+            startIcon={<Icon icon='mdi:delete-forever' />}
+          >
+            {t('Delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const ConfirmationDisableModal = ({ isOpen, onClose, onConfirm, tab }) => {
+    const { t } = useTranslation()
+  
+  
+    return (
+      <Dialog open={isOpen} onClose={onClose}>
+        <DialogTitle>{t('Confirm Action')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t('Disable all selected?')}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={onClose}
+            size='large'
+            variant='outlined'
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+          <Button
+            onClick={onConfirm}
+            size='large'
+            variant='contained'
+            color='warning'
+            autoFocus
+            startIcon={<Icon icon='mdi:minus-box' />}
+          >
+            {t('Disable')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const ConfirmationEnableModal = ({ isOpen, onClose, onConfirm }) => {
+    
+    return (
+      <Dialog open={isOpen} onClose={onClose}>
+        <DialogTitle>{t('Confirm Action')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t('Enable all selected?')}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={onClose}
+            size='large'
+            variant='outlined'
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+          <Button
+            onClick={onConfirm}
+            size='large'
+            variant='contained'
+            color='info'
+            autoFocus
+            startIcon={<Icon icon='mdi:plus-box' />}
+          >
+            {t('Enable')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+
   }
 
   
@@ -162,6 +433,11 @@ const Settings = () => {
                 >
                   {t('Add User')}
                 </Button>
+                <MoreActionsDropdown
+                  onDeactivate={handleDeactivate}
+                  onDelete={handleDelete}
+                  onActivate={handleActivate}
+                />
               </Fragment>
             )}
             
@@ -189,6 +465,27 @@ const Settings = () => {
           {/* dialogue content ends*/}
         </TabContext>
       </Grid>
+      {/*<DynamicDialogForm open={openModal} handleClose={handleCloseModal} tab={value} />*/}
+      <ConfirmationDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        tab={value}
+      />
+
+      <ConfirmationEnableModal
+        isOpen={isEnableModalOpen}
+        onClose={handleCloseEnableModal}
+        onConfirm={handleConfirmEnable}
+        tab={value}
+      />
+
+      <ConfirmationDisableModal
+        isOpen={isDisableModalOpen}
+        onClose={handleCloseDisableModal}
+        onConfirm={handleConfirmDisable}
+        tab={value}
+      />
     </Grid>
   )
 }

@@ -667,7 +667,8 @@ const ActiveProbes = props => {
                   setCurrentProbe(row)
                   setEditDialog(true)
                 }}
-                disabled={!ability.can('update', 'probes')}
+                disabled={true}
+                // disabled={!ability.can('update', 'probes')}
               >
                 <Icon icon='mdi:account-edit' />
               </IconButton>

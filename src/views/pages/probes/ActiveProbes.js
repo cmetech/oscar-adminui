@@ -590,41 +590,41 @@ const ActiveProbes = props => {
         )
       }
     },
-    {
-      flex: 0.02,
-      minWidth: 60,
-      field: 'updatedAtTime',
-      headerName: t('Updated At'),
-      renderCell: params => {
-        const { row } = params
+    // {
+    //   flex: 0.02,
+    //   minWidth: 60,
+    //   field: 'updatedAtTime',
+    //   headerName: t('Updated At'),
+    //   renderCell: params => {
+    //     const { row } = params
 
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+    //     const timezone = session?.data?.user?.timezone || 'US/Eastern'
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+    //     const humanReadableDate = formatInTimeZone(
+    //       utcToZonedTime(parseISO(row?.modified_at), timezone),
+    //       timezone,
+    //       'MMM d, yyyy, h:mm:ss aa zzz'
+    //     )
 
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
+    //     return (
+    //       <Box
+    //         sx={{
+    //           display: 'flex',
+    //           alignItems: 'center', // Ensures vertical centering inside the Box
+    //           justifyContent: 'flex-start',
+    //           width: '100%', // Ensures the Box takes full width of the cell
+    //           height: '100%' // Ensures the Box takes full height of the cell
+    //         }}
+    //       >
+    //         <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+    //           <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+    //             {humanReadableDate}
+    //           </Typography>
+    //         </Box>
+    //       </Box>
+    //     )
+    //   }
+    // },
     {
       field: 'actions',
       headerName: t('Actions'),
@@ -658,7 +658,7 @@ const ActiveProbes = props => {
               >
                 <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
               </IconButton>
-              <IconButton
+              {/* <IconButton
                 size='small'
                 title={t('Edit Probe')}
                 color='secondary'
@@ -667,11 +667,10 @@ const ActiveProbes = props => {
                   setCurrentProbe(row)
                   setEditDialog(true)
                 }}
-                disabled={true}
-                // disabled={!ability.can('update', 'probes')}
+                disabled={!ability.can('update', 'probes')}
               >
                 <Icon icon='mdi:account-edit' />
-              </IconButton>
+              </IconButton> */}
               <IconButton
                 size='small'
                 title={t('Delete Probe')}

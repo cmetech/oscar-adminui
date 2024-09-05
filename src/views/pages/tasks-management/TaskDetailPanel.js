@@ -1190,7 +1190,7 @@ const TaskDetailPanel = ({ row }) => {
                   variant: 'outlined'
                 },
                 noRowsOverlay: {
-                  message: t('No Schedule Information Found')
+                  message: t('No Records Found')
                 },
                 noResultsOverlay: {
                   message: t('No Results Found')

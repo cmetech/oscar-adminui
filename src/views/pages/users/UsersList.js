@@ -7,6 +7,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useSession } from 'next-auth/react'
 import themeConfig from 'src/configs/themeConfig'
 import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -66,7 +67,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateUserWizard from 'src/views/pages/misc/forms/UpdateUserWizard'
-
+import { userIdsAtom, usersAtom, refetchUserTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -117,6 +118,7 @@ const UsersList = props => {
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
@@ -124,6 +126,9 @@ const UsersList = props => {
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
+  const [userIds, setUserIds] = useAtom(userIdsAtom)
+  const [users, setUsers] = useAtom(usersAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchUserTriggerAtom)
 
   // ** Dialog
   const [openDialog, setOpenDialog] = useState(false)
@@ -755,7 +760,7 @@ const UsersList = props => {
 
   const handleDeactivateUserDialogSubmit = async () => {
     try {
-      const apiToken = session?.data?.user?.apiToken
+      const apiToken = session?.data?.accessToken
 
       const headers = {
         Accept: 'application/json',
@@ -784,6 +789,7 @@ const UsersList = props => {
         })
 
         setRows(updatedRows)
+        setRefetchTrigger(Date.now())
         setDeactivateDialog(false)
 
         toast.success('User status updated successfully')
@@ -796,7 +802,7 @@ const UsersList = props => {
 
   const handleDeleteUserDialogSubmit = async () => {
     try {
-      const apiToken = session?.data?.user?.apiToken
+      const apiToken = session?.data?.accessToken
 
       const headers = {
         Accept: 'application/json',
@@ -811,6 +817,7 @@ const UsersList = props => {
 
         setRows(updatedRows)
         setDeleteDialog(false)
+        setRefetchTrigger(Date.now())
 
         toast.success('User successfully deleted')
       }
@@ -819,6 +826,12 @@ const UsersList = props => {
       toast.error('Error deleting of user')
     }
   }
+
+  // Use an effect to synchronize the DataGrid's selection model with userIds
+  useEffect(() => {
+    // This updates the DataGrid's selection model whenever userIds changes
+    setRowSelectionModel(userIds)
+  }, [userIds])
 
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
@@ -847,7 +860,9 @@ const UsersList = props => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData])
+  }, [fetchData, refetchTrigger])
+
+  
 
   // Trigger based on sort
   useEffect(() => {
@@ -906,6 +921,10 @@ const UsersList = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel.items.length, runFilterQuery])
 
+  useEffect(() => {
+    fetchData()
+  }, [fetchData, refetchTrigger])
+
   const handleAction = event => {
     setAction(event.target.value)
   }
@@ -956,7 +975,7 @@ const UsersList = props => {
     setRowSelectionModel(newRowSelectionModel)
 
     // Update the Jotai atom with the new selection model
-    setServerIds(newRowSelectionModel)
+    setUserIds(newRowSelectionModel)
   }
 
   // Hidden columns
@@ -1031,7 +1050,9 @@ const UsersList = props => {
               setFilterButtonEl,
               setFilterActive,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,

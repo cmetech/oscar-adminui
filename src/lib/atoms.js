@@ -19,6 +19,8 @@ export const serversAtom = atom([])
 
 export const tasksAtom = atom([])
 
+export const usersAtom = atom([])
+
 export const componentsAtom = atom([])
 
 export const subcomponentsAtom = atom([])

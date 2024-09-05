@@ -105,6 +105,7 @@ const Settings = () => {
 
   const handleSuccess = () => {
     handleAddUserDialogClose()
+    setRefetchTrigger(Date.now())
     //console.log("closing dialog on success")
   }
 

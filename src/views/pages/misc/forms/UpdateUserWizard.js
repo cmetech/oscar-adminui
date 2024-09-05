@@ -206,12 +206,12 @@ const UpdateUserWizard = props => {
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
-        const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
+        const apiToken = session?.data?.accessToken
 
-        const headers = {
-          Accept: 'application/json',
-          Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-        }
+      const headers = {
+        Accept: 'application/json',
+        Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+      }
 
         const payload = {
           username: username,

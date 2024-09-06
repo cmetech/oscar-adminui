@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, useRef, forwardRef } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -72,6 +72,7 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
+
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
 })
@@ -101,6 +102,7 @@ const UsersList = props => {
   const session = useSession()
   const { t } = useTranslation()
   const theme = useTheme()
+  const hasRunRef = useRef(false)
 
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
@@ -861,6 +863,30 @@ const UsersList = props => {
   useEffect(() => {
     fetchData()
   }, [fetchData, refetchTrigger])
+
+  //Trigger fetch when current run reference is false
+  useEffect(() => {
+    console.log("Run refresh val:---------------------------" + runRefresh)
+    
+    const registerAndFetchData = async () => {
+        if (runRefresh && !hasRunRef.current) {
+        hasRunRef.current = true
+        try {
+          await axios.get('/api/users', { timeout: 10000 })
+        } catch (error) {
+          console.error(t('Error refreshing users'), error)
+          toast.error(t('Failed to refresh users'))
+        } finally {
+          fetchData()
+          setRunRefresh(false)
+        }
+      }
+    }
+
+    registerAndFetchData()
+    
+    
+  },[fetchData, runRefresh, setRunRefresh])
 
   
 

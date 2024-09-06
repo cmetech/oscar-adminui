@@ -574,6 +574,11 @@ const UsersList = props => {
     setDeleteDialog(false)
   }
 
+  const handleSuccess = () => {
+    handleUpdateUserDialogClose()
+    setRefetchTrigger(Date.now())
+  }
+
   const UserEditDialog = () => {
     return (
       <Dialog
@@ -618,7 +623,7 @@ const UsersList = props => {
             </Typography>
             <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
           </Box>
-          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} onSuccess={handleSuccess}/>
         </DialogContent>
         {/* <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleUpdateDriverDialogClose} color='primary'>

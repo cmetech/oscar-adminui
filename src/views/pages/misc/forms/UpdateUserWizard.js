@@ -239,6 +239,10 @@ const UpdateUserWizard = props => {
 
           props.setRows(updatedRows)
 
+          setTimeout(() => {
+            props.onSuccess()
+          }, 1000)
+
           toast.success('User status updated successfully')
         }
       } catch (error) {

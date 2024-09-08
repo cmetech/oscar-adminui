@@ -154,15 +154,7 @@ const AppBarContent = props => {
 
   const shortcuts = [
     {
-      title: 'Academy',
-      subtitle: 'FAQs & Articles',
-      icon: 'mdi:help-circle-outline',
-      url: `https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`,
-      externalLink: true,
-      openInNewTab: true
-    },
-    {
-      title: 'Workflows',
+      title: 'Airflow',
       subtitle: 'Manage Workflows',
       icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}/airflow`,
@@ -170,25 +162,25 @@ const AppBarContent = props => {
       openInNewTab: true
     },
     {
-      title: 'Reverse Proxy',
-      subtitle: 'Explore Routes',
+      title: 'Traefik',
+      subtitle: 'Edge Router',
       icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Monitor Workers',
+      title: 'Flower',
       url: `https://${rootDomain}:${flower_port}/flower/`,
-      subtitle: 'Celery Flower',
+      subtitle: 'Celery Workers',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'VM Agent',
+      title: 'Collector',
       url: `https://${rootDomain}/ext/vmagent/`,
-      subtitle: 'Menu',
+      subtitle: 'Managege Metrics',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
@@ -196,7 +188,7 @@ const AppBarContent = props => {
     {
       title: 'Alert Manager',
       url: `https://${rootDomain}/ext/alertmanager/`,
-      subtitle: 'Menu',
+      subtitle: 'Manage Alerts',
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
@@ -204,7 +196,7 @@ const AppBarContent = props => {
     {
       title: 'Vault',
       url: `https://${rootDomain}:${vault_port}/ui/vault`,
-      subtitle: 'Menu',
+      subtitle: 'Manage Secrets',
       icon: 'mdi:encryption-secure',
       externalLink: true,
       openInNewTab: true

@@ -137,6 +137,7 @@ const AppBarContent = props => {
   const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
   const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'
   const flower_port = publicRuntimeConfig.FLOWER_PORT || '5555'
+  const vault_port = publicRuntimeConfig.VAULT_PORT || '9200'
   const reverseproxy_dashboard_port = publicRuntimeConfig.REVERSEPROXY_DASHBOARD_PORT || '8443'
 
   // Determine the root domain or IP from the URL
@@ -197,6 +198,14 @@ const AppBarContent = props => {
       url: `https://${rootDomain}/ext/alertmanager/`,
       subtitle: 'Menu',
       icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: 'Vault',
+      url: `https://${rootDomain}:${vault_port}/ui/vault`,
+      subtitle: 'Menu',
+      icon: 'mdi:encryption-secure',
       externalLink: true,
       openInNewTab: true
     }

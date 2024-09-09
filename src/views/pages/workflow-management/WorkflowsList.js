@@ -319,7 +319,7 @@ const WorkflowsList = props => {
                   setEditDialog(true)
                 }}
               >
-                <Icon icon='mdi:account-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'

@@ -669,7 +669,7 @@ const ActiveProbes = props => {
                 }}
                 disabled={!ability.can('update', 'probes')}
               >
-                <Icon icon='mdi:account-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton> */}
               <IconButton
                 size='small'

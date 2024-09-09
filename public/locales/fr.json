@@ -160,7 +160,7 @@
     "UNKNOWN": "INCONNU",
     "UP": "ACTIF",
     "DOWN": "INACTIF",
-    "DISABLED": "DÉSACTIVÉ",
+    "DISABLED": "DÉSACTIV",
     "SSL": "SSL",
     "OK": "OK",
     "INVALID": "INVALIDE",
@@ -236,5 +236,15 @@
     "and ensures": "et assure",
     "by leveraging": "en exploitant",
     "No Records found": "Aucun enregistrement trouvé",
-    "No Records Found": "Aucun enregistrement trouvé"
+    "No Records Found": "Aucun enregistrement trouvé",
+    "Secrets": "Secrets",
+    "Secret": "Secret",
+    "Path": "Chemin",
+    "Key": "Clé",
+    "Value": "Valeur",
+    "Edit Secret": "Modifier le Secret",
+    "Delete Secret": "Supprimer le Secret",
+    "Failed to fetch secrets": "Échec de la récupération des secrets",
+    "credentials-title": "Credentials",
+    "credentials-body": "Manage your credential settings"
 }

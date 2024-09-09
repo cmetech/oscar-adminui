@@ -169,8 +169,8 @@ const navigation = () => {
           subject: 'runtime'
         },
         {
-          title: 'Connections',
-          path: '/management/application/connections',
+          title: 'Credentials',
+          path: '/management/application/credentials',
           icon: 'mdi:transit-connection-variant',
           action: 'manage',
           subject: 'runtime'

@@ -124,10 +124,10 @@ const Home = () => {
 
   const managementTools = [
     {
-      title: t('connections-title'),
-      description: t('connections-body'),
-      link: '/management/application/connections',
-      icon: 'mdi:transit-connection-variant'
+      title: t('credentials-title'),
+      description: t('credentials-body'),
+      link: '/management/application/credentials',
+      icon: 'mdi:key-variant'
     },
     {
       title: t('inventory-title'),

@@ -239,5 +239,15 @@
     "and ensures": "y garantiza",
     "by leveraging": "aprovechando",
     "No Records found": "No se encontraron registros",
-    "No Records Found": "No se encontraron registros"
+    "No Records Found": "No se encontraron registros",
+    "Secrets": "Secretos",
+    "Secret": "Secreto",
+    "Path": "Ruta",
+    "Key": "Clave",
+    "Value": "Valor",
+    "Edit Secret": "Editar Secreto",
+    "Delete Secret": "Eliminar Secreto",
+    "Failed to fetch secrets": "Error al obtener secretos",
+    "credentials-title": "Credenciales",
+    "credentials-body": "Administre su configuración de credenciales"
 }

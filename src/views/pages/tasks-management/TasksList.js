@@ -579,7 +579,7 @@ const TasksList = props => {
               }}
               disabled={!ability.can('update', 'tasks')}
             >
-              <Icon icon='mdi:account-edit' />
+              <Icon icon='mdi:edit' />
             </IconButton>
             <IconButton
               size='small'
@@ -718,7 +718,7 @@ const TasksList = props => {
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
                 <Typography variant='h5' justifyContent='center' alignContent='center'>

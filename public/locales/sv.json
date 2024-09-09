@@ -239,5 +239,15 @@
   "and ensures": "och säkerställer",
   "by leveraging": "genom att utnyttja",
   "No Records found": "Inga poster hittades",
-  "No Records Found": "Inga poster hittades"
+  "No Records Found": "Inga poster hittades",
+  "Secrets": "Hemligheter",
+  "Secret": "Hemlighet",
+  "Path": "Sökväg",
+  "Key": "Nyckel",
+  "Value": "Värde",
+  "Edit Secret": "Redigera Hemlighet",
+  "Delete Secret": "Radera Hemlighet",
+  "Failed to fetch secrets": "Misslyckades med att hämta hemligheter",
+  "credentials-title": "Autentiseringsuppgifter",
+  "credentials-body": "Hantera dina inställningar för autentiseringsuppgifter"
 }

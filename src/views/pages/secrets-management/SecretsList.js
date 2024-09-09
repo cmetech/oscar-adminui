@@ -1,60 +1,82 @@
-import { useState, useContext, useEffect, useCallback, useRef, useMemo, forwardRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { styled, useTheme } from '@mui/material/styles'
+// ** React Imports
+import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
 import Link from 'next/link'
+
+// ** Context Imports
+import { AbilityContext } from 'src/layouts/components/acl/Can'
+import { useSession } from 'next-auth/react'
+import themeConfig from 'src/configs/themeConfig'
+import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
+
+// ** Hook Import
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
+import Grid from '@mui/material/Grid'
+import Chip from '@mui/material/Chip'
+import Button from '@mui/material/Button'
+import Backdrop from '@mui/material/Backdrop'
 import Typography from '@mui/material/Typography'
+import CardHeader from '@mui/material/CardHeader'
+import CardContent from '@mui/material/CardContent'
+import Collapse from '@mui/material/Collapse'
+import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
+import MenuItem from '@mui/material/MenuItem'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
+import Paper from '@mui/material/Paper'
+import OutlinedInput from '@mui/material/OutlinedInput'
+import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
+import TextField from '@mui/material/TextField'
+import FormHelperText from '@mui/material/FormHelperText'
+import LinearProgress from '@mui/material/LinearProgress'
+import Tab from '@mui/material/Tab'
+import TabPanel from '@mui/lab/TabPanel'
+import TabContext from '@mui/lab/TabContext'
+import Stack from '@mui/material/Stack'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import Stack from '@mui/material/Stack'
-import Button from '@mui/material/Button'
 import Fade from '@mui/material/Fade'
-import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
+
+// ** ThirdParty Components
+import axios from 'axios'
+
+import toast from 'react-hot-toast'
+import { useForm, Controller } from 'react-hook-form'
+import { parseISO, formatDistance } from 'date-fns'
+import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
+// ** Utils Import
+import { getInitials } from 'src/@core/utils/get-initials'
+import { escapeRegExp, getNestedValue } from 'src/lib/utils'
+
 // ** Custom Components
+import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
-import UpdateConnectionWizard from 'src/views/pages/connection-management/forms/UpdateConnectionWizard'
+import CustomAvatar from 'src/@core/components/mui/avatar'
+import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
+import UpdateSecretsWizard from 'src/views/pages/secrets-management/forms/UpdateSecretsWizard'
+import { refetchSecretsTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
-
-// ** Third Party Components
-import axios from 'axios'
-import toast from 'react-hot-toast'
-
-// ** Styled Components
-import { CustomDataGrid } from 'src/lib/styled-components'
-import { useAtom } from 'jotai'
-import { connectionsIdsAtom, connectionsAtom, refetchConnectionsTriggerAtom } from 'src/lib/atoms'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
 })
 
-const StyledLink = styled(Link)(({ theme }) => ({
-  fontWeight: 600,
-  fontSize: '1rem',
-  cursor: 'pointer',
-  textDecoration: 'none',
-  color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandWhite : theme.palette.customColors.brandBlack,
-  '&:hover': {
-    color:
-      theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
-  }
-}))
-
-const ConnectionsList = props => {
-  // ** Hooks
+const SecretsList = ({ set_total, total, ...props }) => {
   const { t } = useTranslation()
   const theme = useTheme()
 
@@ -66,141 +88,35 @@ const ConnectionsList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
-  const [sortModel, setSortModel] = useState([{ field: 'connection_id', sort: 'asc' }])
+  const [sortModel, setSortModel] = useState([{ field: 'path', sort: 'asc' }])
 
   // ** State
   const [searchValue, setSearchValue] = useState('')
-  const [pinnedColumns, setPinnedColumns] = useState({})
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runRefresh, setRunRefresh] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [selectedSecretIds, setSelectedSecretIds] = useState([])
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
-  const [connections, setConnections] = useAtom(connectionsAtom)
-  const [connectionsIds, setConnectionsIds] = useAtom(connectionsIdsAtom)
-  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchConnectionsTriggerAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSecretsTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
-  const [sortingMode, setSortingMode] = useState('server')
-  const [paginationMode, setPaginationMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('client')
 
-  // ** Dialog
-  const [editDialog, setEditDialog] = useState(false)
-  const [deleteDialog, setDeleteDialog] = useState(false)
-  const [testDialog, setTestDialog] = useState(false)
-  const [currentConnection, setCurrentConnection] = useState(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [secretToDelete, setSecretToDelete] = useState(null)
+  const [secretToEdit, setSecretToEdit] = useState(null)
+  const [visibleSecrets, setVisibleSecrets] = useState({})
 
-  // column definitions
+  // ** Column Definitions
   const columns = [
     {
-      flex: 0.07,
-      field: 'connection_id',
-      headerName: t('Connection ID'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.connection_id?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.connection_id?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.07,
-      field: 'conn_type',
-      headerName: t('Connection Type'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.conn_type?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.conn_type?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.06,
-      field: 'host',
-      headerName: t('Host'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.host?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.host?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.05,
-      field: 'port',
-      headerName: t('Port'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.port} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.port}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
       flex: 0.2,
-      field: 'schema',
-      headerName: t('Schema'),
+      field: 'path',
+      headerName: t('Path'),
       renderCell: params => {
         const { row } = params
 
@@ -215,8 +131,8 @@ const ConnectionsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.schema?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.schema?.toUpperCase()}
+              <Typography title={row.path} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                {row.path}
               </Typography>
             </Box>
           </Box>
@@ -224,11 +140,12 @@ const ConnectionsList = props => {
       }
     },
     {
-      flex: 0.2,
-      field: 'description',
-      headerName: t('Description'),
+      flex: 0.3,
+      field: 'key',
+      headerName: t('Key'),
       renderCell: params => {
         const { row } = params
+
         return (
           <Box
             sx={{
@@ -240,8 +157,8 @@ const ConnectionsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.description} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.description}
+              <Typography title={row.key} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                {row.key}
               </Typography>
             </Box>
           </Box>
@@ -249,16 +166,51 @@ const ConnectionsList = props => {
       }
     },
     {
-      flex: 0.02,
+      flex: 0.4,
+      field: 'value',
+      headerName: t('Value'),
+      renderCell: params => {
+        const { row } = params
+        const isVisible = visibleSecrets[row.id]
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Typography
+              title={isVisible ? row.value : t('Click the eye icon to reveal')}
+              noWrap
+              overflow={'hidden'}
+              textOverflow={'ellipsis'}
+              sx={{ flexGrow: 1, mr: 2 }}
+            >
+              {isVisible ? row.value : '*'.repeat(8)}
+            </Typography>
+            <IconButton
+              size='small'
+              onClick={() => toggleSecretVisibility(row.id)}
+              sx={{ flexShrink: 0 }}
+            >
+              <Icon icon={isVisible ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} />
+            </IconButton>
+          </Box>
+        )
+      }
+    },
+    {
+      flex: 0.1,
       minWidth: 200,
       field: 'actions',
       headerName: t('Actions'),
       type: 'string',
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
+      renderCell: ({ row }) => (
+        <Box
             sx={{
               display: 'flex',
               alignItems: 'center', // Ensures vertical centering inside the Box
@@ -267,69 +219,58 @@ const ConnectionsList = props => {
               height: '100%' // Ensures the Box takes full height of the cell
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <IconButton
-                size='small'
-                title='Test Connection'
-                aria-label='Test Connection'
-                color='info'
-                onClick={() => {
-                  setCurrentConnection(row)
-                  setTestDialog(true)
-                }}
-              >
-                <Icon icon='mdi:lan-check' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Edit Connection'
-                color='secondary'
-                aria-label='Edit Connection'
-                onClick={() => {
-                  setCurrentConnection(row)
-                  setEditDialog(true)
-                }}
-              >
-                <Icon icon='mdi:edit' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Delete Connection'
-                aria-label='Delete Connection'
-                color='error'
-                onClick={() => {
-                  setCurrentConnection(row)
-                  setDeleteDialog(true)
-                }}
-              >
-                <Icon icon='mdi:delete-forever' />
-              </IconButton>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+            <IconButton
+              size='small'
+              title={t('Edit Secret')}
+              aria-label={t('Edit Secret')}
+              onClick={() => handleEditClick(row)}
+            >
+              <Icon icon='mdi:edit' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title={t('Delete Secret')}
+              aria-label={t('Delete Secret')}
+              color='error'
+              onClick={() => handleDeleteClick(row)}
+            >
+              <Icon icon='mdi:delete-forever' />
+            </IconButton>
           </Box>
-        )
-      }
+        </Box>
+      )
     }
   ]
 
-
-  const fetchConnections = useCallback(async () => {
+  const fetchSecrets = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await axios.get('/api/workflows/connections', {
+      const response = await axios.get('/api/secrets', {
         params: {
-          page: paginationModel.page + 1,
-          limit: paginationModel.pageSize,
           sort: sortModel[0]?.sort || 'asc',
-          order_by: sortModel[0]?.field || 'conn_id'
+          order_by: sortModel[0]?.field || 'path',
+          page: paginationModel.page,
+          limit: paginationModel.pageSize,
+          filter: JSON.stringify(filterModel),
         }
       })
-      setRows(response.data.connections)
-      setRowCount(response.data.total_entries)
-      props.set_total(response.data.total_entries)
-      setConnections(response.data.connections)
+      const formattedRows = response.data.keys.flatMap(secret => {
+        const path = Object.keys(secret)[0]
+        const secretData = secret[path]
+        return Object.entries(secretData).map(([key, value]) => ({
+          id: `${path}-${key}`,
+          path,
+          key,
+          value
+        }))
+      })
+      setRows(formattedRows)
+      setRowCount(formattedRows.length)
+      set_total(formattedRows.length)
     } catch (error) {
-      console.error('Failed to fetch connections:', error)
-      toast.error('Failed to fetch connections')
+      console.error('Failed to fetch secrets:', error)
+      toast.error(t('Failed to fetch secrets'))
     } finally {
       setLoading(false)
       setRunFilterQuery(false)
@@ -339,53 +280,30 @@ const ConnectionsList = props => {
 
   useEffect(() => {
     if (!runFilterQuery) {
-      fetchConnections()
+      fetchSecrets()
     }
 
-    const intervalId = setInterval(fetchConnections, 300000)
+    const intervalId = setInterval(fetchSecrets, 300000)
 
     return () => clearInterval(intervalId)
-  }, [fetchConnections, refetchTrigger, runFilterQuery])
+  }, [fetchSecrets, refetchTrigger, runFilterQuery])
 
+  // Trigger based on sort
   useEffect(() => {
-    if (runFilterQuery && filterModel.items.length > 0) {
-      if (filterMode === 'server') {
-        fetchConnections(filterModel)
-      } else {
-      }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
-    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
-      if (filterMode === 'server') {
-        fetchConnections(filterModel)
-      } else {
-      }
-      setRunFilterQueryCount(0)
-    } else {
-      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterModel, runFilterQuery])
+    console.log('Effect Run:', { sortModel, runFilterQuery })
+    console.log('Sort Model:', JSON.stringify(sortModel))
 
-  useEffect(() => {
-    fetchConnections()
-  }, [fetchConnections, refetchTrigger])
-
-  useEffect(() => {
-    if (runRefresh) {
-      fetchData()
-    }
-
-    return () => {
-      runRefresh && setRunRefresh(false)
-    }
-  }, [fetchConnections, runRefresh])
-
-  useEffect(() => {
     if (sortingMode === 'server') {
-      fetchConnections()
+      // server side sorting
     } else {
+      // client side sorting
       const column = sortModel[0]?.field
       const sort = sortModel[0]?.sort
+
+      console.log('Column:', column)
+      console.log('Sort:', sort)
+
+      console.log('Rows:', rows)
 
       if (filteredRows.length > 0) {
         const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
@@ -401,229 +319,122 @@ const ConnectionsList = props => {
   }, [sortModel])
 
   const handleSearch = value => {
+    // console.log('Search Value:', value)
+
     setSearchValue(value)
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      const searchFields = ['id', 'name', 'port', 'type', 'description']
+      console.log('Row:', row)
+
+      // Extend the search to include nested paths
+      const searchFields = [
+        'id',
+        'path',
+        'key',
+        'value'
+      ]
 
       return searchFields.some(field => {
         const fieldValue = getNestedValue(row, field)
 
+        // Ensure the fieldValue is a string before calling toString()
         return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
       })
     })
 
     if (value.length) {
+      // console.log('Filtered Rows:', filteredRows)
       setFilteredRows(filteredRows)
       setRowCount(filteredRows.length)
-      props.set_total(filteredRows.length)
+      set_total(filteredRows.length)
     } else {
       setFilteredRows([])
       setRowCount(rows.length)
-      props.set_total(rows.length)
+      set_total(rows.length)
     }
   }
 
-  useEffect(() => {
-    fetchConnections()
-  }, [fetchConnections])
-
-  const handleEditDialogClose = () => {
-    setEditDialog(false)
-  }
-
-  const handleDeleteDialogClose = () => {
-    setDeleteDialog(false)
-  }
-
-  const handleTestDialogClose = () => {
-    setTestDialog(false)
-  }
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await axios.delete(`/api/workflows/connections/${currentConnection.conn_id}`)
-      toast.success('Connection deleted successfully')
-      fetchConnections()
-    } catch (error) {
-      console.error('Failed to delete connection:', error)
-      toast.error('Failed to delete connection')
-    }
-    setDeleteDialog(false)
-  }
-
-  const handleTestConfirm = async () => {
-    try {
-      const response = await axios.post(`/api/workflows/connections/${currentConnection.conn_id}/test`)
-      toast.success('Connection test successful')
-      // Handle the test response as needed
-    } catch (error) {
-      console.error('Connection test failed:', error)
-      toast.error('Connection test failed')
-    }
-    setTestDialog(false)
-  }
-
-  const EditDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='lg'
-        scroll='body'
-        open={editDialog}
-        onClose={handleEditDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentConnection?.connection_id?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentConnection?.conn_type?.toUpperCase() ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleEditDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Connection Information
-            </Typography>
-            <Typography variant='body2'>Updates to connection information will be effective immediately.</Typography>
-          </Box>
-          {currentConnection && (
-            <UpdateConnectionWizard
-              connectionData={currentConnection}
-              onSuccess={handleEditDialogClose}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  const DeleteDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={deleteDialog}
-        onClose={handleDeleteDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentConnection?.connection_id?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentConnection?.conn_type?.toUpperCase() ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this connection.
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
-          </Button>
-          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }
-
-  const handleDeleteDialogSubmit = async () => {
-    try {
-      const headers = {
-        Accept: 'application/json'
-      }
-
-      // console.log('Deleting Task:', currentWorkflow)
-
-      const endpoint = `/api/connections/${currentConnection.connection_id}`
-
-      console.log('DELETE Endpoint:', endpoint)
-      const response = await axios.delete(endpoint, { headers })
-
-      if (response.status === 204) {
-        const updatedRows = rows.filter(row => row.connection_id !== currentConnection.connection_id)
-
-        setRows(updatedRows)
-        setDeleteDialog(false)
-
-        // props.set_total(props.total - 1)
-
-        setRefetchTrigger(Date.now())
-
-        toast.success('Successfully deleted Connection')
-      }
-    } catch (error) {
-      console.error('Failed to delete Connection', error)
-      toast.error('Failed to delete Connection')
-    }
-  }
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 
+    console.log('Added IDs:', addedIds)
+
     addedIds.forEach(id => {
       const row = rows.find(r => r.id === id)
+      console.log('Added Row:', row)
     })
 
+    // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
 
-    setConnectionsIds(newRowSelectionModel)
+    // Update the Jotai atom with the new selection model
+    setSelectedSecretIds(newRowSelectionModel)
   }
+
+  const handleDeleteClick = (secret) => {
+    setSecretToDelete(secret)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!secretToDelete) return
+
+    try {
+      const response = await axios.delete('/api/secrets/delete', {
+        params: {
+          path: secretToDelete.path,
+          key: secretToDelete.key,
+          delete_empty_paths: true
+        }
+      });
+
+      if (response.status === 200) {
+        toast.success(t('Secret deleted successfully'))
+        setRefetchTrigger(Date.now())
+      } else {
+        toast.error(t('Failed to delete secret'))
+      }
+    } catch (error) {
+      console.error('Error deleting secret:', error);
+      toast.error(t('An error occurred while deleting the secret'))
+    } finally {
+      setDeleteDialogOpen(false)
+      setSecretToDelete(null)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setSecretToDelete(null)
+  }
+
+  const handleEditClick = (secret) => {
+    setSecretToEdit(secret)
+    setEditDialogOpen(true)
+  }
+
+  const handleEditClose = () => {
+    setEditDialogOpen(false)
+    setSecretToEdit(null)
+  }
+
+  const handleEditSuccess = () => {
+    setEditDialogOpen(false)
+    setSecretToEdit(null)
+    setRefetchTrigger(Date.now())
+  }
+
+  const handleSearchChange = (event) => {
+    setSearchValue(event.target.value)
+  }
+
+  const toggleSecretVisibility = useCallback((id) => {
+    setVisibleSecrets(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }))
+  }, [])
 
   // Hidden columns
   const hiddenFields = []
@@ -634,29 +445,18 @@ const ConnectionsList = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
-          getRowId={row => row.connection_id}
-          localeText={{
-            toolbarColumns: t('Columns'),
-            toolbarFilters: t('Filters')
-          }}
-          initialState={{
-            columns: {
-              columnVisibilityModel: {
-                // Add any columns you want to hide by default
-              }
-            }
-          }}
           autoHeight
           rows={filteredRows.length ? filteredRows : rows}
           rowCount={rowCountState}
           columns={columns}
+          loading={loading}
           checkboxSelection={true}
-          disableRowSelectionOnClick
           filterMode={filterMode}
           filterModel={filterModel}
           onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
@@ -675,9 +475,8 @@ const ConnectionsList = props => {
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
-          onRowSelectionModelChange={newRowSelectionModel => handleRowSelection(newRowSelectionModel)}
+          onRowSelectionModelChange={newSelectionModel => setSelectedSecretIds(newSelectionModel)}
           rowSelectionModel={rowSelectionModel}
-          loading={loading}
           keepNonExistentRowsSelected
           slotProps={{
             baseButton: {
@@ -687,7 +486,7 @@ const ConnectionsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Connections found'
+              message: 'No Secrets found'
             },
             noResultsOverlay: {
               message: 'No Results Found'
@@ -699,11 +498,8 @@ const ConnectionsList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
-              setRunFilterQuery,
               showButtons: false,
-              showexport: true,
-              showRefresh: true,
-              setRunRefresh
+              showexport: true
             },
             columnsManagement: {
               getTogglableColumns,
@@ -899,12 +695,62 @@ const ConnectionsList = props => {
             }
           }}
         />
-
-        <EditDialog />
-        <DeleteDialog />
+        <Dialog
+          fullWidth
+          maxWidth='md'
+          scroll='body'
+          open={editDialogOpen}
+          onClose={handleEditClose}
+        >
+          <UpdateSecretsWizard secretData={secretToEdit} onSuccess={handleEditSuccess} onClose={handleEditClose} />
+        </Dialog>
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+          TransitionComponent={Transition}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {t('Confirm Deletion')}
+              </Typography>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <IconButton
+              size='small'
+              onClick={() => handleDeleteCancel()}
+              sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+            >
+              <Icon icon='mdi:close' />
+            </IconButton>
+            <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
+              </Box>
+              <Box>
+                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                  {t('Are you sure you want to delete this secret?')}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteConfirm} color="primary" autoFocus>
+              {t('Delete')}
+            </Button>
+            <Button variant='outlined' onClick={handleDeleteCancel} color="secondary">
+              {t('Cancel')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Card>
     </Box>
   )
 }
 
-export default ConnectionsList
+export default SecretsList

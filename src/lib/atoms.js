@@ -74,3 +74,7 @@ export const connectionsAtom = atom([])
 export const connectionsIdsAtom = atom([])
 
 export const refetchConnectionsTriggerAtom = atom(0)
+
+export const secretsAtom = atom([])
+export const secretsIdsAtom = atom([])
+export const refetchSecretsTriggerAtom = atom(0)

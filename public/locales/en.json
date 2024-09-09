@@ -239,5 +239,15 @@
     "and ensures": "and ensures",
     "by leveraging": "by leveraging",
     "No Records found": "No Records found",
-    "No Records Found": "No Records found"
+    "No Records Found": "No Records found",
+    "Secrets": "Secrets",
+    "Secret": "Secret",
+    "Path": "Path",
+    "Key": "Key",
+    "Value": "Value",
+    "Edit Secret": "Edit Secret",
+    "Delete Secret": "Delete Secret",
+    "Failed to fetch secrets": "Failed to fetch secrets",
+    "credentials-title": "Credentials",
+    "credentials-body": "Manage your credential settings"
 }

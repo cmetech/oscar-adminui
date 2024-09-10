@@ -71,6 +71,7 @@ import { refetchSecretsTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { secretsIdsAtom } from 'src/lib/atoms'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -85,7 +86,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
   const [rows, setRows] = useState([])
   const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
-  const [rowSelectionModel, setRowSelectionModel] = useState([])
+  const [selectedSecretIds, setSelectedSecretIds] = useAtom(secretsIdsAtom)
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
   const [sortModel, setSortModel] = useState([{ field: 'path', sort: 'asc' }])
@@ -98,7 +99,6 @@ const SecretsList = ({ set_total, total, ...props }) => {
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
-  const [selectedSecretIds, setSelectedSecretIds] = useState([])
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSecretsTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
@@ -355,22 +355,10 @@ const SecretsList = ({ set_total, total, ...props }) => {
     }
   }
 
-  const handleRowSelection = newRowSelectionModel => {
-    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
-
-    console.log('Added IDs:', addedIds)
-
-    addedIds.forEach(id => {
-      const row = rows.find(r => r.id === id)
-      console.log('Added Row:', row)
-    })
-
-    // Update the row selection model
-    setRowSelectionModel(newRowSelectionModel)
-
-    // Update the Jotai atom with the new selection model
-    setSelectedSecretIds(newRowSelectionModel)
-  }
+  const handleRowSelection = useCallback((newSelectionModel) => {
+    console.log('New Selection Model:', newSelectionModel)
+    setSelectedSecretIds(newSelectionModel)
+  }, [setSelectedSecretIds])
 
   const handleDeleteClick = (secret) => {
     setSecretToDelete(secret)
@@ -475,8 +463,8 @@ const SecretsList = ({ set_total, total, ...props }) => {
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
-          onRowSelectionModelChange={newSelectionModel => setSelectedSecretIds(newSelectionModel)}
-          rowSelectionModel={rowSelectionModel}
+          onRowSelectionModelChange={handleRowSelection}
+          rowSelectionModel={selectedSecretIds}
           keepNonExistentRowsSelected
           slotProps={{
             baseButton: {

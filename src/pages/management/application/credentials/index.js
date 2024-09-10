@@ -77,6 +77,7 @@ const MoreActionsDropdown = ({ onDelete, onTest, tabValue }) => {
   const { t } = useTranslation()
 
   const handleDropdownOpen = event => {
+    console.log('Dropdown opened, tabValue:', tabValue)
     setAnchorEl(event.currentTarget)
   }
 
@@ -191,6 +192,8 @@ const CredentialsManager = () => {
   const [, setSecretsRefetchTrigger] = useAtom(refetchSecretsTriggerAtom)
 
   const handleDelete = () => {
+    console.log('Current value:', value)
+    console.log('Selected Secret IDs:', selectedSecretIds)
     if (value === '1') {
       // Handle connection deletion
       if (selectedConnectionIds.length > 0) {
@@ -203,6 +206,7 @@ const CredentialsManager = () => {
       if (selectedSecretIds.length > 0) {
         setIsDeleteModalOpen(true)
       } else {
+        console.log('No secrets selected')
         toast.error(t('No secrets selected for deletion'))
       }
     }
@@ -259,23 +263,31 @@ const CredentialsManager = () => {
     } else {
       // Handle secret deletion
       try {
-        const response = await axios.delete('/api/secrets', {
-          data: {
-            paths: selectedSecretIds.map(id => {
-              const [path, key] = id.split('-')
-              return `${path}/${key}`
-            }),
-            delete_empty_paths: true
-          }
+        const deletePromises = selectedSecretIds.map(id => {
+          const [path, key] = id.split('-')
+          return axios.delete('/api/secrets/delete', {
+            params: {
+              path,
+              key,
+              delete_empty_paths: true
+            }
+          })
         })
 
-        if (response.status === 204) {
-          toast.success(t('Selected secrets deleted successfully'))
-          setSecretsRefetchTrigger(Date.now())
-          setSelectedSecretIds([])
-        } else {
-          toast.error(t('Failed to delete selected secrets'))
+        const results = await Promise.all(deletePromises)
+
+        const successCount = results.filter(result => result.status === 200).length
+        const failCount = selectedSecretIds.length - successCount
+
+        if (successCount > 0) {
+          toast.success(t(`${successCount} secret(s) deleted successfully`))
         }
+        if (failCount > 0) {
+          toast.error(t(`Failed to delete ${failCount} secret(s)`))
+        }
+
+        setSecretsRefetchTrigger(Date.now())
+        setSelectedSecretIds([])
       } catch (error) {
         console.error('Error deleting secrets:', error)
         toast.error(t('An error occurred while deleting secrets'))
@@ -286,6 +298,7 @@ const CredentialsManager = () => {
   }
 
   const handleChange = (event, newValue) => {
+    console.log('Tab changed to:', newValue)
     setValue(newValue)
   }
 

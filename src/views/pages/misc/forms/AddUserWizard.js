@@ -301,6 +301,9 @@ const AddUserWizard = props => {
                 </FormControl>
               </Grid>
               <Grid item sm={4} xs={12}>
+                
+              </Grid>
+              <Grid item sm={4} xs={12}>
                 <FormControl fullWidth>
                   <FormControlLabel
                     control={<CheckboxStyled checked={isActive} onChange={handleCheckboxChange(setIsActive)} />}

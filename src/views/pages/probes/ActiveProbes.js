@@ -732,10 +732,23 @@ const ActiveProbes = forwardRef((props, ref) => {
         <Typography>{t('Are you sure you want to export the probes?')}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleExportDialogClose} color="secondary">
+        <Button
+          onClick={handleExportDialogClose}
+          size="large"
+          variant="outlined"
+          color="secondary"
+          startIcon={<Icon icon="mdi:close" />}
+        >
           {t('Cancel')}
         </Button>
-        <Button onClick={handleExportDialogConfirm} color="primary">
+        <Button
+          onClick={handleExportDialogConfirm}
+          size="large"
+          variant="contained"
+          color="warning"
+          autoFocus
+          startIcon={<Icon icon="mdi:export" />}
+        >
           {t('Export')}
         </Button>
       </DialogActions>

@@ -12,13 +12,15 @@ import {
   StepLabel,
   Grid,
   Card,
-  CardContent
+  CardContent,
+  IconButton
 } from '@mui/material'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useTheme, styled } from '@mui/material/styles'
 import StepperWrapper from 'src/@core/styles/mui/stepper'
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
+import Icon from 'src/@core/components/icon'
 
 const steps = [
   {
@@ -162,6 +164,13 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
     <>
       <DialogTitle>{t('Update Secret')}</DialogTitle>
       <DialogContent>
+        <IconButton
+          size='small'
+          onClick={onClose}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
         <StepperWrapper>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((step, index) => (

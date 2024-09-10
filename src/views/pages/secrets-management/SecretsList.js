@@ -728,10 +728,24 @@ const SecretsList = ({ set_total, total, ...props }) => {
           </Box>
           </DialogContent>
           <DialogActions>
-            <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteConfirm} color="primary" autoFocus>
+            <Button
+              variant='contained'
+              size='large'
+              sx={{ mr: 1 }}
+              onClick={handleDeleteConfirm}
+              color="error"
+              autoFocus
+              startIcon={<Icon icon="mdi:delete-forever" />}
+            >
               {t('Delete')}
             </Button>
-            <Button variant='outlined' onClick={handleDeleteCancel} color="secondary">
+            <Button
+              variant='outlined'
+              size='large'
+              onClick={handleDeleteCancel}
+              color="secondary"
+              startIcon={<Icon icon="mdi:close" />}
+            >
               {t('Cancel')}
             </Button>
           </DialogActions>

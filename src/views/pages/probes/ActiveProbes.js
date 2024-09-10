@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -44,6 +44,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Fade from '@mui/material/Fade'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 
 // ** ThirdParty Components
 import axios from 'axios'
@@ -100,7 +102,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 // TODO: Test with no Probes to see if the NoRowsOverlay is displayed with the Register Probes button
 // FIXME: Deleting all probes works, but I am reloading the probes automatically, I should now use the Overlay Register Probes button
 
-const ActiveProbes = props => {
+const ActiveProbes = forwardRef((props, ref) => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const dgApiRef = useGridApiRef()
@@ -143,6 +145,7 @@ const ActiveProbes = props => {
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
   const [currentProbe, setCurrentProbe] = useState(null)
+  const [exportDialog, setExportDialog] = useState(false)
 
   const getDetailPanelContent = useCallback(({ row }) => <ProbeDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -711,6 +714,34 @@ const ActiveProbes = props => {
     setRunDialog(false)
   }
 
+  const handleExportDialogClose = () => setExportDialog(false)
+
+  const handleExportDialogConfirm = () => {
+    exportProbes()
+    setExportDialog(false)
+  }
+
+  const ExportDialog = () => (
+    <Dialog
+      open={exportDialog}
+      onClose={handleExportDialogClose}
+      aria-labelledby="export-dialog-title"
+    >
+      <DialogTitle id="export-dialog-title">{t('Confirm Export')}</DialogTitle>
+      <DialogContent>
+        <Typography>{t('Are you sure you want to export the probes?')}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleExportDialogClose} color="secondary">
+          {t('Cancel')}
+        </Button>
+        <Button onClick={handleExportDialogConfirm} color="primary">
+          {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+
   const EditDialog = () => {
     return (
       <Dialog
@@ -1206,6 +1237,40 @@ const ActiveProbes = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  const exportProbes = useCallback(() => {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Probes')
+
+    worksheet.columns = [
+      { header: 'Name', key: 'name', width: 30 },
+      { header: 'Type', key: 'type', width: 15 },
+      { header: 'Target', key: 'target', width: 30 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Description', key: 'description', width: 50 }
+    ]
+
+    const dataToExport = filteredRows.length ? filteredRows : rows
+
+    dataToExport.forEach(row => {
+      worksheet.addRow({
+        name: row.name,
+        type: row.type === 'httpurl' ? 'URL' : 'Port',
+        target: row.target,
+        status: row.status,
+        description: row.description
+      })
+    })
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      saveAs(blob, 'probes_export.xlsx')
+    })
+  }, [rows, filteredRows])
+
+  useImperativeHandle(ref, () => ({
+    exportProbes: () => setExportDialog(true)
+  }))
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1489,9 +1554,10 @@ const ActiveProbes = props => {
         <DisableDialog />
         <EditDialog />
         <DeleteDialog />
+        <ExportDialog />
       </Card>
     </Box>
   )
-}
+})
 
 export default ActiveProbes

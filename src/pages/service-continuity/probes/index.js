@@ -113,7 +113,7 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, onExport, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
   const ability = useContext(AbilityContext)
@@ -234,6 +234,15 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, tabValue
             </Box>
           </MenuItem>
         )}
+        <MenuItem sx={{ p: 0 }} onClick={() => {
+          onExport()
+          handleDropdownClose()
+        }} disabled={!ability.can('read', 'probes')}>
+          <Box sx={styles}>
+            <Icon icon='mdi:file-export' />
+            {t('Export Probes')}
+          </Box>
+        </MenuItem>
       </Menu>
     </Fragment>
   )
@@ -630,6 +639,8 @@ const ProbeManager = () => {
 
   const [openUploadDialog, setOpenUploadDialog] = useState(false)
 
+  const activeProbesRef = useRef(null)
+
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
   }
@@ -791,6 +802,12 @@ const ProbeManager = () => {
     setOpenUploadDialog(false)
   }
 
+  const handleExport = () => {
+    if (activeProbesRef.current) {
+      activeProbesRef.current.exportProbes()
+    }
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -814,6 +831,7 @@ const ProbeManager = () => {
                   onEnable={handleEnable}
                   onDisable={handleDisable}
                   onUpload={handleUpload}
+                  onExport={handleExport}
                   tabValue={value}
                 />
               </Fragment>
@@ -961,7 +979,7 @@ const ProbeManager = () => {
             )}
           </TabList>
           <TabPanel value='1'>
-            <ActiveProbesList set_total={setProbeTotal} total={probeTotal} />
+            <ActiveProbesList ref={activeProbesRef} set_total={setProbeTotal} total={probeTotal} />
           </TabPanel>
           <TabPanel value='2'>
             <ProbeHistoryList dateRange={dateRange} onAccept={onAccept} />

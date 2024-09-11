@@ -570,7 +570,7 @@ const UsersList = props => {
     setDeactivateDialog(false)
   }
 
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
   }
 
@@ -640,125 +640,135 @@ const UsersList = props => {
   const UserDisableDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deactivateDialog}
         onClose={handleDisableUserDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Action')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDisableUserDialogClose}
+              aria-label="close"
             >
-              {currentUser?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                <Typography variant='h6'>
                   {currentUser?.is_active
-                    ? 'Please confirm that you want to deactivate this user.'
-                    : 'Please confirm that you want to activate this user.'}
+                    ? t('Confirm you want to deactivate this user.')
+                    : t('Confirm you want to activate this user.')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeactivateUserDialogSubmit} color='primary'>
-            {currentUser?.is_active ? 'Deactivate' : 'Activate'}
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeactivateUserDialogSubmit}
+            color="primary"
+            autoFocus
+            startIcon={<Icon icon={currentUser?.is_active ? "mdi:account-off" : "mdi:account-check"} />}
+          >
+            {currentUser?.is_active ? t('Deactivate') : t('Activate')}
           </Button>
-          <Button variant='outlined' onClick={handleDisableUserDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDisableUserDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
     )
   }
 
-  const UserDeleteDialog = () => {
+  const DeleteDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDeleteDialogClose}
+              aria-label="close"
             >
-              {currentUser?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
+                <Typography variant='h6'>
+                  {t('Confirm you want to delete this user?')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
-            Delete
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeleteDialogSubmit}
+            color="error"
+            autoFocus
+            startIcon={<Icon icon="mdi:delete-forever" />}
+          >
+            {t('Delete')}
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDeleteDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -807,7 +817,7 @@ const UsersList = props => {
     }
   }
 
-  const handleDeleteUserDialogSubmit = async () => {
+  const handleDeleteDialogSubmit = async () => {
     try {
       const apiToken = session?.data?.accessToken
 
@@ -872,7 +882,7 @@ const UsersList = props => {
   //Trigger fetch when current run reference is false
   useEffect(() => {
     console.log("Run refresh val:---------------------------" + runRefresh)
-    
+
     const registerAndFetchData = async () => {
         if (runRefresh && !hasRunRef.current) {
         hasRunRef.current = true
@@ -889,11 +899,11 @@ const UsersList = props => {
     }
 
     registerAndFetchData()
-    
-    
+
+
   },[fetchData, runRefresh, setRunRefresh])
 
-  
+
 
   // Trigger based on sort
   useEffect(() => {
@@ -1281,7 +1291,7 @@ const UsersList = props => {
         />
         <UserEditDialog />
         <UserDisableDialog />
-        <UserDeleteDialog />
+        <DeleteDialog />
       </Card>
     </Box>
   )

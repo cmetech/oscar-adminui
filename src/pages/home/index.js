@@ -145,7 +145,9 @@ const Home = () => {
       title: t('runtime-title'),
       description: t('runtime-body'),
       link: '/api/oscar/services',
-      icon: 'mdi:heart-pulse'
+      icon: 'mdi:heart-pulse',
+      externalLink: true,
+      openInNewTab: true
     }
   ]
 
@@ -378,7 +380,16 @@ const Home = () => {
                       : theme.palette.customColors.brandWhite
                 }}
               >
-                <CardActionArea onClick={() => (window.location.href = tool.link)} sx={{ flex: 1 }}>
+                <CardActionArea
+                  onClick={() => {
+                    if (tool.externalLink && tool.openInNewTab) {
+                      window.open(tool.link, '_blank', 'noopener,noreferrer');
+                    } else {
+                      window.location.href = tool.link;
+                    }
+                  }}
+                  sx={{ flex: 1 }}
+                >
                   <CardContent sx={{ display: 'flex', alignItems: 'top' }}>
                     <Icon icon={tool.icon} fontSize={30} />
                     <Box

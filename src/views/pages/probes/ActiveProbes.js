@@ -136,7 +136,7 @@ const ActiveProbes = forwardRef((props, ref) => {
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
-  const [paginationMode, setPaginationMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('server')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -1112,7 +1112,7 @@ const ActiveProbes = forwardRef((props, ref) => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, setProbes, setRows]
+    [paginationModel.page, paginationModel.pageSize]
   )
 
   // Effect to fetch data initially and start the periodic refresh

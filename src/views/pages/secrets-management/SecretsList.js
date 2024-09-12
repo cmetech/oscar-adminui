@@ -243,18 +243,12 @@ const SecretsList = ({ set_total, total, ...props }) => {
     }
   ]
 
+  const [allRows, setAllRows] = useState([])
+
   const fetchSecrets = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await axios.get('/api/secrets', {
-        params: {
-          sort: sortModel[0]?.sort || 'asc',
-          order_by: sortModel[0]?.field || 'path',
-          page: paginationModel.page,
-          limit: paginationModel.pageSize,
-          filter: JSON.stringify(filterModel),
-        }
-      })
+      const response = await axios.get('/api/secrets')
       const formattedRows = response.data.keys.flatMap(secret => {
         const [fullPath, value] = Object.entries(secret)[0]
         const lastColonIndex = fullPath.lastIndexOf(':')
@@ -267,94 +261,78 @@ const SecretsList = ({ set_total, total, ...props }) => {
           value
         }
       })
-      setRows(formattedRows)
-      setRowCount(response.data.total)
-      set_total(response.data.total)
+      setAllRows(formattedRows)
+      setFilteredRows(formattedRows)
+      setRowCount(formattedRows.length)
+      set_total(formattedRows.length)
     } catch (error) {
       console.error('Failed to fetch secrets:', error)
       toast.error(t('Failed to fetch secrets'))
     } finally {
       setLoading(false)
-      setRunFilterQuery(false)
-      setRunRefresh(false)
     }
-  }, [paginationModel.page, paginationModel.pageSize, setRows])
+  }, [set_total, t])
 
   useEffect(() => {
-    if (!runFilterQuery) {
-      fetchSecrets()
-    }
-
+    fetchSecrets()
     const intervalId = setInterval(fetchSecrets, 300000)
-
     return () => clearInterval(intervalId)
-  }, [fetchSecrets, refetchTrigger, runFilterQuery])
+  }, [fetchSecrets, refetchTrigger])
 
-  // Trigger based on sort
-  useEffect(() => {
-    console.log('Effect Run:', { sortModel, runFilterQuery })
-    console.log('Sort Model:', JSON.stringify(sortModel))
+  const applyFiltersAndSort = useCallback(() => {
+    let result = [...allRows]
 
-    if (sortingMode === 'server') {
-      // server side sorting
-    } else {
-      // client side sorting
-      const column = sortModel[0]?.field
-      const sort = sortModel[0]?.sort
-
-      console.log('Column:', column)
-      console.log('Sort:', sort)
-
-      console.log('Rows:', rows)
-
-      if (filteredRows.length > 0) {
-        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-        setFilteredRows(dataToFilter)
-      } else {
-        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-        setRows(dataToFilter)
-      }
+    // Apply filtering
+    if (filterModel.items.length > 0) {
+      result = result.filter(row => {
+        return filterModel.items.every(filter => {
+          const value = row[filter.field]
+          switch (filter.operator) {
+            case 'contains':
+              return value.toLowerCase().includes(filter.value.toLowerCase())
+            case 'equals':
+              return value.toLowerCase() === filter.value.toLowerCase()
+            case 'startsWith':
+              return value.toLowerCase().startsWith(filter.value.toLowerCase())
+            case 'endsWith':
+              return value.toLowerCase().endsWith(filter.value.toLowerCase())
+            default:
+              return true
+          }
+        })
+      })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortModel])
+
+    // Apply search
+    if (searchValue) {
+      const searchRegex = new RegExp(escapeRegExp(searchValue), 'i')
+      result = result.filter(row => {
+        return ['path', 'key', 'value'].some(field => searchRegex.test(row[field]))
+      })
+    }
+
+    // Apply sorting
+    if (sortModel.length > 0) {
+      const { field, sort } = sortModel[0]
+      result.sort((a, b) => {
+        if (a[field] < b[field]) return sort === 'asc' ? -1 : 1
+        if (a[field] > b[field]) return sort === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    setFilteredRows(result)
+    setRowCount(result.length)
+    set_total(result.length)
+  }, [allRows, filterModel, searchValue, sortModel, set_total])
+
+  useEffect(() => {
+    applyFiltersAndSort()
+  }, [applyFiltersAndSort])
 
   const handleSearch = value => {
-    // console.log('Search Value:', value)
-
     setSearchValue(value)
-    const searchRegex = new RegExp(escapeRegExp(value), 'i')
-
-    const filteredRows = rows.filter(row => {
-      console.log('Row:', row)
-
-      // Extend the search to include nested paths
-      const searchFields = [
-        'id',
-        'path',
-        'key',
-        'value'
-      ]
-
-      return searchFields.some(field => {
-        const fieldValue = getNestedValue(row, field)
-
-        // Ensure the fieldValue is a string before calling toString()
-        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
-      })
-    })
-
-    if (value.length) {
-      // console.log('Filtered Rows:', filteredRows)
-      setFilteredRows(filteredRows)
-      setRowCount(filteredRows.length)
-      set_total(filteredRows.length)
-    } else {
-      setFilteredRows([])
-      setRowCount(rows.length)
-      set_total(rows.length)
-    }
+    applyFiltersAndSort()
   }
 
   const handleRowSelection = useCallback((newSelectionModel) => {
@@ -442,32 +420,37 @@ const SecretsList = ({ set_total, total, ...props }) => {
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
           autoHeight
-          rows={filteredRows.length ? filteredRows : rows}
-          rowCount={rowCountState}
+          rows={filteredRows}
+          rowCount={rowCount}
           columns={columns}
           loading={loading}
           checkboxSelection={true}
-          filterMode={filterMode}
+          filterMode="client"
           filterModel={filterModel}
-          onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
-          sortingMode={sortingMode}
+          onFilterModelChange={newFilterModel => {
+            setFilterModel(newFilterModel)
+            applyFiltersAndSort()
+          }}
+          sortingMode="client"
           sortModel={sortModel}
-          onSortModelChange={newSortModel => setSortModel(newSortModel)}
+          onSortModelChange={newSortModel => {
+            setSortModel(newSortModel)
+            applyFiltersAndSort()
+          }}
           pagination={true}
-          paginationMode={paginationMode}
+          paginationMode="client"
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
-          onPageChange={newPage => setPage(newPage)}
+          onRowSelectionModelChange={handleRowSelection}
+          rowSelectionModel={selectedSecretIds}
+          keepNonExistentRowsSelected
           slots={{
             toolbar: ServerSideToolbar,
             noRowsOverlay: NoRowsOverlay,
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
-          onRowSelectionModelChange={handleRowSelection}
-          rowSelectionModel={selectedSecretIds}
-          keepNonExistentRowsSelected
           slotProps={{
             baseButton: {
               variant: 'outlined'

@@ -256,18 +256,20 @@ const SecretsList = ({ set_total, total, ...props }) => {
         }
       })
       const formattedRows = response.data.keys.flatMap(secret => {
-        const path = Object.keys(secret)[0]
-        const secretData = secret[path]
-        return Object.entries(secretData).map(([key, value]) => ({
+        const [fullPath, value] = Object.entries(secret)[0]
+        const lastColonIndex = fullPath.lastIndexOf(':')
+        const path = fullPath.substring(0, lastColonIndex)
+        const key = fullPath.substring(lastColonIndex + 1)
+        return {
           id: `${path}-${key}`,
           path,
           key,
           value
-        }))
+        }
       })
       setRows(formattedRows)
-      setRowCount(formattedRows.length)
-      set_total(formattedRows.length)
+      setRowCount(response.data.total)
+      set_total(response.data.total)
     } catch (error) {
       console.error('Failed to fetch secrets:', error)
       toast.error(t('Failed to fetch secrets'))

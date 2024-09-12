@@ -12,7 +12,7 @@ async function handler(req, res) {
     try {
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/vault/secrets`);
       url.searchParams.append('path', path);
-      url.searchParams.append('limit', limit);
+      url.searchParams.append('format', 'flat');
 
       const response = await axios.get(url.toString(), {
         timeout: 30000,

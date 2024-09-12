@@ -100,6 +100,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
+  const [appliedFilterModel, setAppliedFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchSecretsTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
@@ -283,19 +284,22 @@ const SecretsList = ({ set_total, total, ...props }) => {
     let result = [...allRows]
 
     // Apply filtering
-    if (filterModel.items.length > 0) {
+    if (appliedFilterModel.items.length > 0) {
       result = result.filter(row => {
-        return filterModel.items.every(filter => {
+        return appliedFilterModel.items.every(filter => {
           const value = row[filter.field]
+          if (value === undefined || value === null) {
+            return false // or true, depending on how you want to handle null/undefined values
+          }
           switch (filter.operator) {
             case 'contains':
-              return value.toLowerCase().includes(filter.value.toLowerCase())
+              return value.toString().toLowerCase().includes(filter.value.toLowerCase())
             case 'equals':
-              return value.toLowerCase() === filter.value.toLowerCase()
+              return value.toString().toLowerCase() === filter.value.toLowerCase()
             case 'startsWith':
-              return value.toLowerCase().startsWith(filter.value.toLowerCase())
+              return value.toString().toLowerCase().startsWith(filter.value.toLowerCase())
             case 'endsWith':
-              return value.toLowerCase().endsWith(filter.value.toLowerCase())
+              return value.toString().toLowerCase().endsWith(filter.value.toLowerCase())
             default:
               return true
           }
@@ -324,7 +328,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
     setFilteredRows(result)
     setRowCount(result.length)
     set_total(result.length)
-  }, [allRows, filterModel, searchValue, sortModel, set_total])
+  }, [allRows, appliedFilterModel, searchValue, sortModel, set_total])
 
   useEffect(() => {
     applyFiltersAndSort()
@@ -413,6 +417,15 @@ const SecretsList = ({ set_total, total, ...props }) => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  useEffect(() => {
+    if (runRefresh) {
+      fetchSecrets()
+    }
+
+    return () => {
+      runRefresh && setRunRefresh(false)
+    }
+  }, [fetchSecrets, runRefresh])
 
   return (
     <Box>
@@ -429,7 +442,6 @@ const SecretsList = ({ set_total, total, ...props }) => {
           filterModel={filterModel}
           onFilterModelChange={newFilterModel => {
             setFilterModel(newFilterModel)
-            applyFiltersAndSort()
           }}
           sortingMode="client"
           sortModel={sortModel}
@@ -472,7 +484,13 @@ const SecretsList = ({ set_total, total, ...props }) => {
               setFilterButtonEl,
               setFilterActive,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh: setRunRefresh,
+              setRunFilterQuery: () => {
+                setAppliedFilterModel(filterModel);
+                applyFiltersAndSort();
+              }
             },
             columnsManagement: {
               getTogglableColumns,

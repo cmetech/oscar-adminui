@@ -101,12 +101,11 @@ const WorkflowsList = props => {
 
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
+  const [allRows, setAllRows] = useState([])
   const [rows, setRows] = useState([])
-  const [filteredRows, setFilteredRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
-  const [rowCountState, setRowCountState] = useState(rowCount)
   const [sortModel, setSortModel] = useState([{ field: 'dag_id', sort: 'asc' }])
 
   // ** State
@@ -115,7 +114,6 @@ const WorkflowsList = props => {
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runRefresh, setRunRefresh] = useState(false)
-  const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
@@ -340,6 +338,10 @@ const WorkflowsList = props => {
     }
   ]
 
+  // Add this function to get toggleable columns
+  const getTogglableColumns = useCallback(() => {
+    return columns.filter(column => column.field !== 'actions')
+  }, [columns])
 
   const handleUpdateDialogClose = () => {
     setEditDialog(false)
@@ -694,6 +696,100 @@ const WorkflowsList = props => {
     )
   }
 
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get('/api/workflows', {
+        params: {
+          sort: memoizedSortModel[0]?.sort || 'asc',
+          order_by: memoizedSortModel[0]?.field || 'dag_id',
+          page: paginationModel.page,
+          limit: paginationModel.pageSize,
+          filter: JSON.stringify(filterModel),
+        },
+        timeout: 10000,
+      })
+
+      if (response.status === 200 && response.data) {
+        setAllRows(response.data.dags || [])
+        setRowCount(response.data.total_entries || 0)
+        props.set_total(response.data.total_entries || 0)
+      } else {
+        throw new Error('Failed to fetch workflows')
+      }
+    } catch (error) {
+      console.error('Failed to fetch workflows:', error)
+      toast.error('Failed to fetch workflows')
+      setAllRows([])
+      setRowCount(0)
+      props.set_total(0)
+    } finally {
+      setLoading(false)
+    }
+  }, [paginationModel.page, paginationModel.pageSize, memoizedSortModel, filterModel, props])
+
+  const applyFiltersAndSort = useCallback(() => {
+    let result = [...allRows]
+
+    // Apply filtering
+    if (filterModel.items.length > 0) {
+      result = result.filter(row => {
+        return filterModel.items.every(filter => {
+          const value = row[filter.field]
+          if (value === undefined || value === null) {
+            return false
+          }
+          switch (filter.operator) {
+            case 'contains':
+              return value.toString().toLowerCase().includes(filter.value.toLowerCase())
+            case 'equals':
+              return value.toString().toLowerCase() === filter.value.toLowerCase()
+            case 'startsWith':
+              return value.toString().toLowerCase().startsWith(filter.value.toLowerCase())
+            case 'endsWith':
+              return value.toString().toLowerCase().endsWith(filter.value.toLowerCase())
+            default:
+              return true
+          }
+        })
+      })
+    }
+
+    // Apply search
+    if (searchValue) {
+      const searchRegex = new RegExp(escapeRegExp(searchValue), 'i')
+      result = result.filter(row => {
+        return ['dag_id', 'schedule_interval', 'timetable_description'].some(field =>
+          searchRegex.test(row[field]?.toString() || '')
+        ) || (Array.isArray(row.owners) && row.owners.some(owner => searchRegex.test(owner)))
+      })
+    }
+
+    // Apply sorting
+    if (sortModel.length > 0) {
+      const { field, sort } = sortModel[0]
+      result.sort((a, b) => {
+        if (a[field] < b[field]) return sort === 'asc' ? -1 : 1
+        if (a[field] > b[field]) return sort === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    setRows(result)
+  }, [allRows, filterModel, searchValue, sortModel])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  useEffect(() => {
+    applyFiltersAndSort()
+  }, [applyFiltersAndSort])
+
+  const handleSearch = useCallback((value) => {
+    setSearchValue(value)
+  }, [])
+
   const handleScheduleDialogSubmit = async () => {
     const taskId = currentWorkflow?.dag_id
 
@@ -879,247 +975,6 @@ const WorkflowsList = props => {
     setRowSelectionModel(workflowIds)
   }, [workflowIds])
 
-  useEffect(() => {
-    setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
-  }, [rowCount, setRowCountState])
-
-  const fetchData = useCallback(async (filter_model = {}) => {
-    setLoading(true);
-    console.log('Pagination Model:', paginationModel)
-    console.log('Sorting Model:', memoizedSortModel)
-
-    try {
-      const response = await axios.get('/api/workflows', {
-        params: {
-          sort: memoizedSortModel[0]?.sort || 'asc',
-          order_by: memoizedSortModel[0]?.field || 'dag_id',
-          page: paginationModel.page,
-          limit: paginationModel.pageSize,
-          filter: JSON.stringify(filter_model),
-        },
-        timeout: 10000,
-      });
-
-      if (response.status === 200) {
-        setRows(response.data.dags);
-        setRowCount(response.data.total_entries);
-        props.set_total(response.data.total_entries);
-      } else {
-        setRows([]);
-        setRowCount(0);
-        props.set_total(0);
-        toast.error('Failed to fetch workflows');
-      }
-    } catch (error) {
-      console.error('Failed to fetch workflows:', error);
-      setRows([]);
-      setRowCount(0);
-      props.set_total(0);
-      toast.error('Failed to fetch workflows');
-    } finally {
-      setLoading(false);
-      setRunFilterQuery(false);
-      setRunRefresh(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginationModel.page, paginationModel.pageSize]);
-
-  // Effect to fetch data initially and start the periodic refresh
-  useEffect(() => {
-    if (!runFilterQuery) {
-      fetchData()
-    }
-
-    const intervalId = setInterval(fetchData, 300000) // Fetch data every 300 seconds (5 minutes)
-
-    return () => clearInterval(intervalId) // Cleanup interval on component unmount
-  }, [fetchData, refetchTrigger, runFilterQuery])
-
-  // Trigger based on filter application
-  useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
-
-    if (runFilterQuery && filterModel.items.length > 0) {
-      if (filterMode === 'server') {
-        const sort = sortModel[0]?.sort
-        const sortColumn = sortModel[0]?.field
-        fetchData(filterModel)
-      } else {
-        // client side filtering
-      }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
-    } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
-      if (filterMode === 'server') {
-        fetchData(filterModel)
-      } else {
-        // client side filtering
-      }
-      setRunFilterQueryCount(0)
-    } else {
-      console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
-    }
-
-    // Reset the runFilterQuery flag
-    return () => {
-      runFilterQuery && setRunFilterQuery(false)
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterModel, runFilterQuery]) // Triggered by filter changes
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData, refetchTrigger])
-
-  useEffect(() => {
-    const registerAndFetchData = async () => {
-      if (runRefresh && !hasRunRef.current) {
-        hasRunRef.current = true
-        try {
-          await axios.post('/api/tasks/register', { timeout: 10000 })
-        } catch (error) {
-          console.error('Error refreshing workflows:', error)
-          toast.error('Failed to refresh workflows')
-        } finally {
-          fetchData()
-          setRunRefresh(false)
-        }
-      }
-    }
-
-    registerAndFetchData()
-
-    // Reset the flag in the cleanup function
-    return () => {
-      hasRunRef.current = false
-    }
-  }, [fetchData, runRefresh, setRunRefresh])
-
-  // Trigger based on sort
-  useEffect(() => {
-    console.log('Effect Run:', { sortModel, runFilterQuery })
-    console.log('Sort Model:', JSON.stringify(sortModel))
-
-    if (sortingMode === 'server') {
-      console.log('Sort Model:', JSON.stringify(sortModel))
-      fetchData()
-    } else {
-      // client side sorting
-      const column = sortModel[0]?.field
-      const sort = sortModel[0]?.sort
-
-      console.log('Column:', column)
-      console.log('Sort:', sort)
-
-      console.log('Rows:', rows)
-
-      if (filteredRows.length > 0) {
-        const dataAsc = [...filteredRows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-        setFilteredRows(dataToFilter)
-      } else {
-        const dataAsc = [...rows].sort((a, b) => (a[column] < b[column] ? -1 : 1))
-        const dataToFilter = sort === 'asc' ? dataAsc : dataAsc.reverse()
-        setRows(dataToFilter)
-      }
-    }
-
-    // Reset sortModel on unmount
-    return () => {
-      setSortModel([{ field: 'dag_id', sort: 'asc' }])
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoizedSortModel[0]?.field, memoizedSortModel[0]?.sort, runFilterQuery]) // Triggered by sort changes
-
-  const handleAction = event => {
-    setAction(event.target.value)
-  }
-
-  const handleSearch = value => {
-    // console.log('Search Value:', value)
-
-    setSearchValue(value)
-    const searchRegex = new RegExp(escapeRegExp(value), 'i')
-
-    const filteredRows = rows.filter(row => {
-      console.log('Row:', row)
-
-      // Extend the search to include nested paths
-      // Extend the search to include nested paths
-      const searchFields = [
-        'id',
-        'name',
-        'celery_job_name',
-        'type',
-        'status',
-        'owner',
-        'organization',
-        'description',
-        'schedule.id',
-        'schedule.task_id',
-        'schedule.minute',
-        'schedule.hour',
-        'schedule.day',
-        'schedule.month',
-        'schedule.year',
-        'args', // Array of arguments
-        'kwargs.key1',
-        'kwargs.key2',
-        'kwargs.key3',
-        'metadata.metakey1',
-        'metadata.metakey2',
-        'metadata.metakey3',
-        'hosts' // Array of hosts
-      ]
-
-      return searchFields.some(field => {
-        const fieldValue = getNestedValue(row, field)
-
-        // Ensure the fieldValue is a string before calling toString()
-        return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
-      })
-    })
-
-    if (value.length) {
-      // console.log('Filtered Rows:', filteredRows)
-      setFilteredRows(filteredRows)
-      setRowCount(filteredRows.length)
-      props.set_total(filteredRows.length)
-    } else {
-      setFilteredRows([])
-      setRowCount(rows.length)
-      props.set_total(rows.length)
-    }
-  }
-
-  const handleRowSelection = newRowSelectionModel => {
-    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
-
-    console.log('Added IDs:', addedIds)
-
-    addedIds.forEach(id => {
-      const row = rows.find(r => r.id === id)
-      console.log('Added Row:', row)
-    })
-
-    // Update the row selection model
-    setRowSelectionModel(newRowSelectionModel)
-
-    // Update the Jotai atom with the new selection model
-    setWorkflowIds(newRowSelectionModel)
-  }
-
-  // Hidden columns
-  const hiddenFields = ['id', 'organization']
-
-  const getTogglableColumns = columns => {
-    setFilterActive(false)
-
-    return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
-  }
-
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1141,9 +996,9 @@ const WorkflowsList = props => {
             }
           }}
           autoHeight={true}
-          rows={filteredRows.length ? filteredRows : rows}
+          rows={rows}
           apiRef={dgApiRef}
-          rowCount={rowCountState}
+          rowCount={rowCount}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick
@@ -1193,11 +1048,13 @@ const WorkflowsList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
-              setRunFilterQuery,
               showButtons: false,
               showexport: true,
               showRefresh: true,
-              setRunRefresh
+              setRunRefresh,
+              setRunFilterQuery: () => {
+                applyFiltersAndSort();
+              }
             },
             columnsManagement: {
               getTogglableColumns,

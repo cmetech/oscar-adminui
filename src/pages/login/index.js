@@ -288,7 +288,14 @@ const LoginPage = ({ csrfToken, providers }) => {
                 variant='outlined'
                 color='warning'
                 onClick={handleKeycloakLogin}
-                sx={{ mb: 2 }}
+                sx={{
+                  mb: 2,
+                  '&.Mui-disabled': {
+                    color: theme.palette.warning.main,
+                    borderColor: theme.palette.warning.main,
+                    opacity: 0.3
+                  }
+                }}
                 startIcon={<Icon icon='mdi:shield' />}
                 disabled={!keycloak_enabled}
               >
@@ -300,7 +307,14 @@ const LoginPage = ({ csrfToken, providers }) => {
                 variant='outlined'
                 color='info'
                 onClick={handleAzureLogin}
-                sx={{ mb: 2 }}
+                sx={{
+                  mb: 2,
+                  '&.Mui-disabled': {
+                    color: theme.palette.info.main,
+                    borderColor: theme.palette.info.main,
+                    opacity: 0.3
+                  }
+                }}
                 startIcon={<Icon icon='mdi:microsoft' />}
                 disabled={!azure_ad_enabled}
               >

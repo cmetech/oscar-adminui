@@ -4,6 +4,7 @@ const path = require('path')
 // Assuming @iconify/react is installed
 const component = '@iconify/react'
 const commonJS = false
+
 const target = path.join(__dirname, 'src/iconify-bundle/icons-bundle-react.js')
 
 ;(async function () {

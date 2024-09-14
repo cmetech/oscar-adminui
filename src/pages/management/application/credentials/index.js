@@ -156,7 +156,13 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm }) => {
         <DialogContentText>{t('Delete all selected?')}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} size='large' variant='outlined' color='secondary' startIcon={<Icon icon='mdi:close' />}>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
           {t('Cancel')}
         </Button>
         <Button
@@ -265,6 +271,7 @@ const CredentialsManager = () => {
       try {
         const deletePromises = selectedSecretIds.map(id => {
           const [path, key] = id.split('-')
+
           return axios.delete('/api/secrets/delete', {
             params: {
               path,
@@ -377,11 +384,7 @@ const CredentialsManager = () => {
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={handleCloseModal}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
+          <IconButton size='small' onClick={handleCloseModal} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
             <Icon icon='mdi:close' />
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>

@@ -70,15 +70,19 @@ const WorkflowDetailPanel = ({ row }) => {
   ]
 
   const generalInfoRows = [
-    { id: 1, field: 'DAG ID', value: row.dag_id },
-    { id: 2, field: 'Display Name', value: row.dag_display_name },
+    { id: 1, field: 'DAG ID', value: row.dag_id || 'N/A' },
+    { id: 2, field: 'Display Name', value: row.dag_display_name || 'N/A' },
     { id: 3, field: 'Description', value: row.description || 'N/A' },
-    { id: 4, field: 'Owner', value: row.owners.join(', ') },
-    { id: 5, field: 'Is Paused', value: row.is_paused ? 'Yes' : 'No' },
-    { id: 6, field: 'Is Active', value: row.is_active ? 'Yes' : 'No' },
-    { id: 7, field: 'Is Subdag', value: row.is_subdag ? 'Yes' : 'No' },
-    { id: 8, field: 'File Location', value: row.fileloc },
-    { id: 9, field: 'Tags', value: row.tags.map(tag => tag.name).join(', ') }
+    { id: 4, field: 'Owner', value: Array.isArray(row.owners) ? row.owners.join(', ') : 'N/A' },
+    { id: 5, field: 'Is Paused', value: row.is_paused != null ? (row.is_paused ? 'Yes' : 'No') : 'N/A' },
+    { id: 6, field: 'Is Active', value: row.is_active != null ? (row.is_active ? 'Yes' : 'No') : 'N/A' },
+    { id: 7, field: 'Is Subdag', value: row.is_subdag != null ? (row.is_subdag ? 'Yes' : 'No') : 'N/A' },
+    { id: 8, field: 'File Location', value: row.fileloc || 'N/A' },
+    {
+      id: 9,
+      field: 'Tags',
+      value: Array.isArray(row.tags) ? row.tags.map(tag => tag?.name || 'N/A').join(', ') : 'N/A'
+    }
   ]
 
   const scheduleInfoColumns = [
@@ -87,8 +91,8 @@ const WorkflowDetailPanel = ({ row }) => {
   ]
 
   const scheduleInfoRows = [
-    { id: 1, field: 'Schedule Interval', value: row.schedule_interval ? row.schedule_interval.value : 'N/A' },
-    { id: 2, field: 'Timetable Description', value: row.timetable_description },
+    { id: 1, field: 'Schedule Interval', value: row.schedule_interval?.value || 'N/A' },
+    { id: 2, field: 'Timetable Description', value: row.timetable_description || 'N/A' },
     { id: 3, field: 'Next Dagrun', value: row.next_dagrun || 'N/A' },
     { id: 4, field: 'Next Dagrun Data Interval Start', value: row.next_dagrun_data_interval_start || 'N/A' },
     { id: 5, field: 'Next Dagrun Data Interval End', value: row.next_dagrun_data_interval_end || 'N/A' },
@@ -101,26 +105,38 @@ const WorkflowDetailPanel = ({ row }) => {
   ]
 
   const detailsRows = [
-    { id: 1, field: 'Last Parsed Time', value: row.last_parsed_time },
-    { id: 2, field: 'Default View', value: row.default_view },
-    { id: 3, field: 'Max Active Tasks', value: row.max_active_tasks },
-    { id: 4, field: 'Max Active Runs', value: row.max_active_runs },
-    { id: 5, field: 'Has Task Concurrency Limits', value: row.has_task_concurrency_limits ? 'Yes' : 'No' },
-    { id: 6, field: 'Has Import Errors', value: row.has_import_errors ? 'Yes' : 'No' },
-    { id: 7, field: 'Max Consecutive Failed Dag Runs', value: row.max_consecutive_failed_dag_runs }
+    { id: 1, field: 'Last Parsed Time', value: row.last_parsed_time || 'N/A' },
+    { id: 2, field: 'Default View', value: row.default_view || 'N/A' },
+    { id: 3, field: 'Max Active Tasks', value: row.max_active_tasks != null ? row.max_active_tasks.toString() : 'N/A' },
+    { id: 4, field: 'Max Active Runs', value: row.max_active_runs != null ? row.max_active_runs.toString() : 'N/A' },
+    {
+      id: 5,
+      field: 'Has Task Concurrency Limits',
+      value: row.has_task_concurrency_limits != null ? (row.has_task_concurrency_limits ? 'Yes' : 'No') : 'N/A'
+    },
+    {
+      id: 6,
+      field: 'Has Import Errors',
+      value: row.has_import_errors != null ? (row.has_import_errors ? 'Yes' : 'No') : 'N/A'
+    },
+    {
+      id: 7,
+      field: 'Max Consecutive Failed Dag Runs',
+      value: row.max_consecutive_failed_dag_runs != null ? row.max_consecutive_failed_dag_runs.toString() : 'N/A'
+    }
   ]
 
   return (
     <Box sx={{ m: 5 }}>
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <TabList onChange={handleChange} aria-label="Workflow details tabs">
-            <Tab label={t('General Info')} value="1" />
-            <Tab label={t('Schedule Info')} value="2" />
-            <Tab label={t('Additional Details')} value="3" />
+          <TabList onChange={handleChange} aria-label='Workflow details tabs'>
+            <Tab label={t('General Info')} value='1' />
+            <Tab label={t('Schedule Info')} value='2' />
+            <Tab label={t('Additional Details')} value='3' />
           </TabList>
         </Box>
-        <TabPanel value="1">
+        <TabPanel value='1'>
           <CustomDataGrid
             rows={generalInfoRows}
             columns={generalInfoColumns}
@@ -139,7 +155,7 @@ const WorkflowDetailPanel = ({ row }) => {
             }}
           />
         </TabPanel>
-        <TabPanel value="2">
+        <TabPanel value='2'>
           <CustomDataGrid
             rows={scheduleInfoRows}
             columns={scheduleInfoColumns}
@@ -158,7 +174,7 @@ const WorkflowDetailPanel = ({ row }) => {
             }}
           />
         </TabPanel>
-        <TabPanel value="3">
+        <TabPanel value='3'>
           <CustomDataGrid
             rows={detailsRows}
             columns={detailsColumns}

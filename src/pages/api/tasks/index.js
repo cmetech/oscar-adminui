@@ -7,6 +7,7 @@ async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
     const { column = '', sort = '', skip = '1', limit = '100', filter = '{}' } = query
+
     // console.log('Filter', filter)
 
     const queryStringParameters = {

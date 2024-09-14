@@ -72,7 +72,6 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
-
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
 })
@@ -623,7 +622,7 @@ const UsersList = props => {
             </Typography>
             <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
           </Box>
-          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} onSuccess={handleSuccess}/>
+          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} onSuccess={handleSuccess} />
         </DialogContent>
         {/* <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleUpdateDriverDialogClose} color='primary'>
@@ -643,8 +642,8 @@ const UsersList = props => {
         open={deactivateDialog}
         onClose={handleDisableUserDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -652,16 +651,12 @@ const UsersList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Action')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDisableUserDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDisableUserDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -687,9 +682,9 @@ const UsersList = props => {
             variant='contained'
             size='large'
             onClick={handleDeactivateUserDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon={currentUser?.is_active ? "mdi:account-off" : "mdi:account-check"} />}
+            startIcon={<Icon icon={currentUser?.is_active ? 'mdi:account-off' : 'mdi:account-check'} />}
           >
             {currentUser?.is_active ? t('Deactivate') : t('Activate')}
           </Button>
@@ -697,8 +692,8 @@ const UsersList = props => {
             variant='outlined'
             size='large'
             onClick={handleDisableUserDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -713,8 +708,8 @@ const UsersList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -722,16 +717,12 @@ const UsersList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -743,9 +734,7 @@ const UsersList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this user?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this user?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -755,9 +744,9 @@ const UsersList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -765,8 +754,8 @@ const UsersList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -881,10 +870,10 @@ const UsersList = props => {
 
   //Trigger fetch when current run reference is false
   useEffect(() => {
-    console.log("Run refresh val:---------------------------" + runRefresh)
+    console.log('Run refresh val:---------------------------' + runRefresh)
 
     const registerAndFetchData = async () => {
-        if (runRefresh && !hasRunRef.current) {
+      if (runRefresh && !hasRunRef.current) {
         hasRunRef.current = true
         try {
           await axios.get('/api/users', { timeout: 10000 })
@@ -900,10 +889,8 @@ const UsersList = props => {
 
     registerAndFetchData()
 
-
-  },[fetchData, runRefresh, setRunRefresh])
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, runRefresh, setRunRefresh])
 
   // Trigger based on sort
   useEffect(() => {

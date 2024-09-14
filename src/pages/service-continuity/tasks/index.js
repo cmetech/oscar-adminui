@@ -4,7 +4,13 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import {
+  predefinedRangesDayjs,
+  today,
+  todayRounded,
+  todayRoundedPlus1hour,
+  yesterdayRounded
+} from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -116,7 +122,7 @@ const RegisterTaskForm = ({ onClose, onSubmit }) => {
   const [taskName, setTaskName] = useState('')
   const { t } = useTranslation()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault()
     onSubmit(taskName)
   }
@@ -126,21 +132,21 @@ const RegisterTaskForm = ({ onClose, onSubmit }) => {
       <DialogContent>
         <TextfieldStyled
           autoFocus
-          margin="dense"
-          id="taskName"
+          margin='dense'
+          id='taskName'
           label={t('Task Name')}
-          type="text"
+          type='text'
           fullWidth
-          variant="outlined"
+          variant='outlined'
           value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
+          onChange={e => setTaskName(e.target.value)}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color='secondary'>
           {t('Cancel')}
         </Button>
-        <Button type="submit" color="primary" variant="contained">
+        <Button type='submit' color='primary' variant='contained'>
           {t('Submit')}
         </Button>
       </DialogActions>
@@ -488,6 +494,7 @@ const RegisterTaskDialog = ({ open, onClose, onSuccess }) => {
   const handleSubmit = async () => {
     if (!taskName.trim()) {
       toast.error('Please enter a task name.')
+
       return
     }
 
@@ -510,25 +517,21 @@ const RegisterTaskDialog = ({ open, onClose, onSuccess }) => {
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>
         <Typography variant='h6'>{t('Register Task')}</Typography>
-        <IconButton
-          size='small'
-          onClick={handleClose}
-          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-        >
+        <IconButton size='small' onClick={handleClose} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
           <Icon icon='mdi:close' />
         </IconButton>
       </DialogTitle>
       <DialogContent>
         <TextfieldStyled
           autoFocus
-          margin="dense"
-          id="taskName"
+          margin='dense'
+          id='taskName'
           label={t('Task Name')}
-          type="text"
+          type='text'
           fullWidth
-          variant="outlined"
+          variant='outlined'
           value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
+          onChange={e => setTaskName(e.target.value)}
           sx={{ mt: 2 }}
         />
       </DialogContent>

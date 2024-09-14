@@ -4,7 +4,13 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { probeIdsAtom, refetchProbeTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import {
+  predefinedRangesDayjs,
+  today,
+  todayRounded,
+  todayRoundedPlus1hour,
+  yesterdayRounded
+} from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -128,6 +134,7 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, onExport
   const getDynamicTitle = tabValue => {
     const mapping = {
       1: 'Active Probes'
+
       //2: 'Probe History'
     }
 
@@ -234,10 +241,14 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, onExport
             </Box>
           </MenuItem>
         )}
-        <MenuItem sx={{ p: 0 }} onClick={() => {
-          onExport()
-          handleDropdownClose()
-        }} disabled={!ability.can('read', 'probes')}>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onExport()
+            handleDropdownClose()
+          }}
+          disabled={!ability.can('read', 'probes')}
+        >
           <Box sx={styles}>
             <Icon icon='mdi:file-export' />
             {t('Export Probes')}
@@ -501,6 +512,7 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
   const handleSubmit = async () => {
     if (!file) {
       toast.error('Please select a file to upload.')
+
       return
     }
 
@@ -567,12 +579,7 @@ const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
         >
           <Icon icon='mdi:close' />
         </IconButton>
-        <input
-          type='file'
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
+        <input type='file' ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
         <Button onClick={handleButtonClick} size='large' variant='contained' color='primary' disabled={isUploading}>
           {t('Choose File')}
         </Button>
@@ -727,7 +734,9 @@ const ProbeManager = () => {
         toast.error(t('Error disabling probes'))
       }
     } catch (error) {
-      toast.error(t('Error disabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message }))
+      toast.error(
+        t('Error disabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message })
+      )
 
       // Close the disable modal dialog
       setIsDisableModalOpen(false) // Add this line to close the dialog
@@ -758,7 +767,9 @@ const ProbeManager = () => {
         toast.error(t('Error enabling probes'))
       }
     } catch (error) {
-      toast.error(t('Error enabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message }))
+      toast.error(
+        t('Error enabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message })
+      )
 
       setIsEnableModalOpen(false)
     }
@@ -1026,4 +1037,3 @@ ProbeManager.acl = {
 }
 
 export default ProbeManager
-

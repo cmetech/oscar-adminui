@@ -144,8 +144,6 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
   const theme = useTheme()
   const session = useSession()
 
-  
-
   useEffect(() => {
     // Reset the active step when notifier type changes
     setActiveStep(0)
@@ -218,10 +216,9 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
     setShowPassword(!showPassword)
   }
 
-  const handleMouseDownPassword = (event) => {
+  const handleMouseDownPassword = event => {
     event.preventDefault()
   }
-  
 
   const handleFormChange = (event, index, section) => {
     const { name, value } = event.target
@@ -230,6 +227,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
       setConnectionForm(prevForm => {
         const newExtra = [...prevForm.extra]
         newExtra[index] = { ...newExtra[index], [name]: value }
+
         return { ...prevForm, extra: newExtra }
       })
     } else {
@@ -289,7 +287,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
 
         const payload = {
           ...connectionForm,
-          extra: extraString,
+          extra: extraString
         }
 
         const endpoint = `/api/connections/${connectionForm.connection_id}`
@@ -377,10 +375,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                   />
                 </Grid>
                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                  <IconButton
-                    onClick={() => removeSectionEntry('extra', index)}
-                    color='secondary'
-                  >
+                  <IconButton onClick={() => removeSectionEntry('extra', index)} color='secondary'>
                     <Icon icon='mdi:minus-circle-outline' />
                   </IconButton>
                 </Grid>
@@ -501,26 +496,26 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabelStyled htmlFor="outlined-adornment-password">Password</InputLabelStyled>
+                  <FormControl fullWidth variant='outlined'>
+                    <InputLabelStyled htmlFor='outlined-adornment-password'>Password</InputLabelStyled>
                     <OutlinedInputStyled
-                      id="outlined-adornment-password"
+                      id='outlined-adornment-password'
                       type={showPassword ? 'text' : 'password'}
                       value={connectionForm.password}
-                      onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
+                      onChange={e => handleFormChange({ target: { name: 'password', value: e.target.value } })}
                       endAdornment={
-                        <InputAdornment position="end">
+                        <InputAdornment position='end'>
                           <IconButton
-                            aria-label="toggle password visibility"
+                            aria-label='toggle password visibility'
                             onClick={handleClickShowPassword}
                             onMouseDown={handleMouseDownPassword}
-                            edge="end"
+                            edge='end'
                           >
                             <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                           </IconButton>
                         </InputAdornment>
                       }
-                      label="Password"
+                      label='Password'
                     />
                   </FormControl>
                 </Grid>
@@ -640,9 +635,10 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                       <Typography
                         className='step-subtitle'
                         style={{
-                          color: theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandYellow
-                            : theme.palette.secondary.light
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow
+                              : theme.palette.secondary.light
                         }}
                       >
                         {step.subtitle}
@@ -674,7 +670,7 @@ const Section = ({ title, data }) => {
             <Grid item xs={12} sm={6}>
               <TextfieldStyled
                 fullWidth
-                label="Key"
+                label='Key'
                 value={item.key || ''}
                 InputProps={{ readOnly: true }}
                 variant='outlined'
@@ -684,7 +680,7 @@ const Section = ({ title, data }) => {
             <Grid item xs={12} sm={6}>
               <TextfieldStyled
                 fullWidth
-                label="Value"
+                label='Value'
                 value={item.value || ''}
                 InputProps={{ readOnly: true }}
                 variant='outlined'
@@ -794,9 +790,7 @@ const ReviewAndSubmitSection = ({ connectionForm }) => {
   return (
     <Fragment>
       {renderGeneralSection(connectionForm)}
-      {connectionForm.extra && connectionForm.extra.length > 0 && (
-        <Section title='Extra' data={connectionForm.extra} />
-      )}
+      {connectionForm.extra && connectionForm.extra.length > 0 && <Section title='Extra' data={connectionForm.extra} />}
     </Fragment>
   )
 }

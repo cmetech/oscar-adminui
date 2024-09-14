@@ -25,7 +25,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import FormGroup from '@mui/material/FormGroup' 
+import FormGroup from '@mui/material/FormGroup'
 import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
@@ -118,7 +118,7 @@ const AddUserWizard = props => {
   const [isVerified, setIsVerified] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
-      
+
   const theme = useTheme()
   const session = useSession()
 
@@ -126,6 +126,7 @@ const AddUserWizard = props => {
     try {
       await validationSchema.validate({ firstName, lastName, username, email, password }, { abortEarly: false })
       setFormErrors({})
+
       return true
     } catch (yupError) {
       const transformedErrors = yupError.inner.reduce(
@@ -136,12 +137,13 @@ const AddUserWizard = props => {
         {}
       )
       setFormErrors(transformedErrors)
+
       return false
     }
   }
 
   const handleBack = () => {
-      setActiveStep(prevActiveStep => prevActiveStep - 1)
+    setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
   const handleNext = async () => {
@@ -153,10 +155,12 @@ const AddUserWizard = props => {
     if (activeStep === steps.length - 1) {
       try {
         const apiToken = session?.data?.user?.apiToken
+
         const headers = {
           Accept: 'application/json',
           Authorization: `Bearer ${apiToken}`
         }
+
         const payload = {
           username: username,
           first_name: firstName,
@@ -175,14 +179,13 @@ const AddUserWizard = props => {
         if (response.data) {
           const newUser = response.data
           setRows(prevRows => [...prevRows, newUser]) // Use setRows from props
-          
+
           setActiveStep(null)
 
           setTimeout(() => {
             onSuccess()
           }, 1000)
-          
-          
+
           toast.success('User added successfully')
         }
       } catch (error) {
@@ -216,7 +219,7 @@ const AddUserWizard = props => {
     setShowPassword(!showPassword)
   }
 
-  const handleMouseDownPassword = (event) => {
+  const handleMouseDownPassword = event => {
     event.preventDefault()
   }
 
@@ -276,19 +279,19 @@ const AddUserWizard = props => {
               </Grid>
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
-                <InputLabelStyled htmlFor="outlined-adornment-password">Password</InputLabelStyled>
+                  <InputLabelStyled htmlFor='outlined-adornment-password'>Password</InputLabelStyled>
                   <OutlinedInputStyled
-                    id="outlined-adornment-password"
+                    id='outlined-adornment-password'
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={handleInputChange(setPassword)}
                     endAdornment={
-                      <InputAdornment position="end">
+                      <InputAdornment position='end'>
                         <IconButton
-                          aria-label="toggle password visibility"
+                          aria-label='toggle password visibility'
                           onClick={handleClickShowPassword}
                           onMouseDown={handleMouseDownPassword}
-                          edge="end"
+                          edge='end'
                         >
                           <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                         </IconButton>
@@ -300,9 +303,7 @@ const AddUserWizard = props => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item sm={4} xs={12}>
-                
-              </Grid>
+              <Grid item sm={4} xs={12}></Grid>
               <Grid item sm={4} xs={12}>
                 <FormControl fullWidth>
                   <FormControlLabel
@@ -381,99 +382,94 @@ const AddUserWizard = props => {
   }
 
   const renderContent = () => {
-    if (activeStep === steps.length || activeStep== null) {
-
+    if (activeStep === steps.length || activeStep == null) {
       return (
-
-          <Fragment>
-            <Typography>New user details have been submitted.</Typography>
-            <Grid container spacing={1}>
-              <Grid item xs={4}>
-                <Typography
-                  variant='h6'
-                  sx={{
-                    mt: 2,
-                    mb: 1,
-                    textDecoration: 'underline',
-                    color:
-                      theme.palette.mode === 'light'
-                        ? theme.palette.customColors.brandBlack
-                        : theme.palette.customColors.brandYellow
-                  }}
-                >
-                  General Information
-                </Typography>
-                <Grid item xs={12}>
-                  <Typography>
-                    Name:{' '}
-                    <strong>
-                      {firstName} {lastName}
-                    </strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Username: <strong>{username}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Status: <strong>{isActive.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Admin: <strong>{isSuperUser.toString()}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    Is Verified: <strong>{isVerified.toString()}</strong>
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button size='large' variant='contained' onClick={handleReset}>
-                Reset
-              </Button>
-            </Box>
-            </Fragment>
-
-      )
-    } else if(activeStep != null) {
-      
-      return(
-        <form onSubmit={e => e.preventDefault()}>
-            <Grid container spacing={5}>
+        <Fragment>
+          <Typography>New user details have been submitted.</Typography>
+          <Grid container spacing={1}>
+            <Grid item xs={4}>
+              <Typography
+                variant='h6'
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  textDecoration: 'underline',
+                  color:
+                    theme.palette.mode === 'light'
+                      ? theme.palette.customColors.brandBlack
+                      : theme.palette.customColors.brandYellow
+                }}
+              >
+                General Information
+              </Typography>
               <Grid item xs={12}>
-                <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {steps[activeStep].title}
-                </Typography>
-                <Typography variant='caption' component='p' paddingBottom={5}>
-                  {steps[activeStep].description}
+                <Typography>
+                  Name:{' '}
+                  <strong>
+                    {firstName} {lastName}
+                  </strong>
                 </Typography>
               </Grid>
-              {getStepContent(activeStep)}
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button
-                  size='large'
-                  variant='outlined'
-                  color='secondary'
-                  disabled={activeStep === 0}
-                  onClick={handleBack}
-                >
-                  Back
-                </Button>
-                <Button size='large' variant='contained' onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
-                </Button>
+              <Grid item xs={12}>
+                <Typography>
+                  Username: <strong>{username}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Status: <strong>{isActive.toString()}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Is Admin: <strong>{isSuperUser.toString()}</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Is Verified: <strong>{isVerified.toString()}</strong>
+                </Typography>
               </Grid>
             </Grid>
-          </form> 
-          )
+          </Grid>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button size='large' variant='contained' onClick={handleReset}>
+              Reset
+            </Button>
+          </Box>
+        </Fragment>
+      )
+    } else if (activeStep != null) {
+      return (
+        <form onSubmit={e => e.preventDefault()}>
+          <Grid container spacing={5}>
+            <Grid item xs={12}>
+              <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
+                {steps[activeStep].title}
+              </Typography>
+              <Typography variant='caption' component='p' paddingBottom={5}>
+                {steps[activeStep].description}
+              </Typography>
+            </Grid>
+            {getStepContent(activeStep)}
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button
+                size='large'
+                variant='outlined'
+                color='secondary'
+                disabled={activeStep === 0}
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+              <Button size='large' variant='contained' onClick={handleNext}>
+                {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      )
     }
-
   }
 
   return (

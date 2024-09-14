@@ -6,8 +6,8 @@ import oscarConfig from '../../../configs/oscarConfig'
 async function handler(req, res) {
   if (req.method === 'GET') {
     const query = req.query
-    const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}'} = query
-   
+    const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}' } = query
+
     console.log('start_time', start_time)
     console.log('end_time', end_time)
     console.log('skip', skip)
@@ -15,11 +15,11 @@ async function handler(req, res) {
     console.log('column', column)
     console.log('sort', sort)
     console.log('filter', filter)
-  
+
     try {
       // Construct the request URL with query parameters
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/alerts/`)
-      
+
       if (start_time) url.searchParams.append('start_time', start_time)
       if (end_time) url.searchParams.append('end_time', end_time)
       url.searchParams.append('page', skip)
@@ -35,32 +35,35 @@ async function handler(req, res) {
       })
 
       if (response?.data) {
-        if (response?.data?.records?.length > 0) {          
+        if (response?.data?.records?.length > 0) {
           res.status(response.status || 200).json({
             records: response.data.records,
+
             //total_filtered_records: filteredData.length,
             total_pages: response.data.total_pages,
-            total_records: response.data.total_records,
+            total_records: response.data.total_records
+
             //rows: filteredData || []
           })
         } else {
-          res.status(200).json({ 
+          res.status(200).json({
             records: [],
+
             //total_filtered_records: 0,
             total_pages: 0,
-            total_records: 0,
+            total_records: 0
+
             //rows: []
           })
         }
       } else {
         res.status(500).json({ message: 'No response - An error occurred' })
-      } 
+      }
     } catch (error) {
-        console.error('Error proxying export targets:', error)
-        res.status(error.response?.status || 500).json({ message: error.message })
+      console.error('Error proxying export targets:', error)
+      res.status(error.response?.status || 500).json({ message: error.message })
     }
-  } 
-  else {
+  } else {
     // Handle unsupported HTTP methods
     res.setHeader('Allow', ['GET', 'POST'])
     res.status(405).end(`Method ${req.method} Not Allowed`)

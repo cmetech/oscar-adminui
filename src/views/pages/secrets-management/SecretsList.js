@@ -193,11 +193,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
             >
               {isVisible ? row.value : '*'.repeat(8)}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={() => toggleSecretVisibility(row.id)}
-              sx={{ flexShrink: 0 }}
-            >
+            <IconButton size='small' onClick={() => toggleSecretVisibility(row.id)} sx={{ flexShrink: 0 }}>
               <Icon icon={isVisible ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} />
             </IconButton>
           </Box>
@@ -212,14 +208,14 @@ const SecretsList = ({ set_total, total, ...props }) => {
       type: 'string',
       renderCell: ({ row }) => (
         <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
+          sx={{
+            display: 'flex',
+            alignItems: 'center', // Ensures vertical centering inside the Box
+            justifyContent: 'flex-start',
+            width: '100%', // Ensures the Box takes full width of the cell
+            height: '100%' // Ensures the Box takes full height of the cell
+          }}
+        >
           <Box sx={{ display: 'flex', flexDirection: 'row' }}>
             <IconButton
               size='small'
@@ -250,11 +246,16 @@ const SecretsList = ({ set_total, total, ...props }) => {
     setLoading(true)
     try {
       const response = await axios.get('/api/secrets')
+
       const formattedRows = response.data.keys.flatMap(secret => {
         const [fullPath, value] = Object.entries(secret)[0]
+
         const lastColonIndex = fullPath.lastIndexOf(':')
+
         const path = fullPath.substring(0, lastColonIndex)
+
         const key = fullPath.substring(lastColonIndex + 1)
+
         return {
           id: `${path}-${key}`,
           path,
@@ -277,6 +278,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
   useEffect(() => {
     fetchSecrets()
     const intervalId = setInterval(fetchSecrets, 300000)
+
     return () => clearInterval(intervalId)
   }, [fetchSecrets, refetchTrigger])
 
@@ -321,6 +323,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
       result.sort((a, b) => {
         if (a[field] < b[field]) return sort === 'asc' ? -1 : 1
         if (a[field] > b[field]) return sort === 'asc' ? 1 : -1
+
         return 0
       })
     }
@@ -339,12 +342,15 @@ const SecretsList = ({ set_total, total, ...props }) => {
     applyFiltersAndSort()
   }
 
-  const handleRowSelection = useCallback((newSelectionModel) => {
-    console.log('New Selection Model:', newSelectionModel)
-    setSelectedSecretIds(newSelectionModel)
-  }, [setSelectedSecretIds])
+  const handleRowSelection = useCallback(
+    newSelectionModel => {
+      console.log('New Selection Model:', newSelectionModel)
+      setSelectedSecretIds(newSelectionModel)
+    },
+    [setSelectedSecretIds]
+  )
 
-  const handleDeleteClick = (secret) => {
+  const handleDeleteClick = secret => {
     setSecretToDelete(secret)
     setDeleteDialogOpen(true)
   }
@@ -359,7 +365,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
           key: secretToDelete.key,
           delete_empty_paths: true
         }
-      });
+      })
 
       if (response.status === 200) {
         toast.success(t('Secret deleted successfully'))
@@ -368,7 +374,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
         toast.error(t('Failed to delete secret'))
       }
     } catch (error) {
-      console.error('Error deleting secret:', error);
+      console.error('Error deleting secret:', error)
       toast.error(t('An error occurred while deleting the secret'))
     } finally {
       setDeleteDialogOpen(false)
@@ -381,7 +387,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
     setSecretToDelete(null)
   }
 
-  const handleEditClick = (secret) => {
+  const handleEditClick = secret => {
     setSecretToEdit(secret)
     setEditDialogOpen(true)
   }
@@ -397,11 +403,11 @@ const SecretsList = ({ set_total, total, ...props }) => {
     setRefetchTrigger(Date.now())
   }
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = event => {
     setSearchValue(event.target.value)
   }
 
-  const toggleSecretVisibility = useCallback((id) => {
+  const toggleSecretVisibility = useCallback(id => {
     setVisibleSecrets(prev => ({
       ...prev,
       [id]: !prev[id]
@@ -438,19 +444,19 @@ const SecretsList = ({ set_total, total, ...props }) => {
           columns={columns}
           loading={loading}
           checkboxSelection={true}
-          filterMode="client"
+          filterMode='client'
           filterModel={filterModel}
           onFilterModelChange={newFilterModel => {
             setFilterModel(newFilterModel)
           }}
-          sortingMode="client"
+          sortingMode='client'
           sortModel={sortModel}
           onSortModelChange={newSortModel => {
             setSortModel(newSortModel)
             applyFiltersAndSort()
           }}
           pagination={true}
-          paginationMode="client"
+          paginationMode='client'
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
@@ -488,8 +494,8 @@ const SecretsList = ({ set_total, total, ...props }) => {
               showRefresh: true,
               setRunRefresh: setRunRefresh,
               setRunFilterQuery: () => {
-                setAppliedFilterModel(filterModel);
-                applyFiltersAndSort();
+                setAppliedFilterModel(filterModel)
+                applyFiltersAndSort()
               }
             },
             columnsManagement: {
@@ -686,23 +692,17 @@ const SecretsList = ({ set_total, total, ...props }) => {
             }
           }}
         />
-        <Dialog
-          fullWidth
-          maxWidth='md'
-          scroll='body'
-          open={editDialogOpen}
-          onClose={handleEditClose}
-        >
+        <Dialog fullWidth maxWidth='md' scroll='body' open={editDialogOpen} onClose={handleEditClose}>
           <UpdateSecretsWizard secretData={secretToEdit} onSuccess={handleEditSuccess} onClose={handleEditClose} />
         </Dialog>
         <Dialog
           open={deleteDialogOpen}
           onClose={handleDeleteCancel}
           TransitionComponent={Transition}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
+          aria-labelledby='alert-dialog-title'
+          aria-describedby='alert-dialog-description'
         >
-          <DialogTitle id="alert-dialog-title">
+          <DialogTitle id='alert-dialog-title'>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
                 {t('Confirm Deletion')}
@@ -718,17 +718,17 @@ const SecretsList = ({ set_total, total, ...props }) => {
               <Icon icon='mdi:close' />
             </IconButton>
             <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='32' height='32' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {t('Are you sure you want to delete this secret?')}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
+              <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+                <Box>
+                  <img src='/images/warning.png' alt='warning' width='32' height='32' />
+                </Box>
+                <Box>
+                  <Typography variant='h5' justifyContent='center' alignContent='center'>
+                    {t('Are you sure you want to delete this secret?')}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
           </DialogContent>
           <DialogActions>
             <Button
@@ -736,9 +736,9 @@ const SecretsList = ({ set_total, total, ...props }) => {
               size='large'
               sx={{ mr: 1 }}
               onClick={handleDeleteConfirm}
-              color="error"
+              color='error'
               autoFocus
-              startIcon={<Icon icon="mdi:delete-forever" />}
+              startIcon={<Icon icon='mdi:delete-forever' />}
             >
               {t('Delete')}
             </Button>
@@ -746,8 +746,8 @@ const SecretsList = ({ set_total, total, ...props }) => {
               variant='outlined'
               size='large'
               onClick={handleDeleteCancel}
-              color="secondary"
-              startIcon={<Icon icon="mdi:close" />}
+              color='secondary'
+              startIcon={<Icon icon='mdi:close' />}
             >
               {t('Cancel')}
             </Button>

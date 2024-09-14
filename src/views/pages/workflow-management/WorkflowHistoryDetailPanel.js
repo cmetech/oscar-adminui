@@ -81,14 +81,16 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
     fetchTaskInstances()
   }, [row.dag_id, row.dag_run_id])
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return 'N/A'
     try {
       const date = parseISO(dateString)
       const zonedDate = utcToZonedTime(date, 'UTC')
+
       return format(zonedDate, 'yyyy-MM-dd HH:mm:ss zzz')
     } catch (error) {
       console.error('Error parsing date:', error)
+
       return 'Invalid Date'
     }
   }
@@ -98,7 +100,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'task_id',
       headerName: t('Task ID'),
       flex: 1,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -120,7 +122,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'task_display_name',
       headerName: t('Display Name'),
       flex: 1,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -142,7 +144,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'state',
       headerName: t('State'),
       flex: 0.7,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -158,10 +160,15 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
               size='medium'
               skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
               color={
-                params.row.state === 'success' ? 'success' :
-                params.row.state === 'running' ? 'info' :
-                params.row.state === 'failed' ? 'error' :
-                params.row.state === 'skipped' ? 'warning' : 'default'
+                params.row.state === 'success'
+                  ? 'success'
+                  : params.row.state === 'running'
+                  ? 'info'
+                  : params.row.state === 'failed'
+                  ? 'error'
+                  : params.row.state === 'skipped'
+                  ? 'warning'
+                  : 'default'
               }
               label={params.row.state.toUpperCase()}
             />
@@ -173,7 +180,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'start_date',
       headerName: t('Start Date'),
       flex: 1.2,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -195,7 +202,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'end_date',
       headerName: t('End Date'),
       flex: 1.2,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -217,7 +224,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'duration',
       headerName: t('Duration'),
       flex: 0.7,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -239,7 +246,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'try_number',
       headerName: t('Try Number'),
       flex: 0.7,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -261,7 +268,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'operator',
       headerName: t('Operator'),
       flex: 1,
-      renderCell: (params) => (
+      renderCell: params => (
         <Box
           sx={{
             display: 'flex',
@@ -301,13 +308,13 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         </Box>
         <TabPanel value='1'>
           <CustomDataGrid
-            getRowId={(row) => row.task_id}
+            getRowId={row => row.task_id}
             autoHeight
             rows={taskInstances}
             columns={taskInstanceColumns}
             loading={loading}
             pageSize={5}
-            rowsPerPageOptions={[5, 10, 25]}    
+            rowsPerPageOptions={[5, 10, 25]}
             disableSelectionOnClick
             slots={{
               noRowsOverlay: NoRowsOverlay,
@@ -356,7 +363,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                           : theme.palette.primary.main
                     }
                   },
-  
+
                   // Target the root of the outlined input
                   '& .MuiOutlinedInput-root': {
                     // Apply these styles when the element is focused
@@ -391,7 +398,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
               filterPanel: {
                 // Force usage of "And" operator
                 logicOperators: [GridLogicOperator.And, GridLogicOperator.Or],
-  
+
                 // Display columns by ascending alphabetical order
                 columnsSort: 'asc',
                 filterFormProps: {
@@ -405,7 +412,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                     size: 'small',
                     sx: {
                       mt: 'auto',
-  
+
                       // Target the root style of the outlined input
                       '& .MuiOutlinedInput-root': {
                         // Apply styles when focused
@@ -419,7 +426,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                           }
                         }
                       },
-  
+
                       // Target the label for color change
                       '& .MuiInputLabel-outlined': {
                         // Apply styles when focused
@@ -437,7 +444,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                     size: 'small',
                     sx: {
                       mt: 'auto',
-  
+
                       // Target the root style of the outlined input
                       '& .MuiOutlinedInput-root': {
                         // Apply styles when focused
@@ -451,7 +458,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                           }
                         }
                       },
-  
+
                       // Target the label for color change
                       '& .MuiInputLabel-outlined': {
                         // Apply styles when focused
@@ -482,7 +489,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
                             }
                           }
                         },
-  
+
                         // Target the label for color change
                         '& .MuiInputLabel-outlined': {
                           // Apply styles when focused

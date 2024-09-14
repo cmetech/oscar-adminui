@@ -593,6 +593,7 @@ const ActiveProbes = forwardRef((props, ref) => {
         )
       }
     },
+
     // {
     //   flex: 0.02,
     //   minWidth: 60,
@@ -722,12 +723,8 @@ const ActiveProbes = forwardRef((props, ref) => {
   }
 
   const ExportDialog = () => (
-    <Dialog
-      open={exportDialog}
-      onClose={handleExportDialogClose}
-      aria-labelledby="export-dialog-title"
-    >
-      <DialogTitle id="export-dialog-title">{t('Confirm Export')}</DialogTitle>
+    <Dialog open={exportDialog} onClose={handleExportDialogClose} aria-labelledby='export-dialog-title'>
+      <DialogTitle id='export-dialog-title'>{t('Confirm Export')}</DialogTitle>
       <DialogContent>
         <IconButton
           size='small'
@@ -741,20 +738,20 @@ const ActiveProbes = forwardRef((props, ref) => {
       <DialogActions>
         <Button
           onClick={handleExportDialogClose}
-          size="large"
-          variant="outlined"
-          color="secondary"
-          startIcon={<Icon icon="mdi:close" />}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
         >
           {t('Cancel')}
         </Button>
         <Button
           onClick={handleExportDialogConfirm}
-          size="large"
-          variant="contained"
-          color="warning"
+          size='large'
+          variant='contained'
+          color='warning'
           autoFocus
-          startIcon={<Icon icon="mdi:export" />}
+          startIcon={<Icon icon='mdi:export' />}
         >
           {t('Export')}
         </Button>
@@ -825,8 +822,8 @@ const ActiveProbes = forwardRef((props, ref) => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -834,16 +831,12 @@ const ActiveProbes = forwardRef((props, ref) => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -855,9 +848,7 @@ const ActiveProbes = forwardRef((props, ref) => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this probe?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this probe?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -867,9 +858,9 @@ const ActiveProbes = forwardRef((props, ref) => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -877,8 +868,8 @@ const ActiveProbes = forwardRef((props, ref) => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -895,8 +886,8 @@ const ActiveProbes = forwardRef((props, ref) => {
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -904,16 +895,12 @@ const ActiveProbes = forwardRef((props, ref) => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Action')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDisableDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDisableDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -939,9 +926,9 @@ const ActiveProbes = forwardRef((props, ref) => {
             variant='contained'
             size='large'
             onClick={handleDisableDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon={isProbeEnabled ? "mdi:pause-circle" : "mdi:play-circle"} />}
+            startIcon={<Icon icon={isProbeEnabled ? 'mdi:pause-circle' : 'mdi:play-circle'} />}
           >
             {isProbeEnabled ? t('Disable') : t('Enable')}
           </Button>
@@ -949,8 +936,8 @@ const ActiveProbes = forwardRef((props, ref) => {
             variant='outlined'
             size='large'
             onClick={handleDisableDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>

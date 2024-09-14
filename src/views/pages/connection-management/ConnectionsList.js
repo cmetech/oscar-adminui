@@ -111,7 +111,12 @@ const ConnectionsList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.connection_id?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+              <Typography
+                title={row?.connection_id?.toUpperCase()}
+                noWrap
+                overflow={'hidden'}
+                textoverflow={'ellipsis'}
+              >
                 {row?.connection_id?.toUpperCase()}
               </Typography>
             </Box>
@@ -229,6 +234,7 @@ const ConnectionsList = props => {
       headerName: t('Description'),
       renderCell: params => {
         const { row } = params
+
         return (
           <Box
             sx={{
@@ -311,7 +317,6 @@ const ConnectionsList = props => {
     }
   ]
 
-
   const fetchConnections = useCallback(async () => {
     setLoading(true)
     try {
@@ -335,6 +340,7 @@ const ConnectionsList = props => {
       setRunFilterQuery(false)
       setRunRefresh(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel.page, paginationModel.pageSize, setRows])
 
   useEffect(() => {
@@ -457,6 +463,7 @@ const ConnectionsList = props => {
     try {
       const response = await axios.post(`/api/workflows/connections/${currentConnection.conn_id}/test`)
       toast.success('Connection test successful')
+
       // Handle the test response as needed
     } catch (error) {
       console.error('Connection test failed:', error)
@@ -510,10 +517,7 @@ const ConnectionsList = props => {
             <Typography variant='body2'>Updates to connection information will be effective immediately.</Typography>
           </Box>
           {currentConnection && (
-            <UpdateConnectionWizard
-              connectionData={currentConnection}
-              onSuccess={handleEditDialogClose}
-            />
+            <UpdateConnectionWizard connectionData={currentConnection} onSuccess={handleEditDialogClose} />
           )}
         </DialogContent>
       </Dialog>
@@ -526,8 +530,8 @@ const ConnectionsList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -535,16 +539,12 @@ const ConnectionsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -556,9 +556,7 @@ const ConnectionsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this connection?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this connection?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -568,9 +566,9 @@ const ConnectionsList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -578,8 +576,8 @@ const ConnectionsList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -618,6 +616,7 @@ const ConnectionsList = props => {
       toast.error('Failed to delete Connection')
     }
   }
+
   const handleRowSelection = newRowSelectionModel => {
     const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
 

@@ -133,7 +133,7 @@ const WorkflowsList = props => {
   const [runDialog, setRunDialog] = useState(false)
   const [currentWorkflow, setCurrentWorkflow] = useState(null)
 
-  const memoizedSortModel = useMemo(() => sortModel, [sortModel]);
+  const memoizedSortModel = useMemo(() => sortModel, [sortModel])
 
   const getDetailPanelContent = useCallback(({ row }) => <WorkflowDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -143,100 +143,14 @@ const WorkflowsList = props => {
   }, [])
 
   // column definitions
-  const columns = [
-    {
-      flex: 0.06,
-      field: 'dag_id',
-      headerName: t('Name'),
-      renderCell: params => {
-        const { row } = params
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.dag_id?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.dag_id?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.02,
-      minWidth: 100,
-      field: 'schedule_interval',
-      headerName: t('Schedule Interval'),
-      renderCell: params => {
-        const { row } = params
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.schedule_interval?.value} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.schedule_interval?.value}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.03,
-      minWidth: 100,
-      field: 'timetable_description',
-      headerName: t('Timetable Description'),
-      renderCell: params => {
-        const { row } = params
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={row?.timetable_description} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {row?.timetable_description}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.03,
-      minWidth: 60,
-      field: 'next_dagrun',
-      headerName: t('Next Run'),
-      renderCell: params => {
-        const { row } = params
-
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
-
-        if (row?.next_dagrun && !isNaN(new Date(row.next_dagrun).getTime())) {
-          const humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row.next_dagrun), timezone),
-            timezone,
-            'MMM d, yyyy, h:mm:ss aa zzz'
-          )
+  const columns = useMemo(
+    () => [
+      {
+        flex: 0.06,
+        field: 'dag_id',
+        headerName: t('Name'),
+        renderCell: params => {
+          const { row } = params
 
           return (
             <Box
@@ -248,95 +162,188 @@ const WorkflowsList = props => {
                 height: '100%'
               }}
             >
-              <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-                <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                  {humanReadableDate}
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+                <Typography title={row?.dag_id?.toUpperCase()} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                  {row?.dag_id?.toUpperCase()}
                 </Typography>
               </Box>
             </Box>
           )
-        } else {
-          return null
+        }
+      },
+      {
+        flex: 0.02,
+        minWidth: 100,
+        field: 'schedule_interval',
+        headerName: t('Schedule Interval'),
+        renderCell: params => {
+          const { row } = params
+
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+                <Typography title={row?.schedule_interval?.value} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                  {row?.schedule_interval?.value}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.03,
+        minWidth: 100,
+        field: 'timetable_description',
+        headerName: t('Timetable Description'),
+        renderCell: params => {
+          const { row } = params
+
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+                <Typography title={row?.timetable_description} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                  {row?.timetable_description}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.03,
+        minWidth: 60,
+        field: 'next_dagrun',
+        headerName: t('Next Run'),
+        renderCell: params => {
+          const { row } = params
+
+          const timezone = session?.data?.user?.timezone || 'US/Eastern'
+
+          if (row?.next_dagrun && !isNaN(new Date(row.next_dagrun).getTime())) {
+            const humanReadableDate = formatInTimeZone(
+              utcToZonedTime(parseISO(row.next_dagrun), timezone),
+              timezone,
+              'MMM d, yyyy, h:mm:ss aa zzz'
+            )
+
+            return (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+                  <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+                    {humanReadableDate}
+                  </Typography>
+                </Box>
+              </Box>
+            )
+          } else {
+            return null
+          }
+        }
+      },
+      {
+        field: 'actions',
+        headerName: t('Actions'),
+        type: 'string',
+        flex: 0.02,
+        minWidth: 200,
+        renderCell: params => {
+          const { row } = params
+          const isPaused = row?.is_paused
+          const isActive = row?.is_active
+
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                justifyContent: 'flex-start',
+                width: '100%', // Ensures the Box takes full width of the cell
+                height: '100%' // Ensures the Box takes full height of the cell
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                <IconButton
+                  size='small'
+                  title={t('Run Workflow')}
+                  aria-label={t('Run Workflow')}
+                  color='warning'
+                  onClick={() => {
+                    setCurrentWorkflow(row)
+                    setRunDialog(true)
+                  }}
+                  disabled={!isActive || isPaused}
+                >
+                  <Icon icon='mdi:play-circle-outline' />
+                </IconButton>
+                <IconButton
+                  size='small'
+                  title={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
+                  aria-label={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
+                  color={isActive && !isPaused ? 'success' : 'secondary'}
+                  onClick={() => {
+                    setCurrentWorkflow(row)
+                    setDisableDialog(true)
+                  }}
+                >
+                  <Icon icon={isActive && !isPaused ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+                </IconButton>
+                <IconButton
+                  size='small'
+                  title={t('Edit Workflow')}
+                  color='secondary'
+                  aria-label={t('Edit Workflow')}
+                  onClick={() => {
+                    setCurrentWorkflow(row)
+                    setEditDialog(true)
+                  }}
+                >
+                  <Icon icon='mdi:edit' />
+                </IconButton>
+                <IconButton
+                  size='small'
+                  title={t('Delete Workflow')}
+                  aria-label={t('Delete Workflow')}
+                  color='error'
+                  onClick={() => {
+                    setCurrentWorkflow(row)
+                    setDeleteDialog(true)
+                  }}
+                >
+                  <Icon icon='mdi:delete-forever' />
+                </IconButton>
+              </Box>
+            </Box>
+          )
         }
       }
-    },
-    {
-      field: 'actions',
-      headerName: t('Actions'),
-      type: 'string',
-      flex: 0.02,
-      minWidth: 200,
-      renderCell: params => {
-        const { row } = params
-        const isPaused = row?.is_paused
-        const isActive = row?.is_active
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <IconButton
-                size='small'
-                title={t('Run Workflow')}
-                aria-label={t('Run Workflow')}
-                color='warning'
-                onClick={() => {
-                  setCurrentWorkflow(row)
-                  setRunDialog(true)
-                }}
-                disabled={!isActive || isPaused}
-              >
-                <Icon icon='mdi:play-circle-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
-                aria-label={isActive && !isPaused ? t('Disable Workflow') : t('Enable Workflow')}
-                color={isActive && !isPaused ? 'success' : 'secondary'}
-                onClick={() => {
-                  setCurrentWorkflow(row)
-                  setDisableDialog(true)
-                }}
-              >
-                <Icon icon={isActive && !isPaused ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-              </IconButton>
-              <IconButton
-                size='small'
-                title={t('Edit Workflow')}
-                color='secondary'
-                aria-label={t('Edit Workflow')}
-                onClick={() => {
-                  setCurrentWorkflow(row)
-                  setEditDialog(true)
-                }}
-              >
-                <Icon icon='mdi:edit' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title={t('Delete Workflow')}
-                aria-label={t('Delete Workflow')}
-                color='error'
-                onClick={() => {
-                  setCurrentWorkflow(row)
-                  setDeleteDialog(true)
-                }}
-              >
-                <Icon icon='mdi:delete-forever' />
-              </IconButton>
-            </Box>
-          </Box>
-        )
-      }
-    }
-  ]
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t]
+  )
 
   // Add this function to get toggleable columns
   const getTogglableColumns = useCallback(() => {
@@ -405,7 +412,9 @@ const WorkflowsList = props => {
             <Typography variant='h5' sx={{ mb: 3 }}>
               {t('Edit Workflow Information')}
             </Typography>
-            <Typography variant='body2'>{t('Updates to workflow information will be effective immediately.')}</Typography>
+            <Typography variant='body2'>
+              {t('Updates to workflow information will be effective immediately.')}
+            </Typography>
           </Box>
           {currentWorkflow && (
             <UpdateTaskWizard
@@ -426,8 +435,8 @@ const WorkflowsList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -435,16 +444,12 @@ const WorkflowsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -456,9 +461,7 @@ const WorkflowsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this workflow?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this workflow?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -468,9 +471,9 @@ const WorkflowsList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -478,8 +481,8 @@ const WorkflowsList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -496,8 +499,8 @@ const WorkflowsList = props => {
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -505,16 +508,12 @@ const WorkflowsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Action')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDisableDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDisableDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -540,9 +539,9 @@ const WorkflowsList = props => {
             variant='contained'
             size='large'
             onClick={handleDisableDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon={isWorkflowActive ? "mdi:pause-circle" : "mdi:play-circle"} />}
+            startIcon={<Icon icon={isWorkflowActive ? 'mdi:pause-circle' : 'mdi:play-circle'} />}
           >
             {isWorkflowActive ? t('Disable') : t('Enable')}
           </Button>
@@ -550,8 +549,8 @@ const WorkflowsList = props => {
             variant='outlined'
             size='large'
             onClick={handleDisableDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -566,8 +565,8 @@ const WorkflowsList = props => {
         open={scheduleDialog}
         onClose={handleScheduleDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -575,16 +574,12 @@ const WorkflowsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Schedule Workflow')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleScheduleDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleScheduleDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -596,9 +591,7 @@ const WorkflowsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to schedule this workflow.')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to schedule this workflow.')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -608,9 +601,9 @@ const WorkflowsList = props => {
             variant='contained'
             size='large'
             onClick={handleScheduleDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon="mdi:calendar-clock" />}
+            startIcon={<Icon icon='mdi:calendar-clock' />}
           >
             {t('Schedule')}
           </Button>
@@ -618,8 +611,8 @@ const WorkflowsList = props => {
             variant='outlined'
             size='large'
             onClick={handleScheduleDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -634,8 +627,8 @@ const WorkflowsList = props => {
         open={runDialog}
         onClose={handleRunDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -643,16 +636,12 @@ const WorkflowsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Run Workflow')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleRunDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleRunDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -664,9 +653,7 @@ const WorkflowsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to run this workflow.')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to run this workflow.')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -676,9 +663,9 @@ const WorkflowsList = props => {
             variant='contained'
             size='large'
             onClick={handleRunDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon="mdi:play" />}
+            startIcon={<Icon icon='mdi:play' />}
           >
             {t('Run')}
           </Button>
@@ -686,8 +673,8 @@ const WorkflowsList = props => {
             variant='outlined'
             size='large'
             onClick={handleRunDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -705,9 +692,9 @@ const WorkflowsList = props => {
           order_by: memoizedSortModel[0]?.field || 'dag_id',
           page: paginationModel.page,
           limit: paginationModel.pageSize,
-          filter: JSON.stringify(filterModel),
+          filter: JSON.stringify(filterModel)
         },
-        timeout: 10000,
+        timeout: 10000
       })
 
       if (response.status === 200 && response.data) {
@@ -759,9 +746,12 @@ const WorkflowsList = props => {
     if (searchValue) {
       const searchRegex = new RegExp(escapeRegExp(searchValue), 'i')
       result = result.filter(row => {
-        return ['dag_id', 'schedule_interval', 'timetable_description'].some(field =>
-          searchRegex.test(row[field]?.toString() || '')
-        ) || (Array.isArray(row.owners) && row.owners.some(owner => searchRegex.test(owner)))
+        return (
+          ['dag_id', 'schedule_interval', 'timetable_description'].some(field =>
+            searchRegex.test(row[field]?.toString() || '')
+          ) ||
+          (Array.isArray(row.owners) && row.owners.some(owner => searchRegex.test(owner)))
+        )
       })
     }
 
@@ -771,6 +761,7 @@ const WorkflowsList = props => {
       result.sort((a, b) => {
         if (a[field] < b[field]) return sort === 'asc' ? -1 : 1
         if (a[field] > b[field]) return sort === 'asc' ? 1 : -1
+
         return 0
       })
     }
@@ -786,7 +777,7 @@ const WorkflowsList = props => {
     applyFiltersAndSort()
   }, [applyFiltersAndSort])
 
-  const handleSearch = useCallback((value) => {
+  const handleSearch = useCallback(value => {
     setSearchValue(value)
   }, [])
 
@@ -859,9 +850,10 @@ const WorkflowsList = props => {
       const response = await axios.post(
         endpoint,
         {
-          note: "Manually triggered execution",
+          note: 'Manually triggered execution',
+
           // You can include any additional data here if needed
-          conf: {},
+          conf: {}
         },
         {
           headers
@@ -980,7 +972,7 @@ const WorkflowsList = props => {
       <Card sx={{ position: 'relative' }}>
         <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
-          getRowId={(row) => row.dag_id}
+          getRowId={row => row.dag_id}
           localeText={{
             toolbarColumns: t('Columns'),
             toolbarFilters: t('Filters')
@@ -1053,7 +1045,7 @@ const WorkflowsList = props => {
               showRefresh: true,
               setRunRefresh,
               setRunFilterQuery: () => {
-                applyFiltersAndSort();
+                applyFiltersAndSort()
               }
             },
             columnsManagement: {

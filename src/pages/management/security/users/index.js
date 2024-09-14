@@ -98,7 +98,6 @@ const Settings = () => {
     setValue(newValue)
   }
 
-  
   const handleAddUserDialogClose = () => {
     setOpenDialog(false)
   }
@@ -106,25 +105,26 @@ const Settings = () => {
   const handleSuccess = () => {
     handleAddUserDialogClose()
     setRefetchTrigger(Date.now())
+
     //console.log("closing dialog on success")
   }
 
   const handleDeactivate = () => {
     //TO DO handle deactivate logic
     setIsDisableModalOpen(true)
-    console.log("handle deactivate")
+    console.log('handle deactivate')
   }
 
   const handleDelete = () => {
     //TO DO handle deactivate logic
     setIsDeleteModalOpen(true)
-    console.log("handle delete")
+    console.log('handle delete')
   }
 
   const handleActivate = () => {
     //TO DO handle deactivate logic
     setIsEnableModalOpen(true)
-    console.log("handle activate")
+    console.log('handle activate')
   }
 
   const handleOpenModal = () => {
@@ -165,7 +165,7 @@ const Settings = () => {
     setIsDisableModalOpen(false)
   }
 
-  const MoreActionsDropdown = ({ onDeactivate, onDelete , onActivate }) => {
+  const MoreActionsDropdown = ({ onDeactivate, onDelete, onActivate }) => {
     const [anchorEl, setAnchorEl] = useState(null)
     const { t } = useTranslation()
     const ability = useContext(AbilityContext)
@@ -200,33 +200,32 @@ const Settings = () => {
 
     return (
       <Fragment>
-      <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
-        <Icon icon='mdi:menu' />
-      </IconButton>
-      <Menu
-        id='simple-menu'
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={() => handleDropdownClose()}
-        sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
-      >
-
-        <MenuItem
-          sx={{ p: 0 }}
-          onClick={() => {
-            onActivate()
-            handleDropdownClose()
-          }}
-          disabled={!ability.can('enable', 'tasks')}
+        <IconButton color='secondary' aria-haspopup='true' onClick={handleDropdownOpen} aria-controls='customized-menu'>
+          <Icon icon='mdi:menu' />
+        </IconButton>
+        <Menu
+          id='simple-menu'
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={() => handleDropdownClose()}
+          sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
         >
-          <Box sx={styles}>
-            <Icon icon='mdi:plus-box' />
-            {t('Enable')}
-          </Box>
-        </MenuItem>
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onActivate()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('enable', 'tasks')}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:plus-box' />
+              {t('Enable')}
+            </Box>
+          </MenuItem>
 
-        <MenuItem
+          <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
               onDeactivate()
@@ -238,10 +237,9 @@ const Settings = () => {
               <Icon icon='mdi:minus-box' />
               {t('Disable')}
             </Box>
+          </MenuItem>
 
-        </MenuItem>
-
-        <MenuItem
+          <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
               onDelete()
@@ -254,18 +252,14 @@ const Settings = () => {
               {t('Delete')}
             </Box>
           </MenuItem>
-
-          
-
-      </Menu>
+        </Menu>
       </Fragment>
     )
-
   }
 
-  const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm}) => {
+  const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm }) => {
     const { t } = useTranslation()
-    
+
     return (
       <Dialog open={isOpen} onClose={onClose}>
         <DialogTitle>{t('Confirm Action')}</DialogTitle>
@@ -299,8 +293,7 @@ const Settings = () => {
 
   const ConfirmationDisableModal = ({ isOpen, onClose, onConfirm, tab }) => {
     const { t } = useTranslation()
-  
-  
+
     return (
       <Dialog open={isOpen} onClose={onClose}>
         <DialogTitle>{t('Confirm Action')}</DialogTitle>
@@ -333,7 +326,6 @@ const Settings = () => {
   }
 
   const ConfirmationEnableModal = ({ isOpen, onClose, onConfirm }) => {
-    
     return (
       <Dialog open={isOpen} onClose={onClose}>
         <DialogTitle>{t('Confirm Action')}</DialogTitle>
@@ -363,37 +355,32 @@ const Settings = () => {
         </DialogActions>
       </Dialog>
     )
-
   }
 
-  
-
   const UserAddDialog = () => {
-
-    return(
+    return (
       <Dialog
-          fullWidth
-          maxWidth='md'
-          scroll='body'
-          open={openDialog}
-          onClose={handleAddUserDialogClose}
-          TransitionComponent={Transition}
-          onSuccess={handleSuccess}
-          aria-labelledby='form-dialog-title'>
-            
+        fullWidth
+        maxWidth='md'
+        scroll='body'
+        open={openDialog}
+        onClose={handleAddUserDialogClose}
+        TransitionComponent={Transition}
+        onSuccess={handleSuccess}
+        aria-labelledby='form-dialog-title'
+      >
         <DialogTitle id='form-dialog-title'>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               Add User Wizard
             </Typography>
-            
           </Box>
         </DialogTitle>
         <DialogContent>
           <IconButton
-          size='small'
-          onClick={() => handleAddUserDialogClose()}
-          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+            size='small'
+            onClick={() => handleAddUserDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
           >
             <Icon icon='mdi:close' />
           </IconButton>
@@ -403,12 +390,10 @@ const Settings = () => {
             </Typography>
             <Typography variant='body2'>Creates a new User to be effective immediately.</Typography>
           </Box>
-          <AddUserWizard setRows={setRows} onSuccess={handleSuccess}/>
+          <AddUserWizard setRows={setRows} onSuccess={handleSuccess} />
         </DialogContent>
-
-        </Dialog>
+      </Dialog>
     )
-
   }
 
   return (
@@ -425,10 +410,10 @@ const Settings = () => {
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:user-plus' />}
                   onClick={() => {
-                  //setCurrentUser(params.row)
+                    //setCurrentUser(params.row)
                     if (!openDialog) {
-                    setOpenDialog(true)
-                  } 
+                      setOpenDialog(true)
+                    }
                   }}
                   disabled={!ability.can('create', 'user')}
                 >
@@ -441,7 +426,6 @@ const Settings = () => {
                 />
               </Fragment>
             )}
-            
           </Box>
         </Box>
         <TabContext value={value}>

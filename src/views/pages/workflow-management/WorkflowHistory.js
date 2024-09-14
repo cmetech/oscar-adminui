@@ -41,8 +41,6 @@ const WorkflowHistory = props => {
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
 
-  
-
   const columns = [
     {
       flex: 0.2,
@@ -108,6 +106,7 @@ const WorkflowHistory = props => {
           default:
             color = 'default'
         }
+
         return (
           <Box
             sx={{
@@ -137,6 +136,7 @@ const WorkflowHistory = props => {
       headerName: t('Execution Date'),
       renderCell: params => {
         const date = parseISO(params.row.execution_date)
+
         return (
           <Box
             sx={{
@@ -162,6 +162,7 @@ const WorkflowHistory = props => {
       headerName: t('Start Date'),
       renderCell: params => {
         const date = parseISO(params.row.start_date)
+
         return (
           <Box
             sx={{
@@ -187,6 +188,7 @@ const WorkflowHistory = props => {
       headerName: t('End Date'),
       renderCell: params => {
         const date = params.row.end_date ? parseISO(params.row.end_date) : null
+
         return (
           <Box
             sx={{
@@ -211,31 +213,31 @@ const WorkflowHistory = props => {
   const fetchData = useCallback(
     async filterModel => {
       // Default start and end times to the last 24 hours if not defined
-      let startDate, endDate;
-  
+      let startDate, endDate
+
       if (props.onAccept === true) {
-        startDate = yesterdayRounded;
-        endDate = todayRounded;
+        startDate = yesterdayRounded
+        endDate = todayRounded
       } else if (Array.isArray(props.onAccept) && props.onAccept.length === 2) {
-        [startDate, endDate] = props.onAccept;
+        ;[startDate, endDate] = props.onAccept
       } else {
-        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-        endDate = new Date();
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+        endDate = new Date()
       }
-  
+
       // Ensure startDate and endDate are Date objects
-      startDate = startDate instanceof Date ? startDate : new Date(startDate);
-      endDate = endDate instanceof Date ? endDate : new Date(endDate);
-  
+      startDate = startDate instanceof Date ? startDate : new Date(startDate)
+      endDate = endDate instanceof Date ? endDate : new Date(endDate)
+
       console.log('onAccept:', props.onAccept)
       console.log('Start Date:', startDate)
       console.log('End Date:', endDate)
-  
+
       const startTime = startDate.toISOString()
       const endTime = endDate.toISOString()
-  
+
       // ... rest of the function remains the same
-  
+
       setLoading(true)
       try {
         const response = await axios.post('/api/workflows/history', {
@@ -247,7 +249,7 @@ const WorkflowHistory = props => {
           execution_date_gte: startTime,
           execution_date_lte: endTime
         })
-  
+
         if (response.status === 200) {
           setRows(response.data.dag_runs || [])
           setRowCount(response.data.total_entries || 0)
@@ -258,13 +260,14 @@ const WorkflowHistory = props => {
         }
       } catch (error) {
         console.error('Error fetching workflow history:', error)
-        setRows([]);
-        setRowCount(0);
+        setRows([])
+        setRowCount(0)
         toast.error(t('Error fetching workflow history'))
       } finally {
         setLoading(false)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize, sortModel[0]?.field, sortModel[0]?.sort, props.onAccept]
   )
   useEffect(() => {
@@ -300,15 +303,15 @@ const WorkflowHistory = props => {
       <Card>
         <CardHeader title={t('Workflow History')} />
         <CustomDataGrid
-          getRowId={(row) => `${row.dag_id}_${row.dag_run_id}`}
+          getRowId={row => `${row.dag_id}_${row.dag_run_id}`}
           autoHeight
           rows={rows}
           columns={columns}
           rowCount={rowCount}
           loading={loading}
-          filterMode="server"
-          sortingMode="server"
-          paginationMode="server"
+          filterMode='server'
+          sortingMode='server'
+          paginationMode='server'
           pageSizeOptions={[10, 25, 50]}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}

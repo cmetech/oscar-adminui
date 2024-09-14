@@ -9,7 +9,9 @@ import { styled, useTheme } from '@mui/material/styles'
 import { parseISO, format } from 'date-fns'
 import { utcToZonedTime } from 'date-fns-tz'
 import axios from 'axios'
-import CustomChip from 'src/@core/components/mui/chip'
+
+// import CustomChip from 'src/@core/components/mui/chip'
+import CustomChip from 'src/views/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -95,6 +97,10 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
     }
   }
 
+  const safeUpperCase = value => {
+    return typeof value === 'string' ? value.toUpperCase() : 'N/A'
+  }
+
   const taskInstanceColumns = [
     {
       field: 'task_id',
@@ -112,7 +118,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-              {params.row.task_id.toUpperCase()}
+              {safeUpperCase(params.row.task_id)}
             </Typography>
           </Box>
         </Box>
@@ -134,7 +140,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-              {params.row.task_display_name.toUpperCase()}
+              {safeUpperCase(params.row.task_display_name)}
             </Typography>
           </Box>
         </Box>
@@ -144,37 +150,42 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
       field: 'state',
       headerName: t('State'),
       flex: 0.7,
-      renderCell: params => (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '100%',
-            height: '100%'
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            <CustomChip
-              rounded
-              size='medium'
-              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-              color={
-                params.row.state === 'success'
-                  ? 'success'
-                  : params.row.state === 'running'
-                  ? 'info'
-                  : params.row.state === 'failed'
-                  ? 'error'
-                  : params.row.state === 'skipped'
-                  ? 'warning'
-                  : 'default'
-              }
-              label={params.row.state.toUpperCase()}
-            />
+      renderCell: params => {
+        const state = params.row.state || 'unknown'
+
+        const color =
+          state === 'success'
+            ? 'success'
+            : state === 'running'
+            ? 'info'
+            : state === 'failed'
+            ? 'error'
+            : state === 'skipped'
+            ? 'warning'
+            : 'default'
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <CustomChip
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                color={color}
+                label={safeUpperCase(state)}
+              />
+            </Box>
           </Box>
-        </Box>
-      )
+        )
+      }
     },
     {
       field: 'start_date',
@@ -236,7 +247,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-              {params.row.duration ? `${params.row.duration.toFixed(2)} seconds` : 'N/A'}
+              {params.row.duration != null ? `${params.row.duration.toFixed(2)} seconds` : 'N/A'}
             </Typography>
           </Box>
         </Box>
@@ -258,7 +269,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-              {params.row.try_number}
+              {params.row.try_number != null ? params.row.try_number : 'N/A'}
             </Typography>
           </Box>
         </Box>
@@ -280,7 +291,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-              {params.row.operator}
+              {params.row.operator || 'N/A'}
             </Typography>
           </Box>
         </Box>
@@ -308,7 +319,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         </Box>
         <TabPanel value='1'>
           <CustomDataGrid
-            getRowId={row => row.task_id}
+            getRowId={row => row.task_id || Math.random().toString(36).substr(2, 9)}
             autoHeight
             rows={taskInstances}
             columns={taskInstanceColumns}
@@ -545,7 +556,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
         <TabPanel value='2'>
           <Typography variant='body1'>Configuration:</Typography>
           <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(row.conf, null, 2)}
+            {JSON.stringify(row.conf || {}, null, 2)}
           </Typography>
         </TabPanel>
       </TabContext>

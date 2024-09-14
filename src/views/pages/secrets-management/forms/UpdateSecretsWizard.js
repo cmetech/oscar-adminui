@@ -58,6 +58,7 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const [activeStep, setActiveStep] = useState(0)
+
   const [secretForm, setSecretForm] = useState({
     path: '',
     key: '',
@@ -74,7 +75,7 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
     }
   }, [secretData])
 
-  const handleFormChange = (event) => {
+  const handleFormChange = event => {
     const { name, value } = event.target
     setSecretForm(prevForm => ({
       ...prevForm,
@@ -83,11 +84,11 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
   }
 
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+    setActiveStep(prevActiveStep => prevActiveStep + 1)
   }
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+    setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
   const handleSubmit = async () => {
@@ -105,7 +106,7 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
     }
   }
 
-  const renderStepContent = (step) => {
+  const renderStepContent = step => {
     switch (step) {
       case 0:
         return (
@@ -115,10 +116,10 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
                 <TextFieldStyled
                   fullWidth
                   label={t('Path')}
-                  name="path"
+                  name='path'
                   value={secretForm.path}
                   onChange={handleFormChange}
-                  margin="normal"
+                  margin='normal'
                   disabled
                 />
               </Grid>
@@ -126,10 +127,10 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
                 <TextFieldStyled
                   fullWidth
                   label={t('Key')}
-                  name="key"
+                  name='key'
                   value={secretForm.key}
                   onChange={handleFormChange}
-                  margin="normal"
+                  margin='normal'
                   disabled
                 />
               </Grid>
@@ -137,10 +138,10 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
                 <TextFieldStyled
                   fullWidth
                   label={t('Value')}
-                  name="value"
+                  name='value'
                   value={secretForm.value}
                   onChange={handleFormChange}
-                  margin="normal"
+                  margin='normal'
                 />
               </Grid>
             </Grid>
@@ -149,10 +150,18 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
       case 1:
         return (
           <Box>
-            <Typography variant="h6" gutterBottom>{t('Review Secret')}</Typography>
-            <Typography><strong>{t('Path')}:</strong> {secretForm.path}</Typography>
-            <Typography><strong>{t('Key')}:</strong> {secretForm.key}</Typography>
-            <Typography><strong>{t('Value')}:</strong> {secretForm.value}</Typography>
+            <Typography variant='h6' gutterBottom>
+              {t('Review Secret')}
+            </Typography>
+            <Typography>
+              <strong>{t('Path')}:</strong> {secretForm.path}
+            </Typography>
+            <Typography>
+              <strong>{t('Key')}:</strong> {secretForm.key}
+            </Typography>
+            <Typography>
+              <strong>{t('Value')}:</strong> {secretForm.value}
+            </Typography>
           </Box>
         )
       default:
@@ -164,11 +173,7 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
     <>
       <DialogTitle>{t('Update Secret')}</DialogTitle>
       <DialogContent>
-        <IconButton
-          size='small'
-          onClick={onClose}
-          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-        >
+        <IconButton size='small' onClick={onClose} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
           <Icon icon='mdi:close' />
         </IconButton>
         <StepperWrapper>
@@ -181,9 +186,10 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
                     className='step-subtitle'
                     variant='caption'
                     style={{
-                      color: theme.palette.mode === 'dark'
-                        ? theme.palette.customColors.brandYellow
-                        : theme.palette.secondary.light
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.secondary.light
                     }}
                   >
                     {t(step.subtitle)}
@@ -206,9 +212,10 @@ const UpdateSecretsWizard = ({ secretData, onSuccess, onClose }) => {
                   paddingBottom={5}
                   className='step-subtitle'
                   style={{
-                    color: theme.palette.mode === 'dark'
-                      ? theme.palette.customColors.brandYellow
-                      : theme.palette.secondary.light
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.secondary.light
                   }}
                 >
                   {t(steps[activeStep].description)}

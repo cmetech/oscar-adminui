@@ -305,15 +305,16 @@ const RunTaskWizard = ({ onClose, ...props }) => {
     event.preventDefault()
   }
 
-  const togglePasswordVisibility = (index) => {
+  const togglePasswordVisibility = index => {
     setShowPasswords(prev => ({
       ...prev,
       [index]: !prev[index]
     }))
   }
 
-  const isSensitiveField = (promptText) => {
+  const isSensitiveField = promptText => {
     const lowercasePrompt = promptText.toLowerCase()
+
     return lowercasePrompt.includes('password') || lowercasePrompt.includes('apikey')
   }
 
@@ -322,7 +323,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
 
     if (isPassword) {
       return (
-        <FormControl fullWidth variant="outlined">
+        <FormControl fullWidth variant='outlined'>
           <InputLabelStyled htmlFor={`prompt-${index}`} error={!!validationErrors[`prompts[${index}].value`]}>
             Value
           </InputLabelStyled>
@@ -330,24 +331,24 @@ const RunTaskWizard = ({ onClose, ...props }) => {
             id={`prompt-${index}`}
             type={showPasswords[index] ? 'text' : 'password'}
             value={userPromptValues[index] || ''}
-            onChange={(e) => handlePromptInputChange(e, index)}
+            onChange={e => handlePromptInputChange(e, index)}
             onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
             error={!!validationErrors[`prompts[${index}].value`]}
             endAdornment={
-              <InputAdornment position="end">
+              <InputAdornment position='end'>
                 <IconButton
-                  aria-label="toggle password visibility"
+                  aria-label='toggle password visibility'
                   onClick={() => togglePasswordVisibility(index)}
-                  edge="end"
+                  edge='end'
                 >
                   <Icon icon={showPasswords[index] ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                 </IconButton>
               </InputAdornment>
             }
-            label="Value"
+            label='Value'
           />
           {validationErrors[`prompts[${index}].value`] && (
-            <Typography color="error" variant="caption">
+            <Typography color='error' variant='caption'>
               {validationErrors[`prompts[${index}].value`]}
             </Typography>
           )}
@@ -360,11 +361,11 @@ const RunTaskWizard = ({ onClose, ...props }) => {
           helperText={validationErrors[`prompts[${index}].value`] || ''}
           required
           id={`prompt-${index}`}
-          label="Value"
+          label='Value'
           fullWidth
-          autoComplete="off"
+          autoComplete='off'
           value={userPromptValues[index] || ''}
-          onChange={(e) => handlePromptInputChange(e, index)}
+          onChange={e => handlePromptInputChange(e, index)}
           onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
         />
       )
@@ -379,7 +380,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
             <Grid container spacing={3}>
               {currentTask.prompts.map((prompt, index) => (
                 <Grid item xs={12} key={index}>
-                  <Typography variant="body1" gutterBottom>
+                  <Typography variant='body1' gutterBottom>
                     {prompt.prompt}
                   </Typography>
                   {renderPromptField(prompt, index)}
@@ -394,24 +395,24 @@ const RunTaskWizard = ({ onClose, ...props }) => {
             <Grid container spacing={3}>
               {currentTask.prompts.map((prompt, index) => (
                 <Grid item xs={12} key={index}>
-                  <Typography variant="body1" gutterBottom>
+                  <Typography variant='body1' gutterBottom>
                     {prompt.prompt}
                   </Typography>
                   <TextfieldStyled
                     fullWidth
                     id={`prompt-review-${index}`}
-                    label="Entered Value"
-                    variant="outlined"
-                    margin="dense"
+                    label='Entered Value'
+                    variant='outlined'
+                    margin='dense'
                     InputProps={{
                       readOnly: true,
                       type: isSensitiveField(prompt.prompt) && !showPasswords[index] ? 'password' : 'text',
                       endAdornment: isSensitiveField(prompt.prompt) ? (
-                        <InputAdornment position="end">
+                        <InputAdornment position='end'>
                           <IconButton
-                            aria-label="toggle password visibility"
+                            aria-label='toggle password visibility'
                             onClick={() => togglePasswordVisibility(index)}
-                            edge="end"
+                            edge='end'
                           >
                             <Icon icon={showPasswords[index] ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                           </IconButton>

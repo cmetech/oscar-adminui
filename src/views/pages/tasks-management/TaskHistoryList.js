@@ -91,7 +91,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   }
 }))
 
-const TaskHistoryList = props => {
+const TaskHistoryList = ({ dateRange, onAccept }) => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const dgApiRef = useGridApiRef()
@@ -407,29 +407,10 @@ const TaskHistoryList = props => {
 
   const fetchData = useCallback(
     async filterModel => {
-      // Default start and end times to the last 24 hours if not defined
-      let [startDate, endDate] = []
-      if (props.onAccept == true) {
-        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
-      } else {
-        ;[startDate, endDate] = props.onAccept
-      }
+      const [startDate, endDate] = dateRange
 
-      // Assuming props.dateRange contains Date objects or is undefined
-      console.log('onAccept:', props.onAccept)
-      console.log('Start Date:', startDate)
-      console.log('End Date:', endDate)
-
-      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = endDate?.toISOString() || new Date().toISOString()
-
-      // console.log('Start Time:', startTime)
-      // console.log('End Time:', endTime)
-      // console.log('Search Value:', searchValue)
-      // console.log('Sort:', sortModel[0]?.sort)
-      // console.log('Sort Column:', sortModel[0]?.field)
-      // console.log('Page:', paginationModel.page)
-      // console.log('Page Size:', paginationModel.pageSize)
+      const startTime = startDate.toISOString()
+      const endTime = endDate.toISOString()
 
       setLoading(true)
       await axios
@@ -445,9 +426,6 @@ const TaskHistoryList = props => {
           }
         })
         .then(res => {
-          // console.log('total_pages', res.data.total_pages)
-          // console.log('total_records', res.data.total_records)
-
           setRowCount(res.data.total_records || 0)
           setRows(res.data.records || [])
         })
@@ -457,8 +435,9 @@ const TaskHistoryList = props => {
 
       setLoading(false)
     },
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, props.onAccept]
+    [dateRange, paginationModel]
   )
 
   useEffect(() => {
@@ -538,27 +517,20 @@ const TaskHistoryList = props => {
   }
 
   const handleSearch = value => {
-    // console.log('Search Value:', value)
-
     setSearchValue(value)
     const searchRegex = new RegExp(escapeRegExp(value), 'i')
 
     const filteredRows = rows.filter(row => {
-      // console.log('Row:', row)
-
-      // Extend the search to include nested paths
       const searchFields = ['id', 'task_id', 'alias', 'worker']
 
       return searchFields.some(field => {
         const fieldValue = getNestedValue(row, field)
 
-        // Ensure the fieldValue is a string before calling toString()
         return fieldValue !== null && fieldValue !== undefined && searchRegex.test(fieldValue.toString())
       })
     })
 
     if (value.length) {
-      // console.log('Filtered Rows:', filteredRows)
       setFilteredRows(filteredRows)
       setRowCount(filteredRows.length)
     } else {
@@ -577,7 +549,6 @@ const TaskHistoryList = props => {
       console.log('Added Row:', row)
     })
 
-    // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
   }
 
@@ -593,7 +564,7 @@ const TaskHistoryList = props => {
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
-        <CardHeader title={t(props.type)} sx={{ textTransform: 'capitalize' }} />
+        <CardHeader title={t('Task History')} sx={{ textTransform: 'capitalize' }} />
         <CustomDataGrid
           localeText={{
             toolbarColumns: t('Columns'),

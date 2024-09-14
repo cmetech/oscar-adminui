@@ -9,7 +9,10 @@ import {
   today,
   todayRounded,
   todayRoundedPlus1hour,
-  yesterdayRounded
+  yesterdayRounded,
+  getLast24Hours,
+  getDefaultDateRange,
+  extendedPredefinedRangesDayjs
 } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
@@ -774,8 +777,7 @@ const TasksManager = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
-  // const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
+  const [dateRange, setDateRange] = useState(getDefaultDateRange)
   const [onAccept, setOnAccept] = useState(value)
 
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
@@ -985,6 +987,12 @@ const TasksManager = () => {
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
+    if (newValue === '2') {
+      // Update the date range when switching to the Task History tab
+      const [start, end] = getLast24Hours()
+      setDateRange([start, end])
+      setOnAccept([start, end])
+    }
   }
 
   const handleOpenModal = () => {
@@ -1011,6 +1019,7 @@ const TasksManager = () => {
   const handleOnAccept = value => {
     console.log('onAccept', value)
     setOnAccept(value)
+    setDateRange(value)
   }
 
   return (
@@ -1047,12 +1056,12 @@ const TasksManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
+                defaultValue={getDefaultDateRange()}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
-                  // console.log('Date range:', newValue)
+                  console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
                 onAccept={handleOnAccept}
@@ -1092,7 +1101,7 @@ const TasksManager = () => {
                   },
 
                   shortcuts: {
-                    items: predefinedRangesDayjs,
+                    items: extendedPredefinedRangesDayjs,
                     sx: {
                       '& .MuiChip-root': {
                         color:

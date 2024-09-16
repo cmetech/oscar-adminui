@@ -154,49 +154,49 @@ const AppBarContent = props => {
 
   const shortcuts = [
     {
-      title: 'Airflow',
-      subtitle: 'Manage Workflows',
+      title: t('Airflow'),
+      subtitle: t('Manage Workflows'),
       icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}/airflow`,
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Traefik',
-      subtitle: 'Edge Router',
+      title: t('Traefik'),
+      subtitle: t('Edge Router'),
       icon: 'mdi:monitor-dashboard',
       url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Flower',
+      title: t('Flower'),
       url: `https://${rootDomain}:${flower_port}/flower/`,
-      subtitle: 'Celery Workers',
+      subtitle: t('Celery Workers'),
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Collector',
+      title: t('Collector'),
       url: `https://${rootDomain}/ext/vmagent/`,
-      subtitle: 'Managege Metrics',
+      subtitle: t('Manage Metrics'),
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Alert Manager',
+      title: t('Alert Manager'),
       url: `https://${rootDomain}/ext/alertmanager/`,
-      subtitle: 'Manage Alerts',
+      subtitle: t('Manage Alerts'),
       icon: 'mdi:monitor-dashboard',
       externalLink: true,
       openInNewTab: true
     },
     {
-      title: 'Vault',
+      title: t('Vault'),
       url: `https://${rootDomain}:${vault_port}/ui/vault`,
-      subtitle: 'Manage Secrets',
+      subtitle: t('Manage Secrets'),
       icon: 'mdi:encryption-secure',
       externalLink: true,
       openInNewTab: true
@@ -220,9 +220,7 @@ const AppBarContent = props => {
         <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
-        {ability?.can('manage', 'all') ? (
-          <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} />
-        ) : null }
+        {ability?.can('manage', 'all') ? <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} /> : null}
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>

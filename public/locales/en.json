@@ -249,5 +249,17 @@
     "Delete Secret": "Delete Secret",
     "Failed to fetch secrets": "Failed to fetch secrets",
     "credentials-title": "Credentials",
-    "credentials-body": "Manage your credential settings"
+    "credentials-body": "Manage your credential settings",
+    "Airflow": "Airflow",
+    "Manage Workflows": "Manage Workflows",
+    "Traefik": "Traefik",
+    "Edge Router": "Edge Router",
+    "Flower": "Flower",
+    "Celery Workers": "Celery Workers",
+    "Collector": "Collector",
+    "Manage Metrics": "Manage Metrics",
+    "Alert Manager": "Alert Manager",
+    "Manage Alerts": "Manage Alerts",
+    "Vault": "Vault",
+    "Manage Secrets": "Manage Secrets"
 }

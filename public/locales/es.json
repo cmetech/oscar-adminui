@@ -249,5 +249,17 @@
     "Delete Secret": "Eliminar Secreto",
     "Failed to fetch secrets": "Error al obtener secretos",
     "credentials-title": "Credenciales",
-    "credentials-body": "Administre su configuración de credenciales"
+    "credentials-body": "Administre su configuración de credenciales",
+    "Airflow": "Airflow",
+    "Manage Workflows": "Gestionar Flujos de Trabajo",
+    "Traefik": "Traefik",
+    "Edge Router": "Enrutador de Borde",
+    "Flower": "Flower",
+    "Celery Workers": "Trabajadores Celery",
+    "Collector": "Recolector",
+    "Manage Metrics": "Gestionar Métricas",
+    "Alert Manager": "Gestor de Alertas",
+    "Manage Alerts": "Gestionar Alertas",
+    "Vault": "Vault",
+    "Manage Secrets": "Gestionar Secretos"
 }

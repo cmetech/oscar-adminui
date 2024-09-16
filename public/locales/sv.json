@@ -249,5 +249,14 @@
   "Delete Secret": "Radera Hemlighet",
   "Failed to fetch secrets": "Misslyckades med att hämta hemligheter",
   "credentials-title": "Autentiseringsuppgifter",
-  "credentials-body": "Hantera dina inställningar för autentiseringsuppgifter"
+  "credentials-body": "Hantera dina inställningar för autentiseringsuppgifter",
+  "Airflow": "Airflow",
+  "Manage Workflows": "Hantera arbetsflöden",
+  "Traefik": "Traefik",
+  "Edge Router": "Kantrouter",
+  "Flower": "Flower",
+  "Celery Workers": "Celery-arbetare",
+  "Collector": "Insamlare",
+  "Manage Metrics": "Hantera mätvärden",
+  "Alert Manager": "Aviseringshanterare"
 }

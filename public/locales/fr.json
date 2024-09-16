@@ -246,5 +246,17 @@
     "Delete Secret": "Supprimer le Secret",
     "Failed to fetch secrets": "Échec de la récupération des secrets",
     "credentials-title": "Credentials",
-    "credentials-body": "Manage your credential settings"
+    "credentials-body": "Manage your credential settings",
+    "Airflow": "Airflow",
+    "Manage Workflows": "Gérer les Flux de Travail",
+    "Traefik": "Traefik",
+    "Edge Router": "Routeur de Bordure",
+    "Flower": "Flower",
+    "Celery Workers": "Travailleurs Celery",
+    "Collector": "Collecteur",
+    "Manage Metrics": "Gérer les Métriques",
+    "Alert Manager": "Gestionnaire d'Alertes",
+    "Manage Alerts": "Gérer les Alertes",
+    "Vault": "Vault",
+    "Manage Secrets": "Gérer les Secrets"
 }

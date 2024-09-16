@@ -58,19 +58,15 @@ const UserFooterContent = props => {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>
           <Stack direction='row' spacing={3}>
             <Button variant='contained' color='primary'>
-              <Link
-                href={`https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`}
-                passHref
-                legacyBehavior
-              >
-                <StyledLink target="_blank" rel="noopener noreferrer">
+              <Link href={`https://${rootDomain}/ext/docs/?theme=${theme.palette.mode}`} passHref legacyBehavior>
+                <StyledLink target='_blank' rel='noopener noreferrer'>
                   {t('Academy')}
                 </StyledLink>
               </Link>
             </Button>
-            <Button variant='contained' color='primary'>
+            {/* <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Feedback')}</StyledLink>
-            </Button>
+            </Button> */}
             {/* <Button variant='contained' color='primary'>
               <StyledLink href='/support'>{t('Support')}</StyledLink>
             </Button> */}

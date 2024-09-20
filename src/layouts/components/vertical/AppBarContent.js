@@ -163,18 +163,18 @@ const AppBarContent = props => {
       openInNewTab: true
     },
     {
-      title: t('Traefik'),
-      subtitle: t('Edge Router'),
-      icon: 'mdi:monitor-dashboard',
-      url: `https://${rootDomain}:${reverseproxy_dashboard_port}/dashboard/`,
-      externalLink: true,
-      openInNewTab: true
-    },
-    {
       title: t('Flower'),
       url: `https://${rootDomain}:${flower_port}/flower/`,
       subtitle: t('Celery Workers'),
       icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('VMUI'),
+      subtitle: t('Metric Explorer'),
+      icon: 'mdi:monitor-dashboard',
+      url: `https://${rootDomain}/ext/vmdb/vmui`,
       externalLink: true,
       openInNewTab: true
     },

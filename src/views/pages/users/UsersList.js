@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, useRef, forwardRef } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -7,6 +7,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useSession } from 'next-auth/react'
 import themeConfig from 'src/configs/themeConfig'
 import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
@@ -66,7 +67,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateUserWizard from 'src/views/pages/misc/forms/UpdateUserWizard'
-
+import { userIdsAtom, usersAtom, refetchUserTriggerAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -100,6 +101,7 @@ const UsersList = props => {
   const session = useSession()
   const { t } = useTranslation()
   const theme = useTheme()
+  const hasRunRef = useRef(false)
 
   // ** Data Grid state
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
@@ -117,6 +119,7 @@ const UsersList = props => {
   const [isFilterActive, setFilterActive] = useState(false)
   const [runFilterQuery, setRunFilterQuery] = useState(false)
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
@@ -124,6 +127,9 @@ const UsersList = props => {
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
+  const [userIds, setUserIds] = useAtom(userIdsAtom)
+  const [users, setUsers] = useAtom(usersAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchUserTriggerAtom)
 
   // ** Dialog
   const [openDialog, setOpenDialog] = useState(false)
@@ -540,6 +546,7 @@ const UsersList = props => {
                 size='small'
                 title='Delete User'
                 aria-label='Delete User'
+                color='error'
                 onClick={() => {
                   setCurrentUser(params.row)
                   setDeleteDialog(true)
@@ -562,8 +569,13 @@ const UsersList = props => {
     setDeactivateDialog(false)
   }
 
-  const handleDeleteUserDialogClose = () => {
+  const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
+  }
+
+  const handleSuccess = () => {
+    handleUpdateUserDialogClose()
+    setRefetchTrigger(Date.now())
   }
 
   const UserEditDialog = () => {
@@ -610,7 +622,7 @@ const UsersList = props => {
             </Typography>
             <Typography variant='body2'>Updates to user information will be effective immediately.</Typography>
           </Box>
-          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} />
+          <UpdateUserWizard currentUser={currentUser} rows={rows} setRows={setRows} onSuccess={handleSuccess} />
         </DialogContent>
         {/* <DialogActions>
           <Button variant='contained' sx={{ mr: 1 }} onClick={handleUpdateDriverDialogClose} color='primary'>
@@ -627,125 +639,125 @@ const UsersList = props => {
   const UserDisableDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deactivateDialog}
         onClose={handleDisableUserDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Action')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentUser?.id ?? ''}
-            </Typography>
+            <IconButton size='small' onClick={handleDisableUserDialogClose} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
+                <Typography variant='h6'>
                   {currentUser?.is_active
-                    ? 'Please confirm that you want to deactivate this user.'
-                    : 'Please confirm that you want to activate this user.'}
+                    ? t('Confirm you want to deactivate this user.')
+                    : t('Confirm you want to activate this user.')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeactivateUserDialogSubmit} color='primary'>
-            {currentUser?.is_active ? 'Deactivate' : 'Activate'}
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeactivateUserDialogSubmit}
+            color='primary'
+            autoFocus
+            startIcon={<Icon icon={currentUser?.is_active ? 'mdi:account-off' : 'mdi:account-check'} />}
+          >
+            {currentUser?.is_active ? t('Deactivate') : t('Activate')}
           </Button>
-          <Button variant='outlined' onClick={handleDisableUserDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDisableUserDialogClose}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
     )
   }
 
-  const UserDeleteDialog = () => {
+  const DeleteDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deleteDialog}
-        onClose={handleDeleteUserDialogClose}
+        onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentUser?.first_name?.toUpperCase() ?? ''} {currentUser?.last_name?.toUpperCase() ?? ''}
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentUser?.id ?? ''}
-            </Typography>
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteUserDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this user.
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this user?')}</Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteUserDialogSubmit} color='primary'>
-            Delete
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeleteDialogSubmit}
+            color='error'
+            autoFocus
+            startIcon={<Icon icon='mdi:delete-forever' />}
+          >
+            {t('Delete')}
           </Button>
-          <Button variant='outlined' onClick={handleDeleteUserDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDeleteDialogClose}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -754,7 +766,7 @@ const UsersList = props => {
 
   const handleDeactivateUserDialogSubmit = async () => {
     try {
-      const apiToken = session?.data?.user?.apiToken
+      const apiToken = session?.data?.accessToken
 
       const headers = {
         Accept: 'application/json',
@@ -783,6 +795,7 @@ const UsersList = props => {
         })
 
         setRows(updatedRows)
+        setRefetchTrigger(Date.now())
         setDeactivateDialog(false)
 
         toast.success('User status updated successfully')
@@ -793,9 +806,9 @@ const UsersList = props => {
     }
   }
 
-  const handleDeleteUserDialogSubmit = async () => {
+  const handleDeleteDialogSubmit = async () => {
     try {
-      const apiToken = session?.data?.user?.apiToken
+      const apiToken = session?.data?.accessToken
 
       const headers = {
         Accept: 'application/json',
@@ -810,6 +823,7 @@ const UsersList = props => {
 
         setRows(updatedRows)
         setDeleteDialog(false)
+        setRefetchTrigger(Date.now())
 
         toast.success('User successfully deleted')
       }
@@ -818,6 +832,12 @@ const UsersList = props => {
       toast.error('Error deleting of user')
     }
   }
+
+  // Use an effect to synchronize the DataGrid's selection model with userIds
+  useEffect(() => {
+    // This updates the DataGrid's selection model whenever userIds changes
+    setRowSelectionModel(userIds)
+  }, [userIds])
 
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
@@ -846,7 +866,31 @@ const UsersList = props => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData])
+  }, [fetchData, refetchTrigger])
+
+  //Trigger fetch when current run reference is false
+  useEffect(() => {
+    console.log('Run refresh val:---------------------------' + runRefresh)
+
+    const registerAndFetchData = async () => {
+      if (runRefresh && !hasRunRef.current) {
+        hasRunRef.current = true
+        try {
+          await axios.get('/api/users', { timeout: 10000 })
+        } catch (error) {
+          console.error(t('Error refreshing users'), error)
+          toast.error(t('Failed to refresh users'))
+        } finally {
+          fetchData()
+          setRunRefresh(false)
+        }
+      }
+    }
+
+    registerAndFetchData()
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, runRefresh, setRunRefresh])
 
   // Trigger based on sort
   useEffect(() => {
@@ -905,6 +949,10 @@ const UsersList = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel.items.length, runFilterQuery])
 
+  useEffect(() => {
+    fetchData()
+  }, [fetchData, refetchTrigger])
+
   const handleAction = event => {
     setAction(event.target.value)
   }
@@ -955,7 +1003,7 @@ const UsersList = props => {
     setRowSelectionModel(newRowSelectionModel)
 
     // Update the Jotai atom with the new selection model
-    setServerIds(newRowSelectionModel)
+    setUserIds(newRowSelectionModel)
   }
 
   // Hidden columns
@@ -1030,7 +1078,9 @@ const UsersList = props => {
               setFilterButtonEl,
               setFilterActive,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,
@@ -1228,7 +1278,7 @@ const UsersList = props => {
         />
         <UserEditDialog />
         <UserDisableDialog />
-        <UserDeleteDialog />
+        <DeleteDialog />
       </Card>
     </Box>
   )

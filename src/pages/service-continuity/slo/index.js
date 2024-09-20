@@ -4,7 +4,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { sloIdsAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -511,6 +511,7 @@ const TaskUploadDialog = ({ open, onClose, onSuccess, tab }) => {
 const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   const { register, handleSubmit, reset } = useForm()
   const theme = useTheme()
+  const { t } = useTranslation()
 
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
@@ -545,7 +546,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
       // Add cases for other tabs with different fields
       default:
-        return <Typography>Form not configured for this tab.</Typography>
+        return <Typography>{t('Form not configured for this tab.')}</Typography>
     }
   }
 
@@ -578,7 +579,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
           <Typography variant='h5' sx={{ mb: 3 }}>
             {getDynamicSubTitle(tab)}
           </Typography>
-          <Typography variant='body2'>Information submitted will be effective immediately.</Typography>
+          <Typography variant='body2'>{t('Information submitted will be effective immediately.')}</Typography>
         </Box>
         {dynamicFields()}
       </DialogContent>
@@ -600,7 +601,7 @@ const SLO = () => {
   const [selectedSloIds, setSelectedSloIds] = useAtom(sloIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
 
   const handleDelete = () => {
@@ -629,10 +630,10 @@ const SLO = () => {
       // Handle results
       results.forEach(result => {
         if (result.success) {
-          toast.success(`SLO ${result.sloId} deleted successfully`)
+          toast.success(t('SLO {{sloId}} deleted successfully', { sloId: result.sloId }))
         } else {
           console.error(`Error deleting SLO ${result.sloId}:`, result.error)
-          toast.error(`Failed to delete SLO ${result.sloId}`)
+          toast.error(t('Failed to delete SLO {{sloId}}', { sloId: result.sloId }))
         }
       })
 
@@ -644,7 +645,7 @@ const SLO = () => {
     } catch (error) {
       // This catch block may not be necessary since individual errors are caught above
       console.error('Unexpected error during SLO deletion:', error)
-      toast.error('An unexpected error occurred during SLO deletion')
+      toast.error(t('An unexpected error occurred during SLO deletion'))
     }
 
     setIsDeleteModalOpen(false)
@@ -705,7 +706,7 @@ const SLO = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRounded]}
+                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -854,8 +855,8 @@ const SLO = () => {
 }
 
 SLO.acl = {
-  action: 'manage',
-  subject: 'slo-page'
+  action: 'read',
+  subject: 'slo'
 }
 
 export default SLO

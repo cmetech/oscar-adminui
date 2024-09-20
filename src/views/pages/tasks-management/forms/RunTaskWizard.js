@@ -48,6 +48,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
+import { validate } from 'uuid'
 
 const steps = [
   {
@@ -153,7 +154,7 @@ const generatePromptsValidationSchema = prompts => {
 
 const promptSchema = yup.object().shape({
   prompt: yup.string().required(), // Technically not validated but included for completeness
-  default_value: yup.string(), // Included for completeness; validation not needed
+  default_value: yup.string().nullable(), // Included for completeness; validation not needed
   value: yup.string().required('Value is required') // User must provide a value or accept the default
 })
 
@@ -173,10 +174,13 @@ const RunTaskWizard = ({ onClose, ...props }) => {
 
   // ** States
   const [userPromptValues, setUserPromptValues] = useState(getInitialUserPromptValues(currentTask.prompts))
+  const [showPasswords, setShowPasswords] = useState({})
 
   const theme = useTheme()
   const session = useSession()
   const { t } = useTranslation()
+
+  // console.log('Current Task Prompts:', currentTask.prompts)
 
   const validateField = async (fieldName, value) => {
     // Create a temporary object to hold the value being validated
@@ -212,6 +216,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
   const handlePromptInputChange = (e, index) => {
     const newValues = { ...userPromptValues, [index]: e.target.value }
     setUserPromptValues(newValues)
+    validateField(index, e.target.value)
   }
 
   const handleReset = () => {
@@ -262,11 +267,10 @@ const RunTaskWizard = ({ onClose, ...props }) => {
         // TODO: Allow for Hosts to be provided to override the default host
 
         // Build the payload
-        const payload = currentTask.prompts.map((prompt, index) => ({
-          prompt: prompt.prompt,
-          default_value: prompt.default_value,
-          value: userPromptValues[index] || prompt.default_value // Use the user-provided value or fallback to the default value
-        }))
+        const payload = {
+          prompts,
+          user_data: null // Add user_data if needed
+        }
 
         console.log('Payload', payload)
 
@@ -301,6 +305,73 @@ const RunTaskWizard = ({ onClose, ...props }) => {
     event.preventDefault()
   }
 
+  const togglePasswordVisibility = index => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }))
+  }
+
+  const isSensitiveField = promptText => {
+    const lowercasePrompt = promptText.toLowerCase()
+
+    return lowercasePrompt.includes('password') || lowercasePrompt.includes('apikey')
+  }
+
+  const renderPromptField = (prompt, index) => {
+    const isPassword = isSensitiveField(prompt.prompt)
+
+    if (isPassword) {
+      return (
+        <FormControl fullWidth variant='outlined'>
+          <InputLabelStyled htmlFor={`prompt-${index}`} error={!!validationErrors[`prompts[${index}].value`]}>
+            Value
+          </InputLabelStyled>
+          <OutlinedInputStyled
+            id={`prompt-${index}`}
+            type={showPasswords[index] ? 'text' : 'password'}
+            value={userPromptValues[index] || ''}
+            onChange={e => handlePromptInputChange(e, index)}
+            onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
+            error={!!validationErrors[`prompts[${index}].value`]}
+            endAdornment={
+              <InputAdornment position='end'>
+                <IconButton
+                  aria-label='toggle password visibility'
+                  onClick={() => togglePasswordVisibility(index)}
+                  edge='end'
+                >
+                  <Icon icon={showPasswords[index] ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                </IconButton>
+              </InputAdornment>
+            }
+            label='Value'
+          />
+          {validationErrors[`prompts[${index}].value`] && (
+            <Typography color='error' variant='caption'>
+              {validationErrors[`prompts[${index}].value`]}
+            </Typography>
+          )}
+        </FormControl>
+      )
+    } else {
+      return (
+        <TextfieldStyled
+          error={!!validationErrors[`prompts[${index}].value`]}
+          helperText={validationErrors[`prompts[${index}].value`] || ''}
+          required
+          id={`prompt-${index}`}
+          label='Value'
+          fullWidth
+          autoComplete='off'
+          value={userPromptValues[index] || ''}
+          onChange={e => handlePromptInputChange(e, index)}
+          onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
+        />
+      )
+    }
+  }
+
   const getStepContent = step => {
     switch (step) {
       case 0:
@@ -312,18 +383,7 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                   <Typography variant='body1' gutterBottom>
                     {prompt.prompt}
                   </Typography>
-                  <TextfieldStyled
-                    error={!!validationErrors[`prompts[${index}].value`]}
-                    helperText={validationErrors[`prompts[${index}].value`] || ''}
-                    required
-                    id={`prompt-${index}`}
-                    label='Value'
-                    fullWidth
-                    autoComplete='off'
-                    defaultValue={prompt.default_value}
-                    onChange={e => handlePromptInputChange(e, index)}
-                    onBlur={() => validateField(`prompts[${index}].value`, userPromptValues[index] || '')}
-                  />
+                  {renderPromptField(prompt, index)}
                 </Grid>
               ))}
             </Grid>
@@ -344,7 +404,21 @@ const RunTaskWizard = ({ onClose, ...props }) => {
                     label='Entered Value'
                     variant='outlined'
                     margin='dense'
-                    InputProps={{ readOnly: true }}
+                    InputProps={{
+                      readOnly: true,
+                      type: isSensitiveField(prompt.prompt) && !showPasswords[index] ? 'password' : 'text',
+                      endAdornment: isSensitiveField(prompt.prompt) ? (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            aria-label='toggle password visibility'
+                            onClick={() => togglePasswordVisibility(index)}
+                            edge='end'
+                          >
+                            <Icon icon={showPasswords[index] ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                          </IconButton>
+                        </InputAdornment>
+                      ) : null
+                    }}
                     value={userPromptValues[index] || prompt.default_value}
                   />
                 </Grid>

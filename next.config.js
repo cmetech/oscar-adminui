@@ -29,7 +29,17 @@ module.exports = {
 
   // Will be available on both server and client
   publicRuntimeConfig: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    MKDOCS_HOST: process.env.DETECTED_IP,
+    MKDOCS_PORT: process.env.MKDOCS_PORT,
+    DETECTED_IP: process.env.DETECTED_IP,
+    KEYCLOAK_ENABLE: process.env.KEYCLOAK_ENABLE,
+    AZURE_ENABLE: process.env.AZURE_ENABLE,
+    NODE_ENV: process.env.NODE_ENV,
+    FLOWER_PORT: process.env.FLOWER_PORT,
+    REVERSEPROXY_DASHBOARD_PORT: process.env.REVERSEPROXY_DASHBOARD_PORT,
+    VAULT_HOST: process.env.VAULT_HOST,
+    VAULT_PORT: process.env.VAULT_PORT,
   },
 
   output: 'standalone'

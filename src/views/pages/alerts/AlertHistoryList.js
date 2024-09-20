@@ -72,6 +72,7 @@ import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom } from 'src/lib/atom
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+import { set } from 'lodash'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -477,28 +478,32 @@ const AlertsList = props => {
   const fetchData = useCallback(
     async filterModel => {
       // Default start and end times to the last 24 hours if not defined
-      let [startDate, endDate] = []
-      if (props.onAccept == true) {
-        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+      let startDate, endDate;
+  
+      if (props.onAccept === true) {
+        startDate = yesterdayRounded;
+        endDate = todayRounded;
+      } else if (Array.isArray(props.onAccept) && props.onAccept.length === 2) {
+        [startDate, endDate] = props.onAccept;
       } else {
-        ;[startDate, endDate] = props.onAccept
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        endDate = new Date();
       }
-
-      // Assuming props.dateRange contains Date objects or is undefined
+  
+      // Ensure startDate and endDate are Date objects
+      startDate = startDate instanceof Date ? startDate : new Date(startDate);
+      endDate = endDate instanceof Date ? endDate : new Date(endDate);
+  
       console.log('onAccept:', props.onAccept)
       console.log('Start Date:', startDate)
       console.log('End Date:', endDate)
 
-      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = endDate?.toISOString() || new Date().toISOString()
-
-      console.log('Start Time:', startTime)
-      console.log('End Time:', endTime)
-      console.log('Filter Data:', JSON.stringify(filterModel))
+      const startTime = startDate.toISOString()
+      const endTime = endDate.toISOString()
 
       setLoading(true)
-      await axios
-        .get('/api/alertmanager', {
+      try {
+        const response = await axios.get('/api/alertmanager', {
           params: {
             sort: sortModel[0]?.sort || 'asc',
             column: sortModel[0]?.field || 'alertname',
@@ -510,19 +515,30 @@ const AlertsList = props => {
           },
           timeout: 30000
         })
-        .then(res => {
-          console.log('total_pages', res.data.total_pages)
-          console.log('total_records', res.data.total_records)
-          setRowCount(res.data.total_records || 0)
-          setRows(res.data.records || [])
-          props.set_total(res.data.total_records)
-        })
-
-      setLoading(false)
-      setRunFilterQuery(false) //temp adding to check if it fixes my condition
+        
+        if (response.status === 200) {
+          console.log('total_pages', response.data.total_pages)
+          console.log('total_records', response.data.total_records)
+          setRowCount(response.data.total_records || 0)
+          setRows(response.data.records || [])
+          props.set_total(response.data.total_records)
+        } else {
+          console.log('Error fetching data')
+          setRows([])
+          setRowCount(0)
+        }
+      } catch (error) {
+        console.log(error)
+        setRows([])
+        setRowCount(0)
+        toast.error('Error fetching alerts')
+      } finally {
+        setLoading(false)
+        setRunFilterQuery(false) //temp adding to check if it fixes my condition
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, props.onAccept]
+    [paginationModel.page, paginationModel.pageSize, props.onAccept]
   )
 
   useEffect(() => {
@@ -699,7 +715,7 @@ const AlertsList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Records found'
+              message: 'No Alerts found'
             },
             noResultsOverlay: {
               message: 'No Results Found'

@@ -1,29 +1,38 @@
-import { AbilityBuilder, Ability } from '@casl/ability'
+import { AbilityBuilder, createMongoAbility } from '@casl/ability'
 
-export const AppAbility = Ability
+export const AppAbility = createMongoAbility
 
 /**
  * Please define your own Ability rules according to your app requirements.
  * We have just shown Admin and Client rules for demo purpose where
  * admin can manage everything and client can just visit ACL page
  */
-const defineRulesFor = (role, subject) => {
-  const { can, rules } = new AbilityBuilder(AppAbility)
-  if (role === 'admin') {
-    can('manage', 'all')
-  } else if (role === 'regular') {
-    can(['read'], 'all')
-  } else {
-    can(['read', 'create', 'update', 'delete'], subject)
-  }
+const defineRulesFor = (roles, subject) => {
+  console.log('ACL.js roles', roles)
+  const { can, cannot, rules } = new AbilityBuilder(AppAbility)
+
+  roles.forEach(role => {
+    if (role === 'admin') {
+      can('manage', 'all')
+    } else if (role === 'super') {
+      can('read', 'all')
+    } else if (role === 'editor') {
+      can(['read', 'create', 'update'], ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home', 'datacenters', 'environments', 'servers', 'components', 'subcomponents'])
+      can('run', 'tasks')
+      can('schedule', 'tasks')
+      cannot('delete', 'all')
+    } else if (role === 'viewer') {
+      can('read', ['accountsettings', 'nav', 'alerts', 'inventory', 'tasks', 'probes', 'workflows', 'slo', 'home', 'datacenters', 'environments', 'servers'])
+      cannot(['create', 'update', 'delete', 'run', 'schedule'], ['tasks', 'datacenters', 'environments', 'servers'])
+      cannot('read', ['components', 'subcomponents'])
+    }
+  });
 
   return rules
 }
 
-export const buildAbilityFor = (role, subject) => {
-  return new AppAbility(defineRulesFor(role, subject), {
-    // https://casl.js.org/v5/en/guide/subject-type-detection
-    // @ts-ignore
+export const buildAbilityFor = (roles, subject) => {
+  return new AppAbility(defineRulesFor(roles, subject), {
     detectSubjectType: object => object.type
   })
 }

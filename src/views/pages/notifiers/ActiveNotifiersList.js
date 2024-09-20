@@ -458,7 +458,7 @@ const ActiveNotifiersList = props => {
                   setEditDialog(true)
                 }}
               >
-                <Icon icon='mdi:account-edit' />
+                <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'
@@ -559,60 +559,65 @@ const ActiveNotifiersList = props => {
   const DeleteDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px' // Adjust this value to your preferred width
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentNotifier?.name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDeleteDialogClose}
+              aria-label="close"
             >
-              {currentNotifier?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this notifier.
+                <Typography variant='h6'>
+                  {t('Confirm you want to delete this notifier?')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeleteDialogSubmit}
+            color="error"
+            autoFocus
+            startIcon={<Icon icon="mdi:delete-forever" />}
+          >
+            {t('Delete')}
           </Button>
-          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDeleteDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -622,67 +627,69 @@ const ActiveNotifiersList = props => {
   const DisableDialog = () => {
     const isNotifierActive = currentNotifier?.status?.toLowerCase() === 'enabled'
 
-    const dialogTitleText = isNotifierActive ? 'Please confirm disable of ' : 'Please confirm enable of '
-
-    const actionButtonText = isNotifierActive ? 'Disable' : 'Enable'
-
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentNotifier?.name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Action')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDisableDialogClose}
+              aria-label="close"
             >
-              {currentNotifier?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {dialogTitleText}
-                  {currentNotifier?.name}
+                <Typography variant='h6'>
+                  {isNotifierActive
+                    ? t('Confirm you want to disable this notifier.')
+                    : t('Confirm you want to enable this notifier.')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDisableDialogSubmit} color='primary'>
-            {actionButtonText}
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDisableDialogSubmit}
+            color="primary"
+            autoFocus
+            startIcon={<Icon icon={isNotifierActive ? "mdi:bell-off" : "mdi:bell"} />}
+          >
+            {isNotifierActive ? t('Disable') : t('Enable')}
           </Button>
-          <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDisableDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -114,6 +114,7 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -178,9 +179,10 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDelete()
+              onDelete && onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', getDynamicTitle(tabValue).toLowerCase())}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -194,6 +196,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
             onExport()
             handleDropdownClose()
           }}
+          disabled={!ability.can('read', getDynamicTitle(tabValue).toLowerCase())}
         >
           <Box sx={styles}>
             <Icon icon='mdi:file-export-outline' />
@@ -207,6 +210,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
               onUpload()
               handleDropdownClose()
             }}
+            disabled={!ability.can('create', 'servers')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:upload' />
@@ -237,7 +241,19 @@ const ConfirmationDeleteModal = ({ isOpen, onClose, onConfirm, tab }) => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      slotProps={{
+        backdrop: {
+          sx: {
+            '& .MuiModal-backdrop': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)' // Adjust the alpha value to control darkness
+            }
+          }
+        }
+      }}
+    >
       <DialogTitle>{t('Confirm Action')}</DialogTitle>
       <DialogContent>
         <DialogContentText>{t('Delete all selected?')}</DialogContentText>
@@ -318,6 +334,9 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
 const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
   const [file, setFile] = useState(null)
   const [fileName, setFileName] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
 
   const fileInputRef = useRef(null)
 
@@ -339,6 +358,8 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
   const handleClose = () => {
     setFile(null)
     setFileName('')
+    setUploadProgress(0)
+    setIsUploading(false)
     onClose()
   }
 
@@ -354,22 +375,60 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
     const formData = new FormData()
     formData.append('file', file)
 
+    let simulateProcessing = null
+
     try {
-      // Replace '/api/inventory/servers/bulk' with your Next.js API route that proxies the request
+      setIsUploading(true)
+      let simulatedProgress = 0
+
+      // Start the simulation before the request is sent
+      simulateProcessing = setInterval(() => {
+        simulatedProgress += Math.random() * 10 // Increment progress by a random amount each time
+        if (simulatedProgress >= 90) {
+          simulatedProgress = 90 // Cap simulated progress at 90% to leave room for real completion
+        }
+        setUploadProgress(simulatedProgress)
+      }, 500)
+
       const response = await axios.post('/api/inventory/servers/bulk', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
+
+        // onUploadProgress: progressEvent => {
+        //   const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        //   setUploadProgress(progress)
+        // }
       })
 
+      // Clear the simulation and set progress to 100% when done
+      clearInterval(simulateProcessing)
+      setUploadProgress(100)
+
       // Handle response here
-      console.log(response.data)
+      if (response.status === 200 && response.data) {
+        const { requested_count, processed_count } = response.data
+        toast.success(`Upload complete: ${processed_count} out of ${requested_count} servers processed successfully.`)
+        setRefetchTrigger(new Date().getTime())
+      } else {
+        toast.success('Upload complete.')
+      }
+
       setFileName('')
       setFile(null)
-      onClose() // Close the dialog on success
-      toast.success('Server are being uploaded and processed.')
+      setIsUploading(false)
+
+      setTimeout(() => {
+        onClose() // Close the dialog after a short delay
+      }, 1000)
     } catch (error) {
+      // Clear the simulation in case of an error if not null
+      if (simulateProcessing) {
+        clearInterval(simulateProcessing) // Clear the simulation in case of an error
+      }
+
       console.error('Error uploading file:', error)
+      setIsUploading(false)
       toast.error('Error uploading file')
     }
   }
@@ -393,13 +452,22 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           style={{ display: 'none' }} // Hide the input
         />
         {/* Custom styled button */}
-        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary'>
+        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary' disabled={isUploading}>
           {t('Choose File')}
         </Button>
         {fileName && (
           <Typography variant='subtitle1' sx={{ mt: 2 }}>
             Selected file: {fileName}
           </Typography>
+        )}
+
+        {isUploading && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant='determinate' value={uploadProgress} />
+            <Typography variant='subtitle2' align='center'>
+              {Math.round(uploadProgress)}% uploaded
+            </Typography>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>
@@ -409,6 +477,7 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           variant='outlined'
           color='secondary'
           startIcon={<Icon icon='mdi:close' />}
+          disabled={isUploading}
         >
           {t('Cancel')}
         </Button>
@@ -419,8 +488,9 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
           color='warning'
           autoFocus
           startIcon={<Icon icon='mdi:upload-multiple' />}
+          disabled={isUploading || !file}
         >
-          {t('Upload')}
+          {isUploading ? t('Uploading...') : t('Upload')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -707,76 +777,65 @@ const Settings = () => {
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
           <Typography variant='h4'>{t('Inventory Management')}</Typography>
           <Box display='flex' alignItems='center'>
-            <Button
-              variant='contained'
-              color='secondary'
-              sx={{ marginRight: 1 }}
-              startIcon={<Icon icon='mdi:plus' />}
-              onClick={handleOpenModal}
-            >
-              {getDynamicText(value)}
-            </Button>
-            <MoreActionsDropdown
-              onDelete={handleDelete}
-              onExport={handleExport}
-              onUpload={handleUpload}
-              tabValue={value}
-            />
+            {['1', '2', '3'].includes(value) && (
+              <Fragment>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  sx={{ marginRight: 1 }}
+                  startIcon={<Icon icon='mdi:plus' />}
+                  onClick={handleOpenModal}
+                  disabled={!ability.can('create', getDynamicText(value).toLowerCase())}
+                >
+                  {getDynamicText(value)}
+                </Button>
+                <MoreActionsDropdown
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  onUpload={handleUpload}
+                  tabValue={value}
+                />
+              </Fragment>
+            )}
           </Box>
         </Box>
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='assets'>
-            {datacenterTotal == 0 ? (
-              <Tab value='1' label={t('Datacenters')} icon={<Icon icon='mdi:office-building' />} iconPosition='start' />
-            ) : (
-              <Tab
-                value='1'
-                label={`${t('Datacenters')} (${datacenterTotal})`}
-                icon={<Icon icon='mdi:office-building' />}
-                iconPosition='start'
-              />
-            )}
-            {environmentTotal == 0 ? (
-              <Tab
-                value='2'
-                label={t('Environments')}
-                icon={<Icon icon='mdi:file-table-box-multiple' />}
-                iconPosition='start'
-              />
-            ) : (
-              <Tab
-                value='2'
-                label={`${t('Environments')} (${environmentTotal})`}
-                icon={<Icon icon='mdi:file-table-box-multiple' />}
-                iconPosition='start'
-              />
-            )}
-            {serverTotal == 0 ? (
-              <Tab value='3' label={t('Servers')} icon={<Icon icon='mdi:server' />} iconPosition='start' />
-            ) : (
-              <Tab
-                value='3'
-                label={`${t('Servers')} (${serverTotal})`}
-                icon={<Icon icon='mdi:server' />}
-                iconPosition='start'
-              />
-            )}
-            {componentTotal == 0 ? (
-              <Tab value='4' label={t('Components')} icon={<Icon icon='mdi:group' />} iconPosition='start' />
-            ) : (
+            {/* Datacenters Tab */}
+            <Tab
+              value='1'
+              label={datacenterTotal == 0 ? t('Datacenters') : `${t('Datacenters')} (${datacenterTotal})`}
+              icon={<Icon icon='mdi:database' />}
+              iconPosition='start'
+            />
+            {/* Environments Tab */}
+            <Tab
+              value='2'
+              label={environmentTotal == 0 ? t('Environments') : `${t('Environments')} (${environmentTotal})`}
+              icon={<Icon icon='mdi:file-table-box-multiple' />}
+              iconPosition='start'
+            />
+            {/* Servers Tab */}
+            <Tab
+              value='3'
+              label={serverTotal == 0 ? t('Servers') : `${t('Servers')} (${serverTotal})`}
+              icon={<Icon icon='mdi:server' />}
+              iconPosition='start'
+            />
+            {/* Components Tab - Hidden for viewers */}
+            {ability.can('read', 'components') && (
               <Tab
                 value='4'
-                label={`${t('Components')} (${componentTotal})`}
+                label={componentTotal == 0 ? t('Components') : `${t('Components')} (${componentTotal})`}
                 icon={<Icon icon='mdi:group' />}
                 iconPosition='start'
               />
             )}
-            {subcomponentTotal == 0 ? (
-              <Tab value='5' label={t('Subcomponents')} icon={<Icon icon='mdi:select-group' />} iconPosition='start' />
-            ) : (
+            {/* Subcomponents Tab - Hidden for viewers */}
+            {ability.can('read', 'subcomponents') && (
               <Tab
                 value='5'
-                label={`${t('Subcomponents')} (${subcomponentTotal})`}
+                label={subcomponentTotal == 0 ? t('Subcomponents') : `${t('Subcomponents')} (${subcomponentTotal})`}
                 icon={<Icon icon='mdi:select-group' />}
                 iconPosition='start'
               />
@@ -828,8 +887,8 @@ const Settings = () => {
 }
 
 Settings.acl = {
-  action: 'manage',
-  subject: 'settings-page'
+  action: 'read',
+  subject: 'inventory'
 }
 
 export default Settings

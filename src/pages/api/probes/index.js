@@ -34,6 +34,7 @@ async function handler(req, res) {
         res.status(response.status || 200).json({
           //total_pages: response.data.total_pages,
           total_records: response.data.total_records,
+          total_pages: response.data.total_pages,
           records: response.data.records
         })
       } else {

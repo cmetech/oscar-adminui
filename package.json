@@ -65,6 +65,7 @@
     "i18next-browser-languagedetector": "7.0.1",
     "i18next-http-backend": "2.2.0",
     "jotai": "^2.0.3",
+    "jwt-decode": "^4.0.0",
     "keen-slider": "6.8.5",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.45",
@@ -99,8 +100,8 @@
     "yup": "^1.1.1"
   },
   "devDependencies": {
-    "@iconify/react": "^4.1.0",
     "@iconify/json": "^2.2.58",
+    "@iconify/react": "^4.1.0",
     "@iconify/tools": "^2.2.6",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^2.1.5",

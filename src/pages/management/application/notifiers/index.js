@@ -649,7 +649,7 @@ const NotifierManager = () => {
 
 NotifierManager.acl = {
   action: 'manage',
-  subject: 'notifiers-page'
+  subject: 'notifiers'
 }
 
 export default NotifierManager

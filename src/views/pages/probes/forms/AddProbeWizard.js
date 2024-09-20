@@ -1003,29 +1003,31 @@ const AddProbeWizard = ({ onSuccess }) => {
                   />
                 </Grid>
               )}
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='probehttpmethod-autocomplete'
-                  options={['GET', 'POST']}
-                  value={probeForm.http_method?.toUpperCase()}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
+              {probeType === 'API' && (
+                <Grid item xs={12} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probehttpmethod-autocomplete'
+                    options={['GET', 'POST']}
+                    value={probeForm.http_method?.toUpperCase()}
+                    onChange={(event, newValue) => {
+                      // Directly calling handleFormChange with a synthetic event object
+                      handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -1049,29 +1051,31 @@ const AddProbeWizard = ({ onSuccess }) => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='probesslverification-autocomplete'
-                  options={['YES', 'NO']}
-                  value={probeForm.ssl_verification}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
+              {probeType === 'API' && (
+                <Grid item xs={12} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probesslverification-autocomplete'
+                    options={['YES', 'NO']}
+                    value={probeForm.ssl_verification}
+                    onChange={(event, newValue) => {
+                      // Directly calling handleFormChange with a synthetic event object
+                      handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={12}>
                 <TextfieldStyled
                   fullWidth

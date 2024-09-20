@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -44,6 +44,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Fade from '@mui/material/Fade'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 
 // ** ThirdParty Components
 import axios from 'axios'
@@ -100,7 +102,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 // TODO: Test with no Probes to see if the NoRowsOverlay is displayed with the Register Probes button
 // FIXME: Deleting all probes works, but I am reloading the probes automatically, I should now use the Overlay Register Probes button
 
-const ActiveProbes = props => {
+const ActiveProbes = forwardRef((props, ref) => {
   // ** Hooks
   const ability = useContext(AbilityContext)
   const dgApiRef = useGridApiRef()
@@ -134,7 +136,7 @@ const ActiveProbes = props => {
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
-  const [paginationMode, setPaginationMode] = useState('client')
+  const [paginationMode, setPaginationMode] = useState('server')
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
@@ -143,6 +145,7 @@ const ActiveProbes = props => {
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
   const [currentProbe, setCurrentProbe] = useState(null)
+  const [exportDialog, setExportDialog] = useState(false)
 
   const getDetailPanelContent = useCallback(({ row }) => <ProbeDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -236,22 +239,22 @@ const ActiveProbes = props => {
         const { row } = params
 
         let color = 'secondary'
-        let label = 'UNKNOWN'
+        let label = t('UNKNOWN')
         let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
         if (row?.operational_status?.toLowerCase() === 'up' && row?.status?.toLowerCase() === 'enabled') {
           color = 'success'
-          label = 'UP'
+          label = t('UP')
         } else if (row?.operational_status?.toLowerCase() === 'down' && row?.status?.toLowerCase() === 'enabled') {
           color = 'error'
-          label = 'DOWN'
+          label = t('DOWN')
         } else if (row?.status?.toLowerCase() === 'disabled') {
           skin = 'dark'
           color = 'secondary'
-          label = 'DISABLED'
+          label = t('DISABLED')
         } else {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         }
 
         return (
@@ -282,7 +285,7 @@ const ActiveProbes = props => {
                 rounded
                 size='medium'
                 skin={skin}
-                label={label || 'UNKNOWN'}
+                label={label || t('UNKNOWN')}
                 color={color}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
@@ -305,7 +308,7 @@ const ActiveProbes = props => {
         const shouldShowChip = row.target && !row.target.startsWith('http:') && row.type !== 'api'
 
         let color = 'secondary'
-        let label = 'UNKNOWN'
+        let label = t('UNKNOWN')
         let skin = theme.palette.mode === 'dark' ? 'light' : 'dark'
         if (
           row?.operational_status?.toLowerCase() === 'up' &&
@@ -313,22 +316,22 @@ const ActiveProbes = props => {
           row?.ssl_status?.toLowerCase() === 'ok'
         ) {
           color = 'success'
-          label = 'OK'
+          label = t('OK')
         } else if (
           row?.operational_status?.toLowerCase() === 'down' &&
           row?.status?.toLowerCase() === 'enabled' &&
           row?.ssl_status?.toLowerCase() === 'invalid'
         ) {
           color = 'error'
-          label = 'INVALID'
+          label = t('INVALID')
         } else if (row?.operational_status?.toLowerCase() === 'unknown') {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         } else {
           skin = 'dark'
           color = 'secondary'
-          label = 'UNKNOWN'
+          label = t('UNKNOWN')
         }
 
         return (
@@ -360,7 +363,7 @@ const ActiveProbes = props => {
                   rounded
                   size='medium'
                   skin={skin}
-                  label={label || 'UNKN'}
+                  label={label || t('UNKN')}
                   color={color}
                   sx={{
                     '& .MuiChip-label': { textTransform: 'capitalize' },
@@ -470,16 +473,16 @@ const ActiveProbes = props => {
         const { row } = params
 
         let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
-        let label = 'UNKN'
+        let label = t('UNKN')
         let iconimage = 'mdi:account-question-outline'
         if (row?.type?.toLowerCase() === 'httpurl') {
-          label = 'URL PROBE'
+          label = t('URL PROBE')
           iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
-          label = 'TCP PROBE'
+          label = t('TCP PROBE')
           iconimage = 'mdi:thermometer-probe'
         } else if (row?.type?.toLowerCase() === 'api') {
-          label = 'API PROBE'
+          label = t('API PROBE')
           iconimage = 'mdi:thermometer-probe'
         }
 
@@ -511,7 +514,7 @@ const ActiveProbes = props => {
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
+                label={label || t('UNKN')}
                 color={color}
                 icon={<Icon icon={iconimage} />}
                 sx={{
@@ -590,41 +593,42 @@ const ActiveProbes = props => {
         )
       }
     },
-    {
-      flex: 0.02,
-      minWidth: 60,
-      field: 'updatedAtTime',
-      headerName: t('Updated At'),
-      renderCell: params => {
-        const { row } = params
 
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+    // {
+    //   flex: 0.02,
+    //   minWidth: 60,
+    //   field: 'updatedAtTime',
+    //   headerName: t('Updated At'),
+    //   renderCell: params => {
+    //     const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+    //     const timezone = session?.data?.user?.timezone || 'US/Eastern'
 
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
-              <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
-                {humanReadableDate}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
+    //     const humanReadableDate = formatInTimeZone(
+    //       utcToZonedTime(parseISO(row?.modified_at), timezone),
+    //       timezone,
+    //       'MMM d, yyyy, h:mm:ss aa zzz'
+    //     )
+
+    //     return (
+    //       <Box
+    //         sx={{
+    //           display: 'flex',
+    //           alignItems: 'center', // Ensures vertical centering inside the Box
+    //           justifyContent: 'flex-start',
+    //           width: '100%', // Ensures the Box takes full width of the cell
+    //           height: '100%' // Ensures the Box takes full height of the cell
+    //         }}
+    //       >
+    //         <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textoverflow: 'ellipsis' }}>
+    //           <Typography title={humanReadableDate} noWrap overflow={'hidden'} textoverflow={'ellipsis'}>
+    //             {humanReadableDate}
+    //           </Typography>
+    //         </Box>
+    //       </Box>
+    //     )
+    //   }
+    // },
     {
       field: 'actions',
       headerName: t('Actions'),
@@ -647,37 +651,40 @@ const ActiveProbes = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
-                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Probe' : 'Enable Probe'}
-                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Probe' : 'Enable Probe'}
+                title={row?.status?.toLowerCase() === 'enabled' ? t('Disable Probe') : t('Enable Probe')}
+                aria-label={row?.status?.toLowerCase() === 'enabled' ? t('Disable Probe') : t('Enable Probe')}
                 color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
                 onClick={() => {
                   setCurrentProbe(row)
                   setDisableDialog(true)
                 }}
+                disabled={!ability.can('update', 'probes')}
               >
                 <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
               </IconButton>
-              <IconButton
+              {/* <IconButton
                 size='small'
-                title='Edit Probe'
+                title={t('Edit Probe')}
                 color='secondary'
-                aria-label='Edit Probe'
+                aria-label={t('Edit Probe')}
                 onClick={() => {
                   setCurrentProbe(row)
                   setEditDialog(true)
                 }}
+                disabled={!ability.can('update', 'probes')}
               >
-                <Icon icon='mdi:account-edit' />
-              </IconButton>
+                <Icon icon='mdi:edit' />
+              </IconButton> */}
               <IconButton
                 size='small'
-                title='Delete Probe'
-                aria-label='Delete Probe'
+                title={t('Delete Probe')}
+                aria-label={t('Delete Probe')}
                 color='error'
                 onClick={() => {
                   setCurrentProbe(row)
                   setDeleteDialog(true)
                 }}
+                disabled={!ability.can('delete', 'probes')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>
@@ -707,6 +714,50 @@ const ActiveProbes = props => {
   const handleRunDialogClose = () => {
     setRunDialog(false)
   }
+
+  const handleExportDialogClose = () => setExportDialog(false)
+
+  const handleExportDialogConfirm = () => {
+    exportProbes()
+    setExportDialog(false)
+  }
+
+  const ExportDialog = () => (
+    <Dialog open={exportDialog} onClose={handleExportDialogClose} aria-labelledby='export-dialog-title'>
+      <DialogTitle id='export-dialog-title'>{t('Confirm Export')}</DialogTitle>
+      <DialogContent>
+        <IconButton
+          size='small'
+          onClick={() => handleExportDialogClose()}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+        <Typography>{t('Are you sure you want to export the probes?')}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleExportDialogClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleExportDialogConfirm}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:export' />}
+        >
+          {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
 
   const EditDialog = () => {
     return (
@@ -748,9 +799,9 @@ const ActiveProbes = props => {
           </IconButton>
           <Box sx={{ mb: 8, textAlign: 'center' }}>
             <Typography variant='h5' sx={{ mb: 3 }}>
-              Edit Probe Information
+              {t('Edit Probe Information')}
             </Typography>
-            <Typography variant='body2'>Updates to probe information will be effective immediately.</Typography>
+            <Typography variant='body2'>{t('Updates to probe information will be effective immediately.')}</Typography>
           </Box>
           {currentProbe && (
             <UpdateProbeWizard
@@ -768,60 +819,59 @@ const ActiveProbes = props => {
   const DeleteDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentProbe?.name?.toUpperCase() ?? ''}
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentProbe?.id ?? ''}
-            </Typography>
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this probe.
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this probe?')}</Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeleteDialogSubmit}
+            color='error'
+            autoFocus
+            startIcon={<Icon icon='mdi:delete-forever' />}
+          >
+            {t('Delete')}
           </Button>
-          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDeleteDialogClose}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -829,72 +879,67 @@ const ActiveProbes = props => {
   }
 
   const DisableDialog = () => {
-    // Determine if the probe is currently enabled
     const isProbeEnabled = currentProbe?.status?.toLowerCase() === 'enabled'
-
-    // Determine the dialog title text based on the probe status
-    const dialogTitleText = isProbeEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
-
-    // Determine the action button text based on the probe status
-    const actionButtonText = isProbeEnabled ? 'Disable' : 'Enable'
 
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentProbe?.name?.toUpperCase() ?? ''}
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Action')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentProbe?.id ?? ''}
-            </Typography>
+            <IconButton size='small' onClick={handleDisableDialogClose} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {dialogTitleText}
-                  {currentProbe?.name}
+                <Typography variant='h6'>
+                  {isProbeEnabled
+                    ? t('Confirm you want to disable this probe.')
+                    : t('Confirm you want to enable this probe.')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDisableDialogSubmit} color='primary'>
-            {actionButtonText}
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDisableDialogSubmit}
+            color='primary'
+            autoFocus
+            startIcon={<Icon icon={isProbeEnabled ? 'mdi:pause-circle' : 'mdi:play-circle'} />}
+          >
+            {isProbeEnabled ? t('Disable') : t('Enable')}
           </Button>
-          <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDisableDialogClose}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -907,7 +952,7 @@ const ActiveProbes = props => {
 
     if (!probeId) {
       console.error('Probe ID is undefined')
-      toast.error('Probe ID is undefined or invalid')
+      toast.error(t('Probe ID is undefined or invalid'))
 
       return
     }
@@ -941,14 +986,14 @@ const ActiveProbes = props => {
         setRows(updatedRows)
 
         // Show success message
-        toast.success(`Probe ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
+        toast.success(`${t('Probe')} ${newStatus === 'enabled' ? t('Enabled') : t('Disabled')}`)
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`)
+        toast.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`)
       }
     } catch (error) {
-      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`, error)
-      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Probe`)
+      console.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`, error)
+      toast.error(`${t('Failed to')} ${isCurrentlyEnabled ? t('Disable') : t('Enable')} ${t('Probe')}`)
     }
 
     // Close the dialog
@@ -978,7 +1023,7 @@ const ActiveProbes = props => {
         setDeleteDialog(false)
 
         // props.set_total(props.total - 1)
-        toast.success('Successfully deleted Probe')
+        toast.success(t('Successfully deleted Probe'))
 
         // Wait for a short delay before triggering the refetch
         setTimeout(() => {
@@ -987,7 +1032,7 @@ const ActiveProbes = props => {
       }
     } catch (error) {
       console.error('Failed to delete Probe', error)
-      toast.error('Failed to delete Probe')
+      toast.error(t('Failed to delete Probe'))
     }
   }
 
@@ -1039,7 +1084,7 @@ const ActiveProbes = props => {
         setProbes(response.data.records)
       } catch (error) {
         console.error('Failed to fetch probes:', error)
-        toast.error('Failed to fetch probes')
+        toast.error(t('Failed to fetch probes'))
       } finally {
         // Mark the request as completed
         requestCompleted = true
@@ -1054,7 +1099,7 @@ const ActiveProbes = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, setProbes, setRows]
+    [paginationModel.page, paginationModel.pageSize]
   )
 
   // Effect to fetch data initially and start the periodic refresh
@@ -1203,6 +1248,40 @@ const ActiveProbes = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  const exportProbes = useCallback(() => {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Probes')
+
+    worksheet.columns = [
+      { header: 'Name', key: 'name', width: 30 },
+      { header: 'Type', key: 'type', width: 15 },
+      { header: 'Target', key: 'target', width: 30 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Description', key: 'description', width: 50 }
+    ]
+
+    const dataToExport = filteredRows.length ? filteredRows : rows
+
+    dataToExport.forEach(row => {
+      worksheet.addRow({
+        name: row.name,
+        type: row.type === 'httpurl' ? 'URL' : 'Port',
+        target: row.target,
+        status: row.status,
+        description: row.description
+      })
+    })
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      saveAs(blob, 'probes_export.xlsx')
+    })
+  }, [rows, filteredRows])
+
+  useImperativeHandle(ref, () => ({
+    exportProbes: () => setExportDialog(true)
+  }))
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1262,10 +1341,10 @@ const ActiveProbes = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Probes found'
+              message: t('No Probes found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,
@@ -1486,9 +1565,10 @@ const ActiveProbes = props => {
         <DisableDialog />
         <EditDialog />
         <DeleteDialog />
+        <ExportDialog />
       </Card>
     </Box>
   )
-}
+})
 
 export default ActiveProbes

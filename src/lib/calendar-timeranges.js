@@ -42,6 +42,8 @@ export const today = dayjs()
 
 export const todayRounded = roundDownToNearest10Min(today)
 
+export const todayRoundedPlus1hour = todayRounded.add(1, 'hour')
+
 export const yesterday = dayjs().subtract(1, 'day')
 
 export const yesterdayRounded = roundToNearest10Min(yesterday)
@@ -186,3 +188,24 @@ const getMonthWeekday = (monthIndex, weekdayIndex, dayRank) => {
 
   return firstDayOfMonth.add((dayRank - 1) * 7 + deltaToFirstValidWeekDayInMonth, 'day')
 }
+
+// Add these new functions
+export const getLast24Hours = () => {
+  const now = dayjs()
+  const yesterday = now.subtract(1, 'day')
+
+  return [yesterday, now]
+}
+
+export const getDefaultDateRange = () => {
+  return [yesterdayRounded, todayRounded]
+}
+
+// Add this new array without modifying the existing ones
+export const extendedPredefinedRangesDayjs = [
+  ...predefinedRangesDayjs,
+  {
+    label: 'Last 24 hours',
+    getValue: getLast24Hours
+  }
+]

@@ -1,9 +1,11 @@
 // ** MUI Imports
+import { useEffect, useState, useContext } from 'react'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Link from '@mui/material/Link'
 import Chip from '@mui/material/Chip'
+import getConfig from 'next/config'
 
 import { useRouter } from 'next/router'
 import { useTheme } from '@mui/material/styles'
@@ -21,6 +23,8 @@ import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
 import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
+
+import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 const notifications = [
   {
@@ -64,35 +68,6 @@ const notifications = [
     subtitle: '25 hrs ago',
     avatarImg: '/images/misc/chart.png',
     title: 'Finance report has been generated'
-  }
-]
-
-const shortcuts = [
-  {
-    title: 'Users',
-    url: '/management/security/users',
-    subtitle: 'Manage Users',
-    icon: 'mdi:account-outline'
-  },
-  {
-    title: 'Help Center',
-    subtitle: 'FAQs & Articles',
-    icon: 'mdi:help-circle-outline',
-    url: '/oscar/docs'
-  },
-  {
-    title: 'Tasks',
-    subtitle: 'Manage Tasks',
-    icon: 'mdi:subtasks',
-    url: '/service-continuity/tasks/'
-  },
-  {
-    title: 'Log Explorer',
-    subtitle: 'Explore Logs',
-    icon: 'mdi:math-log',
-    url: '/api/oscar/ui?path=explore',
-    externalLink: true,
-    openInNewTab: true
   }
 ]
 
@@ -157,6 +132,77 @@ const CustomBreadcrumbs = () => {
 const AppBarContent = props => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
+  const theme = useTheme()
+  const { t } = useTranslation()
+  const { publicRuntimeConfig } = getConfig()
+  const docs_host = publicRuntimeConfig.MKDOCS_HOST || 'localhost'
+  const domain = publicRuntimeConfig.DETECTED_IP || 'localhost'
+  const flower_port = publicRuntimeConfig.FLOWER_PORT || '5555'
+  const vault_port = publicRuntimeConfig.VAULT_PORT || '9200'
+  const reverseproxy_dashboard_port = publicRuntimeConfig.REVERSEPROXY_DASHBOARD_PORT || '8443'
+
+  // Determine the root domain or IP from the URL
+  const [rootDomain, setRootDomain] = useState(domain)
+
+  const ability = useContext(AbilityContext)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      setRootDomain(hostname)
+    }
+  }, [domain])
+
+  const shortcuts = [
+    {
+      title: t('Airflow'),
+      subtitle: t('Manage Workflows'),
+      icon: 'mdi:monitor-dashboard',
+      url: `https://${rootDomain}/airflow`,
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('Flower'),
+      url: `https://${rootDomain}:${flower_port}/flower/`,
+      subtitle: t('Celery Workers'),
+      icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('VMUI'),
+      subtitle: t('Metric Explorer'),
+      icon: 'mdi:monitor-dashboard',
+      url: `https://${rootDomain}/ext/vmdb/vmui`,
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('Collector'),
+      url: `https://${rootDomain}/ext/vmagent/`,
+      subtitle: t('Manage Metrics'),
+      icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('Alert Manager'),
+      url: `https://${rootDomain}/ext/alertmanager/`,
+      subtitle: t('Manage Alerts'),
+      icon: 'mdi:monitor-dashboard',
+      externalLink: true,
+      openInNewTab: true
+    },
+    {
+      title: t('Vault'),
+      url: `https://${rootDomain}:${vault_port}/ui/vault`,
+      subtitle: t('Manage Secrets'),
+      icon: 'mdi:encryption-secure',
+      externalLink: true,
+      openInNewTab: true
+    }
+  ]
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -175,7 +221,7 @@ const AppBarContent = props => {
         <OscarChatToggler settings={settings} saveSettings={saveSettings} />
         <UserModeToggler settings={settings} saveSettings={saveSettings} />
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
-        <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} />
+        {ability?.can('manage', 'all') ? <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} /> : null}
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>

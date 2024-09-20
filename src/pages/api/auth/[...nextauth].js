@@ -1,15 +1,71 @@
 // ** Third Party Imports
 import NextAuth from 'next-auth'
+import { jwtDecode } from 'jwt-decode'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import Auth0Provider from 'next-auth/providers/auth0'
-
-import { v4 as uuidv4 } from 'uuid'
+import KeycloakProvider from 'next-auth/providers/keycloak'
+import AzureADB2CProvider from 'next-auth/providers/azure-ad-b2c'
+import AzureADProvider from 'next-auth/providers/azure-ad'
 
 import axios from 'axios'
 import https from 'https'
-import formData from 'form-data'
-import { fi } from 'date-fns/locale'
-import { time } from 'console'
+
+const node_env = process.env.NODE_ENV || 'production'
+
+function extractRoles(decodedToken, client_id) {
+  const realmRoles = decodedToken?.realm_access?.roles || []
+  const resourceRoles = decodedToken?.resource_access?.[client_id]?.roles || []
+  const accountRoles = decodedToken?.resource_access?.account?.roles || []
+
+  // Combine all roles and remove duplicates
+  const allRoles = [...new Set([...realmRoles, ...resourceRoles, ...accountRoles])]
+
+  console.log('All Roles:', allRoles)
+
+  return allRoles
+}
+
+async function refreshAccessToken(token) {
+  try {
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: false
+    })
+
+    const response = await axios.post(
+      `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
+      new URLSearchParams({
+        client_id: process.env.OSCAR_CLIENT_ID,
+        client_secret: process.env.OSCAR_CLIENT_SECRET,
+        grant_type: 'refresh_token',
+        refresh_token: token.refreshToken
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        httpsAgent,
+        timeout: 10000
+      }
+    )
+
+    const refreshedTokens = response.data
+    console.log('Refreshed Tokens:', refreshedTokens)
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      accessTokenExpires: Date.now() + (refreshedTokens.expires_in ?? 0) * 1000,
+      error: undefined // Clear any previous errors
+    }
+  } catch (error) {
+    console.error('RefreshAccessTokenError', error)
+
+    return {
+      ...token,
+      error: error.response?.data?.error || 'RefreshAccessTokenError'
+    }
+  }
+}
 
 export const authOptions = {
   // ** Configure one or more authentication providers
@@ -83,11 +139,57 @@ export const authOptions = {
     }),
 
     // ** ...add more providers here
-    Auth0Provider({
-      clientId: process.env.AUTH0_ID || 'YOUR_AUTH0',
-      clientSecret: process.env.AUTH0_SECRET || 'ffff',
-      issuer: process.env.AUTH0_ISSUER || 'issuer'
+    KeycloakProvider({
+      clientId: process.env.OSCAR_CLIENT_ID,
+      clientSecret: process.env.OSCAR_CLIENT_SECRET,
+      issuer: process.env.KEYCLOAK_ISSUER,
+      authorization: {
+        params: { scope: 'openid email profile roles' }
+      },
+      httpOptions: {
+        agent: new https.Agent({
+          rejectUnauthorized: false
+        }),
+        timeout: 10000
+      }
+    }),
+
+    AzureADProvider({
+      clientId: process.env.AZURE_CLIENT_ID,
+      clientSecret: process.env.AZURE_CLIENT_SECRET,
+      tenantId: process.env.AZURE_TENANT_ID,
+      authorization: {
+        params: {
+          scope: 'openid offline_access email profile roles'
+        }
+      },
+      httpOptions: {
+        agent: new https.Agent({
+          rejectUnauthorized: false
+        }),
+        timeout: 10000
+      }
     })
+
+    // AzureADB2CProvider({
+    //   clientId: process.env.AZURE_CLIENT_ID,
+    //   clientSecret: process.env.AZURE_CLIENT_SECRET,
+    //   tenantId: process.env.AZURE_TENANT_ID,
+    //   primaryUserFlow: process.env.AZURE_PRIMARY_USER_FLOW,
+    //   authorization: {
+    //     params: {
+    //       scope: 'openid offline_access email profile roles'
+    //     }
+    //   },
+    //   httpOptions: {
+    //     agent: new https.Agent({
+    //       rejectUnauthorized: false
+    //     }),
+    //     timeout: 10000
+    //   }
+    // })
+
+    // ** ...add more providers here
   ],
 
   // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
@@ -120,61 +222,184 @@ export const authOptions = {
      * the `session()` callback. So we have to add custom parameters in `token`
      * via `jwt()` callback to make them accessible in the `session()` callback
      */
-    async jwt({ token, user, session }) {
-      // console.log('JWT Callback', { token, user, session })
-      if (user) {
-        // Extract API token from the response
-        const apiToken = user.access_token
+    async jwt({ token, user, account, profile }) {
+      const nowTimeStamp = Math.floor(Date.now() / 1000)
 
-        // Add API token to JWT
-        const updatedToken = {
-          ...token,
-          apiToken,
-          role: user.is_superuser ? 'admin' : 'regular',
-          name: user.first_name + ' ' + user.last_name,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          organization: user.organization,
-          timezone: user.timezone,
-          username: user.username
+      if (node_env === 'development') {
+        console.log('JWT Callback: token', token)
+        console.log('JWT Callback: user', user)
+        console.log('JWT Callback: account', account)
+        console.log('JWT Callback: profile', profile)
+      }
+
+      if (account && user) {
+        const thirtyDaysInSeconds = 30 * 24 * 60 * 60 // 30 days in seconds
+        const nowInSeconds = Math.floor(Date.now() / 1000)
+
+        if (account.provider === 'oscar') {
+          // Oscar Auth
+          const roles = user.is_superuser ? ['admin'] : ['viewer']
+
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            roles: roles,
+            name: user.first_name + ' ' + user.last_name,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            organization: user.organization,
+            timezone: user.timezone,
+            username: user.username,
+            accessToken: user.access_token,
+            expires_at: nowInSeconds + thirtyDaysInSeconds, // Set expiration to 30 days from now
+            provider: account.provider
+          }
+
+          node_env === 'development' && console.log('Oscar Auth: updatedToken', updatedToken || 'undefined')
+
+          return updatedToken
+        } else if (account.provider === 'keycloak') {
+          // Use jwt-decode to decode the access token
+          const decodedToken = jwtDecode(account.access_token)
+
+          console.log('Decoded Token:', decodedToken)
+          const client_id = profile.aud
+
+          console.log('Decoded Token:', decodedToken)
+          console.log('Client ID:', client_id)
+
+          // Extract the roles from the decoded token
+          const roles = extractRoles(decodedToken, client_id) || []
+          console.log('Roles:', roles)
+
+          // Keycloak Auth
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+            organization: profile.organization ? 'ericsson' : 'ericsson',
+            timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+            username: profile.preferred_username,
+            idToken: account.id_token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expires_at: account.expires_at,
+            refreshTokenExpires: account.refresh_token_expires_in,
+            provider: account.provider,
+            roles: roles
+          }
+
+          console.log('Keycloak Auth: updatedToken', updatedToken)
+
+          return updatedToken
+        } else if (account.provider === 'azure-ad-b2c') {
+          // Use jwt-decode to decode the access token
+          const decodedToken = jwtDecode(account.access_token)
+
+          node_env === 'development' && console.log('Decoded Token:', decodedToken)
+          const client_id = profile.aud
+
+          node_env === 'development' && console.log('Decoded Token:', decodedToken)
+          node_env === 'development' && console.log('Client ID:', client_id)
+
+          // Extract the roles from the decoded token
+          const roles = decodedToken?.resource_access?.[client_id]?.roles || []
+          node_env === 'development' && console.log('Roles:', roles)
+
+          // Azure AD Auth
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+            organization: profile.organization ? 'ericsson' : 'ericsson',
+            timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+            username: profile.preferred_username,
+            idToken: account.id_token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expires_at: account.expires_at,
+            refreshTokenExpires: account.refresh_token_expires_in,
+            provider: account.provider,
+            roles: profile.roles
+          }
+        } else if (account.provider === 'azure-ad') {
+          // Use jwt-decode to decode the access token
+          const decodedToken = jwtDecode(account.access_token)
+
+          node_env === 'development' && console.log('Decoded Token:', decodedToken)
+          const client_id = profile.aud
+
+          node_env === 'development' && console.log('Decoded Token:', decodedToken)
+          node_env === 'development' && console.log('Client ID:', client_id)
+
+          // Extract the roles from the decoded token
+          const roles = decodedToken?.resource_access?.[client_id]?.roles || []
+          node_env === 'development' && console.log('Roles:', roles)
+
+          // Azure AD Auth
+          const updatedToken = {
+            ...token,
+            sub: token.sub,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
+            organization: profile.organization ? 'ericsson' : 'ericsson',
+            timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
+            username: profile.preferred_username,
+            idToken: account.id_token,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expires_at: account.expires_in,
+            refreshTokenExpires: account.refresh_token_expires_in,
+            provider: account.provider,
+            roles: profile.roles
+          }
         }
+      } else {
+        if (token && token?.provider) {
+          if (token?.provider === 'keycloak') {
+            if (token.expires_at && token.expires_at - nowTimeStamp < 60) {
+              console.log('Token is about to expire. Refreshing...')
 
-        // Log the updated token object
-        // console.log('Updated Token', updatedToken)
-
-        // Return the updated token object
-        return updatedToken
+              return refreshAccessToken(token)
+            }
+          }
+        }
       }
 
       return token
     },
-    async session({ session, token, user }) {
-      // console.log('Session Callback', { session, token, user })
-      if (session.user) {
-        // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
-        const updatedSession = {
-          ...session,
-          user: {
-            ...session.user,
-            role: token.role,
-            username: token.username,
-            apiToken: token.apiToken,
-            firstName: token.first_name,
-            lastName: token.last_name,
-            organization: token.organization,
-            timezone: token.timezone,
-            username: token.username,
-            jwt: token
-          },
-          sessionID: uuidv4()
-        }
 
-        // Log the updated session object
-        // console.log('Updated Session', updatedSession)
+    async session({ session, token }) {
+      node_env === 'development' && console.log('Session Callback: session', session)
+      node_env === 'development' && console.log('Session Callback: token', token)
 
-        // Return the updated session object
-        return updatedSession
+      session.user = {
+        id: token.sub,
+        name: token.name,
+        roles: token.roles,
+        email: token.email,
+        firstName: token.firstName,
+        lastName: token.lastName,
+        organization: token.organization,
+        timezone: token.timezone,
+        username: token.username
       }
+      session.accessToken = token.accessToken
+      session.provider = token.provider
+      session.error = token.error
+      session.expires_at = token.expires_at
+
+      // Add idToken if the provider is Keycloak
+      if (token && token.provider) {
+        if (token.provider === 'keycloak') {
+          session.idToken = token.idToken
+          session.refreshToken = token.refreshToken
+        }
+      }
+
+      console.log('Session Callback: session', session)
 
       return session
     }

@@ -176,18 +176,15 @@ const ChatBot = () => {
                 }}
                 avatarPosition={msg.direction === 'incoming' ? 'cl' : 'cr'}
               >
-                {msg.direction === 'incoming' || imageFileName !== '1' ? (
-                  <Avatar
-                    src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/${imageFileName}.png`}
-                    name={msg.direction === 'incoming' ? 'Oscar' : 'You'}
-                    status={msg.direction === 'incoming' ? 'available' : 'available'}
-                  />
-                ) : (
-                  <Avatar
-                    src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/1.png`} // This will show initials if `src` is not provided or image fails to load
-                    status={msg.direction === 'incoming' ? 'available' : 'available'}
-                  />
-                )}
+                <Avatar
+                  src={msg.direction === 'incoming' ? '/images/oscar.png' : `/images/avatars/${imageFileName}.png`}
+                  name={msg.direction === 'incoming' ? 'Oscar' : 'You'}
+                  status={msg.direction === 'incoming' ? 'available' : 'available'}
+                  onError={e => {
+                    e.target.onerror = null // Prevent infinite loop
+                    e.target.src = '/images/avatars/1.png'
+                  }}
+                />
               </Message>
             ))}
           </MessageList>

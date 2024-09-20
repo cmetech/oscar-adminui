@@ -4,7 +4,13 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { probeIdsAtom, refetchProbeTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import {
+  predefinedRangesDayjs,
+  today,
+  todayRounded,
+  todayRoundedPlus1hour,
+  yesterdayRounded
+} from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -113,9 +119,10 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
 }))
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onUpload, onExport, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -159,6 +166,7 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
 
   // Define tabs where the Delete menu item should be shown
   const deletableTabs = ['1']
+  const showUploadProbesTab = tabValue === '1'
 
   return (
     <Fragment>
@@ -177,9 +185,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDelete()
+              onDelete && onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -191,9 +200,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onEnable()
+              onEnable && onEnable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:plus-box' />
@@ -205,9 +215,10 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
           <MenuItem
             sx={{ p: 0 }}
             onClick={() => {
-              onDisable()
+              onDisable && onDisable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'probes')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:minus-box' />
@@ -215,6 +226,34 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
             </Box>
           </MenuItem>
         )}
+        {showUploadProbesTab && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onUpload()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('create', 'probes')}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:upload' />
+              {t('Upload Probes')}
+            </Box>
+          </MenuItem>
+        )}
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onExport()
+            handleDropdownClose()
+          }}
+          disabled={!ability.can('read', 'probes')}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:file-export' />
+            {t('Export Probes')}
+          </Box>
+        </MenuItem>
       </Menu>
     </Fragment>
   )
@@ -361,6 +400,7 @@ const ConfirmationEnableModal = ({ isOpen, onClose, onConfirm, tab }) => {
 const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   const { register, handleSubmit, reset } = useForm()
   const theme = useTheme()
+  const { t } = useTranslation()
 
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
@@ -395,7 +435,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
       // Add cases for other tabs with different fields
       default:
-        return <Typography>Form not configured for this tab.</Typography>
+        return <Typography>{t('Form not configured for this tab.')}</Typography>
     }
   }
 
@@ -428,10 +468,159 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
           <Typography variant='h5' sx={{ mb: 3 }}>
             {getDynamicSubTitle(tab)}
           </Typography>
-          <Typography variant='body2'>Information submitted will be effective immediately.</Typography>
+          <Typography variant='body2'>{t('Information submitted will be effective immediately.')}</Typography>
         </Box>
         {dynamicFields()}
       </DialogContent>
+    </Dialog>
+  )
+}
+
+const ProbeUploadDialog = ({ open, onClose, onSuccess }) => {
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
+
+  const fileInputRef = useRef(null)
+  const { t } = useTranslation()
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = event => {
+    const file = event.target.files[0]
+    if (file) {
+      setFile(file)
+      setFileName(file.name)
+    } else {
+      setFile(null)
+      setFileName('')
+    }
+  }
+
+  const handleClose = () => {
+    setFile(null)
+    setFileName('')
+    setUploadProgress(0)
+    setIsUploading(false)
+    onClose()
+  }
+
+  const handleSubmit = async () => {
+    if (!file) {
+      toast.error('Please select a file to upload.')
+
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    let simulateProcessing = null
+
+    try {
+      setIsUploading(true)
+      let simulatedProgress = 0
+
+      const simulateProcessing = setInterval(() => {
+        simulatedProgress += Math.random() * 10
+        if (simulatedProgress >= 90) {
+          simulatedProgress = 90
+        }
+        setUploadProgress(simulatedProgress)
+      }, 500)
+
+      const response = await axios.post('/api/probes/bulk', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      clearInterval(simulateProcessing)
+      setUploadProgress(100)
+
+      if (response.status === 200 && response.data) {
+        const { requested_count, processed_count } = response.data
+        toast.success(`Upload complete: ${processed_count} out of ${requested_count} probes processed successfully.`)
+        setRefetchTrigger(new Date().getTime())
+      } else {
+        toast.success('Upload complete.')
+      }
+
+      setFileName('')
+      setFile(null)
+      setIsUploading(false)
+
+      setTimeout(() => {
+        onClose()
+      }, 1000)
+    } catch (error) {
+      // Clear the simulation in case of an error if not null
+      if (simulateProcessing) {
+        clearInterval(simulateProcessing) // Clear the simulation in case of an error
+      }
+      console.error('Error uploading file:', error)
+      setIsUploading(false)
+      toast.error('Error uploading file')
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{t('Upload Probes')}</DialogTitle>
+      <DialogContent>
+        <IconButton
+          size='small'
+          onClick={() => handleClose()}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+        <input type='file' ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+        <Button onClick={handleButtonClick} size='large' variant='contained' color='primary' disabled={isUploading}>
+          {t('Choose File')}
+        </Button>
+        {fileName && (
+          <Typography variant='subtitle1' sx={{ mt: 2 }}>
+            {t('Selected file:')} {fileName}
+          </Typography>
+        )}
+
+        {isUploading && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant='determinate' value={uploadProgress} />
+            <Typography variant='subtitle2' align='center'>
+              {Math.round(uploadProgress)}% {t('uploaded')}
+            </Typography>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+          disabled={isUploading}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:upload-multiple' />}
+          disabled={isUploading || !file}
+        >
+          {isUploading ? t('Uploading...') : t('Upload')}
+        </Button>
+      </DialogActions>
     </Dialog>
   )
 }
@@ -452,8 +641,12 @@ const ProbeManager = () => {
   const [selectedProbeIds, setSelectedProbeIds] = useAtom(probeIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchProbeTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
   const [onAccept, setOnAccept] = useState(value)
+
+  const [openUploadDialog, setOpenUploadDialog] = useState(false)
+
+  const activeProbesRef = useRef(null)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -497,10 +690,10 @@ const ProbeManager = () => {
       // Handle results
       results.forEach(result => {
         if (result.success) {
-          toast.success(`Probe ${result.probeId} deleted successfully`)
+          toast.success(t('Probe {{probeId}} deleted successfully', { probeId: result.probeId }))
         } else {
           console.error(`Error deleting probe ${result.probeId}:`, result.error)
-          toast.error(`Failed to delete probe ${result.probeId}`)
+          toast.error(t('Failed to delete probe {{probeId}}', { probeId: result.probeId }))
         }
       })
 
@@ -512,7 +705,7 @@ const ProbeManager = () => {
     } catch (error) {
       // This catch block may not be necessary since individual errors are caught above
       console.error('Unexpected error during probe deletion:', error)
-      toast.error('An unexpected error occurred during probe deletion')
+      toast.error(t('An unexpected error occurred during probe deletion'))
     }
 
     setIsDeleteModalOpen(false)
@@ -538,10 +731,12 @@ const ProbeManager = () => {
         setIsDisableModalOpen(false) // Add this line to close the dialog
         setSelectedProbeIds([]) // Clear the selected probe IDs
       } else {
-        toast.error('Error disabling probes')
+        toast.error(t('Error disabling probes'))
       }
     } catch (error) {
-      toast.error(`Error disabling probes: ${error.response?.data?.message || error.message}`)
+      toast.error(
+        t('Error disabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message })
+      )
 
       // Close the disable modal dialog
       setIsDisableModalOpen(false) // Add this line to close the dialog
@@ -569,10 +764,12 @@ const ProbeManager = () => {
         setIsEnableModalOpen(false) // Add this line to close the dialog
         setSelectedProbeIds([]) // Clear the selected Probe IDs
       } else {
-        toast.error('Error enabling probes')
+        toast.error(t('Error enabling probes'))
       }
     } catch (error) {
-      toast.error(`Error enabling probes: ${error.response?.data?.message || error.message}`)
+      toast.error(
+        t('Error enabling probes: {{errorMessage}}', { errorMessage: error.response?.data?.message || error.message })
+      )
 
       setIsEnableModalOpen(false)
     }
@@ -608,6 +805,20 @@ const ProbeManager = () => {
     setOnAccept(value)
   }
 
+  const handleUpload = () => {
+    setOpenUploadDialog(true)
+  }
+
+  const handleCloseUploadDialog = () => {
+    setOpenUploadDialog(false)
+  }
+
+  const handleExport = () => {
+    if (activeProbesRef.current) {
+      activeProbesRef.current.exportProbes()
+    }
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -622,6 +833,7 @@ const ProbeManager = () => {
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}
                   onClick={handleOpenModal}
+                  disabled={!ability.can('create', 'probes')}
                 >
                   {getDynamicText(value)}
                 </Button>
@@ -629,6 +841,8 @@ const ProbeManager = () => {
                   onDelete={handleDelete}
                   onEnable={handleEnable}
                   onDisable={handleDisable}
+                  onUpload={handleUpload}
+                  onExport={handleExport}
                   tabValue={value}
                 />
               </Fragment>
@@ -638,7 +852,7 @@ const ProbeManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRounded]}
+                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -762,7 +976,7 @@ const ProbeManager = () => {
             {probeTotal == 0 ? (
               <Tab
                 value='1'
-                label={t('ACtive Probes')}
+                label={t('Active Probes')}
                 icon={<Icon icon='mdi:arrow-decision-auto' />}
                 iconPosition='start'
               />
@@ -776,7 +990,7 @@ const ProbeManager = () => {
             )}
           </TabList>
           <TabPanel value='1'>
-            <ActiveProbesList set_total={setProbeTotal} total={probeTotal} />
+            <ActiveProbesList ref={activeProbesRef} set_total={setProbeTotal} total={probeTotal} />
           </TabPanel>
           <TabPanel value='2'>
             <ProbeHistoryList dateRange={dateRange} onAccept={onAccept} />
@@ -805,13 +1019,21 @@ const ProbeManager = () => {
         onConfirm={handleConfirmEnable}
         tab={value}
       />
+
+      <ProbeUploadDialog
+        open={openUploadDialog}
+        onClose={handleCloseUploadDialog}
+        onSuccess={() => {
+          setOpenUploadDialog(false)
+        }}
+      />
     </Grid>
   )
 }
 
 ProbeManager.acl = {
-  action: 'manage',
-  subject: 'probes-page'
+  action: 'read',
+  subject: 'probes'
 }
 
 export default ProbeManager

@@ -4,7 +4,16 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { taskIdsAtom, refetchTaskTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
+import {
+  predefinedRangesDayjs,
+  today,
+  todayRounded,
+  todayRoundedPlus1hour,
+  yesterdayRounded,
+  getLast24Hours,
+  getDefaultDateRange,
+  extendedPredefinedRangesDayjs
+} from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -112,10 +121,47 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
   }
 }))
 
+const RegisterTaskForm = ({ onClose, onSubmit }) => {
+  const [taskName, setTaskName] = useState('')
+  const { t } = useTranslation()
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    onSubmit(taskName)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <DialogContent>
+        <TextfieldStyled
+          autoFocus
+          margin='dense'
+          id='taskName'
+          label={t('Task Name')}
+          type='text'
+          fullWidth
+          variant='outlined'
+          value={taskName}
+          onChange={e => setTaskName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color='secondary'>
+          {t('Cancel')}
+        </Button>
+        <Button type='submit' color='primary' variant='contained'>
+          {t('Submit')}
+        </Button>
+      </DialogActions>
+    </form>
+  )
+}
+
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, onRegister, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
+  const ability = useContext(AbilityContext)
 
   const router = useRouter()
 
@@ -179,6 +225,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onDelete()
               handleDropdownClose()
             }}
+            disabled={!ability.can('delete', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:delete-forever-outline' />
@@ -193,6 +240,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onEnable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:plus-box' />
@@ -207,6 +255,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
               onDisable()
               handleDropdownClose()
             }}
+            disabled={!ability.can('update', 'tasks')}
           >
             <Box sx={styles}>
               <Icon icon='mdi:minus-box' />
@@ -215,16 +264,29 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
           </MenuItem>
         )}
         <MenuItem
-          disabled
           sx={{ p: 0 }}
           onClick={() => {
             onExport()
             handleDropdownClose()
           }}
+          disabled={!ability.can('read', 'tasks')}
         >
           <Box sx={styles}>
             <Icon icon='mdi:file-export-outline' />
             {t('Export')}
+          </Box>
+        </MenuItem>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onRegister()
+            handleDropdownClose()
+          }}
+          disabled={!ability.can('create', 'tasks')}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:playlist-plus' />
+            {t('Register Task')}
           </Box>
         </MenuItem>
         {/* <MenuItem
@@ -417,6 +479,84 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
           startIcon={<Icon icon='mdi:file-export' />}
         >
           {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+const RegisterTaskDialog = ({ open, onClose, onSuccess }) => {
+  const [taskName, setTaskName] = useState('')
+  const { t } = useTranslation()
+
+  const handleClose = () => {
+    setTaskName('')
+    onClose()
+  }
+
+  const handleSubmit = async () => {
+    if (!taskName.trim()) {
+      toast.error('Please enter a task name.')
+
+      return
+    }
+
+    try {
+      const response = await axios.post(`/api/tasks/register/${encodeURIComponent(taskName)}`, {})
+      if (response.status === 200) {
+        toast.success(response.data.message || `Task "${taskName}" registered successfully`)
+        setTaskName('')
+        onSuccess()
+      } else {
+        toast.error('Error registering task')
+      }
+    } catch (error) {
+      console.error('Error registering task:', error)
+      toast.error(`Error registering task: ${error.response?.data?.message || error.message}`)
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>
+        <Typography variant='h6'>{t('Register Task')}</Typography>
+        <IconButton size='small' onClick={handleClose} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
+          <Icon icon='mdi:close' />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <TextfieldStyled
+          autoFocus
+          margin='dense'
+          id='taskName'
+          label={t('Task Name')}
+          type='text'
+          fullWidth
+          variant='outlined'
+          value={taskName}
+          onChange={e => setTaskName(e.target.value)}
+          sx={{ mt: 2 }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='primary'
+          autoFocus
+          startIcon={<Icon icon='mdi:check' />}
+        >
+          {t('Register')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -637,8 +777,14 @@ const TasksManager = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
+  const [dateRange, setDateRange] = useState(getDefaultDateRange)
   const [onAccept, setOnAccept] = useState(value)
+
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+
+  const handleRegister = () => {
+    setIsRegisterModalOpen(true)
+  }
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -672,12 +818,21 @@ const TasksManager = () => {
     setOpenUploadDialog(false)
   }
 
+  const handleCloseRegisterModal = () => {
+    setIsRegisterModalOpen(false)
+  }
+
   const handleCloseDisableModal = () => {
     setIsDisableModalOpen(false)
   }
 
   const handleCloseEnableModal = () => {
     setIsEnableModalOpen(false)
+  }
+
+  const handleRegisterSuccess = () => {
+    setIsRegisterModalOpen(false)
+    setRefetchTrigger(Date.now()) // Trigger a refetch of the task list
   }
 
   const handleConfirmDelete = async () => {
@@ -832,6 +987,12 @@ const TasksManager = () => {
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
+    if (newValue === '2') {
+      // Update the date range when switching to the Task History tab
+      const [start, end] = getLast24Hours()
+      setDateRange([start, end])
+      setOnAccept([start, end])
+    }
   }
 
   const handleOpenModal = () => {
@@ -858,6 +1019,7 @@ const TasksManager = () => {
   const handleOnAccept = value => {
     console.log('onAccept', value)
     setOnAccept(value)
+    setDateRange(value)
   }
 
   return (
@@ -874,6 +1036,7 @@ const TasksManager = () => {
                   sx={{ marginRight: 1 }}
                   startIcon={<Icon icon='mdi:plus' />}
                   onClick={handleOpenModal}
+                  disabled={!ability.can('create', 'tasks')}
                 >
                   {getDynamicText(value)}
                 </Button>
@@ -883,6 +1046,7 @@ const TasksManager = () => {
                   onEnable={handleEnable}
                   onDisable={handleDisable}
                   onUpload={handleUpload}
+                  onRegister={handleRegister}
                   tabValue={value}
                 />
               </Fragment>
@@ -892,12 +1056,12 @@ const TasksManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRounded]}
+                defaultValue={getDefaultDateRange()}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
-                  // console.log('Date range:', newValue)
+                  console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
                 onAccept={handleOnAccept}
@@ -937,7 +1101,7 @@ const TasksManager = () => {
                   },
 
                   shortcuts: {
-                    items: predefinedRangesDayjs,
+                    items: extendedPredefinedRangesDayjs,
                     sx: {
                       '& .MuiChip-root': {
                         color:
@@ -1071,13 +1235,19 @@ const TasksManager = () => {
         onConfirm={handleConfirmEnable}
         tab={value}
       />
+
+      <RegisterTaskDialog
+        open={isRegisterModalOpen}
+        onClose={handleCloseRegisterModal}
+        onSuccess={handleRegisterSuccess}
+      />
     </Grid>
   )
 }
 
 TasksManager.acl = {
-  action: 'manage',
-  subject: 'tasks-page'
+  action: 'read',
+  subject: 'tasks'
 }
 
 export default TasksManager

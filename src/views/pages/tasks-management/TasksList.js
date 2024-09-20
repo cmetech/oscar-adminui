@@ -525,79 +525,75 @@ const TasksList = props => {
       minWidth: 200,
       renderCell: params => {
         const { row } = params
+        const isActive = row?.status.toLowerCase() === 'enabled'
 
         return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <IconButton
-                size='small'
-                title='Schedule Task'
-                aria-label='Schedule Task'
-                color='info'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setScheduleDialog(true)
-                }}
-              >
-                <Icon icon='mdi:clock-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Run Task'
-                aria-label='Run Task'
-                color='warning'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setRunDialog(true)
-                }}
-              >
-                <Icon icon='mdi:play-circle-outline' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
-                color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
-                onClick={() => {
-                  setCurrentTask(row)
-                  setDisableDialog(true)
-                }}
-              >
-                <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Edit Task'
-                color='secondary'
-                aria-label='Edit Task'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setEditDialog(true)
-                }}
-              >
-                <Icon icon='mdi:account-edit' />
-              </IconButton>
-              <IconButton
-                size='small'
-                title='Delete Task'
-                aria-label='Delete Task'
-                color='error'
-                onClick={() => {
-                  setCurrentTask(row)
-                  setDeleteDialog(true)
-                }}
-              >
-                <Icon icon='mdi:delete-forever' />
-              </IconButton>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+            <IconButton
+              size='small'
+              title='Schedule Task'
+              aria-label='Schedule Task'
+              color='info'
+              onClick={() => {
+                setCurrentTask(row)
+                setScheduleDialog(true)
+              }}
+              disabled={!isActive || !ability.can('schedule', 'tasks')}
+            >
+              <Icon icon='mdi:clock-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Run Task'
+              aria-label='Run Task'
+              color='warning'
+              onClick={() => {
+                setCurrentTask(row)
+                setRunDialog(true)
+              }}
+              disabled={!isActive || !ability.can('run', 'tasks')}
+            >
+              <Icon icon='mdi:play-circle-outline' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              aria-label={row?.status?.toLowerCase() === 'enabled' ? 'Disable Task' : 'Enable Task'}
+              color={row?.status?.toLowerCase() === 'enabled' ? 'success' : 'secondary'}
+              onClick={() => {
+                setCurrentTask(row)
+                setDisableDialog(true)
+              }}
+              disabled={!ability.can('update', 'tasks')}
+            >
+              <Icon icon={row?.status?.toLowerCase() === 'enabled' ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Edit Task'
+              color='secondary'
+              aria-label='Edit Task'
+              onClick={() => {
+                setCurrentTask(row)
+                setEditDialog(true)
+              }}
+              disabled={!ability.can('update', 'tasks')}
+            >
+              <Icon icon='mdi:edit' />
+            </IconButton>
+            <IconButton
+              size='small'
+              title='Delete Task'
+              aria-label='Delete Task'
+              color='error'
+              onClick={() => {
+                setCurrentTask(row)
+                setDeleteDialog(true)
+              }}
+              disabled={!ability.can('delete', 'tasks')}
+            >
+              <Icon icon='mdi:delete-forever' />
+            </IconButton>
           </Box>
         )
       }
@@ -684,60 +680,65 @@ const TasksList = props => {
   const DeleteDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDeleteDialogClose}
+              aria-label="close"
             >
-              {currentTask?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDeleteDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to delete this task.
+                <Typography variant='h6'>
+                  {t('Confirm you want to delete this task?')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDeleteDialogSubmit} color='primary'>
-            Delete
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDeleteDialogSubmit}
+            color="error"
+            autoFocus
+            startIcon={<Icon icon="mdi:delete-forever" />}
+          >
+            {t('Delete')}
           </Button>
-          <Button variant='outlined' onClick={handleDeleteDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDeleteDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -745,135 +746,71 @@ const TasksList = props => {
   }
 
   const DisableDialog = () => {
-    // Determine if the task is currently enabled
-    const isTaskEnabled = currentTask?.status?.toLowerCase() === 'enabled'
-
-    // Determine the dialog title text based on the task status
-    const dialogTitleText = isTaskEnabled ? 'Please confirm disable of ' : 'Please confirm enable of '
-
-    // Determine the action button text based on the task status
-    const actionButtonText = isTaskEnabled ? 'Disable' : 'Enable'
+    const isTaskActive = currentTask?.status?.toLowerCase() === 'enabled'
 
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Action')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleDisableDialogClose}
+              aria-label="close"
             >
-              {currentTask?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleDisableDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-          >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
               <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  {dialogTitleText}
-                  {currentTask?.name}
+                <Typography variant='h6'>
+                  {isTaskActive
+                    ? t('Confirm you want to disable this task.')
+                    : t('Confirm you want to enable this task.')}
                 </Typography>
               </Box>
             </Stack>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleDisableDialogSubmit} color='primary'>
-            {actionButtonText}
-          </Button>
-          <Button variant='outlined' onClick={handleDisableDialogClose} color='secondary'>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }
-
-  const ScheduleDialog = () => {
-    return (
-      <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
-        open={scheduleDialog}
-        onClose={handleScheduleDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
-            </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
-            >
-              {currentTask?.id ?? ''}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <IconButton
-            size='small'
-            onClick={() => handleScheduleDialogClose()}
-            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleDisableDialogSubmit}
+            color="primary"
+            autoFocus
+            startIcon={<Icon icon={isTaskActive ? "mdi:pause-circle" : "mdi:play-circle"} />}
           >
-            <Icon icon='mdi:close' />
-          </IconButton>
-          <Box sx={{ mb: 8, textAlign: 'center' }}>
-            <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
-              <Box>
-                <img src='/images/warning.png' alt='warning' width='64' height='64' />
-              </Box>
-              <Box>
-                <Typography variant='h5' justifyContent='center' alignContent='center'>
-                  Please confirm that you want to schedule this task.
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' sx={{ mr: 1 }} onClick={handleScheduleDialogSubmit} color='primary'>
-            Schedule
+            {isTaskActive ? t('Disable') : t('Enable')}
           </Button>
-          <Button variant='outlined' onClick={handleScheduleDialogClose} color='secondary'>
-            Cancel
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleDisableDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -883,74 +820,140 @@ const TasksList = props => {
   const RunDialog = () => {
     return (
       <Dialog
-        fullWidth
-        maxWidth='md'
-        scroll='body'
         open={runDialog}
         onClose={handleRunDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
       >
-        <DialogTitle id='form-dialog-title'>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {currentTask?.name?.toUpperCase() ?? ''}
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Run Task')}
             </Typography>
-            <Typography
-              noWrap
-              variant='caption'
-              sx={{
-                color:
-                  theme.palette.mode === 'light'
-                    ? theme.palette.customColors.brandBlack
-                    : theme.palette.customColors.brandYellow
-              }}
+            <IconButton
+              size='small'
+              onClick={handleRunDialogClose}
+              aria-label="close"
             >
-              {currentTask?.id ?? ''}
-            </Typography>
+              <Icon icon='mdi:close' />
+            </IconButton>
           </Box>
         </DialogTitle>
         {currentTask?.prompts?.length ? (
           <DialogContent>
-            <IconButton
-              size='small'
-              onClick={() => handleRunDialogClose()}
-              sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-            >
-              <Icon icon='mdi:close' />
-            </IconButton>
             <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
           </DialogContent>
-        ) : (
-          <>
+          ) : (
+            <>
             <DialogContent>
-              <IconButton
-                size='small'
-                onClick={() => handleRunDialogClose()}
-                sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
-              >
-                <Icon icon='mdi:close' />
-              </IconButton>
-              <Box sx={{ mb: 8, textAlign: 'center' }}>
-                <Stack direction='row' spacing={2} justifyContent='center' alignContent='center'>
+              <Box sx={{ textAlign: 'center' }}>
+                <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
                   <Box>
-                    <Typography variant='h5' justifyContent='center' alignContent='center'>
-                      Please confirm that you want to run this task.
+                    <Typography variant='h6'>
+                      {t('Confirm you want to run this task.')}
                     </Typography>
                   </Box>
                 </Stack>
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button variant='contained' sx={{ mr: 1 }} onClick={handleRunDialogSubmit} color='primary'>
-                Run
+              <Button
+                variant='contained'
+                size='large'
+                onClick={handleRunDialogSubmit}
+                color="primary"
+                autoFocus
+                startIcon={<Icon icon="mdi:play" />}
+              >
+                {t('Run')}
               </Button>
-              <Button variant='outlined' onClick={handleRunDialogClose} color='secondary'>
-                Cancel
+              <Button
+                variant='outlined'
+                size='large'
+                onClick={handleRunDialogClose}
+                color="secondary"
+                startIcon={<Icon icon="mdi:close" />}
+              >
+                {t('Cancel')}
               </Button>
             </DialogActions>
           </>
         )}
+      </Dialog>
+    )
+  }
+
+  const ScheduleDialog = () => {
+    return (
+      <Dialog
+        open={scheduleDialog}
+        onClose={handleScheduleDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Schedule Task')}
+            </Typography>
+            <IconButton
+              size='small'
+              onClick={handleScheduleDialogClose}
+              aria-label="close"
+            >
+              <Icon icon='mdi:close' />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
+              </Box>
+              <Box>
+                <Typography variant='h6'>
+                  {t('Confirm you want to schedule this task.')}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleScheduleDialogSubmit}
+            color="primary"
+            autoFocus
+            startIcon={<Icon icon="mdi:calendar-clock" />}
+          >
+            {t('Schedule')}
+          </Button>
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={handleScheduleDialogClose}
+            color="secondary"
+            startIcon={<Icon icon="mdi:close" />}
+          >
+            {t('Cancel')}
+          </Button>
+        </DialogActions>
       </Dialog>
     )
   }
@@ -960,7 +963,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -986,14 +989,14 @@ const TasksList = props => {
 
       if (response.status === 200) {
         // Show success message
-        toast.success(`Task Successfully Scheduled`)
+        toast.success(t('Task Successfully Scheduled'))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to Schedule Task`)
+        toast.error(t('Failed to Schedule Task'))
       }
     } catch (error) {
-      console.error(`Failed to Schedule Task`, error)
-      toast.error(`Failed to Schedule Task`)
+      console.error(t('Failed to Schedule Task'), error)
+      toast.error(t('Failed to Schedule Task'))
     }
 
     // Close the dialog
@@ -1005,7 +1008,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -1031,14 +1034,14 @@ const TasksList = props => {
 
       if (response.status === 200) {
         // Show success message
-        toast.success(`Task Successfully Run`)
+        toast.success(t('Task Successfully Run'))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to Run Task`)
+        toast.error(t('Failed to Run Task'))
       }
     } catch (error) {
-      console.error(`Failed to Run Task`, error)
-      toast.error(`Failed to Run Task`)
+      console.error(t('Failed to Run Task'), error)
+      toast.error(t('Failed to Run Task'))
     }
 
     // Close the dialog
@@ -1051,7 +1054,7 @@ const TasksList = props => {
 
     if (!taskId) {
       console.error('Task ID is undefined')
-      toast.error('Task ID is undefined or invalid')
+      toast.error(t('Task ID is undefined or invalid'))
 
       return
     }
@@ -1080,14 +1083,14 @@ const TasksList = props => {
         setRows(updatedRows)
 
         // Show success message
-        toast.success(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`)
+        toast.success(t(`Task ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`))
       } else {
         // Handle unsuccessful update
-        toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+        toast.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`))
       }
     } catch (error) {
-      console.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`, error)
-      toast.error(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`)
+      console.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`), error)
+      toast.error(t(`Failed to ${isCurrentlyEnabled ? 'Disable' : 'Enable'} Task`))
     }
 
     // Close the dialog
@@ -1120,11 +1123,11 @@ const TasksList = props => {
 
         setRefetchTrigger(Date.now())
 
-        toast.success('Successfully deleted Task')
+        toast.success(t('Successfully deleted Task'))
       }
     } catch (error) {
-      console.error('Failed to delete Task', error)
-      toast.error('Failed to delete Task')
+      console.error(t('Failed to delete Task'), error)
+      toast.error(t('Failed to delete Task'))
     }
   }
 
@@ -1175,8 +1178,8 @@ const TasksList = props => {
         props.set_total(response.data.total_records)
         setTasks(response.data.records)
       } catch (error) {
-        console.error('Failed to fetch tasks:', error)
-        toast.error('Failed to fetch tasks')
+        console.error(t('Failed to fetch tasks'), error)
+        toast.error(t('Failed to fetch tasks'))
       } finally {
         // Mark the request as completed
         requestCompleted = true
@@ -1191,7 +1194,7 @@ const TasksList = props => {
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paginationModel, setTasks, setRows]
+    [paginationModel.page, paginationModel.pageSize]
   )
 
   // Effect to fetch data initially and start the periodic refresh
@@ -1249,8 +1252,8 @@ const TasksList = props => {
         try {
           await axios.post('/api/tasks/register', { timeout: 10000 })
         } catch (error) {
-          console.error('Error refreshing tasks:', error)
-          toast.error('Failed to refresh tasks')
+          console.error(t('Error refreshing tasks'), error)
+          toast.error(t('Failed to refresh tasks'))
         } finally {
           fetchData()
           setRunRefresh(false)
@@ -1300,7 +1303,7 @@ const TasksList = props => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortModel])
+  }, [sortModel[0]?.field, sortModel[0]?.sort])
 
   const handleAction = event => {
     setAction(event.target.value)
@@ -1373,13 +1376,13 @@ const TasksList = props => {
 
       // Optionally, use a UI notification library to inform the user
       // For example, if you're using react-hot-toast
-      toast.success('Tasks successfully registered')
+      toast.success(t('Tasks successfully registered'))
     } catch (error) {
-      console.error('Error registering tasks:', error)
+      console.error(t('Error registering tasks'), error)
 
       // Handle error response
       // Optionally, use a UI notification library to inform the user about the error
-      toast.error('Failed to register tasks')
+      toast.error(t('Failed to register tasks'))
     }
   }
 
@@ -1469,10 +1472,10 @@ const TasksList = props => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: 'No Tasks found'
+              message: t('No Tasks found')
             },
             noResultsOverlay: {
-              message: 'No Results Found'
+              message: t('No Results Found')
             },
             toolbar: {
               value: searchValue,

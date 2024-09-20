@@ -118,6 +118,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
       flex: 0.2,
       field: 'path',
       headerName: t('Path'),
+      resizable: true,
       renderCell: params => {
         const { row } = params
 
@@ -141,9 +142,10 @@ const SecretsList = ({ set_total, total, ...props }) => {
       }
     },
     {
-      flex: 0.3,
+      flex: 0.1,
       field: 'key',
       headerName: t('Key'),
+      resizable: true,
       renderCell: params => {
         const { row } = params
 
@@ -170,6 +172,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
       flex: 0.4,
       field: 'value',
       headerName: t('Value'),
+      resizable: true,
       renderCell: params => {
         const { row } = params
         const isVisible = visibleSecrets[row.id]
@@ -206,6 +209,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
       field: 'actions',
       headerName: t('Actions'),
       type: 'string',
+      resizable: true,
       renderCell: ({ row }) => (
         <Box
           sx={{
@@ -691,6 +695,7 @@ const SecretsList = ({ set_total, total, ...props }) => {
               }
             }
           }}
+          disableColumnResize={false}
         />
         <Dialog fullWidth maxWidth='md' scroll='body' open={editDialogOpen} onClose={handleEditClose}>
           <UpdateSecretsWizard secretData={secretToEdit} onSuccess={handleEditSuccess} onClose={handleEditClose} />

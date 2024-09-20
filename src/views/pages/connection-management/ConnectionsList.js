@@ -203,7 +203,7 @@ const ConnectionsList = props => {
       }
     },
     {
-      flex: 0.2,
+      flex: 0.07,
       field: 'schema',
       headerName: t('Schema'),
       renderCell: params => {

@@ -160,7 +160,15 @@ const stepValidationSchemas = [
       .trim(),
     sloDescription: yup.string().trim()
   }),
-  yup.object(),
+  yup.object({
+    sloTargetPromql: yup
+      .string()
+      .required('SLO Target Prometheus Query is required')
+      .matches(/^([a-zA-Z_][a-zA-Z0-9_]*)({[^}]*})?$/, 'Basic Promethues query should match following syntax metric_name{label1=val1, label2=val2, ...} or metric_name')
+      .min(4, 'Prometheus Base Query must be at least 4 characters')
+      .trim(),
+    
+  }),
   yup.object({
     sloTargetValue: yup.number().required('Target Value is required').positive('Target Value must be positive')
   }),
@@ -185,6 +193,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const [sloTargetType, setSloTargetType] = useState('internal')
   const [sloTargetIndex, setSloTargetIndex] = useState('')
   const [sloTargetPromql, setSloTargetPromql] = useState('')
+  const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState('')
 
   const [sloFilterQuery, setSloFilterQuery] = useState('')
   const [sloGoodQuery, setSloGoodQuery] = useState('')
@@ -208,7 +217,9 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           sloName,
           sloDescription,
           sloTargetValue,
-          sloTargetPeriod
+          sloTargetPeriod,
+          sloTargetPromql,
+          sloTargetPromQlRel
         },
         { abortEarly: false }
       )
@@ -266,14 +277,11 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
               time_window: sloTimeWindow.toLowerCase(),
               target_type: sloTargetType.toLowerCase(),
               target_index: sloTargetIndex,
-              filter_query: sloFilterQuery,
+              filter_query: sloTargetPromQlRel,//send the promql relationship to threshhold value in filter_query field so new data model is not required
               good_query: sloTargetPromql, //send the target query in good_query field so new data model is not required
               total_query: sloTotalQuery
             }
           }
-
-          
-
 
         } else {
           payload = {
@@ -318,7 +326,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloDescription('')
     setSloTargetValue(95)
     setSloTargetPeriod(periodOptions[1])
-
+    setSloTargetCalculationMethod('occurrences')
 
 
     setSloTargetType('internal')
@@ -327,6 +335,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloGoodQuery('')
     setSloTotalQuery('')
     setSloTargetPromql('')
+    setSloTargetPromQlRel('')
     setSloTimeWindow('rolling')
     setActiveStep(0)
   }
@@ -378,6 +387,14 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloTargetPromql(event.target.value)
   }
 
+  const handleSloTargetPromQlRelChange = event => {
+
+    setSloTargetPromQlRel(eventValue => {
+      const value = event.target.value
+      return getSloTargetPromQlRelSymbol(value)
+    })
+  }
+
   const handleTotalQueryChange = event => {
     setSloTotalQuery(event.target.value)
   }
@@ -389,6 +406,36 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   // Handle Confirm Password
   const handleConfirmChange = prop => event => {
     setState({ ...state, [prop]: event.target.value })
+  }
+
+  const getSloTargetPromQlRelSymbol = value => {
+    switch (value) {
+      case 'More than Or Equal':
+        return '>=';
+      case 'More Than':
+        return '>';
+      case 'Less Than':
+        return '<';
+      case 'Less Than Or Equal':
+        return '<=';
+      default:
+        return value;
+    }
+  }
+
+  const getSloTargetPromQlRelLabel = value => {
+    switch (value) {
+      case '>=':
+        return 'More than Or Equal';
+      case '>':
+        return 'More Than';
+      case '<':
+        return 'Less Than';
+      case '<=':
+        return 'Less Than Or Equal';
+      default:
+        return value;
+    }
   }
 
   const getStepContent = step => {
@@ -462,8 +509,39 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     value={sloTargetPromql}
                     onChange={handleSloTargetPromqlChange}
                     label='Prometheus Query'
+                    error={Boolean(formErrors.sloTargetPromql)}
+                    helperText={formErrors.sloTargetPromql}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <AutocompleteStyled
+                    freeSolo={false}
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='slotargettype-autocomplete'
+                    options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
+                    value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                    onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                      handleSloTargetPromQlRelChange(
+                        { target: { name: 'target_promql_rel', value: newValue} },
+                        null,
+                        null
+                      )
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
+                    )}
+                    />
+                    
+                </Grid>
+                  
               </Grid>
             </Fragment>): (
               
@@ -619,6 +697,11 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
               </Grid>
               <Grid item xs={12}>
                 <Typography>
+                  <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                </Typography>
+              </Grid>   
+              <Grid item xs={12}>
+                <Typography>
                   <strong>Time Window:</strong> {sloTimeWindow}
                 </Typography>
               </Grid>
@@ -745,6 +828,11 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                 <Grid item xs={12}>
                   <Typography>
                     <strong>Prometheus Base Query:</strong> {sloTargetPromql}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
                   </Typography>
                 </Grid>
               </Grid>) : (

@@ -197,6 +197,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
   const [sloGoodQuery, setSloGoodQuery] = useState(props?.currentSlo?.target?.good_query || '')
   
   const [sloTargetPromql, setSloTargetPromql] = useState(props?.currentSlo?.target?.good_query || '')
+  const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState(props?.currentSlo?.target?.filter_query || '')
   
 
   const [sloTotalQuery, setSloTotalQuery] = useState(props?.currentSlo?.target?.total_query || '')
@@ -218,7 +219,9 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
           sloName,
           sloDescription,
           sloTargetValue,
-          sloTargetPeriod
+          sloTargetPeriod,
+          sloTargetPromql,
+          sloTargetPromQlRel
         },
         { abortEarly: false }
       )
@@ -275,7 +278,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
               calculation_method: sloTargetCalculationMethod.toLowerCase(),
               target_type: sloTargetType.toLowerCase(),
               target_index: sloTargetIndex,
-              filter_query: sloFilterQuery,
+              filter_query: sloTargetPromQlRel,
               good_query: sloTargetPromql,
               total_query: sloTotalQuery,
               time_window: sloTimeWindow.toLowerCase()
@@ -341,6 +344,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
     setSloFilterQuery(props?.currentSlo?.target?.filter_query || '')
     setSloGoodQuery(props?.currentSlo?.target?.good_query || '')
     setSloTargetPromql(props?.currentSlo?.target?.good_query || '')
+    setSloTargetPromQlRel(props?.currentSlo?.target?.filter_query || '')
     setSloTotalQuery(props?.currentSlo?.target?.total_query || '')
     setSloTimeWindow(props?.currentSlo?.target?.time_window || 'rolling')
     setActiveStep(0)
@@ -392,6 +396,15 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
     setSloTargetPromql(event.target.value)
   }
 
+
+  const handleSloTargetPromQlRelChange = event => {
+
+    setSloTargetPromQlRel(eventValue => {
+      const value = event.target.value
+      return getSloTargetPromQlRelSymbol(value)
+    })
+  }
+
   const handleTotalQueryChange = event => {
     setSloTotalQuery(event.target.value)
   }
@@ -405,10 +418,39 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
     setState({ ...state, [prop]: event.target.value })
   }
 
+  const getSloTargetPromQlRelSymbol = value => {
+    switch (value) {
+      case 'More than Or Equal':
+        return '>=';
+      case 'More Than':
+        return '>';
+      case 'Less Than':
+        return '<';
+      case 'Less Than Or Equal':
+        return '<=';
+      default:
+        return value;
+    }
+  }
+
+  const getSloTargetPromQlRelLabel = value => {
+    switch (value) {
+      case '>=':
+        return 'More than Or Equal';
+      case '>':
+        return 'More Than';
+      case '<':
+        return 'Less Than';
+      case '<=':
+        return 'Less Than Or Equal';
+      default:
+        return value;
+    }
+  }
+
   const getStepContent = step => {
     switch (step) {
-      case 0:
-        
+      case 0:   
         return (
           <Fragment>
             <Grid container spacing={6}>
@@ -464,13 +506,13 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
         )
       case 1:
         return (
-                    <Fragment>
+          <Fragment>
 
             {console.log("Type SLO selected--------------> " + sloTargetType.toUpperCase())}
             {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
             <Fragment>
               <Grid container spacing={6}>
-                <Grid item sm={6} xs={12}>
+                <Grid item sm={20} xs={30}>
                   <TextfieldStyled
                     fullWidth
                     value={sloTargetPromql}
@@ -478,8 +520,38 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
                     label='Promethus Query'
                   />
                 </Grid>
+
+                <Grid item xs={12}>
+                  <AutocompleteStyled
+                    freeSolo={false}
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='slotargettype-autocomplete'
+                    options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
+                    value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                    onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                      handleSloTargetPromQlRelChange(
+                        { target: { name: 'target_promql_rel', value: newValue} },
+                        null,
+                        null
+                      )
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
+                    )}
+                    />
+                    
+                </Grid>  
+
               </Grid>
-              </Fragment>) : (
+            </Fragment>) : (
             <Fragment>
               <Grid container spacing={6}>
                 <Grid item sm={6} xs={12}>
@@ -631,6 +703,11 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
                     <strong>Promethus Base Query:</strong> {sloTargetPromql}
                   </Typography>
                 </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                  </Typography>
+                </Grid>  
                 <Grid item xs={12}>
                   <Typography>
                     <strong>Time Window:</strong> {sloTimeWindow}

@@ -195,10 +195,10 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
   const [sloTargetIndex, setSloTargetIndex] = useState(props?.currentSlo?.target?.target_index || '')
   const [sloFilterQuery, setSloFilterQuery] = useState(props?.currentSlo?.target?.filter_query || '')
   const [sloGoodQuery, setSloGoodQuery] = useState(props?.currentSlo?.target?.good_query || '')
-  
+
   const [sloTargetPromql, setSloTargetPromql] = useState(props?.currentSlo?.target?.good_query || '')
   const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState(props?.currentSlo?.target?.filter_query || '')
-  
+
 
   const [sloTotalQuery, setSloTotalQuery] = useState(props?.currentSlo?.target?.total_query || '')
   const [activeStep, setActiveStep] = useState(0)
@@ -270,8 +270,8 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
 
         if (sloTargetType.toLowerCase() === 'prometheus') {
           payload = {
-          name: sloName,
-          description: sloDescription,
+            name: sloName,
+            description: sloDescription,
             target: {
               target_value: parseFloat(sloTargetValue),
               period: parseInt(sloTargetPeriod.value),
@@ -286,8 +286,8 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
           }
         } else {
           payload = {
-          name: sloName,
-          description: sloDescription,
+            name: sloName,
+            description: sloDescription,
             target: {
               target_value: parseFloat(sloTargetValue),
               period: parseInt(sloTargetPeriod.value),
@@ -298,7 +298,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
               good_query: sloGoodQuery,
               total_query: sloTotalQuery,
               time_window: sloTimeWindow.toLowerCase()
-            }       
+            }
           }
         }
 
@@ -450,7 +450,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
 
   const getStepContent = step => {
     switch (step) {
-      case 0:   
+      case 0:
         return (
           <Fragment>
             <Grid container spacing={6}>
@@ -510,81 +510,81 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
 
             {console.log("Type SLO selected--------------> " + sloTargetType.toUpperCase())}
             {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
-            <Fragment>
-              <Grid container spacing={6}>
-                <Grid item sm={20} xs={30}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTargetPromql}
-                    onChange={handleSloTargetPromqlChange}
-                    label='Promethus Query'
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <AutocompleteStyled
-                    freeSolo={false}
-                    clearOnBlur
-                    selectOnFocus
-                    handleHomeEndKeys
-                    id='slotargettype-autocomplete'
-                    options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
-                    value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
-                    onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                      handleSloTargetPromQlRelChange(
-                        { target: { name: 'target_promql_rel', value: newValue} },
-                        null,
-                        null
-                      )
-                    }}
-                    onInputChange={(event, newInputValue) => {
-                      if (event) {
-                        handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
-                      }
-                    }}
-                    renderInput={params => (
-                      <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
-                    )}
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item sm={20} xs={30}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTargetPromql}
+                      onChange={handleSloTargetPromqlChange}
+                      label='Promethus Query'
                     />
-                    
-                </Grid>  
+                  </Grid>
 
-              </Grid>
-            </Fragment>) : (
-            <Fragment>
-              <Grid container spacing={6}>
-                <Grid item sm={6} xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTargetIndex}
-                    onChange={handleTargetIndexChange}
-                    label='Source Index'
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloFilterQuery}
-                    onChange={handleFilterQueryChange}
-                    label='Filter Query'
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTotalQuery}
-                    onChange={handleTotalQueryChange}
-                    label='Total Query'
-                  />
-                </Grid>
-              </Grid>
-            </Fragment>)}
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo={false}
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='slotargettype-autocomplete'
+                      options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
+                      value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                      onChange={(event, newValue) => {
+                        // Directly calling handleFormChange with a synthetic event object
+                        handleSloTargetPromQlRelChange(
+                          { target: { name: 'target_promql_rel', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
+                      )}
+                    />
 
-            
+                  </Grid>
+
+                </Grid>
+              </Fragment>) : (
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item sm={6} xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTargetIndex}
+                      onChange={handleTargetIndexChange}
+                      label='Source Index'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloFilterQuery}
+                      onChange={handleFilterQueryChange}
+                      label='Filter Query'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTotalQuery}
+                      onChange={handleTotalQueryChange}
+                      label='Total Query'
+                    />
+                  </Grid>
+                </Grid>
+              </Fragment>)}
+
+
           </Fragment>
         )
       case 2:
@@ -681,116 +681,116 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
           <Fragment>
             {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
               <Fragment>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                    Review and Confirm
-                  </Typography>
-                  <Divider sx={{ my: 2 }} />
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                      Review and Confirm
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Name:</strong> {sloName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Description:</strong> {sloDescription}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Promethus Base Query:</strong> {sloTargetPromql}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Time Window:</strong> {sloTimeWindow}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Period:</strong> {sloTargetPeriod.label}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Value:</strong> {sloTargetValue}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Name:</strong> {sloName}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Description:</strong> {sloDescription}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Promethus Base Query:</strong> {sloTargetPromql}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
-                  </Typography>
-                </Grid>  
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Time Window:</strong> {sloTimeWindow}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Period:</strong> {sloTargetPeriod.label}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Value:</strong> {sloTargetValue}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Fragment>
+              </Fragment>
             ) : (
-            <Fragment>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                    Review and Confirm
-                  </Typography>
-                  <Divider sx={{ my: 2 }} />
+              <Fragment>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                      Review and Confirm
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Name:</strong> {sloName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Description:</strong> {sloDescription}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Index:</strong> {sloTargetIndex}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Filter Query:</strong> {sloFilterQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Good Query:</strong> {sloGoodQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Total Query:</strong> {sloTotalQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Time Window:</strong> {sloTimeWindow}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Period:</strong> {sloTargetPeriod.label}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Value:</strong> {sloTargetValue}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Name:</strong> {sloName}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Description:</strong> {sloDescription}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Index:</strong> {sloTargetIndex}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Filter Query:</strong> {sloFilterQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Good Query:</strong> {sloGoodQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Total Query:</strong> {sloTotalQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Time Window:</strong> {sloTimeWindow}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Period:</strong> {sloTargetPeriod.label}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Value:</strong> {sloTargetValue}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Fragment>
+              </Fragment>
             )}
           </Fragment>
         )
@@ -832,36 +832,36 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
                 </Typography>
               </Grid>
               {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
-              <Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Prometheus Base Query:</strong> {sloTargetIndex}
-                  </Typography>
+                <Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Prometheus Base Query:</strong> {sloTargetIndex}
+                    </Typography>
+                  </Grid>
                 </Grid>
-              </Grid>
-              ): (
-              <Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Index:</strong> {sloTargetIndex}
-                  </Typography>
+              ) : (
+                <Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Index:</strong> {sloTargetIndex}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Filter Query:</strong> {sloFilterQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Good Query:</strong> {sloGoodQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Total Query:</strong> {sloTotalQuery}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Filter Query:</strong> {sloFilterQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Good Query:</strong> {sloGoodQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Total Query:</strong> {sloTotalQuery}
-                  </Typography>
-                </Grid>
-              </Grid>                  
               )}
 
               <Grid item xs={12}>

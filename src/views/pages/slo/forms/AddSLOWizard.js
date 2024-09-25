@@ -160,15 +160,7 @@ const stepValidationSchemas = [
       .trim(),
     sloDescription: yup.string().trim()
   }),
-  yup.object({
-    sloTargetPromql: yup
-      .string()
-      .required('SLO Target Prometheus Query is required')
-      .matches(/^([a-zA-Z_][a-zA-Z0-9_]*)({[^}]*})?$/, 'Basic Promethues query should match following syntax metric_name{label1=val1, label2=val2, ...} or metric_name')
-      .min(4, 'Prometheus Base Query must be at least 4 characters')
-      .trim(),
-    
-  }),
+  yup.object(),
   yup.object({
     sloTargetValue: yup.number().required('Target Value is required').positive('Target Value must be positive')
   }),
@@ -189,11 +181,10 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const [sloTargetPeriod, setSloTargetPeriod] = useState(periodOptions[1])
   const [sloTimeWindow, setSloTimeWindow] = useState('rolling')
   const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState('occurrences')
-  
   const [sloTargetType, setSloTargetType] = useState('internal')
   const [sloTargetIndex, setSloTargetIndex] = useState('')
   const [sloTargetPromql, setSloTargetPromql] = useState('')
-  const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState('')
+  const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState('>=')
 
   const [sloFilterQuery, setSloFilterQuery] = useState('')
   const [sloGoodQuery, setSloGoodQuery] = useState('')
@@ -206,7 +197,6 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const theme = useTheme()
   const session = useSession()
 
-  
   // Validate form based on the active step
   const validateForm = async () => {
     try {
@@ -217,9 +207,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           sloName,
           sloDescription,
           sloTargetValue,
-          sloTargetPeriod,
-          sloTargetPromql,
-          sloTargetPromQlRel
+          sloTargetPeriod
         },
         { abortEarly: false }
       )
@@ -301,6 +289,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           }
         }
 
+
         console.log('Payload', payload)
 
         // Update the endpoint to point to your Next.js API route
@@ -327,8 +316,6 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloTargetValue(95)
     setSloTargetPeriod(periodOptions[1])
     setSloTargetCalculationMethod('occurrences')
-
-
     setSloTargetType('internal')
     setSloTargetIndex('')
     setSloFilterQuery('')
@@ -365,7 +352,6 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const handleTargetCalculationMethodChange = event => {
     setSloTargetCalculationMethod(event.target.value)
   }
-
 
   const handleTargetTypeChange = event => {
     setSloTargetType(event.target.value)
@@ -408,6 +394,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setState({ ...state, [prop]: event.target.value })
   }
 
+
   const getSloTargetPromQlRelSymbol = value => {
     switch (value) {
       case 'More than Or Equal':
@@ -437,6 +424,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         return value;
     }
   }
+
 
   const getStepContent = step => {
     switch (step) {
@@ -497,85 +485,84 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       case 1:
         return (
           <Fragment>
-            {console.log("Type SLO selected--------------> "+sloTargetType.toUpperCase()) }
+            {console.log("Type SLO selected--------------> " + sloTargetType.toUpperCase())}
             {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
 
-            <Fragment>
-              <Grid container spacing={6}>
-                <Grid item sm={20} xs={30}>
-                  <TextfieldStyled
-                    fullWidth
-                    multiline  
-                    value={sloTargetPromql}
-                    onChange={handleSloTargetPromqlChange}
-                    label='Prometheus Query'
-                    error={Boolean(formErrors.sloTargetPromql)}
-                    helperText={formErrors.sloTargetPromql}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <AutocompleteStyled
-                    freeSolo={false}
-                    clearOnBlur
-                    selectOnFocus
-                    handleHomeEndKeys
-                    id='slotargettype-autocomplete'
-                    options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
-                    value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
-                    onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                      handleSloTargetPromQlRelChange(
-                        { target: { name: 'target_promql_rel', value: newValue} },
-                        null,
-                        null
-                      )
-                    }}
-                    onInputChange={(event, newInputValue) => {
-                      if (event) {
-                        handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
-                      }
-                    }}
-                    renderInput={params => (
-                      <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
-                    )}
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item sm={20} xs={30}>
+                    <TextfieldStyled
+                      fullWidth
+                      multiline
+                      value={sloTargetPromql}
+                      onChange={handleSloTargetPromqlChange}
+                      label='Prometheus Query'
+
                     />
-                    
+                  </Grid>
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo={false}
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='slotargettype-autocomplete'
+                      options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
+                      value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                      onChange={(event, newValue) => {
+                        // Directly calling handleFormChange with a synthetic event object
+                        handleSloTargetPromQlRelChange(
+                          { target: { name: 'target_promql_rel', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
+                      )}
+                    />
+
+                  </Grid>
+
                 </Grid>
-                  
-              </Grid>
-            </Fragment>): (
-              
-            <Fragment>
-              <Grid container spacing={6}>
-                <Grid item sm={6} xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTargetIndex}
-                    onChange={handleTargetIndexChange}
-                    label='Source Index'
-                  />
+              </Fragment>) : (
+
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item sm={6} xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTargetIndex}
+                      onChange={handleTargetIndexChange}
+                      label='Source Index'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloFilterQuery}
+                      onChange={handleFilterQueryChange}
+                      label='Filter Query'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTotalQuery}
+                      onChange={handleTotalQueryChange}
+                      label='Total Query'
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloFilterQuery}
-                    onChange={handleFilterQueryChange}
-                    label='Filter Query'
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTotalQuery}
-                    onChange={handleTotalQueryChange}
-                    label='Total Query'
-                  />
-                </Grid>
-              </Grid>
-            </Fragment>
+              </Fragment>
             )}
           </Fragment>
         )
@@ -663,7 +650,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Target Method' fullWidth required autoComplete='off' />
                   )}
-                />               
+                />
               </Grid>
             </Grid>
           </Fragment>
@@ -672,121 +659,122 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         return (
           <Fragment>
             {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
-            <Fragment>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                  Review and Confirm
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Name:</strong> {sloName}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Description:</strong> {sloDescription}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Prometheus Base Query:</strong> {sloTargetPromql}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
-                </Typography>
-              </Grid>   
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Time Window:</strong> {sloTimeWindow}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Target Period:</strong> {sloTargetPeriod.label}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Target Value:</strong> {sloTargetValue}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Fragment>
+              <Fragment>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                      Review and Confirm
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Name:</strong> {sloName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Description:</strong> {sloDescription}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Prometheus Base Query:</strong> {sloTargetPromql}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Time Window:</strong> {sloTimeWindow}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Period:</strong> {sloTargetPeriod.label}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Value:</strong> {sloTargetValue}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Fragment>
 
             ) : (
-            <Fragment>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                  Review and Confirm
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Name:</strong> {sloName}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Description:</strong> {sloDescription}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Target Index:</strong> {sloTargetIndex}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Filter Query:</strong> {sloFilterQuery}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Good Query:</strong> {sloGoodQuery}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Total Query:</strong> {sloTotalQuery}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Time Window:</strong> {sloTimeWindow}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Target Period:</strong> {sloTargetPeriod.label}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Target Value:</strong> {sloTargetValue}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Fragment>
+              <Fragment>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                      Review and Confirm
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Name:</strong> {sloName}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Description:</strong> {sloDescription}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Index:</strong> {sloTargetIndex}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Filter Query:</strong> {sloFilterQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Good Query:</strong> {sloGoodQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Total Query:</strong> {sloTotalQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Time Window:</strong> {sloTimeWindow}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Period:</strong> {sloTargetPeriod.label}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Value:</strong> {sloTargetValue}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Fragment>
             )}
-          
+
           </Fragment>
+
         )
       default:
         return 'Unknown Step'
@@ -836,30 +824,30 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   </Typography>
                 </Grid>
               </Grid>) : (
-                  <Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Target Index:</strong> {sloTargetIndex}
-                  </Typography>
+                <Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Index:</strong> {sloTargetIndex}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Filter Query:</strong> {sloFilterQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Good Query:</strong> {sloGoodQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Total Query:</strong> {sloTotalQuery}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Filter Query:</strong> {sloFilterQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Good Query:</strong> {sloGoodQuery}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Total Query:</strong> {sloTotalQuery}
-                  </Typography>
-                </Grid>
-              </Grid>
               )}
-              
+
               <Grid item xs={12}>
                 <Typography>
                   <strong>Time Window:</strong> {sloTimeWindow}

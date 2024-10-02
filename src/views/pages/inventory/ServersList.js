@@ -50,25 +50,23 @@ import axios from 'axios'
 
 import toast from 'react-hot-toast'
 import { useForm, Controller } from 'react-hook-form'
-import { parseISO, formatDistance } from 'date-fns'
-import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { parseISO } from 'date-fns'
+import { formatInTimeZone } from 'date-fns-tz'
 import { useTranslation } from 'react-i18next'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
 // ** Utils Import
-import { getInitials } from 'src/@core/utils/get-initials'
 import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 
 // ** Custom Components
 import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
-import CustomAvatar from 'src/@core/components/mui/avatar'
-import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
+import { CustomDataGrid } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import ServerDetailPanel from 'src/views/pages/inventory/ServerDetailPanel'
-import { serverIdsAtom, serversAtom, refetchServerTriggerAtom, timezoneAtom } from 'src/lib/atoms'
+import { serverIdsAtom, refetchServerTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -118,7 +116,6 @@ const ServersList = props => {
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
   const [serverIds, setServerIds] = useAtom(serverIdsAtom)
-  const [servers, setServers] = useAtom(serverIdsAtom)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
@@ -140,22 +137,85 @@ const ServersList = props => {
     setDetailPanelExpandedRowIds(newIds)
   }, [])
 
-  // column definitions
+  // ** Column definitions with ellipsis styling
   const columns = [
     {
       flex: 0.02,
       field: 'id',
-      headerName: t('Identifier')
+      headerName: t('Identifier'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.id}>
+                {row.id}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.02,
       field: 'subcomponent_name',
-      headerName: t('Subcomponent')
+      headerName: t('Subcomponent'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.subcomponent_name}>
+                {row.subcomponent_name}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.02,
       field: 'datacenter_name',
-      headerName: t('Datacenter')
+      headerName: t('Datacenter'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.datacenter_name}>
+                {row.datacenter_name}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.035,
@@ -169,14 +229,16 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.hostname?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row?.hostname?.toUpperCase()}>
+                {row?.hostname?.toUpperCase()}
+              </Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -186,6 +248,7 @@ const ServersList = props => {
                       ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
+                title={row?.id}
               >
                 {row?.id}
               </Typography>
@@ -202,20 +265,20 @@ const ServersList = props => {
       renderCell: params => {
         const { row } = params
 
-        // console.log('Row Datacenter:', row?.datacenter_name?.toUpperCase())
-
         return (
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.environment_name?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row?.environment_name?.toUpperCase()}>
+                {row?.environment_name?.toUpperCase()}
+              </Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -225,6 +288,7 @@ const ServersList = props => {
                       ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
+                title={row?.datacenter_name?.toUpperCase()}
               >
                 {row?.datacenter_name?.toUpperCase()}
               </Typography>
@@ -256,19 +320,19 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
+                alignItems: 'center',
                 flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
+                justifyContent: 'center',
+                width: '100%'
               }}
             >
               <CustomChip
@@ -297,14 +361,16 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.component_name?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row?.component_name?.toUpperCase()}>
+                {row?.component_name?.toUpperCase()}
+              </Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -314,6 +380,7 @@ const ServersList = props => {
                       ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
+                title={row?.subcomponent_name?.toUpperCase()}
               >
                 {row?.subcomponent_name?.toUpperCase()}
               </Typography>
@@ -336,7 +403,7 @@ const ServersList = props => {
         if (row.created_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.created_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -345,14 +412,16 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -373,7 +442,7 @@ const ServersList = props => {
         if (row.modified_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.modified_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -382,14 +451,16 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'row', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -406,10 +477,10 @@ const ServersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>

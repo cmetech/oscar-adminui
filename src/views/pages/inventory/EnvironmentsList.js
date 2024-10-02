@@ -140,17 +140,59 @@ const EnvironmentsList = props => {
 
   const editmode = false
 
-  // column definitions
+  // ** Column definitions with updated renderCell functions
   const columns = [
     {
       flex: 0.02,
       field: 'id',
-      headerName: t('Identifier')
+      headerName: t('Identifier'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.id}>
+                {row.id}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.02,
       field: 'datacenter_name',
-      headerName: t('Datacenter')
+      headerName: t('Datacenter'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.datacenter_name?.toUpperCase()}>
+                {row.datacenter_name?.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.04,
@@ -165,14 +207,16 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.name?.toUpperCase()}>
+                {row.name?.toUpperCase()}
+              </Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -182,8 +226,9 @@ const EnvironmentsList = props => {
                       ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
+                title={row.datacenter_name?.toUpperCase()}
               >
-                {row?.datacenter_name?.toUpperCase()}
+                {row.datacenter_name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -207,31 +252,21 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='small'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
-                icon={<Icon icon='mdi:server' />}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
+            <CustomChip
+              rounded
+              size='small'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label || 'UNKN'}
+              color={color}
+              icon={<Icon icon='mdi:server' />}
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+            />
           </Box>
         )
       }
@@ -253,31 +288,21 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='small'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
-                icon={<Icon icon='mdi:server-off' />}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
+            <CustomChip
+              rounded
+              size='small'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label || 'UNKN'}
+              color={color}
+              icon={<Icon icon='mdi:server-off' />}
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+            />
           </Box>
         )
       }
@@ -295,14 +320,16 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{capitalizeWords(row?.description)}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={capitalizeWords(row?.description)}>
+                {capitalizeWords(row?.description)}
+              </Typography>
             </Box>
           </Box>
         )
@@ -322,7 +349,7 @@ const EnvironmentsList = props => {
         if (row.created_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.created_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -331,14 +358,16 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -358,7 +387,7 @@ const EnvironmentsList = props => {
         if (row.modified_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.modified_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -367,14 +396,16 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -391,10 +422,10 @@ const EnvironmentsList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
@@ -739,8 +770,6 @@ const EnvironmentsList = props => {
           }}
           autoHeight={true}
           rows={filteredRows.length ? filteredRows : rows}
-          apiRef={dgApiRef}
-          rowCount={rowCountState}
           columns={columns}
           checkboxSelection={false}
           disableRowSelectionOnClick

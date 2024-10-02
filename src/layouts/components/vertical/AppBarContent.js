@@ -23,7 +23,7 @@ import UserDropdown from 'src/layouts/components/UserDropdown'
 import UserNotificationDropdown from 'src/layouts/components/UserNotificationDropdown'
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
 import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
-
+import UserTimezoneToggler from 'src/layouts/components/shared-components/footer/UserTimezoneToggler'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 const notifications = [
@@ -223,6 +223,7 @@ const AppBarContent = props => {
         {/* <UserNotificationDropdown settings={settings} notifications={notifications} /> */}
         {ability?.can('manage', 'all') ? <UserShortcutsDropdown settings={settings} shortcuts={shortcuts} /> : null}
         <UserLanguageDropdown settings={settings} saveSettings={saveSettings} />
+        <UserTimezoneToggler settings={settings} saveSettings={saveSettings} />
         <UserDropdown settings={settings} />
       </Box>
     </Box>

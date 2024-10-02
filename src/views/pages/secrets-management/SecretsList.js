@@ -67,7 +67,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateSecretsWizard from 'src/views/pages/secrets-management/forms/UpdateSecretsWizard'
-import { refetchSecretsTriggerAtom } from 'src/lib/atoms'
+import { refetchSecretsTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -111,6 +111,8 @@ const SecretsList = ({ set_total, total, ...props }) => {
   const [secretToDelete, setSecretToDelete] = useState(null)
   const [secretToEdit, setSecretToEdit] = useState(null)
   const [visibleSecrets, setVisibleSecrets] = useState({})
+
+  const [timezone] = useAtom(timezoneAtom)
 
   // ** Column Definitions
   const columns = [

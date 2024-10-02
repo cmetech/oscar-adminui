@@ -68,7 +68,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import AlertDetailPanel from 'src/views/pages/alerts/AlertDetailPanel'
-import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { alertIdsAtom, alertsAtom, refetchServerTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -126,6 +126,8 @@ const AlertsList = props => {
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
 
+  const [timezone] = useAtom(timezoneAtom)
+
   const getDetailPanelContent = useCallback(({ row }) => <AlertDetailPanel alert={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
@@ -148,8 +150,8 @@ const AlertsList = props => {
 
         if (row.starts_at) {
           humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row?.starts_at), 'US/Eastern'),
-            'US/Eastern',
+            parseISO(row.starts_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -239,8 +241,8 @@ const AlertsList = props => {
 
         if (row.ends_at) {
           humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row?.ends_at), 'US/Eastern'),
-            'US/Eastern',
+            parseISO(row.ends_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -478,22 +480,22 @@ const AlertsList = props => {
   const fetchData = useCallback(
     async filterModel => {
       // Default start and end times to the last 24 hours if not defined
-      let startDate, endDate;
-  
+      let startDate, endDate
+
       if (props.onAccept === true) {
-        startDate = yesterdayRounded;
-        endDate = todayRounded;
+        startDate = yesterdayRounded
+        endDate = todayRounded
       } else if (Array.isArray(props.onAccept) && props.onAccept.length === 2) {
-        [startDate, endDate] = props.onAccept;
+        ;[startDate, endDate] = props.onAccept
       } else {
-        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-        endDate = new Date();
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+        endDate = new Date()
       }
-  
+
       // Ensure startDate and endDate are Date objects
-      startDate = startDate instanceof Date ? startDate : new Date(startDate);
-      endDate = endDate instanceof Date ? endDate : new Date(endDate);
-  
+      startDate = startDate instanceof Date ? startDate : new Date(startDate)
+      endDate = endDate instanceof Date ? endDate : new Date(endDate)
+
       console.log('onAccept:', props.onAccept)
       console.log('Start Date:', startDate)
       console.log('End Date:', endDate)
@@ -515,7 +517,7 @@ const AlertsList = props => {
           },
           timeout: 30000
         })
-        
+
         if (response.status === 200) {
           console.log('total_pages', response.data.total_pages)
           console.log('total_records', response.data.total_records)

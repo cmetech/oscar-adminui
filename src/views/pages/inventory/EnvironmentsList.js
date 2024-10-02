@@ -70,7 +70,7 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
-import { environmentsAtom, refetchEnvironmentTriggerAtom } from 'src/lib/atoms'
+import { environmentsAtom, refetchEnvironmentTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import { capitalizeWords } from 'src/lib/utils'
 import { useAtom } from 'jotai'
 
@@ -135,6 +135,8 @@ const EnvironmentsList = props => {
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
   const [paginationMode, setPaginationMode] = useState('client')
+
+  const [timezone] = useAtom(timezoneAtom)
 
   const editmode = false
 
@@ -315,11 +317,15 @@ const EnvironmentsList = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.created_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.created_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -347,11 +353,15 @@ const EnvironmentsList = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.modified_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.modified_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -489,8 +499,8 @@ const EnvironmentsList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -498,16 +508,12 @@ const EnvironmentsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -519,9 +525,7 @@ const EnvironmentsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this environment?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this environment?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -531,9 +535,9 @@ const EnvironmentsList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -541,8 +545,8 @@ const EnvironmentsList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>

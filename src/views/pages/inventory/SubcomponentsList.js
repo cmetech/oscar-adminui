@@ -71,7 +71,7 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
-import { subcomponentIdsAtom, subcomponentsAtom, refetchSubcomponentTriggerAtom } from 'src/lib/atoms'
+import { subcomponentIdsAtom, subcomponentsAtom, refetchSubcomponentTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -133,6 +133,8 @@ const SubcomponentsList = props => {
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
   const [paginationMode, setPaginationMode] = useState('client')
+
+  const [timezone] = useAtom(timezoneAtom)
 
   const editmode = false
 
@@ -216,11 +218,15 @@ const SubcomponentsList = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.created_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.created_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -248,11 +254,15 @@ const SubcomponentsList = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.modified_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.modified_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -392,8 +402,8 @@ const SubcomponentsList = props => {
         open={deleteDialog}
         onClose={handleDeleteSubcomponentDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -401,16 +411,12 @@ const SubcomponentsList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteSubcomponentDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteSubcomponentDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -422,9 +428,7 @@ const SubcomponentsList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this subcomponent?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this subcomponent?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -434,9 +438,9 @@ const SubcomponentsList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteSubcomponentDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -444,8 +448,8 @@ const SubcomponentsList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteSubcomponentDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>

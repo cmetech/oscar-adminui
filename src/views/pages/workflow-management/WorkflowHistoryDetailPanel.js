@@ -9,6 +9,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import { parseISO, format } from 'date-fns'
 import { utcToZonedTime } from 'date-fns-tz'
 import axios from 'axios'
+import { atom, useAtom, useSetAtom } from 'jotai'
 
 // import CustomChip from 'src/@core/components/mui/chip'
 import CustomChip from 'src/views/components/mui/chip'
@@ -17,6 +18,7 @@ import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
+import { timezoneAtom } from 'src/lib/atoms'
 
 const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
@@ -54,6 +56,7 @@ const WorkflowHistoryDetailPanel = ({ row }) => {
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [timezone] = useAtom(timezoneAtom)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)

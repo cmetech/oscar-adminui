@@ -68,7 +68,7 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import RunTaskWizard from 'src/views/pages/tasks-management/forms/RunTaskWizard'
 import WorkflowDetailPanel from 'src/views/pages/workflow-management/WorkflowDetailPanel'
-import { workflowIdsAtom, workflowsAtom, refetchWorkflowTriggerAtom } from 'src/lib/atoms'
+import { workflowIdsAtom, workflowsAtom, refetchWorkflowTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import UpdateTaskWizard from 'src/views/pages/tasks-management/forms/UpdateTaskWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -124,7 +124,7 @@ const WorkflowsList = props => {
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
-
+  const [timezone] = useAtom(timezoneAtom)
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
@@ -233,11 +233,9 @@ const WorkflowsList = props => {
         renderCell: params => {
           const { row } = params
 
-          const timezone = session?.data?.user?.timezone || 'US/Eastern'
-
           if (row?.next_dagrun && !isNaN(new Date(row.next_dagrun).getTime())) {
             const humanReadableDate = formatInTimeZone(
-              utcToZonedTime(parseISO(row.next_dagrun), timezone),
+              parseISO(row.next_dagrun),
               timezone,
               'MMM d, yyyy, h:mm:ss aa zzz'
             )

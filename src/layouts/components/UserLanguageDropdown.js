@@ -6,6 +6,7 @@ import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import { useTranslation } from 'react-i18next'
 import Icon from 'src/@core/components/icon'
+import Box from '@mui/material/Box'
 
 const UserLanguageDropdown = ({ settings }) => {
   // ** State
@@ -30,6 +31,21 @@ const UserLanguageDropdown = ({ settings }) => {
     handleLangDropdownClose()
   }
 
+  const styles = {
+    py: 1,
+    px: 1,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    color: 'text.primary',
+    textDecoration: 'none',
+    '& svg': {
+      mr: 2,
+      fontSize: '1.375rem',
+      color: 'text.primary'
+    }
+  }
+
   return (
     <Fragment>
       <IconButton
@@ -50,16 +66,28 @@ const UserLanguageDropdown = ({ settings }) => {
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <MenuItem sx={{ py: 2 }} selected={i18n.language === 'en'} onClick={() => handleLangItemClick('en')}>
-          English
+          <Box sx={styles}>
+            <Icon icon='mdi:translate-variant' sx={{ mr: 3 }} />
+            English
+          </Box>
         </MenuItem>
         <MenuItem sx={{ py: 2 }} selected={i18n.language === 'sv'} onClick={() => handleLangItemClick('sv')}>
-          Swedish
+          <Box sx={styles}>
+            <Icon icon='mdi:translate-variant' sx={{ mr: 3 }} />
+            Swedish
+          </Box>
         </MenuItem>
         <MenuItem sx={{ py: 2 }} selected={i18n.language === 'fr'} onClick={() => handleLangItemClick('fr')}>
-          French
+          <Box sx={styles}>
+            <Icon icon='mdi:translate-variant' sx={{ mr: 3 }} />
+            French
+          </Box>
         </MenuItem>
         <MenuItem sx={{ py: 2 }} selected={i18n.language === 'es'} onClick={() => handleLangItemClick('es')}>
-          Spanish
+          <Box sx={styles}>
+            <Icon icon='mdi:translate-variant' sx={{ mr: 3 }} />
+            Spanish
+          </Box>
         </MenuItem>
       </Menu>
     </Fragment>

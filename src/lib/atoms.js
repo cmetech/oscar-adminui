@@ -1,5 +1,5 @@
 import { atom } from 'jotai'
-import { atomWithReset } from 'jotai/utils'
+import { atomWithReset, atomWithStorage } from 'jotai/utils'
 
 export const serverIdsAtom = atom([])
 
@@ -80,3 +80,5 @@ export const secretsAtom = atom([])
 export const secretsIdsAtom = atom([])
 
 export const refetchSecretsTriggerAtom = atom(0)
+
+export const timezoneAtom = atomWithStorage('timezone', 'UTC')

@@ -69,7 +69,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import ActiveAlertsDetailPanel from 'src/views/pages/alerts/ActiveAlertsDetailPanel'
-import { alertIdsAtom, alertsAtom } from 'src/lib/atoms'
+import { alertIdsAtom, alertsAtom, timezoneAtom } from 'src/lib/atoms'
 import { setRef } from '@mui/material'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -124,6 +124,8 @@ const ActiveAlertsList = props => {
   const [sortingMode, setSortingMode] = useState('client')
   const [paginationMode, setPaginationMode] = useState('client')
 
+  const [timezone] = useAtom(timezoneAtom)
+
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
@@ -148,9 +150,17 @@ const ActiveAlertsList = props => {
         let date = ''
         let humanReadableDate = ''
 
+        // if (row.starts_at) {
+        //   date = parseISO(row.starts_at?.substring(0, 19))
+        //   humanReadableDate = format(date, 'PPpp')
+        // }
+
         if (row.starts_at) {
-          date = parseISO(row.starts_at?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.starts_at?.substring(0, 19)),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (
@@ -244,9 +254,17 @@ const ActiveAlertsList = props => {
         let date = ''
         let humanReadableDate = ''
 
+        // if (row.ends_at) {
+        //   date = parseISO(row.ends_at?.substring(0, 19))
+        //   humanReadableDate = format(date, 'PPpp')
+        // }
+
         if (row.ends_at) {
-          date = parseISO(row.ends_at?.substring(0, 19))
-          humanReadableDate = format(date, 'PPpp')
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.ends_at?.substring(0, 19)),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
         }
 
         return (
@@ -461,22 +479,22 @@ const ActiveAlertsList = props => {
   const fetchData = useCallback(
     async filterModel => {
       // Default start and end times to the last 24 hours if not defined
-      let startDate, endDate;
-  
+      let startDate, endDate
+
       if (props.onAccept === true) {
-        startDate = yesterdayRounded;
-        endDate = todayRounded;
+        startDate = yesterdayRounded
+        endDate = todayRounded
       } else if (Array.isArray(props.onAccept) && props.onAccept.length === 2) {
-        [startDate, endDate] = props.onAccept;
+        ;[startDate, endDate] = props.onAccept
       } else {
-        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-        endDate = new Date();
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+        endDate = new Date()
       }
-  
+
       // Ensure startDate and endDate are Date objects
-      startDate = startDate instanceof Date ? startDate : new Date(startDate);
-      endDate = endDate instanceof Date ? endDate : new Date(endDate);
-  
+      startDate = startDate instanceof Date ? startDate : new Date(startDate)
+      endDate = endDate instanceof Date ? endDate : new Date(endDate)
+
       console.log('onAccept:', props.onAccept)
       console.log('Start Date:', startDate)
       console.log('End Date:', endDate)
@@ -497,7 +515,7 @@ const ActiveAlertsList = props => {
             filter: JSON.stringify(filterModel)
           }
         })
-        
+
         if (response.status === 200) {
           setRowCount(response.data.total_records || 0)
           setRows(response.data.records || [])

@@ -3,6 +3,7 @@ import { Box, Card, CardHeader, Typography } from '@mui/material'
 import { useSession } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
+import { atom, useAtom, useSetAtom } from 'jotai'
 import axios from 'axios'
 import { CustomDataGrid } from 'src/lib/styled-components'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
@@ -18,6 +19,7 @@ import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-f
 import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 import { todayRounded, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import { DataGridPro, GridLoadingOverlay, useGridApiRef, GridLogicOperator } from '@mui/x-data-grid-pro'
+import { timezoneAtom } from 'src/lib/atoms'
 
 const WorkflowHistory = props => {
   const { t } = useTranslation()
@@ -40,6 +42,7 @@ const WorkflowHistory = props => {
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [filterButtonEl, setFilterButtonEl] = useState(null)
   const [columnsButtonEl, setColumnsButtonEl] = useState(null)
+  const [timezone] = useAtom(timezoneAtom)
 
   const columns = [
     {
@@ -149,7 +152,7 @@ const WorkflowHistory = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
+                {formatInTimeZone(utcToZonedTime(date, 'UTC'), timezone, 'yyyy-MM-dd HH:mm:ss zzz')}
               </Typography>
             </Box>
           </Box>
@@ -175,7 +178,7 @@ const WorkflowHistory = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                {formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz')}
+                {formatInTimeZone(utcToZonedTime(date, 'UTC'), timezone, 'yyyy-MM-dd HH:mm:ss zzz')}
               </Typography>
             </Box>
           </Box>
@@ -201,7 +204,7 @@ const WorkflowHistory = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow={'hidden'} textOverflow={'ellipsis'}>
-                {date ? formatInTimeZone(utcToZonedTime(date, 'UTC'), 'UTC', 'yyyy-MM-dd HH:mm:ss zzz') : 'N/A'}
+                {date ? formatInTimeZone(utcToZonedTime(date, 'UTC'), timezone, 'yyyy-MM-dd HH:mm:ss zzz') : 'N/A'}
               </Typography>
             </Box>
           </Box>

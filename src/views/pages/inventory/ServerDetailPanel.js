@@ -8,11 +8,15 @@ import { CustomDataGrid, TabList } from 'src/lib/styled-components'
 import { useTranslation } from 'react-i18next'
 import { parseISO, formatDistance } from 'date-fns'
 import { format, zonedTimeToUtc, utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { atom, useAtom, useSetAtom } from 'jotai'
+import { timezoneAtom } from 'src/lib/atoms'
 
 const ServerDetailPanel = props => {
   const [value, setValue] = useState('1')
   const { row } = props
   const { t } = useTranslation()
+
+  const [timezone] = useAtom(timezoneAtom)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -32,14 +36,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.id.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.id.toUpperCase()}>
+                {row.id.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -57,14 +63,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.name.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.name.toUpperCase()}>
+                {row.name.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -82,14 +90,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.ip_address}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.ip_address}>
+                {row.ip_address}
+              </Typography>
             </Box>
           </Box>
         )
@@ -107,14 +117,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.label.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.label.toUpperCase()}>
+                {row.label.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -128,24 +140,30 @@ const ServerDetailPanel = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.created_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.created_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -159,24 +177,30 @@ const ServerDetailPanel = props => {
       renderCell: params => {
         const { row } = params
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), 'US/Eastern'),
-          'US/Eastern',
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        let humanReadableDate = ''
+
+        if (row.modified_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.modified_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -198,14 +222,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.key.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.key.toUpperCase()}>
+                {row.key.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -223,14 +249,16 @@ const ServerDetailPanel = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row.value.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
+                {row.value.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )

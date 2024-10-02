@@ -70,7 +70,7 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
 import TaskHistoryDetailPanel from 'src/views/pages/tasks-management/TaskHistoryDetailPanel'
-import { serverIdsAtom, serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { serverIdsAtom, serversAtom, refetchServerTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -124,6 +124,8 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
+
+  const [timezone] = useAtom(timezoneAtom)
 
   const getDetailPanelContent = useCallback(({ row }) => <TaskHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -298,8 +300,8 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
 
         if (row.received) {
           humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row?.received), 'US/Eastern'),
-            'US/Eastern',
+            parseISO(row.received),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -334,10 +336,10 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
         let date = ''
         let humanReadableDate = ''
 
-        if (row.started) {
+        if (row.received) {
           humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row?.started), 'US/Eastern'),
-            'US/Eastern',
+            parseISO(row.received),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -372,10 +374,10 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
         let date = ''
         let humanReadableDate = ''
 
-        if (row.succeeded) {
+        if (row.received) {
           humanReadableDate = formatInTimeZone(
-            utcToZonedTime(parseISO(row?.succeeded), 'US/Eastern'),
-            'US/Eastern',
+            parseISO(row.received),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }

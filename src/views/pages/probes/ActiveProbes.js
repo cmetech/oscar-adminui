@@ -68,7 +68,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import { probeIdsAtom, probesAtom, refetchProbeTriggerAtom } from 'src/lib/atoms'
+import { probeIdsAtom, probesAtom, refetchProbeTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import UpdateProbeWizard from 'src/views/pages/probes/forms/UpdateProbeWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -137,7 +137,7 @@ const ActiveProbes = forwardRef((props, ref) => {
   const [filterMode, setFilterMode] = useState('client')
   const [sortingMode, setSortingMode] = useState('client')
   const [paginationMode, setPaginationMode] = useState('server')
-
+  const [timezone] = useAtom(timezoneAtom)
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
@@ -566,13 +566,15 @@ const ActiveProbes = forwardRef((props, ref) => {
       renderCell: params => {
         const { row } = params
 
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+        let humanReadableDate = ''
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        if (row.created_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.created_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box

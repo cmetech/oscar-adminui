@@ -67,7 +67,7 @@ import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import UpdateUserWizard from 'src/views/pages/misc/forms/UpdateUserWizard'
-import { userIdsAtom, usersAtom, refetchUserTriggerAtom } from 'src/lib/atoms'
+import { userIdsAtom, usersAtom, refetchUserTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
@@ -136,6 +136,8 @@ const UsersList = props => {
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+
+  const [timezone] = useAtom(timezoneAtom)
 
   const editmode = false
 

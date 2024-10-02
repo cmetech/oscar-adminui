@@ -66,7 +66,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
-import { notifierIdsAtom, notifiersAtom, refetchNotifierTriggerAtom } from 'src/lib/atoms'
+import { notifierIdsAtom, notifiersAtom, refetchNotifierTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import UpdateNotifierWizard from 'src/views/pages/notifiers/forms/UpdateNotifierWizard'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
 import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
@@ -135,6 +135,8 @@ const ActiveNotifiersList = props => {
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
   const [currentNotifier, setCurrentNotifier] = useState(null)
+
+  const [timezone] = useAtom(timezoneAtom)
 
   // const getDetailPanelContent = useCallback(({ row }) => <NotifierDetailPanel row={row} />, [])
   // const getDetailPanelHeight = useCallback(() => 600, [])
@@ -354,13 +356,15 @@ const ActiveNotifiersList = props => {
       renderCell: params => {
         const { row } = params
 
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+        let humanReadableDate = ''
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.created_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        if (row.created_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.created_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -389,13 +393,15 @@ const ActiveNotifiersList = props => {
       renderCell: params => {
         const { row } = params
 
-        const timezone = session?.data?.user?.timezone || 'US/Eastern'
+        let humanReadableDate = ''
 
-        const humanReadableDate = formatInTimeZone(
-          utcToZonedTime(parseISO(row?.modified_at), timezone),
-          timezone,
-          'MMM d, yyyy, h:mm:ss aa zzz'
-        )
+        if (row.modified_at) {
+          humanReadableDate = formatInTimeZone(
+            parseISO(row.modified_at),
+            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            'MMM d, yyyy, h:mm:ss aa zzz'
+          )
+        }
 
         return (
           <Box
@@ -562,8 +568,8 @@ const ActiveNotifiersList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -571,16 +577,12 @@ const ActiveNotifiersList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -592,9 +594,7 @@ const ActiveNotifiersList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this notifier?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this notifier?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -604,9 +604,9 @@ const ActiveNotifiersList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -614,8 +614,8 @@ const ActiveNotifiersList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -632,8 +632,8 @@ const ActiveNotifiersList = props => {
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -641,16 +641,12 @@ const ActiveNotifiersList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Action')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDisableDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDisableDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -676,9 +672,9 @@ const ActiveNotifiersList = props => {
             variant='contained'
             size='large'
             onClick={handleDisableDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon={isNotifierActive ? "mdi:bell-off" : "mdi:bell"} />}
+            startIcon={<Icon icon={isNotifierActive ? 'mdi:bell-off' : 'mdi:bell'} />}
           >
             {isNotifierActive ? t('Disable') : t('Enable')}
           </Button>
@@ -686,8 +682,8 @@ const ActiveNotifiersList = props => {
             variant='outlined'
             size='large'
             onClick={handleDisableDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>

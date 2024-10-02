@@ -692,13 +692,13 @@ const ServersList = props => {
           setRowCount(res.data.total)
           setRows(res.data.rows)
           props.set_total(res.data.total)
-          setServers(res.data.rows)
+          // setServers(res.data.rows)
         })
 
       setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setServers, setRows]
+    [setRows]
   )
 
   useEffect(() => {

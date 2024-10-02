@@ -143,7 +143,28 @@ const DatacentersList = props => {
     {
       flex: 0.02,
       field: 'id',
-      headerName: t('Identifier')
+      headerName: t('Identifier'),
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.id}>
+                {row.id}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
     },
     {
       flex: 0.035,
@@ -158,14 +179,16 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{row?.name?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.name?.toUpperCase()}>
+                {row.name?.toUpperCase()}
+              </Typography>
               <Typography
                 noWrap
                 variant='caption'
@@ -175,8 +198,9 @@ const DatacentersList = props => {
                       ? theme.palette.customColors.brandBlue
                       : theme.palette.customColors.brandYellow
                 }}
+                title={row.id}
               >
-                {row?.id}
+                {row.id}
               </Typography>
             </Box>
           </Box>
@@ -200,31 +224,21 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='small'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
-                icon={<Icon icon='mdi:office-building-cog' />}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
+            <CustomChip
+              rounded
+              size='small'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label || 'UNKN'}
+              color={color}
+              icon={<Icon icon='mdi:office-building-cog' />}
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+            />
           </Box>
         )
       }
@@ -246,31 +260,21 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='small'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
-                icon={<Icon icon='mdi:server' />}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
+            <CustomChip
+              rounded
+              size='small'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label || 'UNKN'}
+              color={color}
+              icon={<Icon icon='mdi:server' />}
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+            />
           </Box>
         )
       }
@@ -292,31 +296,21 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
-                flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%' // Uses full width to align text to the start properly
-              }}
-            >
-              <CustomChip
-                rounded
-                size='small'
-                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || 'UNKN'}
-                color={color}
-                icon={<Icon icon='mdi:server-off' />}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
-              />
-            </Box>
+            <CustomChip
+              rounded
+              size='small'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label || 'UNKN'}
+              color={color}
+              icon={<Icon icon='mdi:server-off' />}
+              sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+            />
           </Box>
         )
       }
@@ -334,14 +328,16 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{row?.location?.toUpperCase()}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.location?.toUpperCase()}>
+                {row.location?.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         )
@@ -361,7 +357,7 @@ const DatacentersList = props => {
         if (row.created_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.created_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -370,14 +366,16 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -397,7 +395,7 @@ const DatacentersList = props => {
         if (row.modified_at) {
           humanReadableDate = formatInTimeZone(
             parseISO(row.modified_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
+            timezone || 'UTC',
             'MMM d, yyyy, h:mm:ss aa zzz'
           )
         }
@@ -406,14 +404,16 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={humanReadableDate}>
+                {humanReadableDate}
+              </Typography>
             </Box>
           </Box>
         )
@@ -430,10 +430,10 @@ const DatacentersList = props => {
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>

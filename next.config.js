@@ -40,7 +40,8 @@ module.exports = {
     REVERSEPROXY_DASHBOARD_PORT: process.env.REVERSEPROXY_DASHBOARD_PORT,
     VAULT_HOST: process.env.VAULT_HOST,
     VAULT_PORT: process.env.VAULT_PORT,
-    CHAT_WS_ENDPOINT: process.env.CHAT_WS_ENDPOINT
+    CHAT_WS_ENDPOINT: process.env.CHAT_WS_ENDPOINT,
+    CHAT_MODE: process.env.CHAT_MODE
   },
 
   output: 'standalone'

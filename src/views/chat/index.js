@@ -58,55 +58,61 @@ const ChatBot = () => {
   const firstName = userName.split(' ')[0]
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
+  const CHAT_MODE = publicRuntimeConfig.CHAT_MODE || 'api'
+  console.log('Chat mode:', CHAT_MODE)
+
   useEffect(() => {
-    // Establish WebSocket connection
-    const wsEndpoint = publicRuntimeConfig.CHAT_WS_ENDPOINT
-    console.log('WebSocket endpoint:', wsEndpoint)
+    if (CHAT_MODE === 'websocket') {
+      // Establish WebSocket connection
+      const wsEndpoint = publicRuntimeConfig.CHAT_WS_ENDPOINT
+      console.log('WebSocket endpoint:', wsEndpoint)
 
-    if (!wsEndpoint) {
-      console.error('WebSocket endpoint is not defined.')
+      if (!wsEndpoint) {
+        console.error('WebSocket endpoint is not defined.')
 
-      return
-    }
-
-    const wsUrl = `${wsEndpoint}/api/v1/chat/ws`
-    console.log('WebSocket URL:', wsUrl)
-
-    wsRef.current = new WebSocket(wsUrl)
-
-    wsRef.current.onopen = () => {
-      console.log('WebSocket connection established')
-      setWsReady(true)
-    }
-
-    wsRef.current.onmessage = event => {
-      const message = {
-        id: Math.random().toString(36).substring(7),
-        text: event.data,
-        direction: 'incoming',
-        sender: 'ChatBot'
+        return
       }
-      setMessages(prevMessages => [...prevMessages, message])
-      setOscarIsTyping(false)
-      console.log('Received message:', message)
-    }
 
-    wsRef.current.onclose = event => {
-      console.log('WebSocket connection closed', event)
-      setWsReady(false)
-    }
+      const wsUrl = `${wsEndpoint}/api/v1/chat/ws`
+      console.log('WebSocket URL:', wsUrl)
 
-    wsRef.current.onerror = error => {
-      console.error('WebSocket error:', error)
-    }
+      wsRef.current = new WebSocket(wsUrl)
 
-    // Cleanup on component unmount
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close()
+      wsRef.current.onopen = () => {
+        console.log('WebSocket connection established')
+        setWsReady(true)
+      }
+
+      wsRef.current.onmessage = event => {
+        const message = {
+          id: Math.random().toString(36).substring(7),
+          text: event.data,
+          direction: 'incoming',
+          sender: 'ChatBot'
+        }
+        setMessages(prevMessages => [...prevMessages, message])
+        setOscarIsTyping(false)
+        console.log('Received message:', message)
+      }
+
+      wsRef.current.onclose = event => {
+        console.log('WebSocket connection closed', event)
+        setWsReady(false)
+      }
+
+      wsRef.current.onerror = error => {
+        console.error('WebSocket error:', error)
+      }
+
+      // Cleanup on component unmount
+      return () => {
+        if (wsRef.current) {
+          wsRef.current.close()
+        }
       }
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [CHAT_MODE])
 
   useEffect(() => {
     const email = session?.user?.email
@@ -198,16 +204,37 @@ const ChatBot = () => {
     //   console.error('Failed to send message: ', error)
     //   setOscarIsTyping(false)
     // }
-    if (wsReady && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      try {
-        wsRef.current.send(text)
-      } catch (error) {
-        console.error('Failed to send message over WebSocket:', error)
+    if (CHAT_MODE === 'websocket') {
+      if (wsReady && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        try {
+          wsRef.current.send(text)
+        } catch (error) {
+          console.error('Failed to send message over WebSocket:', error)
+          setOscarIsTyping(false)
+        }
+      } else {
+        console.error('WebSocket is not open. Unable to send message.')
         setOscarIsTyping(false)
       }
-    } else {
-      console.error('WebSocket is not open. Unable to send message.')
-      setOscarIsTyping(false)
+    } else if (CHAT_MODE === 'api') {
+      try {
+        const response = await axios.post('/api/oscar/chat', { message: text })
+        setMessages(messages => [
+          ...messages,
+          { direction: 'incoming', text: response.data.reply, id: messageId + '_reply' }
+        ])
+        setOscarIsTyping(false)
+      } catch (error) {
+        console.error('Failed to send message: ', error)
+
+        const errorMessage = {
+          direction: 'incoming',
+          text: 'Sorry, something went wrong.',
+          id: messageId + '_reply'
+        }
+        setMessages(prevMessages => [...prevMessages, errorMessage])
+        setOscarIsTyping(false)
+      }
     }
   }
 

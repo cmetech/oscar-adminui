@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react'
 import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
+import getConfig from 'next/config'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
@@ -39,6 +40,9 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState(false)
   const [oscarIsTyping, setOscarIsTyping] = useState(false)
+  const wsRef = useRef(null)
+  const [wsReady, setWsReady] = useState(false)
+  const { publicRuntimeConfig } = getConfig()
 
   const { t } = useTranslation()
 
@@ -53,6 +57,56 @@ const ChatBot = () => {
   const userName = session?.user?.name || 'John Doe'
   const firstName = userName.split(' ')[0]
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    const wsEndpoint = publicRuntimeConfig.CHAT_WS_ENDPOINT
+    console.log('WebSocket endpoint:', wsEndpoint)
+
+    if (!wsEndpoint) {
+      console.error('WebSocket endpoint is not defined.')
+
+      return
+    }
+
+    const wsUrl = `${wsEndpoint}/api/v1/chat/ws`
+    console.log('WebSocket URL:', wsUrl)
+
+    wsRef.current = new WebSocket(wsUrl)
+
+    wsRef.current.onopen = () => {
+      console.log('WebSocket connection established')
+      setWsReady(true)
+    }
+
+    wsRef.current.onmessage = event => {
+      const message = {
+        id: Math.random().toString(36).substring(7),
+        text: event.data,
+        direction: 'incoming',
+        sender: 'ChatBot'
+      }
+      setMessages(prevMessages => [...prevMessages, message])
+      setOscarIsTyping(false)
+      console.log('Received message:', message)
+    }
+
+    wsRef.current.onclose = event => {
+      console.log('WebSocket connection closed', event)
+      setWsReady(false)
+    }
+
+    wsRef.current.onerror = error => {
+      console.error('WebSocket error:', error)
+    }
+
+    // Cleanup on component unmount
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const email = session?.user?.email
@@ -129,20 +183,30 @@ const ChatBot = () => {
 
   const sendMessage = async text => {
     setIsTyping(false)
-
     const messageId = Math.random().toString(36).substring(7) // Simple random ID generator
     setMessages([...messages, { direction: 'outgoing', text, id: messageId }])
     setOscarIsTyping(true)
 
-    try {
-      const response = await axios.post('/api/oscar/chat', { message: text })
-      setMessages(messages => [
-        ...messages,
-        { direction: 'incoming', text: response.data.reply, id: messageId + '_reply' }
-      ])
-      setOscarIsTyping(false)
-    } catch (error) {
-      console.error('Failed to send message: ', error)
+    // try {
+    //   const response = await axios.post('/api/oscar/chat', { message: text })
+    //   setMessages(messages => [
+    //     ...messages,
+    //     { direction: 'incoming', text: response.data.reply, id: messageId + '_reply' }
+    //   ])
+    //   setOscarIsTyping(false)
+    // } catch (error) {
+    //   console.error('Failed to send message: ', error)
+    //   setOscarIsTyping(false)
+    // }
+    if (wsReady && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      try {
+        wsRef.current.send(text)
+      } catch (error) {
+        console.error('Failed to send message over WebSocket:', error)
+        setOscarIsTyping(false)
+      }
+    } else {
+      console.error('WebSocket is not open. Unable to send message.')
       setOscarIsTyping(false)
     }
   }
@@ -171,7 +235,7 @@ const ChatBot = () => {
                 model={{
                   message: msg.text,
                   sender: msg.direction === 'incoming' ? 'OSCAR' : firstName,
-                  sentTime: new Date(),
+                  sentTime: new Date().toISOString(),
                   direction: msg.direction
                 }}
                 avatarPosition={msg.direction === 'incoming' ? 'cl' : 'cr'}

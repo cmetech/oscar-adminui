@@ -41,7 +41,8 @@ module.exports = {
     VAULT_HOST: process.env.VAULT_HOST,
     VAULT_PORT: process.env.VAULT_PORT,
     CHAT_WS_ENDPOINT: process.env.CHAT_WS_ENDPOINT,
-    CHAT_MODE: process.env.CHAT_MODE
+    CHAT_MODE: process.env.CHAT_MODE,
+    CHAT_ENABLE: process.env.CHAT_ENABLE
   },
 
   output: 'standalone'

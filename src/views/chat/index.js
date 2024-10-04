@@ -55,7 +55,7 @@ const ChatBot = () => {
   console.log('session', session)
 
   const userName = session?.user?.name || 'John Doe'
-  const firstName = userName.split(' ')[0]
+  const { firstName, lastName, email, timezone } = session.user
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
   const CHAT_MODE = publicRuntimeConfig.CHAT_MODE || 'api'
@@ -189,21 +189,18 @@ const ChatBot = () => {
 
   const sendMessage = async text => {
     setIsTyping(false)
+
     const messageId = Math.random().toString(36).substring(7) // Simple random ID generator
     setMessages([...messages, { direction: 'outgoing', text, id: messageId }])
     setOscarIsTyping(true)
 
-    // try {
-    //   const response = await axios.post('/api/oscar/chat', { message: text })
-    //   setMessages(messages => [
-    //     ...messages,
-    //     { direction: 'incoming', text: response.data.reply, id: messageId + '_reply' }
-    //   ])
-    //   setOscarIsTyping(false)
-    // } catch (error) {
-    //   console.error('Failed to send message: ', error)
-    //   setOscarIsTyping(false)
-    // }
+    const userInfo = {
+      first_name: session.user.firstName,
+      last_name: session.user.lastName,
+      email: session.user.email,
+      timezone: session.user.timezone
+    }
+
     if (CHAT_MODE === 'websocket') {
       if (wsReady && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         try {
@@ -218,10 +215,14 @@ const ChatBot = () => {
       }
     } else if (CHAT_MODE === 'api') {
       try {
-        const response = await axios.post('/api/oscar/chat', { message: text })
+        const response = await axios.post('/api/oscar/chat', {
+          message: text,
+          ...userInfo
+        })
+
         setMessages(messages => [
           ...messages,
-          { direction: 'incoming', text: response.data.reply, id: messageId + '_reply' }
+          { direction: 'incoming', text: response.data.reply, id: `${messageId}_reply` }
         ])
         setOscarIsTyping(false)
       } catch (error) {
@@ -229,8 +230,8 @@ const ChatBot = () => {
 
         const errorMessage = {
           direction: 'incoming',
-          text: 'Sorry, something went wrong.',
-          id: messageId + '_reply'
+          text: `Sorry ${firstName}, something went wrong.`,
+          id: `${messageId}_reply`
         }
         setMessages(prevMessages => [...prevMessages, errorMessage])
         setOscarIsTyping(false)

@@ -195,6 +195,7 @@ const ChatBot = () => {
     setOscarIsTyping(true)
 
     const userInfo = {
+      username: session.user.username,
       first_name: session.user.firstName,
       last_name: session.user.lastName,
       email: session.user.email,

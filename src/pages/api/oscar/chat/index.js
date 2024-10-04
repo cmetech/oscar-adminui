@@ -6,7 +6,7 @@ import oscarConfig from 'src/configs/oscarConfig' // Adjust the import path acco
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { message, first_name, last_name, email, timezone } = req.body
+    const { message, first_name, last_name, email, timezone, username } = req.body
 
     try {
       // Create an HTTPS agent that disables SSL verification (for self-signed certs)
@@ -25,7 +25,8 @@ export default async function handler(req, res) {
             first_name,
             last_name,
             email,
-            timezone
+            timezone,
+            username
           }
         },
         {

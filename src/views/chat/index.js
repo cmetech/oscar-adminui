@@ -59,7 +59,12 @@ const ChatBot = () => {
   const imageFileName = userName.toLowerCase().replace(/\s+/g, '') || '1'
 
   const CHAT_MODE = publicRuntimeConfig.CHAT_MODE || 'api'
+  const CHAT_ENABLE = publicRuntimeConfig.CHAT_ENABLE || 'false'
   console.log('Chat mode:', CHAT_MODE)
+  console.log('Chat enable:', CHAT_ENABLE)
+
+  // Convert CHAT_ENABLE to boolean
+  const isChatEnabled = CHAT_ENABLE.toLowerCase() === 'true'
 
   useEffect(() => {
     if (CHAT_MODE === 'websocket') {
@@ -245,7 +250,7 @@ const ChatBot = () => {
       <MainContainer>
         <ChatContainer>
           <ConversationHeader>
-            <Avatar src='/images/oscar.png' name='Oscar' status='available' />
+            <Avatar src='/images/oscar.png' name='Oscar' status={isChatEnabled ? 'available' : 'unavailable'} />
             <ConversationHeader.Content userName='OSCAR' info='Ericsson Powered ChatBot' />
             <ConversationHeader.Actions>
               <IconButton onClick={clearChat} title={t('clearChat')} color='error' size='medium'>
@@ -284,10 +289,11 @@ const ChatBot = () => {
           <MessageInput
             attachButton={false}
             autoFocus
-            placeholder={t('Message OSCAR')}
+            placeholder={isChatEnabled ? t('Message OSCAR') : t('OSCAR is currently offline')}
             onSend={sendMessage}
             className='custom-message-input'
             onChange={handleInputChange}
+            disabled={!isChatEnabled}
           />
         </ChatContainer>
       </MainContainer>

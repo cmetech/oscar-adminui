@@ -222,7 +222,7 @@ const ChatBot = () => {
 
         setMessages(messages => [
           ...messages,
-          { direction: 'incoming', text: response.data.reply, id: `${messageId}_reply` }
+          { direction: 'incoming', text: response.data.message, id: `${messageId}_reply` }
         ])
         setOscarIsTyping(false)
       } catch (error) {

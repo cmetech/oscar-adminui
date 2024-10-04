@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       })
 
       // Prepare the API request to the middleware
-      const middlewareUrl = `${oscarConfig.MIDDLEWARE_BASE_URL}/chat`
+      const middlewareUrl = `${oscarConfig.MIDDLEWARE_API_URL}/chat`
 
       const response = await axios.post(
         middlewareUrl,
@@ -35,6 +35,8 @@ export default async function handler(req, res) {
           }
         }
       )
+
+      console.log('Response from middleware:', response.data)
 
       // Get the reply from the middleware response
       const reply = response.data.message

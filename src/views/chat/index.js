@@ -136,8 +136,8 @@ const ChatBot = () => {
   }, [session?.user?.email]) // Dependency on `session` ensures it runs once the session info is available
 
   useEffect(() => {
-    // Only proceed if no messages are present and the initial message hasn't been sent yet
-    if (messages.length === 0 && !initialMessageSentRef.current) {
+    // Only proceed if chat is enabled, no messages are present, and the initial message hasn't been sent yet
+    if (isChatEnabled && messages.length === 0 && !initialMessageSentRef.current) {
       setOscarIsTyping(true)
 
       setTimeout(() => {
@@ -152,8 +152,7 @@ const ChatBot = () => {
         initialMessageSentRef.current = true // Mark that the initial message has been sent
       }, 1000)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, initialMessageSentRef.current])
+  }, [messages.length, initialMessageSentRef.current, isChatEnabled])
 
   useEffect(() => {
     if (session && session.user && session.user.email) {

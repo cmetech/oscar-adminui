@@ -67,7 +67,7 @@ const ChatBot = () => {
   const isChatEnabled = CHAT_ENABLE.toLowerCase() === 'true'
 
   useEffect(() => {
-    if (CHAT_MODE === 'websocket') {
+    if (CHAT_MODE === 'websocket' && isChatEnabled) {
       // Establish WebSocket connection
       const wsEndpoint = publicRuntimeConfig.CHAT_WS_ENDPOINT
       console.log('WebSocket endpoint:', wsEndpoint)
@@ -117,7 +117,7 @@ const ChatBot = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [CHAT_MODE])
+  }, [CHAT_MODE, isChatEnabled])
 
   useEffect(() => {
     const email = session?.user?.email
@@ -152,7 +152,7 @@ const ChatBot = () => {
         initialMessageSentRef.current = true // Mark that the initial message has been sent
       }, 1000)
     }
-  }, [messages.length, initialMessageSentRef.current, isChatEnabled])
+  }, [messages.length, isChatEnabled])
 
   useEffect(() => {
     if (session && session.user && session.user.email) {

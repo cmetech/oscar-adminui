@@ -6,7 +6,8 @@ import oscarConfig from 'src/configs/oscarConfig' // Adjust the import path acco
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { message, first_name, last_name, email, timezone, username } = req.body
+    const { message, user_details } = req.body
+    const { first_name, last_name, email, timezone, username } = user_details || {}
 
     // Console log the destructured req.body
     console.log('message:', message)

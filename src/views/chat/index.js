@@ -194,7 +194,7 @@ const ChatBot = () => {
   const sendMessage = async text => {
     setIsTyping(false)
 
-    const messageId = Math.random().toString(36).substring(7) // Simple random ID generator
+    const messageId = Math.random().toString(36).substring(7)
     setMessages([...messages, { direction: 'outgoing', text, id: messageId }])
     setOscarIsTyping(true)
 
@@ -206,10 +206,17 @@ const ChatBot = () => {
       timezone: session.user.timezone
     }
 
+    // Create the JSON object for both WebSocket and API approaches
+    const messageObject = {
+      message: text,
+      user_details: userInfo
+    }
+
     if (CHAT_MODE === 'websocket') {
       if (wsReady && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         try {
-          wsRef.current.send(text)
+          // Send the JSON object as a string
+          wsRef.current.send(JSON.stringify(messageObject))
         } catch (error) {
           console.error('Failed to send message over WebSocket:', error)
           setOscarIsTyping(false)
@@ -220,10 +227,7 @@ const ChatBot = () => {
       }
     } else if (CHAT_MODE === 'api') {
       try {
-        const response = await axios.post('/api/oscar/chat', {
-          message: text,
-          ...userInfo
-        })
+        const response = await axios.post('/api/oscar/chat', messageObject)
 
         setMessages(messages => [
           ...messages,

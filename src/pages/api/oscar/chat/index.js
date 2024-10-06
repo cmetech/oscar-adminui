@@ -8,6 +8,14 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { message, first_name, last_name, email, timezone, username } = req.body
 
+    // Console log the destructured req.body
+    console.log('message:', message)
+    console.log('first_name:', first_name)
+    console.log('last_name:', last_name)
+    console.log('email:', email)
+    console.log('timezone:', timezone)
+    console.log('username:', username)
+
     try {
       // Create an HTTPS agent that disables SSL verification (for self-signed certs)
       const httpsAgent = new https.Agent({

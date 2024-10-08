@@ -961,17 +961,16 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
   const handleNext = async () => {
     if (activeStep === 1 || activeStep === 2) {
-      // Assuming step 1 is Network Info and step 2 is Metadata Info
-      setResetFormFields(prev => !prev) // Toggle reset state to force UI update
+      setResetFormFields(prev => !prev)
     }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
     if (activeStep === steps.length - 1) {
       try {
-        const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
+        const apiToken = session?.data?.user?.apiToken
 
         const headers = {
           Accept: 'application/json',
-          Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+          Authorization: `Bearer ${apiToken}`
         }
 
         const payload = {
@@ -982,9 +981,6 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
         }
 
-        // console.log('Payload:', payload)
-
-        // Update the endpoint to point to your Next.js API route
         const endpoint = `/api/tasks/config/${currentTask.name}`
         const response = await axios.post(endpoint, payload, { headers })
 
@@ -994,25 +990,24 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           if (task_name) {
             console.log('Task configuration successfully updated for ', task_name)
 
-            // Register Task
             const registerTaskEndpoint = `/api/tasks/register/${task_name}`
             const registerTaskResponse = await axios.post(registerTaskEndpoint, {}, { headers })
 
             if (registerTaskResponse.data) {
-              // Trigger a refetch of the tasks list
-              // TODO: Query Task By Name /query
               const queryTaskEndpoint = `/api/tasks/query/${task_name}`
               const queryTaskResponse = await axios.post(queryTaskEndpoint, {}, { headers })
 
               if (queryTaskResponse.data && queryTaskResponse.status === 200) {
-                // console.log(queryTaskResponse.data)
                 const taskDetails = queryTaskResponse.data[0]
 
-                // Attempt to schedule tasks
-                // Check if the task is not disabled
-                if (taskDetails && taskDetails.status?.toLowerCase() !== 'disabled') {
-                  // Trigger scheduling for the task
-                  const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}` // Make sure to use the correct property for the task ID
+                // Check if the task is not disabled and has a schedule
+                if (
+                  taskDetails &&
+                  taskDetails.status?.toLowerCase() !== 'disabled' &&
+                  taskDetails.schedule &&
+                  Object.keys(taskDetails.schedule).length > 0
+                ) {
+                  const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}`
                   try {
                     const scheduleResponse = await axios.post(scheduleTaskEndpoint, {}, { headers })
 
@@ -1028,10 +1023,16 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                     toast.error(`Error scheduling task ${taskDetails.name}.`)
                   }
                 } else {
-                  console.log(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
-
-                  // Optionally, show a message indicating the task is disabled and won't be scheduled
-                  toast.error(`Task ${taskDetails.name} is disabled and will not be scheduled.`)
+                  let message = `Task ${taskDetails.name} is `
+                  if (taskDetails.status?.toLowerCase() === 'disabled') {
+                    message += 'disabled '
+                  }
+                  if (!taskDetails.schedule || Object.keys(taskDetails.schedule).length === 0) {
+                    message += (message.includes('disabled') ? 'and ' : '') + 'has no schedule defined '
+                  }
+                  message += 'and will not be scheduled.'
+                  console.log(message)
+                  toast.info(message)
                 }
 
                 setRefetchTrigger(Date.now())
@@ -1048,7 +1049,6 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
             toast.error('Failed to update task configuration')
           }
 
-          // Call onClose to close the modal
           onClose && onClose()
         }
       } catch (error) {

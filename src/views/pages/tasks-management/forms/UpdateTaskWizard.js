@@ -1023,16 +1023,16 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                     toast.error(`Error scheduling task ${taskDetails.name}.`)
                   }
                 } else {
-                  let message = `Task ${taskDetails.name} is `
+                  let message = `Task ${taskDetails.name} `
                   if (taskDetails.status?.toLowerCase() === 'disabled') {
-                    message += 'disabled '
+                    message += 'is disabled '
                   }
                   if (!taskDetails.schedule || Object.keys(taskDetails.schedule).length === 0) {
                     message += (message.includes('disabled') ? 'and ' : '') + 'has no schedule defined '
                   }
                   message += 'and will not be scheduled.'
                   console.log(message)
-                  toast.info(message)
+                  toast.success(message) // Changed from toast.info to toast.success
                 }
 
                 setRefetchTrigger(Date.now())

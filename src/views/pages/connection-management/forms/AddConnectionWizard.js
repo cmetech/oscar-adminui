@@ -50,18 +50,44 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
-// Define initial state for the notifier form
+// Define initial state for the connection form
 const initialConnectionFormState = {
   name: '',
-  type: 'http', // default to email notifier
+  type: 'http', // default to 'http' connection type
   description: '',
   host: '',
   login: '',
   schema: '',
   port: '',
   password: '',
-  extra: [{ key: '', value: ''}]
+  extra: [{ key: '', value: '' }]
 }
+
+// Define available connection types
+const connectionTypes = [
+  'mysql',
+  'postgresql',
+  'mongodb',
+  'mssql',
+  'oracle',
+  'sqlite',
+  'redis',
+  'kafka',
+  'rabbitmq',
+  'activemq',
+  'mqtt',
+  'elasticsearch',
+  'couchbase',
+  'ftp',
+  'sftp',
+  'smtp',
+  'pop3',
+  'imap',
+  'nntp',
+  'telnet',
+  'ssh',
+  'vnc'
+]
 
 const steps = [
   {
@@ -158,7 +184,7 @@ const AddConnectionWizard = ({ onSuccess }) => {
   const session = useSession()
 
   useEffect(() => {
-    // Reset the active step when notifier type changes
+    // Reset the active step when connection type changes
     setActiveStep(0)
   }, [connectionForm.type])
 
@@ -229,10 +255,9 @@ const AddConnectionWizard = ({ onSuccess }) => {
     setShowPassword(!showPassword)
   }
 
-  const handleMouseDownPassword = (event) => {
+  const handleMouseDownPassword = event => {
     event.preventDefault()
   }
-  
 
   const handleFormChange = (event, index, section) => {
     const target = event.target || event
@@ -240,10 +265,7 @@ const AddConnectionWizard = ({ onSuccess }) => {
     let value = target.value
 
     // Convert string values to lowercase, except for specific fields
-    if (
-      typeof value === 'string' &&
-      !['description', 'password'].includes(name)
-    ) {
+    if (typeof value === 'string' && !['description', 'password'].includes(name)) {
       value = value.toLowerCase()
     }
 
@@ -334,7 +356,7 @@ const AddConnectionWizard = ({ onSuccess }) => {
 
         const payload = {
           ...connectionForm,
-          extra: extraString,
+          extra: extraString
         }
 
         const endpoint = `/api/connections`
@@ -382,7 +404,7 @@ const AddConnectionWizard = ({ onSuccess }) => {
       }
     }
 
-    const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
+    const { keyLabel, valueLabel } = getFieldLabels(section)
 
     return connectionForm[section].map((entry, index) => (
       <Grid item xs={12} key={`${index}-${resetFormFields}`}>
@@ -438,18 +460,36 @@ const AddConnectionWizard = ({ onSuccess }) => {
           return (
             <Fragment>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth margin='normal'>
-                    <InputLabelStyled id='connection-type-label'>Connection Type</InputLabelStyled>
-                    <SelectStyled
-                      labelId='connection-type-label'
-                      value={connectionForm.type}
-                      onChange={e => setConnectionForm({ ...connectionForm, type: e.target.value })}
-                      label='Connection Type'
-                    >
-                      <MenuItem value='mysql'>mysql</MenuItem>
-                      <MenuItem value='postgres'>postgres</MenuItem>
-                    </SelectStyled>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='connection-type-autocomplete'
+                      options={connectionTypes}
+                      value={connectionForm.type || ''}
+                      onChange={(event, value) => setConnectionForm({ ...connectionForm, type: value })}
+                      onInputChange={(event, value, reason) => {
+                        if (reason === 'clear') {
+                          setConnectionForm({ ...connectionForm, type: '' })
+                        } else {
+                          setConnectionForm({ ...connectionForm, type: value })
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          label='Connection Type'
+                          fullWidth
+                          required
+                          autoComplete='off'
+                          error={Boolean(formErrors.type)}
+                          helperText={formErrors.type}
+                        />
+                      )}
+                    />
                   </FormControl>
                 </Grid>
               </Grid>
@@ -532,26 +572,26 @@ const AddConnectionWizard = ({ onSuccess }) => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabelStyled htmlFor="outlined-adornment-password">Password</InputLabelStyled>
+                  <FormControl fullWidth variant='outlined'>
+                    <InputLabelStyled htmlFor='outlined-adornment-password'>Password</InputLabelStyled>
                     <OutlinedInputStyled
-                      id="outlined-adornment-password"
+                      id='outlined-adornment-password'
                       type={showPassword ? 'text' : 'password'}
                       value={connectionForm.password}
-                      onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
+                      onChange={e => handleFormChange({ target: { name: 'password', value: e.target.value } })}
                       endAdornment={
-                        <InputAdornment position="end">
+                        <InputAdornment position='end'>
                           <IconButton
-                            aria-label="toggle password visibility"
+                            aria-label='toggle password visibility'
                             onClick={handleClickShowPassword}
                             onMouseDown={handleMouseDownPassword}
-                            edge="end"
+                            edge='end'
                           >
                             <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                           </IconButton>
                         </InputAdornment>
                       }
-                      label="Password"
+                      label='Password'
                     />
                   </FormControl>
                 </Grid>
@@ -706,7 +746,7 @@ const Section = ({ title, data }) => {
             <Grid item xs={12} sm={6}>
               <TextfieldStyled
                 fullWidth
-                label="Key"
+                label='Key'
                 value={item.key || ''}
                 InputProps={{ readOnly: true }}
                 variant='outlined'
@@ -716,7 +756,7 @@ const Section = ({ title, data }) => {
             <Grid item xs={12} sm={6}>
               <TextfieldStyled
                 fullWidth
-                label="Value"
+                label='Value'
                 value={item.value || ''}
                 InputProps={{ readOnly: true }}
                 variant='outlined'

@@ -175,6 +175,13 @@ const navigation = () => {
           action: 'manage',
           subject: 'runtime'
         },
+        {
+          title: 'Rules',
+          path: '/management/application/rules',
+          icon: 'mdi:file-document-alert',
+          action: 'manage',
+          subject: 'runtime'
+        }
       ]
     },
     {

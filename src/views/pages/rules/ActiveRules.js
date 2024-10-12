@@ -89,7 +89,7 @@ const ActiveRules = forwardRef((props, ref) => {
 
       // Set the total rule count
       if (props.setRuleTotal) {
-        props.setRuleTotal(response.data.total_records)
+        props.setRuleTotal(response.data.rules.length)
       }
 
       setRules(response.data.rules || [])

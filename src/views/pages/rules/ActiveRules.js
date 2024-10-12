@@ -313,7 +313,7 @@ const ActiveRules = forwardRef((props, ref) => {
   const handleConfirmDelete = async () => {
     if (ruleToDelete) {
       try {
-        await axios.delete(`/api/rules/${ruleToDelete.id}`)
+        await axios.delete(`/api/rules/delete/${ruleToDelete.name}?namespace=${ruleToDelete.namespace}`)
         fetchRules()
         toast.success(t('Rule deleted successfully'))
       } catch (error) {
@@ -513,12 +513,12 @@ const ActiveRules = forwardRef((props, ref) => {
             )}
             <IconButton
               size='small'
-              title={t('Delete Probe')}
-              aria-label={t('Delete Probe')}
+              title={t('Delete Rule')}
+              aria-label={t('Delete Rule')}
               color='error'
               onClick={() => {
                 handleDelete(row)
-                setDeleteDialog(true)
+                setDeleteDialogOpen(true)
               }}
               disabled={!ability.can('delete', 'rules')}
             >

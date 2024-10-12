@@ -32,6 +32,7 @@ import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 import { CustomDataGrid, TabList } from 'src/lib/styled-components.js'
 import { escapeRegExp, getNestedValue } from 'src/lib/utils'
 import { rulesIdsAtom, rulesAtom, refetchRulesTriggerAtom } from 'src/lib/atoms'
+import ActiveRulesDetailPanel from 'src/views/pages/rules/ActiveRulesDetailPanel' // Adjust the path as needed
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -72,6 +73,13 @@ const ActiveRules = forwardRef((props, ref) => {
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchRulesTriggerAtom)
   const [rules, setRules] = useAtom(rulesAtom)
   const [rulesIds, setRulesIds] = useAtom(rulesIdsAtom)
+
+  // Add state for detail panel
+  const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
+
+  const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
+    setDetailPanelExpandedRowIds(newIds)
+  }, [])
 
   useImperativeHandle(ref, () => ({
     refresh: () => {
@@ -433,6 +441,47 @@ const ActiveRules = forwardRef((props, ref) => {
       }
     },
     {
+      flex: 0.015,
+      field: 'suppression',
+      headerName: t('Suppression'),
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: params => {
+        const { row } = params
+
+        const isSuppressed = row.actions?.suppress === true
+        const label = isSuppressed ? t('Enabled') : t('Disabled')
+        const color = isSuppressed ? 'success' : 'error'
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <CustomChip
+              title={label}
+              overflow='hidden'
+              textOverflow='ellipsis'
+              rounded
+              size='medium'
+              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+              label={label}
+              color={color}
+              sx={{
+                '& .MuiChip-label': { textTransform: 'capitalize' },
+                width: '120px'
+              }}
+            />
+          </Box>
+        )
+      }
+    },
+    {
       flex: 0.01,
       field: 'actions',
       headerName: t('Actions'),
@@ -742,6 +791,15 @@ const ActiveRules = forwardRef((props, ref) => {
               }
             }
           }}
+          getDetailPanelContent={({ row }) => <ActiveRulesDetailPanel row={row} />}
+          getDetailPanelHeight={() => 400}
+          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
+          components={
+            {
+              // ... other components ...
+            }
+          }
         />
       </Card>
 

@@ -463,20 +463,32 @@ const ActiveRules = forwardRef((props, ref) => {
               height: '100%'
             }}
           >
-            <CustomChip
-              title={label}
-              overflow='hidden'
-              textOverflow='ellipsis'
-              rounded
-              size='medium'
-              skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-              label={label}
-              color={color}
+            <Box
               sx={{
-                '& .MuiChip-label': { textTransform: 'capitalize' },
-                width: '120px'
+                display: 'flex',
+                alignItems: 'center', // Ensures vertical centering inside the Box
+                flexDirection: 'column',
+                justifyContent: 'center', // Ensures content within this Box is also centered vertically
+                width: '100%', // Uses full width to align text to the start properly
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
-            />
+            >
+              <CustomChip
+                title={label}
+                overflow='hidden'
+                textOverflow='ellipsis'
+                rounded
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
+                label={label}
+                color={color}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '120px'
+                }}
+              />
+            </Box>
           </Box>
         )
       }

@@ -14,14 +14,37 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  IconButton
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { useTheme, styled } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
 import * as yup from 'yup'
+import StepperWrapper from 'src/@core/styles/mui/stepper'
+import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
+
+// ** Styled Components
+const TextFieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.customColors.accent
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent
+    }
+  },
+  marginTop: theme.spacing(2)
+}))
+
+const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
+  color: theme.palette.customColors.accent,
+  '&.Mui-checked': {
+    color: theme.palette.customColors.accent
+  }
+}))
 
 const stepValidationSchemas = [
   // Step 0: Rule Details
@@ -29,7 +52,10 @@ const stepValidationSchemas = [
     name: yup.string().required('Rule name is required'),
     description: yup.string(),
     condition: yup.string().required('Condition is required'),
-    actionSuppress: yup.boolean(),
+    actionSuppress: yup.boolean()
+  }),
+  // Step 1: Add Labels
+  yup.object().shape({
     add_labels: yup.array().of(
       yup.object().shape({
         key: yup.string().required('Label key is required'),
@@ -42,12 +68,19 @@ const stepValidationSchemas = [
 // Steps for the wizard
 const steps = [
   {
-    title: 'Rule Details',
-    description: 'Update rule name, condition, description, and actions'
+    title: 'General',
+    subtitle: 'Information',
+    description: 'Update the rule details.'
+  },
+  {
+    title: 'Labels',
+    subtitle: 'Add Labels',
+    description: 'Add or edit labels to be added by the rule.'
   },
   {
     title: 'Review',
-    description: 'Review the rule before submitting'
+    subtitle: 'Summary',
+    description: 'Review your changes before submitting.'
   }
 ]
 
@@ -61,8 +94,10 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     name: rule.name || '',
     description: rule.description || '',
     condition: rule.condition || '',
-    actionSuppress: rule.suppress || false,
-    add_labels: rule.add_labels ? Object.entries(rule.add_labels).map(([key, value]) => ({ key, value })) : []
+    actionSuppress: rule.actions?.suppress || false,
+    add_labels: rule.actions?.add_labels
+      ? Object.entries(rule.actions.add_labels).map(([key, value]) => ({ key, value }))
+      : []
   })
   const [formErrors, setFormErrors] = useState({})
 
@@ -164,9 +199,9 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       case 0:
         return (
           <Fragment>
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={12}>
-                <TextField
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextFieldStyled
                   label={t('Namespace')}
                   name='namespace'
                   fullWidth
@@ -176,8 +211,8 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
+              <Grid item xs={12} sm={6}>
+                <TextFieldStyled
                   label={t('Rule Name')}
                   name='name'
                   fullWidth
@@ -194,7 +229,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                 )}
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <TextFieldStyled
                   label={t('Description')}
                   name='description'
                   fullWidth
@@ -205,7 +240,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <TextFieldStyled
                   label={t('Condition')}
                   name='condition'
                   fullWidth
@@ -223,7 +258,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
               <Grid item xs={12}>
                 <FormControlLabel
                   control={
-                    <Checkbox
+                    <CheckboxStyled
                       checked={ruleForm.actionSuppress}
                       onChange={handleFormChange}
                       name='actionSuppress'
@@ -233,43 +268,52 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                   label={t('Suppress Alert')}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant='subtitle1'>{t('Add Labels')}</Typography>
-                {ruleForm.add_labels.map((label, index) => (
-                  <Grid container spacing={1} key={index}>
-                    <Grid item xs={5}>
-                      <TextField
-                        label={t('Key')}
-                        name='key'
-                        fullWidth
-                        value={label.key}
-                        onChange={e => handleFormChange(e, index, 'add_labels')}
-                      />
-                    </Grid>
-                    <Grid item xs={5}>
-                      <TextField
-                        label={t('Value')}
-                        name='value'
-                        fullWidth
-                        value={label.value}
-                        onChange={e => handleFormChange(e, index, 'add_labels')}
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Button color='secondary' onClick={() => removeLabelEntry(index)}>
-                        <Icon icon='mdi:delete-outline' />
-                      </Button>
-                    </Grid>
-                  </Grid>
-                ))}
-                <Button startIcon={<Icon icon='mdi:plus-circle-outline' />} onClick={addLabelEntry} sx={{ mt: 2 }}>
-                  {t('Add Label')}
-                </Button>
-              </Grid>
             </Grid>
           </Fragment>
         )
       case 1:
+        return (
+          <Fragment>
+            <Typography variant='h6' sx={{ mt: 2 }}>
+              {t('Add Labels')}
+            </Typography>
+            {ruleForm.add_labels.map((label, index) => (
+              <Grid container spacing={2} key={index} alignItems='center'>
+                <Grid item xs={5}>
+                  <TextFieldStyled
+                    label={t('Key')}
+                    name='key'
+                    fullWidth
+                    value={label.key}
+                    onChange={e => handleFormChange(e, index, 'add_labels')}
+                  />
+                </Grid>
+                <Grid item xs={5}>
+                  <TextFieldStyled
+                    label={t('Value')}
+                    name='value'
+                    fullWidth
+                    value={label.value}
+                    onChange={e => handleFormChange(e, index, 'add_labels')}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <IconButton color='secondary' onClick={() => removeLabelEntry(index)}>
+                    <Icon icon='mdi:delete-outline' />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            ))}
+            <Button
+              startIcon={<Icon icon='mdi:plus-circle-outline' />}
+              onClick={addLabelEntry}
+              sx={{ mt: 2, color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+            >
+              {t('Add Label')}
+            </Button>
+          </Fragment>
+        )
+      case 2:
         return (
           <Fragment>
             <Typography variant='h6' sx={{ mt: 2 }}>
@@ -289,7 +333,12 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                 <Typography variant='subtitle1'>
                   <strong>{t('Condition')}:</strong>
                 </Typography>
-                <Box component='pre' p={2} bgcolor={theme.palette.action.hover} sx={{ borderRadius: 1 }}>
+                <Box
+                  component='pre'
+                  p={2}
+                  bgcolor={theme.palette.action.hover}
+                  sx={{ borderRadius: 1, whiteSpace: 'pre-wrap' }}
+                >
                   {ruleForm.condition}
                 </Box>
                 <Typography variant='subtitle1'>
@@ -319,55 +368,87 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
       <DialogTitle>
-        {t('Update Rule')}
-        <Icon
-          icon='mdi:close'
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {t('Update Rule')}
+          </Typography>
+          <Typography
+            noWrap
+            variant='caption'
+            sx={{
+              color:
+                theme.palette.mode === 'light'
+                  ? theme.palette.customColors.brandBlack
+                  : theme.palette.customColors.brandYellow
+            }}
+          >
+            {ruleForm.namespace.toUpperCase()} - {ruleForm.name.toUpperCase()}
+          </Typography>
+        </Box>
+        <IconButton
+          size='small'
           onClick={onClose}
-          fontSize={24}
-          style={{
-            cursor: 'pointer',
-            position: 'absolute',
-            right: theme.spacing(2),
-            top: theme.spacing(2)
-          }}
-        />
+          sx={{ position: 'absolute', right: theme.spacing(2), top: theme.spacing(2) }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
       </DialogTitle>
       <DialogContent>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((step, index) => (
-            <Step key={index}>
-              <StepLabel>{t(step.title)}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+        <StepperWrapper>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((step, index) => {
+              return (
+                <Step key={index}>
+                  <StepLabel StepIconComponent={StepperCustomDot}>
+                    <div className='step-label'>
+                      <div>
+                        <Typography className='step-title'>{t(step.title)}</Typography>
+                        <Typography
+                          className='step-subtitle'
+                          style={{
+                            color:
+                              theme.palette.mode === 'dark'
+                                ? theme.palette.customColors.brandYellow
+                                : theme.palette.secondary.light
+                          }}
+                        >
+                          {t(step.subtitle)}
+                        </Typography>
+                      </div>
+                    </div>
+                  </StepLabel>
+                </Step>
+              )
+            })}
+          </Stepper>
+        </StepperWrapper>
         <form onSubmit={e => e.preventDefault()}>
           {getStepContent(activeStep)}
           <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item>
+            <Grid item xs={6}>
               <Button
                 size='large'
                 variant='outlined'
                 color='secondary'
                 disabled={activeStep === 0}
                 onClick={handleBack}
+                fullWidth
               >
                 {t('Back')}
               </Button>
             </Grid>
-            {activeStep < steps.length - 1 && (
-              <Grid item>
-                <Button size='large' variant='contained' onClick={handleNext}>
+            <Grid item xs={6} sx={{ textAlign: 'right' }}>
+              {activeStep < steps.length - 1 && (
+                <Button size='large' variant='contained' onClick={handleNext} fullWidth>
                   {t('Next')}
                 </Button>
-              </Grid>
-            )}
-            {activeStep === steps.length - 1 && (
-              <Grid item>
-                <Button size='large' variant='contained' onClick={handleNext}>
+              )}
+              {activeStep === steps.length - 1 && (
+                <Button size='large' variant='contained' onClick={handleNext} fullWidth>
                   {t('Submit')}
                 </Button>
-              </Grid>
-            )}
+              )}
+            </Grid>
           </Grid>
         </form>
       </DialogContent>

@@ -1,5 +1,9 @@
 // src/views/pages/rules/forms/UpdateRuleForm.js
+
+// ** React Imports
 import React, { Fragment, useEffect, useState } from 'react'
+
+// ** MUI Imports
 import {
   Box,
   Grid,
@@ -14,15 +18,18 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   IconButton
 } from '@mui/material'
 import { useTheme, styled } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
-import { useTranslation } from 'react-i18next'
+
+// ** Third Party Imports
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import * as yup from 'yup'
+
+// ** Custom Components Imports
 import StepperWrapper from 'src/@core/styles/mui/stepper'
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 
@@ -46,6 +53,7 @@ const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   }
 }))
 
+// ** Validation Schemas
 const stepValidationSchemas = [
   // Step 0: Rule Details
   yup.object().shape({
@@ -69,8 +77,8 @@ const stepValidationSchemas = [
 const steps = [
   {
     title: 'General',
-    subtitle: 'Information',
-    description: 'Update the rule details.'
+    subtitle: 'Rule Details',
+    description: 'Update rule name, condition, description, and actions.'
   },
   {
     title: 'Labels',
@@ -88,6 +96,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const [activeStep, setActiveStep] = useState(0)
+  const [formErrors, setFormErrors] = useState({})
 
   const [ruleForm, setRuleForm] = useState({
     namespace: rule.namespace || '',
@@ -99,13 +108,12 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       ? Object.entries(rule.actions.add_labels).map(([key, value]) => ({ key, value }))
       : []
   })
-  const [formErrors, setFormErrors] = useState({})
 
   // ** Handle form input changes
   const handleFormChange = (event, index, section) => {
     const target = event.target || event
     const name = target.name
-    let value = target.value
+    let value = target.type === 'checkbox' ? target.checked : target.value
 
     setRuleForm(prevForm => {
       const newForm = { ...prevForm }
@@ -113,29 +121,10 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       if (index !== undefined && section) {
         newForm[section][index][name] = value
       } else {
-        if (target.type === 'checkbox') {
-          value = target.checked
-        }
         newForm[name] = value
       }
 
       return newForm
-    })
-  }
-
-  const addLabelEntry = () => {
-    setRuleForm(prevForm => ({
-      ...prevForm,
-      add_labels: [...prevForm.add_labels, { key: '', value: '' }]
-    }))
-  }
-
-  const removeLabelEntry = index => {
-    setRuleForm(prevForm => {
-      const updatedLabels = [...prevForm.add_labels]
-      updatedLabels.splice(index, 1)
-
-      return { ...prevForm, add_labels: updatedLabels }
     })
   }
 
@@ -147,7 +136,9 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
   const handleNext = async () => {
     const currentStepSchema = stepValidationSchemas[activeStep]
     try {
-      await currentStepSchema.validate(ruleForm, { abortEarly: false })
+      if (currentStepSchema) {
+        await currentStepSchema.validate(ruleForm, { abortEarly: false })
+      }
       setFormErrors({})
       if (activeStep === steps.length - 1) {
         submitRule()
@@ -167,25 +158,50 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     }
   }
 
+  // ** Handlers for dynamic add_labels
+  const addLabelEntry = () => {
+    setRuleForm(prevForm => ({
+      ...prevForm,
+      add_labels: [...prevForm.add_labels, { key: '', value: '' }]
+    }))
+  }
+
+  const removeLabelEntry = index => {
+    const updatedLabels = [...ruleForm.add_labels]
+    updatedLabels.splice(index, 1)
+    setRuleForm(prevForm => ({
+      ...prevForm,
+      add_labels: updatedLabels
+    }))
+  }
+
+  // ** Submit the form
   const submitRule = async () => {
     try {
-      const actions = {
-        suppress: ruleForm.actionSuppress,
-        add_labels: ruleForm.add_labels.reduce((acc, label) => {
-          acc[label.key] = label.value
+      // Transform add_labels array into an object
+      const labelsObject = ruleForm.add_labels.reduce((acc, label) => {
+        acc[label.key] = label.value
 
-          return acc
-        }, {})
-      }
+        return acc
+      }, {})
 
       const updatedRule = {
+        namespace: ruleForm.namespace,
         name: ruleForm.name,
         description: ruleForm.description,
         condition: ruleForm.condition,
-        actions
+        actions: {
+          suppress: ruleForm.actionSuppress,
+          add_labels: Object.keys(labelsObject).length > 0 ? labelsObject : null
+        }
       }
 
-      await axios.put(`/api/rules/update/${encodeURIComponent(ruleForm.name)}`, updatedRule)
+      // Include namespace as a query parameter
+      await axios.put(
+        `/api/rules/update/${encodeURIComponent(ruleForm.name)}?namespace=${encodeURIComponent(ruleForm.namespace)}`,
+        updatedRule
+      )
+
       toast.success(t('Successfully updated rule'))
       onClose()
     } catch (error) {
@@ -194,6 +210,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     }
   }
 
+  // ** Render functions for each step
   const getStepContent = step => {
     switch (step) {
       case 0:
@@ -248,12 +265,9 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                   onChange={handleFormChange}
                   multiline
                   rows={4}
+                  error={Boolean(formErrors?.condition)}
+                  helperText={formErrors?.condition}
                 />
-                {formErrors.condition && (
-                  <Typography color='error' variant='caption'>
-                    {t(formErrors.condition)}
-                  </Typography>
-                )}
               </Grid>
               <Grid item xs={12}>
                 <FormControlLabel
@@ -274,9 +288,6 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       case 1:
         return (
           <Fragment>
-            <Typography variant='h6' sx={{ mt: 2 }}>
-              {t('Add Labels')}
-            </Typography>
             {ruleForm.add_labels.map((label, index) => (
               <Grid container spacing={2} key={index} alignItems='center'>
                 <Grid item xs={5}>
@@ -394,6 +405,14 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
         </IconButton>
       </DialogTitle>
       <DialogContent>
+        {/* Added content above the stepper */}
+        <Box sx={{ mb: 8, textAlign: 'center' }}>
+          <Typography variant='h5' sx={{ mb: 3 }}>
+            {t('Update Rule Information')}
+          </Typography>
+          <Typography variant='body2'>{t('Information submitted will be effective immediately.')}</Typography>
+        </Box>
+
         <StepperWrapper>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((step, index) => {
@@ -422,35 +441,51 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
             })}
           </Stepper>
         </StepperWrapper>
-        <form onSubmit={e => e.preventDefault()}>
-          {getStepContent(activeStep)}
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={6}>
-              <Button
-                size='large'
-                variant='outlined'
-                color='secondary'
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                fullWidth
-              >
-                {t('Back')}
-              </Button>
-            </Grid>
-            <Grid item xs={6} sx={{ textAlign: 'right' }}>
-              {activeStep < steps.length - 1 && (
-                <Button size='large' variant='contained' onClick={handleNext} fullWidth>
-                  {t('Next')}
+
+        {/* Add spacing between StepperWrapper and form content */}
+        <Box sx={{ mt: 4 }} />
+
+        {/* Wrap the form content in a Box with padding */}
+        <Box sx={{ paddingLeft: theme.spacing(5), paddingRight: theme.spacing(5) }}>
+          <form onSubmit={e => e.preventDefault()}>
+            <Grid container spacing={5}>
+              <Grid item xs={12}>
+                <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {steps[activeStep].title}
+                </Typography>
+                <Typography
+                  variant='caption'
+                  component='p'
+                  paddingBottom={5}
+                  className='step-subtitle'
+                  style={{
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.secondary.light
+                  }}
+                >
+                  {steps[activeStep].description}
+                </Typography>
+              </Grid>
+              {getStepContent(activeStep)}
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Button
+                  size='large'
+                  variant='outlined'
+                  color='secondary'
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                >
+                  {t('Back')}
                 </Button>
-              )}
-              {activeStep === steps.length - 1 && (
-                <Button size='large' variant='contained' onClick={handleNext} fullWidth>
-                  {t('Submit')}
+                <Button size='large' variant='contained' onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? t('Submit') : t('Next')}
                 </Button>
-              )}
+              </Grid>
             </Grid>
-          </Grid>
-        </form>
+          </form>
+        </Box>
       </DialogContent>
     </Dialog>
   )

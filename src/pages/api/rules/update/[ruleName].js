@@ -4,7 +4,7 @@ import https from 'https'
 import oscarConfig from 'src/configs/oscarConfig'
 
 async function handler(req, res) {
-  const { ruleName } = req.query
+  const { ruleName, namespace } = req.query // Extract namespace
 
   if (req.method === 'PUT') {
     const payload = req.body
@@ -13,12 +13,15 @@ async function handler(req, res) {
     const encodedRuleName = encodeURIComponent(ruleName)
 
     try {
+      // Include namespace as a query parameter when forwarding the request
       const response = await axios.put(`${oscarConfig.MIDDLEWARE_API_URL}/rules/${encodedRuleName}`, payload, {
         headers: {
           'X-API-Key': oscarConfig.API_KEY,
           'Content-Type': 'application/json'
         },
-        params: req.query, // Forward any additional query parameters like 'namespace'
+        params: {
+          namespace: namespace // Forward namespace
+        },
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
       })
 
@@ -28,8 +31,8 @@ async function handler(req, res) {
         res.status(500).json({ message: 'No response - An error occurred' })
       }
     } catch (error) {
-      console.error(`Error updating rule ${ruleName}:`, error)
-      res.status(error.response?.status || 500).json({ message: error.message })
+      console.error(`Error updating rule ${ruleName}:`, error.response?.data || error.message)
+      res.status(error.response?.status || 500).json({ message: error.response?.data?.detail || error.message })
     }
   } else {
     res.setHeader('Allow', ['PUT'])

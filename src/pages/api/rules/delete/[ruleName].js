@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 
-  const { ruleName } = req.query
+  const { ruleName, namespace } = req.query
 
   if (!ruleName) {
     return res.status(400).json({ message: "Invalid or missing 'ruleName'." })
@@ -24,7 +24,9 @@ export default async function handler(req, res) {
         'X-API-Key': oscarConfig.API_KEY,
         Accept: 'application/json'
       },
-      params: req.query, // Include any query parameters like 'namespace'
+      params: {
+        namespace: namespace // Forward namespace
+      },
       httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
     })
 

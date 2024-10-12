@@ -82,3 +82,9 @@ export const secretsIdsAtom = atom([])
 export const refetchSecretsTriggerAtom = atom(0)
 
 export const timezoneAtom = atomWithStorage('timezone', 'UTC')
+
+export const rulesIdsAtom = atom([])
+
+export const rulesAtom = atom([])
+
+export const refetchRulesTriggerAtom = atom(0)

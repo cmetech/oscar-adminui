@@ -180,26 +180,36 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     try {
       // Transform add_labels array into an object
       const labelsObject = ruleForm.add_labels.reduce((acc, label) => {
-        acc[label.key] = label.value
+        if (label.key && label.value) {
+          acc[label.key] = label.value
+        }
 
         return acc
       }, {})
 
-      const updatedRule = {
-        namespace: ruleForm.namespace,
-        name: ruleForm.name,
-        description: ruleForm.description,
+      const payload = {
         condition: ruleForm.condition,
         actions: {
-          suppress: ruleForm.actionSuppress,
-          add_labels: Object.keys(labelsObject).length > 0 ? labelsObject : null
+          suppress: ruleForm.actionSuppress
         }
       }
+
+      // Only add description if it's not empty
+      if (ruleForm.description) {
+        payload.description = ruleForm.description
+      }
+
+      // Only add 'add_labels' to the payload if there are labels
+      if (Object.keys(labelsObject).length > 0) {
+        payload.actions.add_labels = labelsObject
+      }
+
+      console.log('Update Rule Payload:', JSON.stringify(payload, null, 2))
 
       // Include namespace as a query parameter
       await axios.put(
         `/api/rules/update/${encodeURIComponent(ruleForm.name)}?namespace=${encodeURIComponent(ruleForm.namespace)}`,
-        updatedRule
+        payload
       )
 
       toast.success(t('Successfully updated rule'))

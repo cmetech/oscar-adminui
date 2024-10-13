@@ -285,5 +285,7 @@
     "Add": "Add",
     "Update": "Update",
     "No Rules found": "No Rules found",
-    "Select an Excel file to import rules": "Select an Excel file to import rules"
+    "Select an Excel file to import rules": "Select an Excel file to import rules",
+    "Rules": "Rules",
+    "Credentials": "Credentials"
 }

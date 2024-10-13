@@ -286,5 +286,7 @@
   "Select an Excel file to import rules": "Välj en Excel-fil för att importera regler",
   "Please select a file": "Vänligen välj en fil",
   "Edit": "Redigera",
-  "Active Rules": "Aktiva Regler"
+  "Active Rules": "Aktiva Regler",
+  "Rules": "Regler",
+  "Credentials": "Inloggningsuppgifter"
 }

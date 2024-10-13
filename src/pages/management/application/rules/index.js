@@ -1,5 +1,5 @@
 // ** React Imports
-import React, { useState, Fragment } from 'react'
+import React, { useState, Fragment, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 // ** MUI Imports
@@ -16,7 +16,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tab
+  Tab,
+  Fade,
+  Stack
 } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
@@ -54,6 +56,11 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
     }
   }
 }))
+
+// Transition for Dialog
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Fade ref={ref} {...props} />
+})
 
 // ** MoreActionsDropdown Component
 const MoreActionsDropdown = ({ onAction }) => {
@@ -114,7 +121,7 @@ const MoreActionsDropdown = ({ onAction }) => {
             {t('Export Rules')}
           </Box>
         </MenuItem>
-        <MenuItem sx={{ p: 0 }} onClick={() => handleMenuItemClick('delete')}>
+        <MenuItem sx={{ p: 0 }} onClick={() => handleMenuItemClick('delete_selected')}>
           <Box sx={menuItemStyles}>
             <Icon icon='mdi:delete-forever-outline' />
             {t('Delete Selected')}
@@ -134,6 +141,10 @@ const RuleManager = () => {
   const [ruleTotal, setRuleTotal] = useState(0)
   const [selectedRuleIds, setSelectedRuleIds] = useState([])
   const [value, setValue] = useState('1')
+  const [deleteSelectedDialogOpen, setDeleteSelectedDialogOpen] = useState(false)
+  const [rowSelectionModel, setRowSelectionModel] = useState([])
+  const [rules, setRules] = useState([])
+  const gridRef = useRef(null)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -191,14 +202,113 @@ const RuleManager = () => {
     }
   }
 
+  // Handler for actions from MoreActionsDropdown
   const handleMoreActions = action => {
     if (action === 'import') {
       handleOpenImportDialog()
     } else if (action === 'export') {
       handleOpenExportDialog()
-    } else if (action === 'delete') {
-      // Handle delete action
+    } else if (action === 'delete_selected') {
+      if (rowSelectionModel.length === 0) {
+        toast.error(t('No rules selected'))
+      } else {
+        setDeleteSelectedDialogOpen(true)
+      }
     }
+  }
+
+  // Handler for confirming deletion
+  const handleConfirmDeleteSelected = async () => {
+    try {
+      const deletePromises = rowSelectionModel.map(ruleId => {
+        const rule = rules.find(row => `${row.namespace}-${row.name.replace(/\s+/g, '_')}` === ruleId)
+        if (rule) {
+          return axios.delete(
+            `/api/rules/delete/${encodeURIComponent(rule.name)}?namespace=${encodeURIComponent(rule.namespace)}`
+          )
+        } else {
+          return Promise.resolve()
+        }
+      })
+
+      await Promise.all(deletePromises)
+
+      toast.success(t('Selected rules deleted successfully'))
+
+      // Refresh the rules list
+      if (gridRef.current && gridRef.current.refresh) {
+        gridRef.current.refresh()
+      }
+    } catch (error) {
+      console.error('Failed to delete selected rules', error)
+      toast.error(t('Failed to delete selected rules'))
+    } finally {
+      setDeleteSelectedDialogOpen(false)
+      setRowSelectionModel([])
+    }
+  }
+
+  // Dialog Component
+  const DeleteSelectedDialog = () => {
+    return (
+      <Dialog
+        open={deleteSelectedDialogOpen}
+        onClose={() => setDeleteSelectedDialogOpen(false)}
+        TransitionComponent={Transition}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
+      >
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {t('Confirm Deletion')}
+            </Typography>
+            <IconButton size='small' onClick={() => setDeleteSelectedDialogOpen(false)} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <Box>
+                <img src='/images/warning.png' alt='warning' width='32' height='32' />
+              </Box>
+              <Box>
+                <Typography variant='h6'>{t('Confirm you want to delete the selected rules?')}</Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleConfirmDeleteSelected}
+            color='error'
+            autoFocus
+            startIcon={<Icon icon='mdi:delete-forever' />}
+          >
+            {t('Delete')}
+          </Button>
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={() => setDeleteSelectedDialogOpen(false)}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
   }
 
   return (
@@ -234,9 +344,12 @@ const RuleManager = () => {
 
           <TabPanel value='1' sx={{ p: 0 }}>
             <ActiveRules
+              ref={gridRef}
               setRuleTotal={setRuleTotal}
-              selectedRuleIds={selectedRuleIds}
-              setSelectedRuleIds={setSelectedRuleIds}
+              rowSelectionModel={rowSelectionModel}
+              setRowSelectionModel={setRowSelectionModel}
+              rules={rules}
+              setRules={setRules}
             />
           </TabPanel>
         </TabContext>
@@ -265,6 +378,7 @@ const RuleManager = () => {
             </DialogActions>
           </Dialog>
         )}
+        <DeleteSelectedDialog />
       </Grid>
     </Grid>
   )

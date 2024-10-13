@@ -44,7 +44,15 @@ const ActiveRules = forwardRef((props, ref) => {
   const ability = useContext(AbilityContext)
   const apiRef = useGridApiRef()
 
+  // ** Destructure new props
+  const { rowSelectionModel, setRowSelectionModel, rules, setRules } = props
+
   // ** Data Grid State
+  // Remove local state for rowSelectionModel and rules
+  // const [rowSelectionModel, setRowSelectionModel] = useState([])
+  // const [rules, setRules] = useState([])
+
+  // ** State
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
@@ -53,7 +61,6 @@ const ActiveRules = forwardRef((props, ref) => {
   const [paginationMode, setPaginationMode] = useState('client')
   const [filteredRows, setFilteredRows] = useState([])
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
-  const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCountState, setRowCountState] = useState(0)
 
   // ** State
@@ -71,7 +78,6 @@ const ActiveRules = forwardRef((props, ref) => {
   const [rowCount, setRowCount] = useState(0)
   const [runRefresh, setRunRefresh] = useState(false)
   const [refetchTrigger, setRefetchTrigger] = useAtom(refetchRulesTriggerAtom)
-  const [rules, setRules] = useAtom(rulesAtom)
   const [rulesIds, setRulesIds] = useAtom(rulesIdsAtom)
 
   // Add state for detail panel
@@ -112,11 +118,9 @@ const ActiveRules = forwardRef((props, ref) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Use an effect to synchronize the DataGrid's selection model with probeIds
   useEffect(() => {
-    // This updates the DataGrid's selection model whenever probeIds changes
-    setRowSelectionModel(rulesIds)
-  }, [rulesIds])
+    setRows(rules)
+  }, [rules])
 
   useEffect(() => {
     setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
@@ -363,22 +367,9 @@ const ActiveRules = forwardRef((props, ref) => {
     }
   }
 
+  // ** Update the handleRowSelection function
   const handleRowSelection = newRowSelectionModel => {
-    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
-
-    // console.log('Added IDs:', addedIds)
-
-    addedIds.forEach(id => {
-      const row = rows.find(r => r.id === id)
-
-      // console.log('Added Row:', row)
-    })
-
-    // Update the row selection model
     setRowSelectionModel(newRowSelectionModel)
-
-    // Update the Jotai atom with the new selection model
-    setRulesIds(newRowSelectionModel)
   }
 
   // Hidden columns
@@ -571,7 +562,7 @@ const ActiveRules = forwardRef((props, ref) => {
             noResultsOverlay: NoResultsOverlay,
             loadingOverlay: CustomLoadingOverlay
           }}
-          onRowSelectionModelChange={newRowSelectionModel => setRowSelectionModel(newRowSelectionModel)}
+          onRowSelectionModelChange={handleRowSelection}
           rowSelectionModel={rowSelectionModel}
           loading={loading}
           keepNonExistentRowsSelected

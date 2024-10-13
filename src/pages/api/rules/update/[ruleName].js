@@ -6,6 +6,9 @@ import oscarConfig from 'src/configs/oscarConfig'
 async function handler(req, res) {
   const { ruleName, namespace } = req.query // Extract namespace
 
+  console.log('namespace', namespace)
+  console.log('ruleName', ruleName)
+
   if (req.method === 'PUT') {
     const payload = req.body
 

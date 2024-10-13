@@ -3,6 +3,9 @@
 // ** React Imports
 import React, { Fragment, useEffect, useState } from 'react'
 
+import { useSetAtom } from 'jotai'
+import { refetchRulesTriggerAtom } from 'src/lib/atoms'
+
 // ** MUI Imports
 import {
   Box,
@@ -106,6 +109,7 @@ const AddRuleForm = ({ open, onClose }) => {
   const theme = useTheme()
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
+  const setRefetchTrigger = useSetAtom(refetchRulesTriggerAtom)
 
   const [ruleForm, setRuleForm] = useState({
     namespace: '',
@@ -205,6 +209,7 @@ const AddRuleForm = ({ open, onClose }) => {
 
       await axios.post('/api/rules/add', payload) // Updated endpoint
       toast.success(t('Successfully added rule'))
+      setRefetchTrigger(prev => prev + 1)
       onClose()
     } catch (error) {
       console.error('Failed to add rule', error)

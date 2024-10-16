@@ -1,8 +1,19 @@
 // ** React Imports
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
-import dayjs from 'dayjs'
+import { useAtom } from 'jotai'
+import { timezoneAtom } from 'src/lib/atoms'
+import {
+  predefinedRangesDayjs,
+  today,
+  todayRounded,
+  todayRoundedPlus1hour,
+  yesterdayRounded,
+  getLast24Hours,
+  getDefaultDateRange,
+  getExtendedPredefinedRangesDayjs
+} from 'src/lib/calendar-timeranges'
+import dayjs from 'src/lib/dayjs-config'
 
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
@@ -55,19 +66,57 @@ const Alerts = () => {
   const { t } = useTranslation()
   const theme = useTheme()
 
+  // ** Get the user's selected timezone
+  const [timezone] = useAtom(timezoneAtom)
+
   const [value, setValue] = useState('1')
   const [alertGroupTotal, setAlertGroupTotal] = useState(0)
   const [activeAlertsTotal, setActiveAlertsTotal] = useState(0)
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
-  const [onAccept, setOnAccept] = useState(value)
+  // ** Initialize dateRange state with the default date range
+  const [dateRange, setDateRange] = useState(getDefaultDateRange(timezone))
+  const [onAccept, setOnAccept] = useState(getDefaultDateRange(timezone))
+
+  // ** Get extended predefined ranges
+  const extendedPredefinedRangesDayjs = getExtendedPredefinedRangesDayjs(timezone, t)
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
+    if (newValue === '2') {
+      const newDateRange = getDefaultDateRange(timezone)
+      setDateRange(newDateRange)
+      setOnAccept(newDateRange)
+    }
   }
 
   const handleOnAccept = value => {
-    console.log('onAccept', value)
-    setOnAccept(value)
+    const [start, end] = value
+    if (start && end) {
+      const diff = dayjs(end).diff(dayjs(start), 'hour', true)
+      if (diff > 12) {
+        // Show an error message or adjust the end date
+        setDateRange([start, dayjs(start).add(12, 'hour')])
+        // Optionally set an error state to display a message
+        setError('You cannot select a range longer than 12 hours.')
+      } else {
+        setDateRange(value)
+        setError('')
+      }
+    } else {
+      setDateRange(value)
+    }
+  }
+
+  // ** Add useEffect to update dateRange when timezone changes
+  useEffect(() => {
+    // Update dateRange and onAccept when timezone changes
+    const newDateRange = getDefaultDateRange(timezone)
+    setDateRange(newDateRange)
+    setOnAccept(newDateRange)
+  }, [timezone])
+
+  // ** Function to calculate maximum end date/time
+  const getMaxEndDateTime = () => {
+    return dateRange[0] ? dayjs(dateRange[0]).add(12, 'hour') : null
   }
 
   return (
@@ -80,7 +129,6 @@ const Alerts = () => {
               calendars={2}
               closeOnSelect={false}
               value={dateRange}
-              defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
               views={['day', 'hours']}
               timeSteps={{ minute: 10 }}
               viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -121,7 +169,7 @@ const Alerts = () => {
                 },
 
                 shortcuts: {
-                  items: predefinedRangesDayjs,
+                  items: extendedPredefinedRangesDayjs,
                   sx: {
                     '& .MuiChip-root': {
                       color:
@@ -130,7 +178,7 @@ const Alerts = () => {
                           : theme.palette.primary.main,
                       '&:hover': {
                         color:
-                          theme.palette.mode == 'dark'
+                          theme.palette.mode === 'dark'
                             ? theme.palette.customColors.brandYellow
                             : theme.palette.primary.main,
                         backgroundColor:
@@ -189,6 +237,12 @@ const Alerts = () => {
                       }
                     }
                   }
+                },
+                endDesktopDateTimePicker: {
+                  maxDateTime: getMaxEndDateTime()
+                },
+                endMobileDateTimePicker: {
+                  maxDateTime: getMaxEndDateTime()
                 }
               }}
             />

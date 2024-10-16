@@ -3,15 +3,18 @@ import { useContext, useState, useEffect, forwardRef, Fragment, useRef } from 'r
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { workflowIdsAtom, refetchWorkflowTriggerAtom } from 'src/lib/atoms'
+import { workflowIdsAtom, refetchWorkflowTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import {
   predefinedRangesDayjs,
   today,
   todayRounded,
   todayRoundedPlus1hour,
-  yesterdayRounded
+  yesterdayRounded,
+  getLast24Hours,
+  getDefaultDateRange,
+  getExtendedPredefinedRangesDayjs
 } from 'src/lib/calendar-timeranges'
-import dayjs from 'dayjs'
+import dayjs from 'src/lib/dayjs-config'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -627,6 +630,9 @@ const WorkflowsManager = () => {
   const { t } = useTranslation()
   const theme = useTheme()
 
+  // ** Get the user's selected timezone
+  const [timezone] = useAtom(timezoneAtom)
+
   const [value, setValue] = useState('1')
   const [workflowTotal, setTaskTotal] = useState(0)
   const [openModal, setOpenModal] = useState(false)
@@ -638,8 +644,12 @@ const WorkflowsManager = () => {
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useAtom(workflowIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchWorkflowTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
-  const [onAccept, setOnAccept] = useState(value)
+  // ** Initialize dateRange state with the default date range
+  const [dateRange, setDateRange] = useState(getDefaultDateRange(timezone))
+  const [onAccept, setOnAccept] = useState(getDefaultDateRange(timezone))
+
+  // ** Get extended predefined ranges
+  const extendedPredefinedRangesDayjs = getExtendedPredefinedRangesDayjs(timezone, t)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -833,6 +843,11 @@ const WorkflowsManager = () => {
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
+    if (newValue === '2') {
+      const newDateRange = getDefaultDateRange(timezone)
+      setDateRange(newDateRange)
+      setOnAccept(newDateRange)
+    }
   }
 
   const handleOpenModal = () => {
@@ -857,8 +872,34 @@ const WorkflowsManager = () => {
   }
 
   const handleOnAccept = value => {
-    console.log('onAccept', value)
-    setOnAccept(value)
+    const [start, end] = value
+    if (start && end) {
+      const diff = dayjs(end).diff(dayjs(start), 'hour', true)
+      if (diff > 12) {
+        // Show an error message or adjust the end date
+        setDateRange([start, dayjs(start).add(12, 'hour')])
+        // Optionally set an error state to display a message
+        setError('You cannot select a range longer than 12 hours.')
+      } else {
+        setDateRange(value)
+        setError('')
+      }
+    } else {
+      setDateRange(value)
+    }
+  }
+
+  // ** Add useEffect to update dateRange when timezone changes
+  useEffect(() => {
+    // Update dateRange and onAccept when timezone changes
+    const newDateRange = getDefaultDateRange(timezone)
+    setDateRange(newDateRange)
+    setOnAccept(newDateRange)
+  }, [timezone])
+
+  // ** Function to calculate maximum end date/time
+  const getMaxEndDateTime = () => {
+    return dateRange[0] ? dayjs(dateRange[0]).add(12, 'hour') : null
   }
 
   return (
@@ -893,7 +934,6 @@ const WorkflowsManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
@@ -938,7 +978,7 @@ const WorkflowsManager = () => {
                   },
 
                   shortcuts: {
-                    items: predefinedRangesDayjs,
+                    items: extendedPredefinedRangesDayjs,
                     sx: {
                       '& .MuiChip-root': {
                         color:
@@ -947,7 +987,7 @@ const WorkflowsManager = () => {
                             : theme.palette.primary.main,
                         '&:hover': {
                           color:
-                            theme.palette.mode == 'dark'
+                            theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandYellow
                               : theme.palette.primary.main,
                           backgroundColor:
@@ -1006,6 +1046,12 @@ const WorkflowsManager = () => {
                         }
                       }
                     }
+                  },
+                  endDesktopDateTimePicker: {
+                    maxDateTime: getMaxEndDateTime()
+                  },
+                  endMobileDateTimePicker: {
+                    maxDateTime: getMaxEndDateTime()
                   }
                 }}
               />

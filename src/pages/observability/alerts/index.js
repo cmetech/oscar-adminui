@@ -21,6 +21,7 @@ import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
 import { Box, Typography, TextField } from '@mui/material'
+import toast from 'react-hot-toast'
 
 // ** Styled Component Imports
 import { styled, useTheme } from '@mui/material/styles'
@@ -93,9 +94,12 @@ const Alerts = () => {
     if (start && end) {
       const diff = dayjs(end).diff(dayjs(start), 'hour', true)
       if (diff > 12) {
-        // Show an error message or adjust the end date
-        setDateRange([start, dayjs(start).add(12, 'hour')])
-        // Optionally set an error state to display a message
+        // Adjust the end date to 12 hours from the start
+        const newEndDate = dayjs(start).add(12, 'hour')
+        setDateRange([start, newEndDate])
+
+        // Show a toast message
+        toast.error('You cannot select a range longer than 12 hours. The end time has been adjusted accordingly.')
         setError('You cannot select a range longer than 12 hours.')
       } else {
         setDateRange(value)

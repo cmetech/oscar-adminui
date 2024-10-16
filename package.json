@@ -56,6 +56,8 @@
     "clsx": "^1.2.1",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
+    "dayjs": "^1.11.13",
+    "dayjs-plugin-utc": "^0.1.2",
     "draft-js": "^0.11.7",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",

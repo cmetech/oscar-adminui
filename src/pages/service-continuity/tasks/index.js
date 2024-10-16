@@ -12,9 +12,9 @@ import {
   yesterdayRounded,
   getLast24Hours,
   getDefaultDateRange,
-  extendedPredefinedRangesDayjs
+  getExtendedPredefinedRangesDayjs
 } from 'src/lib/calendar-timeranges'
-import dayjs from 'dayjs'
+import dayjs from 'src/lib/dayjs-config'
 
 // ** MUI Imports
 import Badge from '@mui/material/Badge'
@@ -76,6 +76,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import AddTaskWizard from 'src/views/pages/tasks-management/forms/AddTaskWizard'
 import toast from 'react-hot-toast'
 import { useAtom } from 'jotai'
+import { timezoneAtom } from 'src/lib/atoms'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -761,6 +762,9 @@ const TasksManager = () => {
   const { t } = useTranslation()
   const theme = useTheme()
 
+  // ** Get the user's selected timezone
+  const [timezone] = useAtom(timezoneAtom)
+
   const [value, setValue] = useState('1')
   const [taskTotal, setTaskTotal] = useState(0)
   const [datacenterTotal, setDatacenterTotal] = useState(0)
@@ -777,8 +781,20 @@ const TasksManager = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
-  const [dateRange, setDateRange] = useState(getDefaultDateRange)
-  const [onAccept, setOnAccept] = useState(value)
+  // ** Initialize dateRange state with the default date range
+  const [dateRange, setDateRange] = useState(getDefaultDateRange(timezone))
+  const [onAccept, setOnAccept] = useState(getDefaultDateRange(timezone))
+
+  // ** Get extended predefined ranges
+  const extendedPredefinedRangesDayjs = getExtendedPredefinedRangesDayjs(timezone, t)
+
+  // ** Add useEffect to update dateRange when timezone changes
+  useEffect(() => {
+    // Update dateRange and onAccept when timezone changes
+    const newDateRange = getDefaultDateRange(timezone)
+    setDateRange(newDateRange)
+    setOnAccept(newDateRange)
+  }, [timezone])
 
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
 
@@ -985,13 +1001,35 @@ const TasksManager = () => {
     }
   }
 
+  // ** Function to calculate maximum end date/time
+  const getMaxEndDateTime = () => {
+    return dateRange[0] ? dayjs(dateRange[0]).add(12, 'hour') : null
+  }
+
+  const handleOnAccept = value => {
+    const [start, end] = value
+    if (start && end) {
+      const diff = dayjs(end).diff(dayjs(start), 'hour', true)
+      if (diff > 12) {
+        // Show an error message or adjust the end date
+        setDateRange([start, dayjs(start).add(12, 'hour')])
+        // Optionally set an error state to display a message
+        setError('You cannot select a range longer than 12 hours.')
+      } else {
+        setDateRange(value)
+        setError('')
+      }
+    } else {
+      setDateRange(value)
+    }
+  }
+
   const handleChange = (event, newValue) => {
     setValue(newValue)
     if (newValue === '2') {
-      // Update the date range when switching to the Task History tab
-      const [start, end] = getLast24Hours()
-      setDateRange([start, end])
-      setOnAccept([start, end])
+      const newDateRange = getDefaultDateRange(timezone)
+      setDateRange(newDateRange)
+      setOnAccept(newDateRange)
     }
   }
 
@@ -1016,12 +1054,6 @@ const TasksManager = () => {
     return mapping[tabValue] || 'Item'
   }
 
-  const handleOnAccept = value => {
-    console.log('onAccept', value)
-    setOnAccept(value)
-    setDateRange(value)
-  }
-
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -1038,7 +1070,7 @@ const TasksManager = () => {
                   onClick={handleOpenModal}
                   disabled={!ability.can('create', 'tasks')}
                 >
-                  {getDynamicText(value)}
+                  {t('Add Task')}
                 </Button>
                 <MoreActionsDropdown
                   onDelete={handleDelete}
@@ -1056,12 +1088,10 @@ const TasksManager = () => {
                 calendars={2}
                 closeOnSelect={false}
                 value={dateRange}
-                defaultValue={getDefaultDateRange()}
                 views={['day', 'hours']}
                 timeSteps={{ minutes: 10 }}
                 viewRenderers={{ hours: renderDigitalClockTimeView }}
                 onChange={newValue => {
-                  console.log('Date range:', newValue)
                   setDateRange(newValue)
                 }}
                 onAccept={handleOnAccept}
@@ -1075,7 +1105,6 @@ const TasksManager = () => {
                       endAdornment: <Icon icon='mdi:calendar' />
                     }
                   }),
-
                   desktopPaper: {
                     style: {
                       backgroundColor:
@@ -1088,10 +1117,7 @@ const TasksManager = () => {
                       '& .MuiPickersDay-root': {
                         color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
                         '&:hover': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.light
+                          color: theme.palette.customColors.accent
                         }
                       },
                       '& .MuiPickersDay-root.Mui-selected': {
@@ -1099,7 +1125,7 @@ const TasksManager = () => {
                       }
                     }
                   },
-
+                  // ** Use the extended predefined ranges from calendar-timeranges.js
                   shortcuts: {
                     items: extendedPredefinedRangesDayjs,
                     sx: {
@@ -1110,7 +1136,7 @@ const TasksManager = () => {
                             : theme.palette.primary.main,
                         '&:hover': {
                           color:
-                            theme.palette.mode == 'dark'
+                            theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandYellow
                               : theme.palette.primary.main,
                           backgroundColor:
@@ -1169,6 +1195,12 @@ const TasksManager = () => {
                         }
                       }
                     }
+                  },
+                  endDesktopDateTimePicker: {
+                    maxDateTime: getMaxEndDateTime()
+                  },
+                  endMobileDateTimePicker: {
+                    maxDateTime: getMaxEndDateTime()
                   }
                 }}
               />

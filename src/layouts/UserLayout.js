@@ -165,10 +165,14 @@ const AppBrand = () => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-            src={theme.palette.mode == 'dark' ? '/images/SMART2D_170x34_White.png' : '/images/SMART2D_170x34_Black.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? '/images/smart2d_170_42_transparent.png'
+                : '/images/smart2d_170_42_transparent.png'
+            }
             alt='logo'
             width='170px'
-            height='40px'
+            height='42px'
           />
         )}
         {/* <Typography
@@ -197,11 +201,11 @@ const User = () => {
   const userFullName = userSession?.data?.user?.name || 'John Doe'
   const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
-  const userRoles = userSession?.data?.user?.roles || [];
+  const userRoles = userSession?.data?.user?.roles || []
 
-  const isAdmin = userRoles.includes('admin');
-  const isEditor = userRoles.includes('Editor');
-  const firstRole = isAdmin ? 'admin' : isEditor ? 'Editor' : 'viewer';
+  const isAdmin = userRoles.includes('admin')
+  const isEditor = userRoles.includes('Editor')
+  const firstRole = isAdmin ? 'admin' : isEditor ? 'Editor' : 'viewer'
 
   return (
     <Box sx={{ py: 2, px: 4, mb: 2.5 }}>

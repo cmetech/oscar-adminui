@@ -47,10 +47,14 @@ const UserFallbackSpinner = ({ sx }) => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-            src={theme.palette.mode == 'dark' ? '/images/SMART2D_170x34_White.png' : '/images/SMART2D_170x34_Black.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? '/images/smart2d_170_42_transparent.png'
+                : '/images/smart2d_170_42_transparent.png'
+            }
             alt='logo'
             width='170px'
-            height='40px'
+            height='42px'
           />
         )}
         {/* <Typography noWrap variant='caption' color={textColor}>

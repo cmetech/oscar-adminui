@@ -183,7 +183,7 @@ const LoginPage = ({ csrfToken, providers }) => {
   // console.log('CSRF: ' + csrfToken)
   // console.log('Providers: ' + JSON.stringify(providers))
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     const { email, password } = data
 
     try {
@@ -267,8 +267,8 @@ const LoginPage = ({ csrfToken, providers }) => {
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                   src={
                     theme.palette.mode == 'dark'
-                      ? '/images/SMART2D_170x34_White.png'
-                      : '/images/SMART2D_170x34_Black.png'
+                      ? '/images/smart2d_170_42_transparent.png'
+                      : '/images/smart2d_170_42_transparent.png'
                   }
                   alt='logo'
                 />
@@ -324,9 +324,7 @@ const LoginPage = ({ csrfToken, providers }) => {
               >
                 Login with Azure AD
               </Button>
-              {showDivider && (
-                <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
-              )}
+              {showDivider && <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>}
               <Box sx={{ mb: 6 }}>
                 <Typography variant='h6'>Please sign-in using local account</Typography>
               </Box>

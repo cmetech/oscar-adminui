@@ -1011,9 +1011,12 @@ const TasksManager = () => {
     if (start && end) {
       const diff = dayjs(end).diff(dayjs(start), 'hour', true)
       if (diff > 12) {
-        // Show an error message or adjust the end date
-        setDateRange([start, dayjs(start).add(12, 'hour')])
-        // Optionally set an error state to display a message
+        // Adjust the end date to 12 hours from the start
+        const newEndDate = dayjs(start).add(12, 'hour')
+        setDateRange([start, newEndDate])
+
+        // Show a toast message
+        toast.error('You cannot select a range longer than 12 hours. The end time has been adjusted accordingly.')
         setError('You cannot select a range longer than 12 hours.')
       } else {
         setDateRange(value)

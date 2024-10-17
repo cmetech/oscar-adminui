@@ -4,7 +4,7 @@ const oscarConfig = {
   MIDDLEWARE_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
   MIDDLWARE_METRICSTORE_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/metricstore`,
   MIDDLEWARE_INVENTORY_API_URL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/inventory`,
-  BRANDING_TAGLINE: 'powered by Ericsson'
+  BRANDING_TAGLINE: 'powered by SMART2D'
 }
 
 export default oscarConfig

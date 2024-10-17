@@ -51,8 +51,8 @@ const UserFooterContent = props => {
           }`
         }}
       >
-        <i className='icon icon-econ' style={{ fontSize: '1rem' }} />
-        {` © Ericsson 1994-${new Date().getFullYear()}`}
+        {/* <i className='icon icon-econ' style={{ fontSize: '1rem' }} /> */}
+        {` © SMART2D 2020-${new Date().getFullYear()}`}
       </Typography>
       {hidden ? null : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>

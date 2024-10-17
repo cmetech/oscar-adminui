@@ -37,10 +37,14 @@ const UserFallbackSpinner = ({ sx }) => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', marginLeft: 3, marginTop: 2 }}
-            src={theme.palette.mode == 'dark' ? '/images/ECON_RGB_WHITE_48px.png' : '/images/ECON_RGB_BLACK_48px.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? '/images/SMART2D_48_61_icon_dark.png'
+                : '/images/SMART2D_48_61_icon_light.png'
+            }
             alt='logo'
             width='48px'
-            height='48px'
+            height='61px'
           />
         ) : (
           <Box

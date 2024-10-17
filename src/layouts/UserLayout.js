@@ -155,10 +155,14 @@ const AppBrand = () => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', marginLeft: 3, marginTop: 2 }}
-            src={theme.palette.mode == 'dark' ? '/images/S2D_150x150_White.png' : '/images/S2D_150x150_Black.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? '/images/SMART2D_48_61_icon_dark.png'
+                : '/images/SMART2D_48_61_icon_light.png'
+            }
             alt='logo'
             width='48px'
-            height='48px'
+            height='61px'
           />
         ) : (
           <Box

@@ -271,6 +271,8 @@ const LoginPage = ({ csrfToken, providers }) => {
                       : '/images/smart2d_170_42_transparent.png'
                   }
                   alt='logo'
+                  width='170px'
+                  height='42px'
                 />
                 <Typography
                   variant='h6'

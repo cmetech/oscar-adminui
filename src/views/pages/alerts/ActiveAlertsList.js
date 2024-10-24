@@ -341,11 +341,14 @@ const ActiveAlertsList = props => {
             >
               <CustomChip
                 rounded
-                size='small'
-                skin='light'
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '120px'
+                }}
               />
             </Box>
           </Box>
@@ -401,11 +404,14 @@ const ActiveAlertsList = props => {
             >
               <CustomChip
                 rounded
-                size='small'
-                skin='light'
+                size='medium'
+                skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
                 label={label || 'UNKN'}
                 color={color}
-                sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
+                sx={{
+                  '& .MuiChip-label': { textTransform: 'capitalize' },
+                  width: '120px'
+                }}
               />
             </Box>
           </Box>

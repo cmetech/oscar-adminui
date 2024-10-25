@@ -86,7 +86,9 @@ const connectionTypes = [
   'nntp',
   'telnet',
   'ssh',
-  'vnc'
+  'vnc',
+  'http',
+  'https'
 ]
 
 const steps = [

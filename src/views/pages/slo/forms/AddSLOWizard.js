@@ -190,8 +190,11 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const { t } = useTranslation()
   const [sloFilterQuery, setSloFilterQuery] = useState('')
   const [sloTargetConnectionID, setSloTargetConnectionID] = useState('')
+  const [sloPrevTargetConnectionID, setSloPrevTargetConnectionID] = useState('')
   const [sloConnections, setSloConnections] = useState([]);
   const [connectionsLoading, setConnectionsLoading] = useState(false)
+  const [specificConnectionsLoading, setSpecificConnectionsLoading] = useState(false)
+  const [selectedConnectionType, setSelectedConnectionType] = useState('')
   const [sloTargetConnectionType, setSloTargetConnectionType] = useState('')
   const [sloGoodQuery, setSloGoodQuery] = useState('')
   const [goodQueryValidationMassage, setGoodQueryValidationMessage] = useState('')
@@ -700,10 +703,13 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setState({ ...state, [prop]: event.target.value })
   }
 
+  //efect to reset all query field properties if slo-target-type is changed
   useEffect(() => {
 
     if (prevSloTargetType !== sloTargetType) {
       setSloGoodQuery('');
+      setSloTargetConnectionID('')
+      setSloTargetConnectionType('')
       setSloFilterQuery('');
       setSloTotalQuery('');
       setSloTargetIndex('');
@@ -716,7 +722,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setPrevSloTargetType(sloTargetType);
   }, [sloTargetType, prevSloTargetType]);
 
-  //effect to put out color if query filed has no text
+  //effect to put out color if query fileed has no text
   useEffect(() =>{
     if (!sloGoodQuery.trim()) {
       setGoodQueryColor('');
@@ -731,7 +737,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     }
   })
 
-  //effect to trigger validation if query field is on focus for more than 6 seconds with no inpouts
+  //effect to trigger validation if query field is on focus for more than 6 seconds with no inputs
   useEffect(() => {
     const handler = setTimeout(() => {
 
@@ -755,13 +761,13 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     };
   }, [sloGoodQuery, sloTotalQuery]);
 
-  //effect to load all connectionsin order to populate target connection dropdown
+//effect to load all connectionsin order to populate target connection dropdown
   useEffect(() => {
 
     const fetchConnections = async () => {
       setConnectionsLoading(true)
       try {
-        const response = await axios.get('/api/workflows/connections')
+        const response = await axios.get('/api/connections')
         setSloConnections(response.data.connections)
         console.log('Fetched connections:', response.data.connections);
       } catch (error) {
@@ -769,12 +775,30 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         toast.error('Failed load target connections')
       } finally {
         setConnectionsLoading(false)
-      }
-    };
-
+      }};
     fetchConnections();
-
   }, []);
+
+  //Effect to fetch slected connection details
+  useEffect(() => {
+
+    const fetchSpecificConnections = async () => {
+      if (!sloTargetConnectionID) 
+        return;
+
+      setSpecificConnectionsLoading(true)
+      try {
+        const response = await axios.get(`/api/connections/${sloTargetConnectionID}?include_credentials=false`)
+        setSelectedConnectionType(response.data.conn_type)
+        console.log('Fetched connection:', response.data.conn_type);
+      } catch (error) {
+        console.error('Failed to fetch selectd connection details', error)
+        toast.error('Failed load selected connection details')
+      } finally {
+        setSpecificConnectionsLoading(false)
+      }};
+      fetchSpecificConnections();
+  }, [sloTargetConnectionID]);
 
 
   const getStepContent = step => {
@@ -842,21 +866,34 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
             <Fragment>
               <Grid container spacing={6}>
                 <Grid item xs={12}>
-                  <TextfieldStyled
-                    fullWidth
-                    value={sloTargetConnectionID}
-                    onChange={handleTargetConnectionIDChange}
-                    label='Connection ID'
-                    required= {false}
+                  <AutocompleteStyled 
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    options={filteredConnectionIds.map(id => id.toUpperCase())}
+                    value={sloTargetConnectionID?sloTargetConnectionID.toUpperCase():' ' }
+                    onChange={(event, newValue) => {
+                      handleTargetConnectionIDChange({ target: { name: 'target_conection', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleTargetConnectionIDChange({ target: { name: 'target_conection', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Connection' fullWidth autoComplete='off' />
+                    )}
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <AutocompleteStyled
                     freeSolo
                     clearOnBlur
                     selectOnFocus
                     handleHomeEndKeys
-                    options={sloTargetConnectionID ? ['PROMETHEUS'] : []}
+                    options={sloTargetConnectionID ? [selectedConnectionType] : []}
                     value= {sloTargetConnectionType? sloTargetConnectionType:'' }
                     onChange={(event, newValue) => {
                       handleTargetConnectionTypeChange({ target: { name: 'target_type', value: newValue } }, null, null)
@@ -999,7 +1036,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     clearOnBlur
                     selectOnFocus
                     handleHomeEndKeys
-                    options={sloTargetConnectionID ? ['MYSQL', 'POSTGRESQL', 'ORACLE'] : []}
+                    options={sloTargetConnectionID ? [selectedConnectionType] : []}
                     value= {sloTargetConnectionType? sloTargetConnectionType:'' }
                     onChange={(event, newValue) => {
                       handleTargetConnectionTypeChange({ target: { name: 'target_type', value: newValue } }, null, null)

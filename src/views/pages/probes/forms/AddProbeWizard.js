@@ -54,6 +54,10 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 import * as yup from 'yup'
 import { current } from '@reduxjs/toolkit'
 
+// Add these constants at the top of the file, after the imports
+const VALIDATION_TYPES = ['HTTP_STATUS', 'REGEX']
+const HTTP_SUCCESS_CODES = ['200', '201', '202', '204']
+
 // Define initial state for the probe form
 const initialProbeFormState = {
   name: '',
@@ -83,7 +87,8 @@ const initialProbeFormState = {
   payload: '',
   payload_type: 'rest',
   http_method: 'GET',
-  http_headers: []
+  http_headers: [],
+  validation_rules: [{ type: 'HTTP_STATUS', value: '200' }]
 }
 
 const allSteps = [
@@ -111,6 +116,11 @@ const allSteps = [
     title: 'Probe Tokens',
     subtitle: 'Token details',
     description: 'Provide details for the probe payload template.'
+  },
+  {
+    title: 'Validation Rules',
+    subtitle: 'Response Validation',
+    description: 'Define rules to validate the API response.'
   },
   {
     title: 'Review',
@@ -423,11 +433,40 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
     return null // Return null if there is no payload
   }
 
+  const renderValidationRulesSection = probeForm => {
+    if (probeForm.validation_rules && probeForm.validation_rules.length > 0) {
+      return (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+              Validation Rules
+            </Typography>
+          </Grid>
+          {probeForm.validation_rules.map((rule, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <TextfieldStyled
+                fullWidth
+                label={`Rule ${index + 1}`}
+                value={`${rule.type}: ${rule.value}`}
+                InputProps={{ readOnly: true }}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )
+    }
+
+    return null
+  }
+
   return (
     <Fragment>
       {renderGeneralSection(probeForm)}
       {probeForm.type === 'API' && renderHeadersSection(probeForm)}
       {probeForm.type === 'API' && renderPayloadSection(probeForm)}
+      {probeForm.type === 'API' && renderValidationRulesSection(probeForm)}
       {probeForm.type === 'API' && renderArgumentsSection(probeForm)}
     </Fragment>
   )
@@ -439,9 +478,8 @@ const allStepValidationSchemas = [
   yup.object({
     type: yup.string().required('Type is required'),
     port: yup.string().when('type', (typeValue, schema) => {
-      //console.log("Type Value in .when():", typeValue);
+      console.log('Validating port for type:', typeValue)
       if (typeValue[0] === 'PORT') {
-        //console.log("checking for port since typevalue = port")
         return schema
           .required('Port is required')
           .matches(/^\d+$/, 'Only numbers are allowed')
@@ -450,12 +488,12 @@ const allStepValidationSchemas = [
 
             return !isNaN(num) && num >= 1 && num <= 65535
           })
-      } else {
-        //console.log("Ignoring port check typevalue = port as its url")
-        return schema.notRequired()
       }
+
+      return schema.notRequired()
     }),
     target: yup.string().when('type', (typeValue, schema) => {
+      console.log('Validating target for type:', typeValue)
       if (typeValue[0] === 'PORT') {
         return schema
           .required('Target is required')
@@ -463,16 +501,16 @@ const allStepValidationSchemas = [
             /^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
             'Must be a valid IP address'
           )
-      } else {
-        //console.log("Ignoring target check typevalue = port as its url");
-        return schema.notRequired()
       }
+
+      return schema.required('Target is required')
     })
   }),
-  yup.object(), //No validation for the headers step
-  yup.object(), //No validation for the payload step
-  yup.object(), //No validation for the tokens step
-  yup.object() //No validation for the review step
+  yup.object(), // Headers step
+  yup.object(), // Payload step
+  yup.object(), // Tokens step
+  yup.object(), // Validation rules step
+  yup.object() // Review step
 ]
 
 const AddProbeWizard = ({ onSuccess }) => {
@@ -503,7 +541,11 @@ const AddProbeWizard = ({ onSuccess }) => {
     probeType === 'API'
       ? allSteps
       : allSteps.filter(
-          step => step.title !== 'Probe Headers' && step.title !== 'Probe Tokens' && step.title !== 'Probe Payload'
+          step =>
+            step.title !== 'Probe Headers' &&
+            step.title !== 'Probe Tokens' &&
+            step.title !== 'Probe Payload' &&
+            step.title !== 'Validation Rules'
         )
 
   const stepValidationSchemas =
@@ -514,26 +556,34 @@ const AddProbeWizard = ({ onSuccess }) => {
   // Validate Form
   const validateForm = async () => {
     try {
-      // Validate based on the current step
+      console.log('Validating step:', activeStep)
+      console.log('Current form data:', {
+        type: probeType,
+        port: probeForm.port,
+        target: probeForm.target,
+        payload: probeForm.payload,
+        payload_type: probeForm.payload_type
+      })
+
       const formData = {
-        type: probeType, // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
-        port: probeForm.port, // Make sure 'probeForm.port' exists and holds the current port number from the form
+        type: probeType,
+        port: probeForm.port,
         target: probeForm.target,
         payload: probeForm.payload,
         payload_type: probeForm.payload_type
       }
 
       const validationSchema = stepValidationSchemas[activeStep]
+      console.log('Using validation schema for step:', activeStep)
 
       await validationSchema.validate(formData, { abortEarly: false })
-
-      // If validation is successful, clear errors
+      console.log('Validation passed')
       setFormErrors({})
 
       return true
     } catch (yupError) {
+      console.error('Validation error:', yupError)
       if (yupError.inner) {
-        // Transform the validation errors to a more manageable structure
         const transformedErrors = yupError.inner.reduce(
           (acc, currentError) => ({
             ...acc,
@@ -541,10 +591,10 @@ const AddProbeWizard = ({ onSuccess }) => {
           }),
           {}
         )
+        console.log('Validation errors:', transformedErrors)
         setFormErrors(transformedErrors)
       } else {
-        // Handle cases where inner does not exist or is empty
-        //console.error("Validation failed without specific field errors:", yupError);
+        console.error('Validation failed without specific field errors:', yupError)
         setFormErrors({ general: yupError.message || 'An unknown error occurred' })
       }
 
@@ -614,35 +664,29 @@ const AddProbeWizard = ({ onSuccess }) => {
   }
 
   const handleNext = async () => {
+    console.log('Current step:', activeStep)
+    console.log('Total steps:', steps.length)
+
     const isValid = await validateForm()
+    console.log('Form validation result:', isValid)
+    console.log('Current form errors:', formErrors)
+
     if (!isValid) {
-      return // Stop the submission or the next step if the validation fails
-    }
+      console.log('Validation failed, stopping submission')
 
-    // If moving from the payload step, pre-populate kwargs with detected tokens
-    if (activeStep === 3) {
-      const tokens = detectTokensInPayload(probeForm.payload)
-      const existingKeys = probeForm.kwargs.map(kwarg => kwarg.key.toLowerCase())
-
-      const newKwargs = tokens
-        .filter(token => !existingKeys.includes(token.toLowerCase()))
-        .map(token => ({ key: token, value: '' }))
-
-      setProbeForm(prevForm => ({
-        ...prevForm,
-        kwargs: [...newKwargs, ...prevForm.kwargs] // Ensure new tokens are added before existing ones
-      }))
+      return
     }
 
     setActiveStep(prevActiveStep => prevActiveStep + 1)
 
     if (activeStep === steps.length - 1) {
       try {
-        const apiToken = session?.data?.user?.apiToken // Assuming this is how you get the apiToken
+        const apiToken = session?.data?.user?.apiToken
+        console.log('Starting probe submission')
 
         const headers = {
           Accept: 'application/json',
-          Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
+          Authorization: `Bearer ${apiToken}`
         }
 
         const payload = {
@@ -653,6 +697,7 @@ const AddProbeWizard = ({ onSuccess }) => {
 
         // Conditionally add the payload field to kwargs if type is API
         if (probeForm.type === 'API') {
+          console.log('Processing API-specific payload fields')
           payload.kwargs['payload'] = probeForm.payload
           payload['owner'] = 'internal'
           payload['organization'] = 'internal'
@@ -666,58 +711,48 @@ const AddProbeWizard = ({ onSuccess }) => {
 
           // Add SSL Verification to Kwargs
           payload.kwargs['__ssl_verification__'] = probeForm.ssl_verification === 'yes' ? 'true' : 'false'
-
-          // Remove the ssl_verification field from the payload
           delete payload.ssl_verification
+
+          // Add Validation Rules to Kwargs
+          payload.kwargs['__validation_rules__'] = JSON.stringify(probeForm.validation_rules)
+          delete payload.validation_rules
         }
 
         // Add Headers to Kwargs
         if (probeForm.http_headers && probeForm.http_headers.length > 0) {
           const headersDict = Object.fromEntries(probeForm.http_headers.map(({ key, value }) => [key, value]))
           payload.kwargs['__http_headers__'] = JSON.stringify(headersDict)
-
-          // Delete the http_headers field
           delete payload.http_headers
         }
 
-        // Remove the payload and payload_type field if it's not an API type
-        if (probeForm.type !== 'API') {
-          delete payload.payload
-          delete payload.payload_type
-          delete payload.http_method
-          delete payload.http_headers
-          delete payload.ssl_verification
-        }
+        console.log('Final payload:', payload)
 
-        console.log('Payload:', payload)
-
-        // Update the endpoint to point to your Next.js API route
         const endpoint = `/api/probes/add`
+        console.log('Sending request to:', endpoint)
+
         const response = await axios.post(endpoint, payload, { headers })
+        console.log('Response received:', response.data)
 
         if (response.data) {
           const probe = response.data
-
           if (probe) {
-            console.log('Probe successfully created for ', probe.name)
-
-            // Show a success toast
+            console.log('Probe successfully created for', probe.name)
             toast.success('Probe successfully created')
           } else {
-            console.error('Failed to create probe')
+            console.error('Failed to create probe - no data in response')
             toast.error('Failed to create probe')
           }
 
-          // Call onClose to close the modal
           onSuccess && onSuccess()
 
           setTimeout(() => {
             setRefetchTrigger(Date.now())
-          }, 2000) // Adjust the delay as needed
+          }, 2000)
         }
       } catch (error) {
-        console.error('Error updating probe details', error)
-        toast.error('Error updating probe details')
+        console.error('Error creating probe:', error)
+        console.error('Error details:', error.response?.data)
+        toast.error(`Error creating probe: ${error.message}`)
       }
     }
   }
@@ -1175,7 +1210,105 @@ const AddProbeWizard = ({ onSuccess }) => {
           </Fragment>
         )
       case 5:
+        return (
+          <Fragment>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Typography variant='subtitle1' gutterBottom>
+                  Response Validation Rules
+                </Typography>
+                {probeForm.validation_rules.map((rule, index) => (
+                  <Box key={`validation-rule-${index}`} sx={{ marginBottom: 2 }}>
+                    <Grid container spacing={3} alignItems='center'>
+                      <Grid item xs={4}>
+                        <FormControl fullWidth margin='normal'>
+                          <InputLabelStyled>Validation Type</InputLabelStyled>
+                          <SelectStyled
+                            value={rule.type}
+                            onChange={e => {
+                              const newRules = [...probeForm.validation_rules]
+                              newRules[index].type = e.target.value
+                              // Reset value when type changes
+                              newRules[index].value = e.target.value === 'HTTP_STATUS' ? '200' : ''
+                              setProbeForm({ ...probeForm, validation_rules: newRules })
+                            }}
+                          >
+                            {VALIDATION_TYPES.map(type => (
+                              <MenuItem key={type} value={type}>
+                                {type}
+                              </MenuItem>
+                            ))}
+                          </SelectStyled>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={6}>
+                        {rule.type === 'HTTP_STATUS' ? (
+                          <FormControl fullWidth margin='normal'>
+                            <InputLabelStyled>Status Code</InputLabelStyled>
+                            <SelectStyled
+                              value={rule.value}
+                              onChange={e => {
+                                const newRules = [...probeForm.validation_rules]
+                                newRules[index].value = e.target.value
+                                setProbeForm({ ...probeForm, validation_rules: newRules })
+                              }}
+                            >
+                              {HTTP_SUCCESS_CODES.map(code => (
+                                <MenuItem key={code} value={code}>
+                                  {code}
+                                </MenuItem>
+                              ))}
+                            </SelectStyled>
+                          </FormControl>
+                        ) : (
+                          <TextfieldStyled
+                            fullWidth
+                            label='Regular Expression'
+                            value={rule.value}
+                            onChange={e => {
+                              const newRules = [...probeForm.validation_rules]
+                              newRules[index].value = e.target.value
+                              setProbeForm({ ...probeForm, validation_rules: newRules })
+                            }}
+                            margin='normal'
+                          />
+                        )}
+                      </Grid>
+                      <Grid item xs={2} style={{ display: 'flex', alignItems: 'center' }}>
+                        <IconButton
+                          onClick={() => {
+                            const newRules = [...probeForm.validation_rules, { type: 'HTTP_STATUS', value: '200' }]
+                            setProbeForm({ ...probeForm, validation_rules: newRules })
+                          }}
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        >
+                          <Icon icon='mdi:plus-circle-outline' />
+                        </IconButton>
+                        {probeForm.validation_rules.length > 1 && (
+                          <IconButton
+                            onClick={() => {
+                              const newRules = probeForm.validation_rules.filter((_, i) => i !== index)
+                              setProbeForm({ ...probeForm, validation_rules: newRules })
+                            }}
+                            color='secondary'
+                          >
+                            <Icon icon='mdi:minus-circle-outline' />
+                          </IconButton>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ))}
+              </Grid>
+            </Grid>
+          </Fragment>
+        )
+
+      case 6:
         return <ReviewAndSubmitSection probeForm={probeForm} />
+
       default:
         return 'Unknown Step'
     }

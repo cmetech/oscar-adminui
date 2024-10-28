@@ -54,7 +54,7 @@ import * as yup from 'yup'
 import { current } from '@reduxjs/toolkit'
 
 // Add these constants at the top of the file, after the imports
-const VALIDATION_TYPES = ['HTTP_STATUS', 'REGEX']
+const VALIDATION_TYPES = ['HTTP_STATUS', 'REGEX', 'RULE']
 const HTTP_SUCCESS_CODES = ['200', '201', '202', '204']
 
 // Define initial state for the probe form

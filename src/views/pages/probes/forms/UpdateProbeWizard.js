@@ -1275,8 +1275,10 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     <Grid container spacing={3} alignItems='center'>
                       <Grid item xs={4}>
                         <FormControl fullWidth margin='normal'>
-                          <InputLabelStyled>Validation Type</InputLabelStyled>
+                          <InputLabelStyled id='validation-type-label'>Validation Type</InputLabelStyled>
                           <SelectStyled
+                            labelId='validation-type-label'
+                            label='Validation Type'
                             value={rule.type}
                             onChange={e => {
                               const newRules = [...probeForm.validation_rules]
@@ -1316,7 +1318,7 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                         ) : (
                           <TextfieldStyled
                             fullWidth
-                            label='Regular Expression'
+                            label={rule.type === 'RULE' ? 'Rule Expression' : 'Regular Expression'}
                             value={rule.value}
                             onChange={e => {
                               const newRules = [...probeForm.validation_rules]

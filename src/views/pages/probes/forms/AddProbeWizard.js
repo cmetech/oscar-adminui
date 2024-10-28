@@ -1222,8 +1222,9 @@ const AddProbeWizard = ({ onSuccess }) => {
                     <Grid container spacing={3} alignItems='center'>
                       <Grid item xs={4}>
                         <FormControl fullWidth margin='normal'>
-                          <InputLabelStyled>Validation Type</InputLabelStyled>
+                          <InputLabelStyled id='validation-type-label'>Validation Type</InputLabelStyled>
                           <SelectStyled
+                            labelId='validation-type-label'
                             value={rule.type}
                             onChange={e => {
                               const newRules = [...probeForm.validation_rules]
@@ -1232,6 +1233,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                               newRules[index].value = e.target.value === 'HTTP_STATUS' ? '200' : ''
                               setProbeForm({ ...probeForm, validation_rules: newRules })
                             }}
+                            label='Validation Type'
                           >
                             {VALIDATION_TYPES.map(type => (
                               <MenuItem key={type} value={type}>
@@ -1263,7 +1265,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                         ) : (
                           <TextfieldStyled
                             fullWidth
-                            label='Regular Expression'
+                            label={rule.type === 'RULE' ? 'Rule Expression' : 'Regular Expression'}
                             value={rule.value}
                             onChange={e => {
                               const newRules = [...probeForm.validation_rules]

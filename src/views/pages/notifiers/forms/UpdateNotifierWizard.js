@@ -145,6 +145,11 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
     const name = target.name
     let value = target.value
 
+    // Convert name field to uppercase
+    if (name === 'name' && typeof value === 'string') {
+      value = value.toUpperCase()
+    }
+
     setNotifierForm(prevForm => {
       const newForm = { ...prevForm }
 
@@ -248,19 +253,25 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                   label='Notifier Name'
                   fullWidth
                   autoComplete='off'
-                  value={notifierForm.name.toUpperCase()}
+                  value={(notifierForm.name || '').toUpperCase()}
                   onChange={handleFormChange}
+                  disabled={true}
+                  InputProps={{
+                    readOnly: true
+                  }}
+                  error={Boolean(formErrors?.name)}
+                  helperText={formErrors?.name}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-              <TextfieldStyled
+                <TextfieldStyled
                   required
                   id='name'
                   name='name'
                   label='Notifier Name'
                   fullWidth
                   autoComplete='off'
-                  value={notifierForm.type.toUpperCase()}
+                  value={(notifierForm.type || '').toUpperCase()}
                   disabled
                 />
               </Grid>
@@ -272,7 +283,7 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                   handleHomeEndKeys
                   id='notifier-status-autocomplete'
                   options={['enabled', 'disabled']}
-                  value={notifierForm.status.toUpperCase()}
+                  value={(notifierForm.status || '').toUpperCase()}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'status', value: newValue } }, null, null)
                   }}
@@ -316,7 +327,7 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                   label='Name'
                   fullWidth
                   autoComplete='off'
-                  value={notifierForm.name}
+                  value={(notifierForm.name || '').toUpperCase()}
                   onChange={handleFormChange}
                   error={Boolean(formErrors?.name)}
                   helperText={formErrors?.name}
@@ -330,7 +341,7 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                   handleHomeEndKeys
                   id='notifier-status-autocomplete'
                   options={['ENABLED', 'DISABLED']}
-                  value={notifierForm.status.toUpperCase()}
+                  value={(notifierForm.status || '').toUpperCase()}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'status', value: newValue } }, null, null)
                   }}
@@ -548,7 +559,7 @@ const ReviewAndSubmitSection = ({ notifierForm }) => {
         <TextfieldStyled
           fullWidth
           label='Notifier Name'
-          value={notifierForm.name !== undefined ? notifierForm.name : ''}
+          value={(notifierForm.name || '').toUpperCase()}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -558,7 +569,7 @@ const ReviewAndSubmitSection = ({ notifierForm }) => {
         <TextfieldStyled
           fullWidth
           label='Notifier Type'
-          value={notifierForm.type !== undefined ? notifierForm.type : ''}
+          value={(notifierForm.type || '').toUpperCase()}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -568,7 +579,7 @@ const ReviewAndSubmitSection = ({ notifierForm }) => {
         <TextfieldStyled
           fullWidth
           label='Status'
-          value={notifierForm.status !== undefined ? notifierForm.status : ''}
+          value={(notifierForm.status || '').toUpperCase()}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'

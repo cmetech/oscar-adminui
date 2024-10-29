@@ -421,7 +421,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     label='Connection Type'
                     fullWidth
                     autoComplete='off'
-                    value={connectionForm.type.toUpperCase()}
+                    value={(connectionForm.conn_type || '').toUpperCase()}
                     onChange={handleFormChange}
                     disabled={true}
                     error={Boolean(formErrors?.type)}
@@ -446,7 +446,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     label='Name'
                     fullWidth
                     autoComplete='off'
-                    value={connectionForm.connection_id.toUpperCase()}
+                    value={(connectionForm.connection_id || '').toUpperCase()}
                     disabled={true}
                     InputProps={{
                       readOnly: true

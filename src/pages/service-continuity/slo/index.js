@@ -4,7 +4,6 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { sloIdsAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
-import { predefinedRangesDayjs, today, todayRounded, todayRoundedPlus1hour, yesterdayRounded } from 'src/lib/calendar-timeranges'
 import dayjs from 'dayjs'
 
 // ** MUI Imports
@@ -54,10 +53,6 @@ import Icon from 'src/@core/components/icon'
 
 // ** Views
 import SLOList from 'src/views/pages/slo/SLOList'
-import SLOEventHistoryList from 'src/views/pages/slo/SLOEventHistoryList'
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
-import { DateTimeRangePicker } from '@mui/x-date-pickers-pro/DateTimeRangePicker'
-import { renderDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers'
 
 // ** Context Imports
 import { AbilityContext } from 'src/layouts/components/acl/Can'
@@ -601,9 +596,6 @@ const SLO = () => {
   const [selectedSloIds, setSelectedSloIds] = useAtom(sloIdsAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
 
-  const [dateRange, setDateRange] = useState([yesterdayRounded, todayRoundedPlus1hour])
-  const [onAccept, setOnAccept] = useState(value)
-
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
   }
@@ -668,18 +660,7 @@ const SLO = () => {
   }
 
   // Function to determine the dynamic text based on the selected tab
-  const getDynamicText = tabValue => {
-    const mapping = {
-      1: t('SLO')
-    }
-
-    return mapping[tabValue] || 'Item'
-  }
-
-  const handleOnAccept = value => {
-    console.log('onAccept', value)
-    setOnAccept(value)
-  }
+  const getDynamicText = () => t('SLO')
 
   return (
     <Grid container spacing={6}>
@@ -687,141 +668,19 @@ const SLO = () => {
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
           <Typography variant='h4'>{t('Service Level Objectives')}</Typography>
           <Box display='flex' alignItems='center'>
-            {value === '1' && (
-              <Fragment>
-                <Button
-                  variant='contained'
-                  color='secondary'
-                  sx={{ marginRight: 1, marginLeft: 3 }}
-                  startIcon={<Icon icon='mdi:plus' />}
-                  onClick={handleOpenModal}
-                >
-                  {getDynamicText(value)}
-                </Button>
-                <MoreActionsDropdown onDelete={handleDelete} tabValue={value} />
-              </Fragment>
-            )}
-            {value === '2' && (
-              <DateTimeRangePicker
-                calendars={2}
-                closeOnSelect={false}
-                value={dateRange}
-                defaultValue={[yesterdayRounded, todayRoundedPlus1hour]}
-                views={['day', 'hours']}
-                timeSteps={{ minutes: 10 }}
-                viewRenderers={{ hours: renderDigitalClockTimeView }}
-                onChange={newValue => {
-                  // console.log('Date range:', newValue)
-                  setDateRange(newValue)
-                }}
-                onAccept={handleOnAccept}
-                slotProps={{
-                  field: { dateSeparator: 'to' },
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    color: position === 'start' ? 'secondary' : 'secondary',
-                    focused: true,
-                    InputProps: {
-                      endAdornment: <Icon icon='mdi:calendar' />
-                    }
-                  }),
-                  desktopPaper: {
-                    style: {
-                      backgroundColor:
-                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
-                    }
-                  },
-
-                  day: {
-                    sx: {
-                      '& .MuiPickersDay-root': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
-                        '&:hover': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.light
-                        }
-                      },
-                      '& .MuiPickersDay-root.Mui-selected': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
-                      }
-                    }
-                  },
-
-                  shortcuts: {
-                    items: predefinedRangesDayjs,
-                    sx: {
-                      '& .MuiChip-root': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandYellow
-                            : theme.palette.primary.main,
-                        '&:hover': {
-                          color:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          backgroundColor:
-                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
-                        }
-                      }
-                    }
-                  },
-
-                  digitalClockItem: {
-                    sx: {
-                      '&:hover': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandBlack
-                            : theme.palette.customColors.black,
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandGray4
-                            : theme.palette.customColors.brandGray4
-                      },
-                      '&.Mui-selected': {
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandYellow4
-                            : theme.palette.customColors.brandGray1
-                      }
-                    }
-                  },
-
-                  actionBar: {
-                    actions: ['clear', 'today', 'cancel', 'accept'],
-                    sx: {
-                      '& .MuiButton-root': {
-                        borderColor:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandWhite
-                            : theme.palette.primary.main,
-                        color:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandWhite
-                            : theme.palette.primary.main,
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
-                          borderColor:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          color:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            )}
+            <Button
+              variant='contained'
+              color='secondary'
+              sx={{ marginRight: 1, marginLeft: 3 }}
+              startIcon={<Icon icon='mdi:plus' />}
+              onClick={handleOpenModal}
+            >
+              {getDynamicText()}
+            </Button>
+            <MoreActionsDropdown onDelete={handleDelete} tabValue={value} />
           </Box>
         </Box>
-        <TabContext value={value}>
+        <TabContext value='1'>
           <TabList onChange={handleChange} aria-label='assets'>
             {sloTotal == 0 ? (
               <Tab value='1' label={t('SLO')} icon={<Icon icon='mdi:check-decagram' />} iconPosition='start' />
@@ -833,13 +692,9 @@ const SLO = () => {
                 iconPosition='start'
               />
             )}
-            <Tab value='2' label={t('SLO Event History')} icon={<Icon icon='mdi:history' />} iconPosition='start' />
           </TabList>
           <TabPanel value='1'>
-            <SLOList set_total={setSloTotal} total={sloTotal} dateRange={dateRange} onAccept={onAccept} />
-          </TabPanel>
-          <TabPanel value='2'>
-            <SLOEventHistoryList dateRange={dateRange} onAccept={onAccept} />
+            <SLOList set_total={setSloTotal} total={sloTotal} />
           </TabPanel>
         </TabContext>
       </Grid>

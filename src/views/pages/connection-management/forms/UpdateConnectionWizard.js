@@ -149,6 +149,8 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
     setActiveStep(0)
   }, [connectionForm.type])
 
+  const NO_AUTH_REQUIRED = ['redis', 'kafka', 'rabbitmq', 'sftp', 'http', 'https', 'smtp', 'pop3', 'imap']
+
   const stepValidationSchemas = [
     // Step 0: Connection Type
     yup.object().shape({
@@ -161,8 +163,16 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
       host: yup.string().required('Host is required'),
       port: yup.number().typeError('Port must be a number').required('Port is required'),
       schema: yup.string(),
-      login: yup.string().required('Login is required'),
-      password: yup.string(),
+      login: yup.string().when('conn_type', {
+        is: type => !NO_AUTH_REQUIRED.includes(type),
+        then: () => yup.string().required('Login is required'),
+        otherwise: () => yup.string()
+      }),
+      password: yup.string().when('conn_type', {
+        is: type => !NO_AUTH_REQUIRED.includes(type),
+        then: () => yup.string().required('Password is required'),
+        otherwise: () => yup.string()
+      }),
       description: yup.string()
     }),
 
@@ -411,9 +421,11 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     label='Connection Type'
                     fullWidth
                     autoComplete='off'
-                    value={connectionForm.conn_type}
+                    value={connectionForm.type.toUpperCase()}
                     onChange={handleFormChange}
                     disabled={true}
+                    error={Boolean(formErrors?.type)}
+                    helperText={formErrors?.type}
                   />
                 </Grid>
               </Grid>
@@ -434,8 +446,11 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     label='Name'
                     fullWidth
                     autoComplete='off'
-                    value={connectionForm.connection_id}
-                    onChange={handleFormChange}
+                    value={connectionForm.connection_id.toUpperCase()}
+                    disabled={true}
+                    InputProps={{
+                      readOnly: true
+                    }}
                     error={Boolean(formErrors?.connection_id)}
                     helperText={formErrors?.connection_id}
                   />
@@ -483,7 +498,6 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldStyled
-                    required
                     id='login'
                     name='login'
                     label='Login'
@@ -493,11 +507,17 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     onChange={handleFormChange}
                     error={Boolean(formErrors?.login)}
                     helperText={formErrors?.login}
+                    required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth variant='outlined'>
-                    <InputLabelStyled htmlFor='outlined-adornment-password'>Password</InputLabelStyled>
+                    <InputLabelStyled
+                      htmlFor='outlined-adornment-password'
+                      required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
+                    >
+                      Password
+                    </InputLabelStyled>
                     <OutlinedInputStyled
                       id='outlined-adornment-password'
                       type={showPassword ? 'text' : 'password'}

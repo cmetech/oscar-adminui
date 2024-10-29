@@ -378,7 +378,7 @@ const ConnectionsList = props => {
 
   useEffect(() => {
     if (runRefresh) {
-      fetchData()
+      fetchConnections()
     }
 
     return () => {

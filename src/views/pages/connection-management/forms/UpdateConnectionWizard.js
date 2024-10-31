@@ -145,9 +145,9 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
   const session = useSession()
 
   useEffect(() => {
-    // Reset the active step when notifier type changes
+    // Reset the active step when connection type changes
     setActiveStep(0)
-  }, [connectionForm.type])
+  }, [connectionForm.conn_type])
 
   const NO_AUTH_REQUIRED = ['redis', 'kafka', 'rabbitmq', 'sftp', 'http', 'https', 'smtp', 'pop3', 'imap']
 
@@ -416,16 +416,16 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                 <Grid item xs={12} sm={4}>
                   <TextfieldStyled
                     required
-                    id='type'
-                    name='type'
+                    id='conn_type'
+                    name='conn_type'
                     label='Connection Type'
                     fullWidth
                     autoComplete='off'
                     value={(connectionForm.conn_type || '').toUpperCase()}
                     onChange={handleFormChange}
                     disabled={true}
-                    error={Boolean(formErrors?.type)}
-                    helperText={formErrors?.type}
+                    error={Boolean(formErrors?.conn_type)}
+                    helperText={formErrors?.conn_type}
                   />
                 </Grid>
               </Grid>
@@ -441,8 +441,8 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                 <Grid item xs={12} sm={6}>
                   <TextfieldStyled
                     required
-                    id='name'
-                    name='name'
+                    id='connection_id'
+                    name='connection_id'
                     label='Name'
                     fullWidth
                     autoComplete='off'
@@ -507,14 +507,14 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     onChange={handleFormChange}
                     error={Boolean(formErrors?.login)}
                     helperText={formErrors?.login}
-                    required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
+                    required={!NO_AUTH_REQUIRED.includes((connectionForm.conn_type || '').toLowerCase())}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth variant='outlined'>
                     <InputLabelStyled
                       htmlFor='outlined-adornment-password'
-                      required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
+                      required={!NO_AUTH_REQUIRED.includes((connectionForm.conn_type || '').toLowerCase())}
                     >
                       Password
                     </InputLabelStyled>

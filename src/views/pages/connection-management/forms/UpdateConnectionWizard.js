@@ -163,12 +163,12 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
       host: yup.string().required('Host is required'),
       port: yup.number().typeError('Port must be a number').required('Port is required'),
       schema: yup.string(),
-      login: yup.string().when('conn_type', {
+      login: yup.string().when('type', {
         is: type => !NO_AUTH_REQUIRED.includes(type),
         then: () => yup.string().required('Login is required'),
         otherwise: () => yup.string()
       }),
-      password: yup.string().when('conn_type', {
+      password: yup.string().when('type', {
         is: type => !NO_AUTH_REQUIRED.includes(type),
         then: () => yup.string().required('Password is required'),
         otherwise: () => yup.string()

@@ -485,9 +485,9 @@ const ActiveProbes = forwardRef((props, ref) => {
         } else if (row?.type?.toLowerCase() === 'api') {
           label = t('API PROBE')
           iconImage = 'mdi:api'
-        } else if (row?.type?.toLowerCase() === 'ping') {
+        } else if (row?.type?.toLowerCase() === 'icmpping') {
           label = t('PING PROBE')
-          iconImage = 'mdi:radar'
+          iconImage = 'mdi:ping-pong'
         }
 
         return (

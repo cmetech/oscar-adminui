@@ -473,50 +473,54 @@ const ActiveProbes = forwardRef((props, ref) => {
         const { row } = params
 
         let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
-        let label = t('UNKN')
-        let iconimage = 'mdi:account-question-outline'
+        let label = t('UNKNOWN')
+        let iconImage = 'mdi:help-circle-outline'
+
         if (row?.type?.toLowerCase() === 'httpurl') {
           label = t('URL PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:web'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
           label = t('TCP PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:lan-connect'
         } else if (row?.type?.toLowerCase() === 'api') {
           label = t('API PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:api'
+        } else if (row?.type?.toLowerCase() === 'ping') {
+          label = t('PING PROBE')
+          iconImage = 'mdi:radar'
         }
 
         return (
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
+                alignItems: 'center',
                 flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%', // Uses full width to align text to the start properly
+                justifyContent: 'center',
+                width: '100%',
                 overflow: 'hidden',
-                textoverflow: 'ellipsis'
+                textOverflow: 'ellipsis'
               }}
             >
               <CustomChip
                 title={label}
                 overflow='hidden'
-                textoverflow='ellipsis'
+                textOverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || t('UNKN')}
+                label={label || t('UNKNOWN')}
                 color={color}
-                icon={<Icon icon={iconimage} />}
+                icon={<Icon icon={iconImage} />}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
                   color:

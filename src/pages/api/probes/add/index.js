@@ -17,6 +17,10 @@ async function handler(req, res) {
       type = 'tcpport'
     }
 
+    if (probeobj.type === 'PING') {
+      type = 'icmpping'
+    }
+
     const payload = {
       name: probeobj['name'],
       description: probeobj['description'],

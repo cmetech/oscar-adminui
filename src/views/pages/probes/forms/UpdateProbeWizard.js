@@ -20,7 +20,6 @@ import InputLabel from '@mui/material/InputLabel'
 import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import InputAdornment from '@mui/material/InputAdornment'
 import Select from '@mui/material/Select'
 import Checkbox from '@mui/material/Checkbox'
 import Radio from '@mui/material/Radio'
@@ -42,6 +41,7 @@ import Icon from 'src/@core/components/icon'
 import StepperCustomDot from 'src/views/pages/misc/forms/StepperCustomDot'
 import { useTheme, styled } from '@mui/material/styles'
 import { refetchProbeTriggerAtom } from 'src/lib/atoms'
+import { detectTokensInPayload } from 'src/lib/utils'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -51,7 +51,6 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 
 // ** Import yup for form validation
 import * as yup from 'yup'
-import { current } from '@reduxjs/toolkit'
 
 // Add these constants at the top of the file, after the imports
 const VALIDATION_TYPES = ['HTTP_STATUS', 'REGEX', 'RULE']
@@ -82,7 +81,7 @@ const initialProbeFormState = {
     jitter: 0
   },
   args: [{ value: '' }],
-  kwargs: {},
+  kwargs: [],
   payload: '',
   payload_type: 'rest',
   http_method: 'GET',
@@ -133,7 +132,6 @@ const wellKnownFakerFunctions = [
   'first_name',
   'last_name',
   'msisdn'
-
   // Add more well-known faker functions here
 ]
 
@@ -143,7 +141,6 @@ const wellKnownHttpHeaders = [
   'Authorization',
   'User-Agent',
   'Referer'
-
   // Add more well-known HTTP headers here
 ]
 
@@ -190,16 +187,12 @@ const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
 
 const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // Style the border color
-  // '& .MuiOutlinedInput-notchedOutline': {
-  //   borderColor: 'inherit' // Replace with your default border color
-  // },
   '&:hover .MuiOutlinedInput-notchedOutline': {
     borderColor: 'inherit' // Replace with your hover state border color
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     borderColor: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.primary.main // Border color when focused
   }
-
   // You can add more styles here for other parts of the input
 }))
 
@@ -281,13 +274,34 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
       <Grid item xs={12} sm={6}>
         <TextfieldStyled
           fullWidth
-          label={probeForm.type === 'PORT' ? 'HOST' : probeForm.type === 'API' ? 'ENDPOINT' : 'URL'}
+          label={
+            probeForm.type === 'PORT'
+              ? 'HOST'
+              : probeForm.type === 'API'
+              ? 'ENDPOINT'
+              : probeForm.type === 'PING'
+              ? 'HOST'
+              : 'URL'
+          }
           value={probeForm.target !== undefined ? probeForm.target : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
         />
       </Grid>
+      {probeForm.type.toLowerCase() === 'port' && (
+        <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            fullWidth
+            label='Port'
+            value={probeForm.port}
+            InputProps={{ readOnly: true }}
+            variant='outlined'
+            margin='normal'
+            type='number'
+          />
+        </Grid>
+      )}
       {probeForm.type.toLowerCase() === 'api' && (
         <Fragment>
           <Grid item xs={12} sm={6}>
@@ -311,19 +325,6 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
             />
           </Grid>
         </Fragment>
-      )}
-      {probeForm.type.toLowerCase() === 'port' && (
-        <Grid item xs={12} sm={6}>
-          <TextfieldStyled
-            fullWidth
-            label='Port'
-            value={probeForm.port}
-            InputProps={{ readOnly: true }}
-            variant='outlined'
-            margin='normal'
-            type='number'
-          />
-        </Grid>
       )}
       <Grid item xs={12}>
         <TextfieldStyled
@@ -477,7 +478,6 @@ const allStepValidationSchemas = [
   yup.object({
     type: yup.string().required('Type is required'),
     port: yup.string().when('type', (typeValue, schema) => {
-      //console.log("Type Value in .when():", typeValue);
       if (typeValue[0] === 'PORT') {
         //console.log("checking for port since typevalue = port")
         return schema
@@ -494,13 +494,10 @@ const allStepValidationSchemas = [
       }
     }),
     target: yup.string().when('type', (typeValue, schema) => {
-      if (typeValue[0] === 'PORT') {
+      if (typeValue[0] === 'PORT' || typeValue[0] === 'PING') {
         return schema
           .required('Target is required')
-          .matches(
-            /^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-            'Must be a valid IP address'
-          )
+          .matches(/^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}$/, 'Must be a valid IP address')
       } else {
         //console.log("Ignoring target check typevalue = port as its url");
         return schema.notRequired()
@@ -528,6 +525,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
       return 'URL'
     } else if (probeType === 'tcpport') {
       return 'PORT'
+    } else if (probeType === 'ping') {
+      return 'PING'
     } else {
       return 'UNKNOWN' // or handle any other default case
     }
@@ -561,8 +560,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     try {
       // Validate based on the current step
       const formData = {
-        type: probeType, // Assuming 'probeType' holds either 'PORT' or some other values correctly corresponding to your form selections
-        port: probeForm.port, // Make sure 'probeForm.port' exists and holds the current port number from the form
+        type: probeType,
+        port: probeForm.port,
         target: probeForm.target,
         payload: probeForm.payload,
         payload_type: probeForm.payload_type
@@ -589,7 +588,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
         setFormErrors(transformedErrors)
       } else {
         // Handle cases where inner does not exist or is empty
-        //console.error("Validation failed without specific field errors:", yupError);
         setFormErrors({ general: yupError.message || 'An unknown error occurred' })
       }
 
@@ -607,7 +605,11 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
             ? 'URL'
             : currentProbe.type.trim().toLowerCase() === 'api'
             ? 'API'
-            : 'PORT',
+            : currentProbe.type.trim().toLowerCase() === 'tcpport'
+            ? 'PORT'
+            : currentProbe.type.trim().toLowerCase() === 'ping'
+            ? 'PING'
+            : 'UNKNOWN',
         description: currentProbe.description || '',
         target: currentProbe.target,
         status: currentProbe.status,
@@ -654,14 +656,11 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
     const name = target.name
     let value = target.value
 
-    //console.log("The field being updated = ", name)
-
     // Convert string values to lowercase, except for specific fields
     if (typeof value === 'string' && name !== 'payload' && name !== 'description') {
       value = value?.toLowerCase()
     }
 
-    //console.log('Updating fields '+name+ ' with: '+value)
     setProbeForm(prevForm => {
       const newForm = { ...prevForm }
 
@@ -938,9 +937,8 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
               <Grid container spacing={2} style={{ padding: '16px' }}>
                 <Grid item>
                   <Typography variant='body2' gutterBottom>
-                    <strong>Probes</strong>, are designed to monitor services from an external perspective. The are
-                    three types of probes in OSCAR: HTTP URL, Port Check, and API probe. Please select the probe type to
-                    get a detailed description of each probe type.
+                    <strong>Probes</strong>, are designed to monitor services from an external perspective. There are
+                    four types of probes in OSCAR: HTTP URL, Port Check, PING, and API probe.
                   </Typography>
                 </Grid>
                 <Grid item>
@@ -972,6 +970,20 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                           <li>Infrastructure monitoring in both development and production environments.</li>
                           <li>
                             <strong>Example:</strong> 10.10.10.10:9100
+                          </li>
+                        </ul>
+                      </Fragment>
+                    ) : probeType === 'PING' ? (
+                      <Fragment>
+                        <strong>PING</strong> - PING probes use ICMP echo requests to check the availability and network
+                        latency of a host. They are useful for monitoring network connectivity and diagnosing network
+                        issues.
+                        <ul>
+                          <li>Monitoring the availability of servers and network devices.</li>
+                          <li>Measuring network latency to detect potential issues.</li>
+                          <li>Ensuring that critical infrastructure components are reachable.</li>
+                          <li>
+                            <strong>Example:</strong> 192.168.1.1
                           </li>
                         </ul>
                       </Fragment>
@@ -1048,7 +1060,15 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   required
                   id='target'
                   name='target'
-                  label={probeType === 'PORT' ? 'HOST' : probeType === 'API' ? 'ENDPOINT' : 'URL'}
+                  label={
+                    probeType === 'PORT'
+                      ? 'HOST'
+                      : probeType === 'API'
+                      ? 'ENDPOINT'
+                      : probeType === 'PING'
+                      ? 'HOST'
+                      : 'URL'
+                  }
                   fullWidth
                   autoComplete='off'
                   value={probeForm.target}
@@ -1081,7 +1101,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                     options={['REST', 'SOAP', 'GRAPHQL']}
                     value={probeForm.payload_type.toUpperCase()}
                     onChange={(event, newValue) => {
-                      // Directly calling handleFormChange with a synthetic event object
                       handleFormChange({ target: { name: 'payload_type', value: newValue } }, null, null)
                     }}
                     onInputChange={(event, newInputValue) => {
@@ -1095,29 +1114,30 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   />
                 </Grid>
               )}
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='probehttpmethod-autocomplete'
-                  options={['GET', 'POST']}
-                  value={probeForm.http_method?.toUpperCase()}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
+              {probeType === 'API' && (
+                <Grid item xs={12} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probehttpmethod-autocomplete'
+                    options={['GET', 'POST']}
+                    value={probeForm.http_method?.toUpperCase()}
+                    onChange={(event, newValue) => {
+                      handleFormChange({ target: { name: 'http_method', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'http_method', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='HTTP Method' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -1128,7 +1148,6 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   options={['ENABLED', 'DISABLED']}
                   value={probeForm.status.toUpperCase()}
                   onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
                     handleFormChange({ target: { name: 'status', value: newValue } }, null, null)
                   }}
                   onInputChange={(event, newInputValue) => {
@@ -1141,29 +1160,30 @@ const UpdateProbeWizard = ({ onClose, ...props }) => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='probesslverification-autocomplete'
-                  options={['YES', 'NO']}
-                  value={probeForm.ssl_verification}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
+              {probeType === 'API' && (
+                <Grid item xs={12} sm={6}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='probesslverification-autocomplete'
+                    options={['YES', 'NO']}
+                    value={probeForm.ssl_verification}
+                    onChange={(event, newValue) => {
+                      handleFormChange({ target: { name: 'ssl_verification', value: newValue } }, null, null)
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (event) {
+                        handleFormChange({ target: { name: 'ssl_verification', value: newInputValue } }, null, null)
+                      }
+                    }}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='SSL Verification' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={12}>
                 <TextfieldStyled
                   fullWidth

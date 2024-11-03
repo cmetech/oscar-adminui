@@ -253,7 +253,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
         <TextfieldStyled
           fullWidth
           label='Probe Name'
-          value={probeForm.name !== undefined ? probeForm.name : ''}
+          value={probeForm.name !== undefined ? probeForm.name.toUpperCase() : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -273,7 +273,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
         <TextfieldStyled
           fullWidth
           label='Status'
-          value={probeForm.status !== undefined ? probeForm.status : ''}
+          value={probeForm.status !== undefined ? probeForm.status.toUpperCase() : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
@@ -282,13 +282,34 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
       <Grid item xs={12} sm={6}>
         <TextfieldStyled
           fullWidth
-          label={probeForm.type === 'PORT' ? 'HOST' : probeForm.type === 'API' ? 'ENDPOINT' : 'URL'}
+          label={
+            probeForm.type === 'PORT'
+              ? 'HOST'
+              : probeForm.type === 'API'
+              ? 'ENDPOINT'
+              : probeForm.type === 'PING'
+              ? 'HOST'
+              : 'URL'
+          }
           value={probeForm.target !== undefined ? probeForm.target : ''}
           InputProps={{ readOnly: true }}
           variant='outlined'
           margin='normal'
         />
       </Grid>
+      {probeForm.type.toLowerCase() === 'port' && (
+        <Grid item xs={12} sm={6}>
+          <TextfieldStyled
+            fullWidth
+            label='Port'
+            value={probeForm.port}
+            InputProps={{ readOnly: true }}
+            variant='outlined'
+            margin='normal'
+            type='number'
+          />
+        </Grid>
+      )}
       {probeForm.type.toLowerCase() === 'api' && (
         <Fragment>
           <Grid item xs={12} sm={6}>
@@ -312,19 +333,6 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
             />
           </Grid>
         </Fragment>
-      )}
-      {probeForm.type.toLowerCase() === 'port' && (
-        <Grid item xs={12} sm={6}>
-          <TextfieldStyled
-            fullWidth
-            label='Port'
-            value={probeForm.port}
-            InputProps={{ readOnly: true }}
-            variant='outlined'
-            margin='normal'
-            type='number'
-          />
-        </Grid>
       )}
       <Grid item xs={12}>
         <TextfieldStyled
@@ -494,13 +502,10 @@ const allStepValidationSchemas = [
     }),
     target: yup.string().when('type', (typeValue, schema) => {
       console.log('Validating target for type:', typeValue)
-      if (typeValue[0] === 'PORT') {
+      if (typeValue[0] === 'PORT' || typeValue[0] === 'PING') {
         return schema
           .required('Target is required')
-          .matches(
-            /^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-            'Must be a valid IP address'
-          )
+          .matches(/^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}$/, 'Must be a valid IP address')
       }
 
       return schema.required('Target is required')
@@ -530,7 +535,7 @@ const AddProbeWizard = ({ onSuccess }) => {
     setProbeForm(prevForm => ({
       ...initialProbeFormState,
       type: probeType,
-      port: probeType === 'URL' ? '' : prevForm.port
+      port: probeType === 'PORT' ? prevForm.port : ''
     }))
 
     // Reset the active step when probe type changes
@@ -780,12 +785,6 @@ const AddProbeWizard = ({ onSuccess }) => {
 
     const { keyLabel, valueLabel, defaultValueLabel } = getFieldLabels(section)
 
-    // console.log('probeForm:', probeForm)
-    // console.log('section:', section)
-    // console.log('keyLabel:', keyLabel)
-    // console.log('valueLabel:', valueLabel)
-    // console.log('defaultValueLabel:', defaultValueLabel)
-
     return probeForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
@@ -880,9 +879,9 @@ const AddProbeWizard = ({ onSuccess }) => {
               <Grid container spacing={2} style={{ padding: '16px' }}>
                 <Grid item>
                   <Typography variant='body2' gutterBottom>
-                    <strong>Probes</strong>, are designed to monitor services from an external perspective. The are
-                    three types of probes in OSCAR: HTTP URL, Port Check, and API probe. Please select the probe type to
-                    get a detailed description of each probe type.
+                    <strong>Probes</strong>, are designed to monitor services from an external perspective. There are
+                    four types of probes in OSCAR: HTTP URL, Port Check, PING, and API probe. Please select the probe
+                    type to get a detailed description of each probe type.
                   </Typography>
                 </Grid>
                 <Grid item>
@@ -917,6 +916,20 @@ const AddProbeWizard = ({ onSuccess }) => {
                           </li>
                         </ul>
                       </Fragment>
+                    ) : probeType === 'PING' ? (
+                      <Fragment>
+                        <strong>PING</strong> - PING probes use ICMP echo requests to check the availability and network
+                        latency of a host. They are useful for monitoring network connectivity and diagnosing network
+                        issues.
+                        <ul>
+                          <li>Monitoring the availability of servers and network devices.</li>
+                          <li>Measuring network latency to detect potential issues.</li>
+                          <li>Ensuring that critical infrastructure components are reachable.</li>
+                          <li>
+                            <strong>Example:</strong> 192.168.1.1
+                          </li>
+                        </ul>
+                      </Fragment>
                     ) : probeType === 'API' ? (
                       <Fragment>
                         <strong>API</strong> - API probes periodically monitor the availability of API endpoints. They
@@ -945,6 +958,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                     >
                       <MenuItem value='URL'>URL</MenuItem>
                       <MenuItem value='PORT'>PORT</MenuItem>
+                      <MenuItem value='PING'>PING</MenuItem>
                       <MenuItem value='API'>API</MenuItem>
                     </SelectStyled>
                   </FormControl>
@@ -991,7 +1005,15 @@ const AddProbeWizard = ({ onSuccess }) => {
                   required
                   id='target'
                   name='target'
-                  label={probeType === 'PORT' ? 'HOST' : probeType === 'API' ? 'ENDPOINT' : 'URL'}
+                  label={
+                    probeType === 'PORT'
+                      ? 'HOST'
+                      : probeType === 'API'
+                      ? 'ENDPOINT'
+                      : probeType === 'PING'
+                      ? 'HOST'
+                      : 'URL'
+                  }
                   fullWidth
                   autoComplete='off'
                   value={probeForm.target}

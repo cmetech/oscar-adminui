@@ -388,7 +388,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             )}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={4}>
           <AutocompleteStyled
             id='timezone'
             options={timezones}
@@ -402,7 +402,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             clearOnBlur // Clear input on blur if not selected from the list
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={2}>
           <TextfieldStyled
             id='jitter'
             name='schedule.jitter'

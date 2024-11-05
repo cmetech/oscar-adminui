@@ -402,7 +402,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             clearOnBlur // Clear input on blur if not selected from the list
           />
         </Grid>
-        {/* <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6}>
           <TextfieldStyled
             id='jitter'
             name='schedule.jitter'
@@ -412,7 +412,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             value={taskForm.schedule.jitter}
             onChange={e => handleFormChange(e, null, 'schedule')}
           />
-        </Grid> */}
+        </Grid>
       </Grid>
     </Fragment>
   )

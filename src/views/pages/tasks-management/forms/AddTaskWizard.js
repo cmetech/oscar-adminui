@@ -363,7 +363,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             onChange={e => handleFormChange(e, null, 'schedule')}
           />
         </Grid> */}
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6}>
           <DateRangePicker
             localeText={{ start: 'Start Date', end: 'End Date' }}
             value={dateRange}
@@ -379,7 +379,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             )}
           />
         </Grid>
-        <Grid item xs={12} sm={2}>
+        <Grid item xs={12} sm={4}>
           <AutocompleteStyled
             id='timezone'
             options={timezones}
@@ -393,7 +393,7 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
             clearOnBlur // Clear input on blur if not selected from the list
           />
         </Grid>
-        <Grid item xs={12} sm={3}>
+        <Grid item xs={12} sm={2}>
           <TextfieldStyled
             id='jitter'
             name='schedule.jitter'

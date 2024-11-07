@@ -51,29 +51,6 @@ import * as yup from 'yup'
 
 import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 
-const steps = [
-  {
-    title: 'SLO Information',
-    subtitle: 'Add SLO Information',
-    description: 'Add the Name, Description, and Target Details for the SLO.'
-  },
-  {
-    title: 'Define SLI Details',
-    subtitle: 'Add SLI Details',
-    description: 'Add the SLI Source Index, SLI Filters and Query details.'
-  },
-  {
-    title: 'Define the Objective',
-    subtitle: 'Add the Objective Details',
-    description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
-  },
-  {
-    title: 'Review',
-    subtitle: 'Review and Submit',
-    description: 'Review the SLO details and submit.'
-  }
-]
-
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
   '&.Mui-checked': {
@@ -220,6 +197,29 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
 
   const theme = useTheme()
   const session = useSession()
+
+  const [steps, setSteps]  = useState([
+  {
+    title: 'SLO Information',
+    subtitle: 'Add SLO Information',
+    description: 'Add the Name, Description, and Target Details for the SLO.'
+  },
+  {
+    title: 'Define SLI Details',
+    subtitle: 'Add SLI Details',
+    description: 'Add the SLI Source Index, SLI Filters and Query details.'
+  },
+  {
+    title: 'Define the Objective',
+    subtitle: 'Add the Objective Details',
+    description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
+  },
+  {
+    title: 'Review',
+    subtitle: 'Review and Submit',
+    description: 'Review the SLO details and submit.'
+  }
+])
 
   // Validate form based on the active step
   const validateForm = async () => {
@@ -467,7 +467,24 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
     setPrevSloTargetType(sloTargetType);
   }, [sloTargetType, prevSloTargetType]);
 
-    //efect to reset all query field properties if slo-target-type is changed
+  //effect to update step with change of SLO-Target-Type
+  useEffect(() => {
+    setSteps((prevSteps) => {
+      const updatedSteps = [...prevSteps];
+
+      if (sloTargetType.toUpperCase() !== 'INTERNAL') {
+        updatedSteps[1] = {
+          title: 'Define SLI Details',
+          subtitle: 'Add SLI Details with Custom Query based on Target Type',
+          description: 'Add Good Query and Total Query with Target Period in intended query language along with Optional Connection ID and Connection Type'
+        };
+      }
+
+      return updatedSteps;
+    });
+  }, [sloTargetType]);
+
+  //efect to reset all query field properties if slo-target-type is changed
   useEffect(() => {
 
     if (sloPrevTargetConnectionID !== sloTargetConnectionID) {

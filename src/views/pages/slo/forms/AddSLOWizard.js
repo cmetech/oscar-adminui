@@ -55,29 +55,6 @@ import { useTranslation } from 'react-i18next'
 
 import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 
-const steps = [
-  {
-    title: 'SLO Description',
-    subtitle: 'Add SLO Description Information',
-    description: 'Add the Name, Description, SLI Target Type for the SLO.'
-  },
-  {
-    title: 'Define SLI Details',
-    subtitle: 'Add SLI Details',
-    description: 'Add the SLI Source Index, SLI Filters and Query details.'
-  },
-  {
-    title: 'Define the Objective',
-    subtitle: 'Add the Objective Details',
-    description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
-  },
-  {
-    title: 'Review',
-    subtitle: 'Review and Submit',
-    description: 'Review the SLO details and submit.'
-  }
-]
-
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
   '&.Mui-checked': {
@@ -205,9 +182,34 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
+  const [isSloTargetTypeInternal, setIsSloTargetTypeInternal] = useState(false)
 
   const theme = useTheme()
   const session = useSession()
+
+  //putting stpes as a state varible
+  const [steps, setSteps] = useState([
+    {
+      title: 'SLO Description',
+      subtitle: 'Add SLO Description Information',
+      description: 'Add the Name, Description, SLI Target Type for the SLO.'
+    },
+    {
+      title: 'Define SLI Details',
+      subtitle: 'Add SLI Details',
+      description: 'Add the SLI Source Index, SLI Filters and Query details.'
+    },
+    {
+      title: 'Define the Objective',
+      subtitle: 'Add the Objective Details',
+      description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
+    },
+    {
+      title: 'Review',
+      subtitle: 'Review and Submit',
+      description: 'Review the SLO details and submit.'
+    }
+  ])
 
   // Validate form based on the active step
   const validateForm = async () => {
@@ -726,6 +728,23 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
 
     setPrevSloTargetType(sloTargetType);
   }, [sloTargetType, prevSloTargetType]);
+
+  //effect to update step with change of SLO-Target-Type
+  useEffect(() => {
+    setSteps((prevSteps) => {
+      const updatedSteps = [...prevSteps];
+
+      if (sloTargetType.toUpperCase() !== 'INTERNAL') {
+        updatedSteps[1] = {
+          title: 'Define SLI Details',
+          subtitle: 'Add SLI Details with Custom Query based on Target Type',
+          description: 'Add Good Query and Total Query with Target Period in intended query language along with Optional Connection ID and Connection Type'
+        };
+      }
+
+      return updatedSteps;
+    });
+  }, [sloTargetType]);
 
   //effect to put out color if query fileed has no text
   useEffect(() =>{

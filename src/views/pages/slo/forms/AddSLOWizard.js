@@ -182,6 +182,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const [sloDescription, setSloDescription] = useState('')
   const [sloTargetValue, setSloTargetValue] = useState(95)
   const [sloTargetPeriod, setSloTargetPeriod] = useState(periodOptions[1])
+  const [sloTargetPeriodNumber, setSloTargetPeriodNumber] = useState('30')
   const [sloTimeWindow, setSloTimeWindow] = useState('rolling')
   const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState('occurrences')
   const [sloTargetType, setSloTargetType] = useState('internal')
@@ -360,6 +361,10 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       // Handle case when newValue is null (clearing selection)
       setSloTargetPeriod(null)
     }
+  }
+
+  const handleTargetPeriodNumberChange = event =>{
+    setSloTargetPeriodNumber(event.target.value)
   }
 
   const handleTargetCalculationMethodChange = event => {
@@ -783,7 +788,12 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   useEffect(() => {
 
     const fetchSpecificConnections = async () => {
-      if (!sloTargetConnectionID) 
+      console.log("Specifc Connections: "+ sloTargetConnectionID)
+      if (!sloTargetConnectionID && 
+            (sloTargetType.toLowerCase() === 'prometheus' || sloTargetType.toLowerCase() === 'sql')) 
+        return;
+
+      if(sloTargetType.toLowerCase() === 'internal')
         return;
 
       setSpecificConnectionsLoading(true)
@@ -861,7 +871,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         return (
           <Fragment>
             {console.log("Type SLO selected--------------> " + sloTargetType.toUpperCase())}
-            {sloTargetType.toUpperCase() == 'PROMETHEUS' ?(
+            {sloTargetType.toUpperCase() === 'PROMETHEUS' ?(
 
             <Fragment>
               <Grid container spacing={6}>
@@ -926,7 +936,6 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                         },
                       }}
                    />
-
                 </Grid>
                 <Grid item xs={12}>
                   <TextfieldStyled
@@ -947,9 +956,33 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     }}
                   />
                 </Grid>
+                {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                <Grid item sm={6} xs={12}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='sloTargetPeriod-autocomplete'
+                    options={periodOptions}
+                    getOptionLabel={option => option.label}
+                    value={sloTargetPeriod}
+                    onChange={handleTargetPeriodChange}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
               </Grid>
             </Fragment>)
-            :sloTargetType.toUpperCase() == 'ELASTICSEARCH'? (
+            :sloTargetType.toUpperCase() === 'ELASTICSEARCH'? (
               <Fragment>
               <Grid container spacing={6}>
                 <Grid item sm={6} xs={12}>
@@ -1003,9 +1036,33 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     label='Total Query Elastic Search'
                   />
                 </Grid>
+                {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                <Grid item sm={6} xs={12}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='sloTargetPeriod-autocomplete'
+                    options={periodOptions}
+                    getOptionLabel={option => option.label}
+                    value={sloTargetPeriod}
+                    onChange={handleTargetPeriodChange}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
               </Grid>
             </Fragment>)
-            :sloTargetType.toUpperCase() == 'SQL'? (
+            :sloTargetType.toUpperCase() === 'SQL'? (
               <Fragment>
               <Grid container spacing={6}>
                 <Grid item xs={12}>
@@ -1096,6 +1153,30 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     }}
                   />
                 </Grid>
+                {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                <Grid item sm={6} xs={12}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='sloTargetPeriod-autocomplete'
+                    options={periodOptions}
+                    getOptionLabel={option => option.label}
+                    value={sloTargetPeriod}
+                    onChange={handleTargetPeriodChange}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid> 
               </Grid>
             </Fragment>):(
               <Fragment>
@@ -1158,6 +1239,8 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   )}
                 />
               </Grid>
+
+              {sloTargetType.toUpperCase() === 'INTERNAL'?(
               <Grid item sm={6} xs={12}>
                 <AutocompleteStyled
                   freeSolo
@@ -1174,6 +1257,10 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   )}
                 />
               </Grid>
+                ):(
+                <></>
+                )}
+
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
                   <TextfieldStyled
@@ -1240,24 +1327,50 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   <strong>Description:</strong> {sloDescription}
                 </Typography>
               </Grid>
+              {sloTargetType.toUpperCase() === 'PROMETHEUS' ?(
+              <Fragment>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Selected Connection:</strong> {sloFilterQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Prometheus Good Query:</strong> {sloGoodQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Prometheus Total Query:</strong> {sloTotalQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Time Window:</strong> {sloTimeWindow}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Target Period:</strong> {sloTargetPeriod.label}
+                  </Typography>
+                </Grid>
+            </Fragment>
+
+              ):sloTargetType.toUpperCase() === 'SQL'?(
+            <Fragment>
               <Grid item xs={12}>
                 <Typography>
-                  <strong>Target Index:</strong> {sloTargetIndex}
+                  <strong>Selected Connection:</strong> {sloFilterQuery}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  <strong>Filter Query:</strong> {sloFilterQuery}
+                  <strong>SQL Good Query:</strong> {sloGoodQuery}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography>
-                  <strong>Good Query:</strong> {sloGoodQuery}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  <strong>Total Query:</strong> {sloTotalQuery}
+                  <strong>SQL Total Query:</strong> {sloTotalQuery}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
@@ -1270,6 +1383,42 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   <strong>Target Period:</strong> {sloTargetPeriod.label}
                 </Typography>
               </Grid>
+            </Fragment>
+              ):(
+              <Fragment>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Target Index:</strong> {sloTargetIndex}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Filter Query:</strong> {sloFilterQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Good Query:</strong> {sloGoodQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Total Query:</strong> {sloTotalQuery}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Time Window:</strong> {sloTimeWindow}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography>
+                    <strong>Target Period:</strong> {sloTargetPeriod.label}
+                  </Typography>
+                </Grid>
+              </Fragment>
+              )}
+
               <Grid item xs={12}>
                 <Typography>
                   <strong>Target Value:</strong> {sloTargetValue}

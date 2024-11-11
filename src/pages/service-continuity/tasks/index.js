@@ -48,6 +48,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Fade from '@mui/material/Fade'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
 
 import { styled, useTheme } from '@mui/material/styles'
 
@@ -159,7 +160,16 @@ const RegisterTaskForm = ({ onClose, onSubmit }) => {
 }
 
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload, onRegister, tabValue }) => {
+const MoreActionsDropdown = ({
+  onDelete,
+  onExport,
+  onDisable,
+  onEnable,
+  onUpload,
+  onRegister,
+  onSchedule,
+  tabValue
+}) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
   const ability = useContext(AbilityContext)
@@ -219,6 +229,19 @@ const MoreActionsDropdown = ({ onDelete, onExport, onDisable, onEnable, onUpload
         onClose={() => handleDropdownClose()}
         sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
       >
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onSchedule()
+            handleDropdownClose()
+          }}
+          disabled={!ability.can('update', 'tasks')}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:calendar-clock' />
+            {t('Schedule Tasks')}
+          </Box>
+        </MenuItem>
         {deletableTabs.includes(tabValue) && (
           <MenuItem
             sx={{ p: 0 }}
@@ -480,6 +503,70 @@ const ConfirmationExportModal = ({ isOpen, onClose, onConfirm, tab }) => {
           startIcon={<Icon icon='mdi:file-export' />}
         >
           {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+// ConfirmationScheduleModal Component
+const ConfirmationScheduleModal = ({ isOpen, onClose, onConfirm }) => {
+  const { t } = useTranslation()
+  const theme = useTheme()
+
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      aria-labelledby='alert-dialog-title'
+      aria-describedby='alert-dialog-description'
+      PaperProps={{
+        sx: {
+          width: '100%',
+          maxWidth: '450px'
+        }
+      }}
+    >
+      <DialogTitle id='alert-dialog-title'>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant='h6' sx={{ fontWeight: 600 }}>
+            {t('Confirm Action')}
+          </Typography>
+          <IconButton size='small' onClick={onClose} aria-label='close'>
+            <Icon icon='mdi:close' />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ textAlign: 'center' }}>
+          <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+            <Box>
+              <img src='/images/warning.png' alt='warning' width='32' height='32' />
+            </Box>
+            <Box>
+              <Typography variant='h6'>{t('Confirm you want to schedule the selected tasks?')}</Typography>
+            </Box>
+          </Stack>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant='contained'
+          size='large'
+          onClick={onConfirm}
+          color='primary'
+          startIcon={<Icon icon='mdi:calendar-clock' />}
+        >
+          {t('Schedule')}
+        </Button>
+        <Button
+          variant='outlined'
+          size='large'
+          onClick={onClose}
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -779,7 +866,7 @@ const TasksManager = () => {
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
   const [isEnableModalOpen, setIsEnableModalOpen] = useState(false)
   const [selectedTaskIds, setSelectedTaskIds] = useAtom(taskIdsAtom)
-  const [, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
+  const [refetchTrigger, setRefetchTrigger] = useAtom(refetchTaskTriggerAtom)
 
   // ** Initialize dateRange state with the default date range
   const [dateRange, setDateRange] = useState(getDefaultDateRange(timezone))
@@ -787,6 +874,9 @@ const TasksManager = () => {
 
   // ** Get extended predefined ranges
   const extendedPredefinedRangesDayjs = getExtendedPredefinedRangesDayjs(timezone, t)
+
+  // State for the Schedule Modal
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
   // ** Add useEffect to update dateRange when timezone changes
   useEffect(() => {
@@ -822,6 +912,15 @@ const TasksManager = () => {
     setIsEnableModalOpen(true)
   }
 
+  // Handler to open the Schedule Modal
+  const handleOpenScheduleModal = () => {
+    if (selectedTaskIds.length === 0) {
+      toast.error(t('No Tasks Selected'))
+    } else {
+      setIsScheduleModalOpen(true)
+    }
+  }
+
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false)
   }
@@ -844,6 +943,11 @@ const TasksManager = () => {
 
   const handleCloseEnableModal = () => {
     setIsEnableModalOpen(false)
+  }
+
+  // Handler to close the Schedule Modal
+  const handleCloseScheduleModal = () => {
+    setIsScheduleModalOpen(false)
   }
 
   const handleRegisterSuccess = () => {
@@ -1001,6 +1105,41 @@ const TasksManager = () => {
     }
   }
 
+  // Handler to confirm scheduling tasks
+  const handleConfirmSchedule = async () => {
+    const headers = {
+      Accept: 'application/json'
+    }
+
+    try {
+      await Promise.all(
+        selectedTaskIds.map(async taskId => {
+          await axios.post(
+            `/api/tasks/schedule/${taskId}`,
+            {}, // Empty body
+            {
+              headers
+            }
+          )
+        })
+      )
+
+      toast.success(t('Tasks Successfully Scheduled'))
+
+      // Refresh the task list
+      setRefetchTrigger(Date.now())
+
+      // Close the modal and reset selected task IDs
+      setIsScheduleModalOpen(false)
+      setSelectedTaskIds([])
+    } catch (error) {
+      console.error('Error scheduling tasks:', error)
+      toast.error(t('Failed to Schedule Tasks'))
+
+      setIsScheduleModalOpen(false)
+    }
+  }
+
   // ** Function to calculate maximum end date/time
   const getMaxEndDateTime = () => {
     return dateRange[0] ? dayjs(dateRange[0]).add(12, 'hour') : null
@@ -1082,6 +1221,7 @@ const TasksManager = () => {
                   onDisable={handleDisable}
                   onUpload={handleUpload}
                   onRegister={handleRegister}
+                  onSchedule={handleOpenScheduleModal}
                   tabValue={value}
                 />
               </Fragment>
@@ -1275,6 +1415,12 @@ const TasksManager = () => {
         open={isRegisterModalOpen}
         onClose={handleCloseRegisterModal}
         onSuccess={handleRegisterSuccess}
+      />
+
+      <ConfirmationScheduleModal
+        isOpen={isScheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        onConfirm={handleConfirmSchedule}
       />
     </Grid>
   )

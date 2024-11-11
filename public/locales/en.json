@@ -287,5 +287,10 @@
     "No Rules found": "No Rules found",
     "Select an Excel file to import rules": "Select an Excel file to import rules",
     "Rules": "Rules",
-    "Credentials": "Credentials"
+    "Credentials": "Credentials",
+    "Confirm you want to schedule the selected tasks?": "Confirm you want to schedule the selected tasks?",
+    "Schedule Tasks": "Schedule Tasks",
+    "Tasks Successfully Scheduled": "Tasks Successfully Scheduled",
+    "Failed to Schedule Tasks": "Failed to Schedule Tasks",
+    "No Tasks Selected": "No Tasks Selected"
 }

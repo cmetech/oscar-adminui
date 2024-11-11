@@ -287,5 +287,10 @@
     "No Rules found": "No se encontraron reglas",
     "Select an Excel file to import rules": "Seleccione un archivo Excel para importar reglas",
     "Rules": "Reglas",
-    "Credentials": "Credenciales"
+    "Credentials": "Credenciales",
+    "Confirm you want to schedule the selected tasks?": "¿Confirma que desea programar las tareas seleccionadas?",
+    "Schedule Tasks": "Programar Tareas",
+    "Tasks Successfully Scheduled": "Tareas programadas con éxito",
+    "Failed to Schedule Tasks": "Error al programar las tareas",
+    "No Tasks Selected": "No se seleccionaron tareas"
 }

@@ -17,6 +17,11 @@ async function handler(req, res) {
       type = 'tcpport'
     }
 
+    if (probeobj.type === 'SSL') {
+      target = target + ':' + probeobj.port
+      type = 'sslport'
+    }
+
     if (probeobj.type === 'PING') {
       type = 'icmpping'
     }
@@ -34,6 +39,12 @@ async function handler(req, res) {
       payload.type = probeobj.type.toLowerCase()
       payload.kwargs = probeobj.kwargs || {}
       payload.schedule = probeobj.schedule || {}
+    }
+
+    if (probeobj.type === 'SSL') {
+      payload.type = 'sslport'
+      payload.schedule = probeobj.schedule || {}
+      payload.kwargs = probeobj.kwargs || {}
     }
 
     console.log('payload:', payload)

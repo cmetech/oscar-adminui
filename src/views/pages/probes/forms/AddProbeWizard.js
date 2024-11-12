@@ -289,6 +289,8 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
               ? 'ENDPOINT'
               : probeForm.type === 'PING'
               ? 'HOST'
+              : probeForm.type === 'SSL'
+              ? 'HOST'
               : 'URL'
           }
           value={probeForm.target !== undefined ? probeForm.target : ''}
@@ -297,7 +299,7 @@ const ReviewAndSubmitSection = ({ probeForm }) => {
           margin='normal'
         />
       </Grid>
-      {probeForm.type.toLowerCase() === 'port' && (
+      {(probeForm.type === 'PORT' || probeForm.type === 'SSL') && (
         <Grid item xs={12} sm={6}>
           <TextfieldStyled
             fullWidth
@@ -487,7 +489,7 @@ const allStepValidationSchemas = [
     type: yup.string().required('Type is required'),
     port: yup.string().when('type', (typeValue, schema) => {
       console.log('Validating port for type:', typeValue)
-      if (typeValue[0] === 'PORT') {
+      if (typeValue[0] === 'PORT' || typeValue[0] === 'SSL') {
         return schema
           .required('Port is required')
           .matches(/^\d+$/, 'Only numbers are allowed')
@@ -916,6 +918,20 @@ const AddProbeWizard = ({ onSuccess }) => {
                           </li>
                         </ul>
                       </Fragment>
+                    ) : probeType === 'SSL' ? (
+                      <Fragment>
+                        <strong>SSL</strong> - SSL probes verify SSL details and expiry for a given TCP port, combining
+                        port checking with SSL verification.
+                        <ul>
+                          <li>Verifying SSL certificate validity and expiration dates.</li>
+                          <li>Ensuring secure connections for HTTPS, FTPS, and other SSL/TLS services.</li>
+                          <li>Monitoring SSL configuration and cipher suites.</li>
+                          <li>Performing all standard PORT probe checks along with SSL verification.</li>
+                          <li>
+                            <strong>Example:</strong> example.com:443
+                          </li>
+                        </ul>
+                      </Fragment>
                     ) : probeType === 'PING' ? (
                       <Fragment>
                         <strong>PING</strong> - PING probes use ICMP echo requests to check the availability and network
@@ -958,6 +974,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                     >
                       <MenuItem value='URL'>URL</MenuItem>
                       <MenuItem value='PORT'>PORT</MenuItem>
+                      <MenuItem value='SSL'>SSL</MenuItem>
                       <MenuItem value='PING'>PING</MenuItem>
                       <MenuItem value='API'>API</MenuItem>
                     </SelectStyled>
@@ -1012,6 +1029,8 @@ const AddProbeWizard = ({ onSuccess }) => {
                       ? 'ENDPOINT'
                       : probeType === 'PING'
                       ? 'HOST'
+                      : probeType === 'SSL'
+                      ? 'HOST'
                       : 'URL'
                   }
                   fullWidth
@@ -1020,7 +1039,7 @@ const AddProbeWizard = ({ onSuccess }) => {
                   onChange={handleFormChange}
                 />
               </Grid>
-              {probeType === 'PORT' && (
+              {(probeType === 'PORT' || probeType === 'SSL') && (
                 <Grid item xs={12} sm={6}>
                   <TextfieldStyled
                     id='port'

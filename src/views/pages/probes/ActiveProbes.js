@@ -488,6 +488,9 @@ const ActiveProbes = forwardRef((props, ref) => {
         } else if (row?.type?.toLowerCase() === 'icmpping') {
           label = t('PING PROBE')
           iconImage = 'mdi:ping-pong'
+        } else if (row?.type?.toLowerCase() === 'sslport') {
+          label = t('SSL PROBE')
+          iconImage = 'mdi:lan-connect'
         }
 
         return (

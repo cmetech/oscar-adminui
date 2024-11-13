@@ -80,7 +80,7 @@ const initialProbeFormState = {
     start_date: '',
     end_date: '',
     timezone: '',
-    jitter: 0
+    jitter: 60
   },
   args: [{ value: '' }],
   kwargs: [],

@@ -1146,7 +1146,7 @@ const TasksList = props => {
             column: sortModel[0]?.field || 'name',
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
-            filter: JSON.stringify(filter_model)
+            filter: filter_model ? JSON.stringify(filter_model) : undefined // Only include filter if provided
           },
           timeout: 30000
         })
@@ -1184,37 +1184,48 @@ const TasksList = props => {
     const intervalId = setInterval(fetchData, 300000) // Fetch data every 300 seconds (5 minutes)
 
     return () => clearInterval(intervalId) // Cleanup interval on component unmount
-  }, [fetchData, refetchTrigger, runFilterQuery])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, refetchTrigger])
 
   // Trigger based on filter application
   useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
+    if (!runFilterQuery) {
+      return
+    }
+
+    console.log('Filter Effect Running:', {
+      itemsLength: filterModel.items.length,
+      runFilterQuery
+    })
 
     if (runFilterQuery && filterModel.items.length > 0) {
       if (filterMode === 'server') {
         const sort = sortModel[0]?.sort
         const sortColumn = sortModel[0]?.field
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
       if (filterMode === 'server') {
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(0)
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(0)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
 
     // Reset the runFilterQuery flag
-    return () => {
-      runFilterQuery && setRunFilterQuery(false)
-    }
+    // return () => {
+    //   runFilterQuery && setRunFilterQuery(false)
+    // }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel, runFilterQuery]) // Triggered by filter changes
@@ -1245,6 +1256,7 @@ const TasksList = props => {
     return () => {
       hasRunRef.current = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, runRefresh, setRunRefresh])
 
   // Trigger based on sort

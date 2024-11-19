@@ -118,7 +118,7 @@ const TaskHistoryDetailPanel = ({ row }) => {
     try {
       return JSON.parse(resultString)
     } catch (e) {
-      return null // Return null if parsing fails
+      return null
     }
   }
 

@@ -104,7 +104,17 @@ const TaskHistoryDetailPanel = ({ row }) => {
   }
 
   // Attempt to parse the result JSON string safely
-  const parseResult = resultString => {
+  const parseResult = (resultString, state) => {
+    if (!state || state === 'NONE') {
+      try {
+        return JSON.parse(resultString)
+      } catch (e) {
+        return null
+      }
+    }
+    if (state === 'FAILURE' && resultString && typeof resultString === 'string' && resultString.length > 0) {
+      return resultString
+    }
     try {
       return JSON.parse(resultString)
     } catch (e) {
@@ -113,7 +123,7 @@ const TaskHistoryDetailPanel = ({ row }) => {
   }
 
   // Call parseResult and store the returned value (object or null)
-  const resultObject = parseResult(row.result)
+  const resultObject = parseResult(row.result, row.state)
 
   // Use useMemo to sort the stage_history once, when the component mounts or row changes
   const sortedStageHistory = useMemo(() => {

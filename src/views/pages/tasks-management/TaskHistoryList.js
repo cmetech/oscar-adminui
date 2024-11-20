@@ -415,8 +415,9 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
       const endTime = endDate.toISOString()
 
       setLoading(true)
-      await axios
-        .get('/api/tasks/history', {
+
+      try {
+        const response = await axios.get('/api/tasks/history', {
           params: {
             sort: sortModel[0]?.sort || 'desc',
             column: sortModel[0]?.field || 'succeeded',
@@ -425,19 +426,26 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
             start_time: startTime,
             end_time: endTime,
             filter: JSON.stringify(filterModel)
-          }
-        })
-        .then(res => {
-          setRowCount(res.data.total_records || 0)
-          setRows(res.data.records || [])
-        })
-        .finally(() => {
-          setRunRefresh(false)
+          },
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
+          timeout: 30000
         })
 
-      setLoading(false)
+        // If we get here, we have successful data
+        setRowCount(response.data.total_records || 0)
+        setRows(response.data.records || [])
+      } catch (error) {
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error(t('Failed to fetch task history'), error)
+          toast.error(t('Failed to fetch task history'))
+        }
+      } finally {
+        setLoading(false)
+        setRunRefresh(false)
+      }
     },
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dateRange, paginationModel]
   )

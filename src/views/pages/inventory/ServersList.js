@@ -684,21 +684,37 @@ const ServersList = props => {
   const fetchData = useCallback(
     async (sort, sortColumn, filterModel) => {
       setLoading(true)
-      await axios
-        .get('/api/inventory/servers', {
-          params: {}
-        })
-        .then(res => {
-          setRowCount(res.data.total)
-          setRows(res.data.rows)
-          props.set_total(res.data.total)
-          // setServers(res.data.rows)
+
+      try {
+        const response = await axios.get('/api/inventory/servers', {
+          params: {
+            sort: sort || sortModel[0]?.sort || 'asc',
+            column: sortColumn || sortModel[0]?.field || 'name',
+            skip: paginationModel.page + 1,
+            limit: paginationModel.pageSize,
+            filter: filterModel ? JSON.stringify(filterModel) : undefined
+          },
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
+          timeout: 30000
         })
 
-      setLoading(false)
+        // If we get here, we have successful data
+        setRowCount(response.data.total)
+        setRows(response.data.rows)
+        props.set_total(response.data.total)
+      } catch (error) {
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error('Failed to fetch servers:', error)
+          toast.error(t('Failed to fetch servers'))
+        }
+      } finally {
+        setLoading(false)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setRows]
+    [setRows, paginationModel.page, paginationModel.pageSize]
   )
 
   useEffect(() => {

@@ -1057,23 +1057,7 @@ const ActiveProbes = forwardRef((props, ref) => {
 
   const fetchData = useCallback(
     async filterModel => {
-      // Flag to track whether the request has completed
-      let requestCompleted = false
-
       setLoading(true)
-
-      // Start a timeout to automatically stop loading after 60s
-      const timeoutId = setTimeout(() => {
-        if (!requestCompleted) {
-          setLoading(false)
-
-          // Optionally, set state to show a "no results found" message or take other actions
-          console.log('Request timed out.')
-
-          // Clear the rows or show some placeholder to indicate no results or timeout
-          setRows([])
-        }
-      }, 20000) // 60s timeout
 
       try {
         const response = await axios.get('/api/probes', {
@@ -1084,28 +1068,27 @@ const ActiveProbes = forwardRef((props, ref) => {
             limit: paginationModel.pageSize,
             filter: JSON.stringify(filterModel)
           },
-          timeout: 10000
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
+          timeout: 30000
         })
 
+        // If we get here, we have successful data
         setRowCount(response.data.total_records)
         setRows(response.data.records)
         props.set_total(response.data.total_records)
         setProbes(response.data.records)
       } catch (error) {
-        console.error('Failed to fetch probes:', error)
-        toast.error(t('Failed to fetch probes'))
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error('Failed to fetch probes:', error)
+          toast.error(t('Failed to fetch probes'))
+        }
       } finally {
-        // Mark the request as completed
-        requestCompleted = true
         setLoading(false)
-
-        // Clear the timeout
-        clearTimeout(timeoutId)
         setRunFilterQuery(false)
         setRunRefresh(false)
       }
-
-      setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize]

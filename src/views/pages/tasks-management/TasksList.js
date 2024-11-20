@@ -1121,23 +1121,8 @@ const TasksList = props => {
 
   const fetchData = useCallback(
     async filter_model => {
-      // Flag to track whether the request has completed
-      let requestCompleted = false
-
+      // Remove the requestCompleted flag as we'll handle this differently
       setLoading(true)
-
-      // Start a timeout to automatically stop loading after 60s
-      const timeoutId = setTimeout(() => {
-        if (!requestCompleted) {
-          setLoading(false)
-
-          // Optionally, set state to show a "no results found" message or take other actions
-          console.log('Request timed out.')
-
-          // Clear the rows or show some placeholder to indicate no results or timeout
-          setRows([])
-        }
-      }, 60000) // 60s timeout
 
       try {
         const response = await axios.get('/api/tasks', {
@@ -1146,30 +1131,29 @@ const TasksList = props => {
             column: sortModel[0]?.field || 'name',
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
-            filter: filter_model ? JSON.stringify(filter_model) : undefined // Only include filter if provided
+            filter: filter_model ? JSON.stringify(filter_model) : undefined
           },
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
           timeout: 30000
         })
 
+        // If we get here, we have successful data
         setRowCount(response.data.total_records)
         setRows(response.data.records)
         props.set_total(response.data.total_records)
         setTasks(response.data.records)
       } catch (error) {
-        console.error(t('Failed to fetch tasks'), error)
-        toast.error(t('Failed to fetch tasks'))
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error(t('Failed to fetch tasks'), error)
+          toast.error(t('Failed to fetch tasks'))
+        }
       } finally {
-        // Mark the request as completed
-        requestCompleted = true
         setLoading(false)
-
-        // Clear the timeout
-        clearTimeout(timeoutId)
         setRunFilterQuery(false)
         setRunRefresh(false)
       }
-
-      setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize]

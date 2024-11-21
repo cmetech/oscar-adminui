@@ -127,6 +127,7 @@ const ServersList = props => {
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentServer, setCurrentServer] = useState(null)
+  const [statusDialog, setStatusDialog] = useState(false)
 
   const editmode = false
 
@@ -471,8 +472,11 @@ const ServersList = props => {
       headerName: t('Actions'),
       align: 'left',
       flex: 0.025,
-      minWidth: 10,
+      minWidth: 150,
       renderCell: params => {
+        const { row } = params
+        const isActive = row.status?.toLowerCase() === 'active'
+
         return (
           <Box
             sx={{
@@ -484,6 +488,19 @@ const ServersList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <IconButton
+                size='small'
+                title={isActive ? 'Deactivate' : 'Activate'}
+                aria-label={isActive ? 'Deactivate' : 'Activate'}
+                color={isActive ? 'success' : 'warning'}
+                onClick={() => {
+                  setCurrentServer(params.row)
+                  setStatusDialog(true)
+                }}
+                disabled={!ability.can('update', 'servers')}
+              >
+                <Icon icon={isActive ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off'} />
+              </IconButton>
               <IconButton
                 size='small'
                 title='Edit'
@@ -853,6 +870,90 @@ const ServersList = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  const StatusDialog = () => {
+    const { row } = currentServer || {}
+    const isActive = row?.status?.toLowerCase() === 'active'
+    console.log('Is Active:', isActive)
+    const newStatus = isActive ? 'inactive' : 'active'
+
+    return (
+      <Dialog
+        open={statusDialog}
+        onClose={() => setStatusDialog(false)}
+        TransitionComponent={Transition}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
+      >
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {t('Confirm Status Change')}
+              </Typography>
+              <Typography variant='caption' sx={{ color: 'text.warning' }}>
+                {currentServer?.hostname?.toUpperCase()}
+              </Typography>
+            </Box>
+            <IconButton size='small' onClick={() => setStatusDialog(false)} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant='h6' sx={{ textAlign: 'center' }}>
+            {t(`Confirm you want to ${isActive ? 'deactivate' : 'activate'} this server?`)}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleStatusDialogSubmit}
+            color={isActive ? 'warning' : 'success'}
+            autoFocus
+            startIcon={<Icon icon={isActive ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />}
+          >
+            {t(isActive ? 'Deactivate' : 'Activate')}
+          </Button>
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={() => setStatusDialog(false)}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
+  const handleStatusDialogSubmit = async () => {
+    try {
+      const isActive = currentServer.status?.toLowerCase() === 'active'
+      const newStatus = isActive ? 'inactive' : 'active'
+
+      await axios.patch(`/api/inventory/servers/${currentServer.id}`, {
+        hostname: currentServer.hostname,
+        status: newStatus
+      })
+
+      setStatusDialog(false)
+      setRefetchTrigger(Date.now())
+      toast.success(`Successfully ${isActive ? 'deactivated' : 'activated'} server`)
+    } catch (error) {
+      console.error('Failed to update server status:', error)
+      toast.error('Failed to update server status')
+    }
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1122,6 +1223,7 @@ const ServersList = props => {
             }
           }}
         />
+        <StatusDialog />
         <EditDialog />
         <DeleteDialog />
       </Card>

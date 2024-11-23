@@ -473,50 +473,57 @@ const ActiveProbes = forwardRef((props, ref) => {
         const { row } = params
 
         let color = theme.palette.mode === 'light' ? 'secondary' : 'secondary'
-        let label = t('UNKN')
-        let iconimage = 'mdi:account-question-outline'
+        let label = t('UNKNOWN')
+        let iconImage = 'mdi:help-circle-outline'
+
         if (row?.type?.toLowerCase() === 'httpurl') {
           label = t('URL PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:web'
         } else if (row?.type?.toLowerCase() === 'tcpport') {
           label = t('TCP PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:lan-connect'
         } else if (row?.type?.toLowerCase() === 'api') {
           label = t('API PROBE')
-          iconimage = 'mdi:thermometer-probe'
+          iconImage = 'mdi:api'
+        } else if (row?.type?.toLowerCase() === 'icmpping') {
+          label = t('PING PROBE')
+          iconImage = 'mdi:ping-pong'
+        } else if (row?.type?.toLowerCase() === 'sslport') {
+          label = t('SSL PROBE')
+          iconImage = 'mdi:lan-connect'
         }
 
         return (
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
+              alignItems: 'center',
               justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
+              width: '100%',
+              height: '100%'
             }}
           >
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center', // Ensures vertical centering inside the Box
+                alignItems: 'center',
                 flexDirection: 'column',
-                justifyContent: 'center', // Ensures content within this Box is also centered vertically
-                width: '100%', // Uses full width to align text to the start properly
+                justifyContent: 'center',
+                width: '100%',
                 overflow: 'hidden',
-                textoverflow: 'ellipsis'
+                textOverflow: 'ellipsis'
               }}
             >
               <CustomChip
                 title={label}
                 overflow='hidden'
-                textoverflow='ellipsis'
+                textOverflow='ellipsis'
                 rounded
                 size='medium'
                 skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
-                label={label || t('UNKN')}
+                label={label || t('UNKNOWN')}
                 color={color}
-                icon={<Icon icon={iconimage} />}
+                icon={<Icon icon={iconImage} />}
                 sx={{
                   '& .MuiChip-label': { textTransform: 'capitalize' },
                   color:
@@ -1050,23 +1057,7 @@ const ActiveProbes = forwardRef((props, ref) => {
 
   const fetchData = useCallback(
     async filterModel => {
-      // Flag to track whether the request has completed
-      let requestCompleted = false
-
       setLoading(true)
-
-      // Start a timeout to automatically stop loading after 60s
-      const timeoutId = setTimeout(() => {
-        if (!requestCompleted) {
-          setLoading(false)
-
-          // Optionally, set state to show a "no results found" message or take other actions
-          console.log('Request timed out.')
-
-          // Clear the rows or show some placeholder to indicate no results or timeout
-          setRows([])
-        }
-      }, 20000) // 60s timeout
 
       try {
         const response = await axios.get('/api/probes', {
@@ -1077,28 +1068,27 @@ const ActiveProbes = forwardRef((props, ref) => {
             limit: paginationModel.pageSize,
             filter: JSON.stringify(filterModel)
           },
-          timeout: 10000
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
+          timeout: 30000
         })
 
+        // If we get here, we have successful data
         setRowCount(response.data.total_records)
         setRows(response.data.records)
         props.set_total(response.data.total_records)
         setProbes(response.data.records)
       } catch (error) {
-        console.error('Failed to fetch probes:', error)
-        toast.error(t('Failed to fetch probes'))
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error('Failed to fetch probes:', error)
+          toast.error(t('Failed to fetch probes'))
+        }
       } finally {
-        // Mark the request as completed
-        requestCompleted = true
         setLoading(false)
-
-        // Clear the timeout
-        clearTimeout(timeoutId)
         setRunFilterQuery(false)
         setRunRefresh(false)
       }
-
-      setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize]

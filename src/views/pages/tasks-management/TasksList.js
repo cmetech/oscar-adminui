@@ -683,8 +683,8 @@ const TasksList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -692,16 +692,12 @@ const TasksList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -713,9 +709,7 @@ const TasksList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this task?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this task?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -725,9 +719,9 @@ const TasksList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -735,8 +729,8 @@ const TasksList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -753,8 +747,8 @@ const TasksList = props => {
         open={disableDialog}
         onClose={handleDisableDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -762,16 +756,12 @@ const TasksList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Action')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDisableDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDisableDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -797,9 +787,9 @@ const TasksList = props => {
             variant='contained'
             size='large'
             onClick={handleDisableDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon={isTaskActive ? "mdi:pause-circle" : "mdi:play-circle"} />}
+            startIcon={<Icon icon={isTaskActive ? 'mdi:pause-circle' : 'mdi:play-circle'} />}
           >
             {isTaskActive ? t('Disable') : t('Enable')}
           </Button>
@@ -807,8 +797,8 @@ const TasksList = props => {
             variant='outlined'
             size='large'
             onClick={handleDisableDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -823,8 +813,8 @@ const TasksList = props => {
         open={runDialog}
         onClose={handleRunDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -832,16 +822,12 @@ const TasksList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Run Task')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleRunDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleRunDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -850,15 +836,13 @@ const TasksList = props => {
           <DialogContent>
             <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
           </DialogContent>
-          ) : (
-            <>
+        ) : (
+          <>
             <DialogContent>
               <Box sx={{ textAlign: 'center' }}>
                 <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
                   <Box>
-                    <Typography variant='h6'>
-                      {t('Confirm you want to run this task.')}
-                    </Typography>
+                    <Typography variant='h6'>{t('Confirm you want to run this task.')}</Typography>
                   </Box>
                 </Stack>
               </Box>
@@ -868,9 +852,9 @@ const TasksList = props => {
                 variant='contained'
                 size='large'
                 onClick={handleRunDialogSubmit}
-                color="primary"
+                color='primary'
                 autoFocus
-                startIcon={<Icon icon="mdi:play" />}
+                startIcon={<Icon icon='mdi:play' />}
               >
                 {t('Run')}
               </Button>
@@ -878,8 +862,8 @@ const TasksList = props => {
                 variant='outlined'
                 size='large'
                 onClick={handleRunDialogClose}
-                color="secondary"
-                startIcon={<Icon icon="mdi:close" />}
+                color='secondary'
+                startIcon={<Icon icon='mdi:close' />}
               >
                 {t('Cancel')}
               </Button>
@@ -896,8 +880,8 @@ const TasksList = props => {
         open={scheduleDialog}
         onClose={handleScheduleDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -905,16 +889,12 @@ const TasksList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Schedule Task')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleScheduleDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleScheduleDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -926,9 +906,7 @@ const TasksList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to schedule this task.')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to schedule this task.')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -938,9 +916,9 @@ const TasksList = props => {
             variant='contained'
             size='large'
             onClick={handleScheduleDialogSubmit}
-            color="primary"
+            color='primary'
             autoFocus
-            startIcon={<Icon icon="mdi:calendar-clock" />}
+            startIcon={<Icon icon='mdi:calendar-clock' />}
           >
             {t('Schedule')}
           </Button>
@@ -948,8 +926,8 @@ const TasksList = props => {
             variant='outlined'
             size='large'
             onClick={handleScheduleDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -1143,23 +1121,8 @@ const TasksList = props => {
 
   const fetchData = useCallback(
     async filter_model => {
-      // Flag to track whether the request has completed
-      let requestCompleted = false
-
+      // Remove the requestCompleted flag as we'll handle this differently
       setLoading(true)
-
-      // Start a timeout to automatically stop loading after 60s
-      const timeoutId = setTimeout(() => {
-        if (!requestCompleted) {
-          setLoading(false)
-
-          // Optionally, set state to show a "no results found" message or take other actions
-          console.log('Request timed out.')
-
-          // Clear the rows or show some placeholder to indicate no results or timeout
-          setRows([])
-        }
-      }, 20000) // 60s timeout
 
       try {
         const response = await axios.get('/api/tasks', {
@@ -1168,30 +1131,29 @@ const TasksList = props => {
             column: sortModel[0]?.field || 'name',
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
-            filter: JSON.stringify(filter_model)
+            filter: filter_model ? JSON.stringify(filter_model) : undefined
           },
-          timeout: 10000
+          // Add signal from AbortController to handle timeouts more gracefully
+          signal: new AbortController().signal,
+          timeout: 30000
         })
 
+        // If we get here, we have successful data
         setRowCount(response.data.total_records)
         setRows(response.data.records)
         props.set_total(response.data.total_records)
         setTasks(response.data.records)
       } catch (error) {
-        console.error(t('Failed to fetch tasks'), error)
-        toast.error(t('Failed to fetch tasks'))
+        // Only show error toast if it's not a timeout and we don't have data
+        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+          console.error(t('Failed to fetch tasks'), error)
+          toast.error(t('Failed to fetch tasks'))
+        }
       } finally {
-        // Mark the request as completed
-        requestCompleted = true
         setLoading(false)
-
-        // Clear the timeout
-        clearTimeout(timeoutId)
         setRunFilterQuery(false)
         setRunRefresh(false)
       }
-
-      setLoading(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationModel.page, paginationModel.pageSize]
@@ -1206,37 +1168,48 @@ const TasksList = props => {
     const intervalId = setInterval(fetchData, 300000) // Fetch data every 300 seconds (5 minutes)
 
     return () => clearInterval(intervalId) // Cleanup interval on component unmount
-  }, [fetchData, refetchTrigger, runFilterQuery])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, refetchTrigger])
 
   // Trigger based on filter application
   useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
+    if (!runFilterQuery) {
+      return
+    }
+
+    console.log('Filter Effect Running:', {
+      itemsLength: filterModel.items.length,
+      runFilterQuery
+    })
 
     if (runFilterQuery && filterModel.items.length > 0) {
       if (filterMode === 'server') {
         const sort = sortModel[0]?.sort
         const sortColumn = sortModel[0]?.field
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
       if (filterMode === 'server') {
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(0)
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(0)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }
 
     // Reset the runFilterQuery flag
-    return () => {
-      runFilterQuery && setRunFilterQuery(false)
-    }
+    // return () => {
+    //   runFilterQuery && setRunFilterQuery(false)
+    // }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterModel, runFilterQuery]) // Triggered by filter changes
@@ -1267,6 +1240,7 @@ const TasksList = props => {
     return () => {
       hasRunRef.current = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, runRefresh, setRunRefresh])
 
   // Trigger based on sort

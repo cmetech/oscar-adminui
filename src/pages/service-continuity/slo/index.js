@@ -833,14 +833,12 @@ const SLO = () => {
                 iconPosition='start'
               />
             )}
-            <Tab value='2' label={t('SLO Event History')} icon={<Icon icon='mdi:history' />} iconPosition='start' />
+  
           </TabList>
           <TabPanel value='1'>
             <SLOList set_total={setSloTotal} total={sloTotal} dateRange={dateRange} onAccept={onAccept} />
           </TabPanel>
-          <TabPanel value='2'>
-            <SLOEventHistoryList dateRange={dateRange} onAccept={onAccept} />
-          </TabPanel>
+
         </TabContext>
       </Grid>
       <DynamicDialogForm open={openModal} handleClose={handleCloseModal} tab={value} />

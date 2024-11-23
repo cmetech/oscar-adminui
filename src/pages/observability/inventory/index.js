@@ -110,8 +110,19 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
   }
 }))
 
+const SelectStyled = styled(Select)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    fieldset: {
+      borderColor: 'inherit' // default border color
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent // border color when focused
+    }
+  }
+}))
+
 // ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
+const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tabValue }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
   const ability = useContext(AbilityContext)
@@ -176,19 +187,34 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, tabValue }) => {
         sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
       >
         {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onDelete && onDelete()
-              handleDropdownClose()
-            }}
-            disabled={!ability.can('delete', getDynamicTitle(tabValue).toLowerCase())}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:delete-forever-outline' />
-              {t('Delete')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
+          <>
+            <MenuItem
+              sx={{ p: 0 }}
+              onClick={() => {
+                onDelete && onDelete()
+                handleDropdownClose()
+              }}
+              disabled={!ability.can('delete', getDynamicTitle(tabValue).toLowerCase())}
+            >
+              <Box sx={styles}>
+                <Icon icon='mdi:delete-forever-outline' />
+                {t('Delete')} {t(getDynamicTitle(tabValue))}
+              </Box>
+            </MenuItem>
+            <MenuItem
+              sx={{ p: 0 }}
+              onClick={() => {
+                onStatusUpdate && onStatusUpdate()
+                handleDropdownClose()
+              }}
+              disabled={!ability.can('update', getDynamicTitle(tabValue).toLowerCase())}
+            >
+              <Box sx={styles}>
+                <Icon icon='mdi:power' />
+                {t('Update Status')}
+              </Box>
+            </MenuItem>
+          </>
         )}
         <MenuItem
           sx={{ p: 0 }}
@@ -592,6 +618,50 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   )
 }
 
+const ConfirmationStatusModal = ({ isOpen, onClose, onConfirm, tab }) => {
+  const { t } = useTranslation()
+  const [status, setStatus] = useState('inactive')
+
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{t('Update Server Status')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ mb: 3 }}>
+          {t('Are you sure you want to update the status of all selected servers?')}
+        </DialogContentText>
+        <FormControl fullWidth>
+          <InputLabel>{t('Status')}</InputLabel>
+          <SelectStyled value={status} label={t('Status')} onChange={e => setStatus(e.target.value)}>
+            <MenuItem value='active'>{t('ACTIVE')}</MenuItem>
+            <MenuItem value='inactive'>{t('INACTIVE')}</MenuItem>
+          </SelectStyled>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={() => onConfirm(status)}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:content-save' />}
+        >
+          {t('Update')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
 const Settings = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -614,6 +684,7 @@ const Settings = () => {
   const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
   const [, setRefetchComponentTrigger] = useAtom(refetchComponentTriggerAtom)
   const [, setRefetchSubcomponentTrigger] = useAtom(refetchSubcomponentTriggerAtom)
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -758,6 +829,43 @@ const Settings = () => {
     handleCloseModal()
   }
 
+  const handleStatusUpdate = () => {
+    setIsStatusModalOpen(true)
+  }
+
+  const handleConfirmStatusUpdate = async newStatus => {
+    try {
+      // Get current server data to access hostnames
+      const response = await axios.get('/api/inventory/servers')
+      const allServers = response.data.rows
+
+      // Create a map of server IDs to their hostnames
+      const serverMap = allServers.reduce((acc, server) => {
+        acc[server.id] = server.hostname
+
+        return acc
+      }, {})
+
+      // Update each selected server with both hostname and status
+      const updatePromises = serverIds.map(serverId =>
+        axios.patch(`/api/inventory/servers/${serverId}`, {
+          hostname: serverMap[serverId], // Include the hostname
+          status: newStatus
+        })
+      )
+
+      await Promise.all(updatePromises)
+
+      setRefetchTrigger(Date.now())
+      toast.success(t('Successfully updated server statuses'))
+    } catch (error) {
+      console.error('Error updating server statuses:', error)
+      toast.error(t('Failed to update server statuses'))
+    }
+
+    setIsStatusModalOpen(false)
+  }
+
   // Function to determine the dynamic text based on the selected tab
   const getDynamicText = tabValue => {
     const mapping = {
@@ -793,6 +901,7 @@ const Settings = () => {
                   onDelete={handleDelete}
                   onExport={handleExport}
                   onUpload={handleUpload}
+                  onStatusUpdate={handleStatusUpdate}
                   tabValue={value}
                 />
               </Fragment>
@@ -880,6 +989,13 @@ const Settings = () => {
           // Handle success, e.g., showing a success message or refreshing the list
           setOpenUploadDialog(false)
         }}
+        tab={value}
+      />
+
+      <ConfirmationStatusModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        onConfirm={handleConfirmStatusUpdate}
         tab={value}
       />
     </Grid>

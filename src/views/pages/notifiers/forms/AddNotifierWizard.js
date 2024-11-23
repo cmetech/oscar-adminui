@@ -211,6 +211,11 @@ const AddNotifierWizard = ({ onSuccess }) => {
     const name = target.name
     let value = target.value
 
+    // Convert name field to uppercase
+    if (name === 'name' && typeof value === 'string') {
+      value = value.toUpperCase()
+    }
+
     setNotifierForm(prevForm => {
       const newForm = { ...prevForm }
 
@@ -381,7 +386,7 @@ const AddNotifierWizard = ({ onSuccess }) => {
                     label='Name'
                     fullWidth
                     autoComplete='off'
-                    value={notifierForm.name}
+                    value={(notifierForm.name || '').toUpperCase()}
                     onChange={handleFormChange}
                     error={Boolean(formErrors?.name)}
                     helperText={formErrors?.name}

@@ -1,4 +1,4 @@
-FROM node:current-alpine3.20 AS base
+FROM node:lts-alpine3.20 AS base
 
 # Install Bash
 RUN apk add --no-cache bash

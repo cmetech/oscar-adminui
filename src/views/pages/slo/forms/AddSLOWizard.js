@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { useAtom } from 'jotai'
@@ -50,30 +50,10 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
-import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
+// ** Translation
+import { useTranslation } from 'react-i18next'
 
-const steps = [
-  {
-    title: 'SLO Description',
-    subtitle: 'Add SLO Description Information',
-    description: 'Add the Name, Description, SLI Target Type for the SLO.'
-  },
-  {
-    title: 'Define SLI Details',
-    subtitle: 'Add SLI Details',
-    description: 'Add the SLI Source Index, SLI Filters and Query details.'
-  },
-  {
-    title: 'Define the Objective',
-    subtitle: 'Add the Objective Details',
-    description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
-  },
-  {
-    title: 'Review',
-    subtitle: 'Review and Submit',
-    description: 'Review the SLO details and submit.'
-  }
-]
+import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
@@ -179,23 +159,57 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
   const [sloDescription, setSloDescription] = useState('')
   const [sloTargetValue, setSloTargetValue] = useState(95)
   const [sloTargetPeriod, setSloTargetPeriod] = useState(periodOptions[1])
+  const [sloTargetPeriodNumber, setSloTargetPeriodNumber] = useState('30')
   const [sloTimeWindow, setSloTimeWindow] = useState('rolling')
   const [sloTargetCalculationMethod, setSloTargetCalculationMethod] = useState('occurrences')
   const [sloTargetType, setSloTargetType] = useState('internal')
+  const [prevSloTargetType, setPrevSloTargetType] = useState('internal')
   const [sloTargetIndex, setSloTargetIndex] = useState('')
-  const [sloTargetPromql, setSloTargetPromql] = useState('')
-  const [sloTargetPromQlRel, setSloTargetPromQlRel] = useState('>=')
-
+  const { t } = useTranslation()
   const [sloFilterQuery, setSloFilterQuery] = useState('')
+  const [sloTargetConnectionID, setSloTargetConnectionID] = useState('')
+  const [sloPrevTargetConnectionID, setSloPrevTargetConnectionID] = useState('')
+  const [sloConnections, setSloConnections] = useState([])
+  const [connectionsLoading, setConnectionsLoading] = useState(false)
+  const [specificConnectionsLoading, setSpecificConnectionsLoading] = useState(false)
+  const [selectedConnectionType, setSelectedConnectionType] = useState('')
+  const [sloTargetConnectionType, setSloTargetConnectionType] = useState('')
   const [sloGoodQuery, setSloGoodQuery] = useState('')
+  const [goodQueryValidationMassage, setGoodQueryValidationMessage] = useState('')
   const [sloTotalQuery, setSloTotalQuery] = useState('')
+  const [totalQueryValidationMassage, setTotalQueryValidationMessage] = useState('')
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
+  const [isSloTargetTypeInternal, setIsSloTargetTypeInternal] = useState(false)
 
   const theme = useTheme()
   const session = useSession()
+
+  //putting stpes as a state varible
+  const [steps, setSteps] = useState([
+    {
+      title: 'SLO Description',
+      subtitle: 'Add SLO Description Information',
+      description: 'Add the Name, Description, SLI Target Type for the SLO.'
+    },
+    {
+      title: 'Define SLI Details',
+      subtitle: 'Add SLI Details',
+      description: 'Add the SLI Source Index, SLI Filters and Query details.'
+    },
+    {
+      title: 'Define the Objective',
+      subtitle: 'Add the Objective Details',
+      description: 'Add the Time Window, Period, Budgeting Method, and Target Value for the SLO.'
+    },
+    {
+      title: 'Review',
+      subtitle: 'Review and Submit',
+      description: 'Review the SLO details and submit.'
+    }
+  ])
 
   // Validate form based on the active step
   const validateForm = async () => {
@@ -254,24 +268,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
 
         var payload = null
 
-        if (sloTargetType.toLowerCase() === 'prometheus') {
-          payload = {
-            name: sloName,
-            description: sloDescription,
-            target: {
-              target_value: parseFloat(sloTargetValue),
-              period: parseInt(sloTargetPeriod.value),
-              calculation_method: sloTargetCalculationMethod.toLowerCase(),
-              time_window: sloTimeWindow.toLowerCase(),
-              target_type: sloTargetType.toLowerCase(),
-              target_index: sloTargetIndex,
-              filter_query: sloTargetPromQlRel,//send the promql relationship to threshhold value in filter_query field so new data model is not required
-              good_query: sloTargetPromql, //send the target query in good_query field so new data model is not required
-              total_query: sloTotalQuery
-            }
-          }
-
-        } else {
+        if (sloTargetType.toLowerCase() === 'internal') {
           payload = {
             name: sloName,
             description: sloDescription,
@@ -287,8 +284,23 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
               total_query: sloTotalQuery
             }
           }
+        } else {
+          payload = {
+            name: sloName,
+            description: sloDescription,
+            target: {
+              target_value: parseFloat(sloTargetValue),
+              period: parseInt(sloTargetPeriod.value),
+              calculation_method: sloTargetCalculationMethod.toLowerCase(),
+              time_window: sloTimeWindow.toLowerCase(),
+              target_type: sloTargetType.toLowerCase(),
+              target_index: sloTargetIndex,
+              filter_query: sloTargetConnectionID,
+              good_query: sloGoodQuery,
+              total_query: sloTotalQuery
+            }
+          }
         }
-
 
         console.log('Payload', payload)
 
@@ -319,10 +331,14 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloTargetType('internal')
     setSloTargetIndex('')
     setSloFilterQuery('')
+    setSloTargetConnectionID('')
+    setSloTargetConnectionType('')
     setSloGoodQuery('')
     setSloTotalQuery('')
-    setSloTargetPromql('')
-    setSloTargetPromQlRel('')
+    setGoodQueryColor('')
+    setTotalQueryColor('')
+    setGoodQueryValidationMessage('')
+    setTotalQueryValidationMessage('')
     setSloTimeWindow('rolling')
     setActiveStep(0)
   }
@@ -349,6 +365,10 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     }
   }
 
+  const handleTargetPeriodNumberChange = event => {
+    setSloTargetPeriodNumber(event.target.value)
+  }
+
   const handleTargetCalculationMethodChange = event => {
     setSloTargetCalculationMethod(event.target.value)
   }
@@ -361,6 +381,14 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloFilterQuery(event.target.value)
   }
 
+  const handleTargetConnectionIDChange = event => {
+    setSloTargetConnectionID(event.target.value.toLowerCase())
+  }
+
+  const handleTargetConnectionTypeChange = event => {
+    setSloTargetConnectionType(event.target.value)
+  }
+
   const handleTargetIndexChange = event => {
     setSloTargetIndex(event.target.value)
   }
@@ -369,62 +397,429 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
     setSloGoodQuery(event.target.value)
   }
 
-  const handleSloTargetPromqlChange = event => {
-    setSloTargetPromql(event.target.value)
-  }
-
-  const handleSloTargetPromQlRelChange = event => {
-
-    setSloTargetPromQlRel(eventValue => {
-      const value = event.target.value
-      return getSloTargetPromQlRelSymbol(value)
-    })
+  const handleGoodQueryChangeSQL = event => {
+    const query = event.target.value
+    const singleLineQuery = query.replace(/[\n\t]/g, ' ')
+    setSloGoodQuery(singleLineQuery)
   }
 
   const handleTotalQueryChange = event => {
     setSloTotalQuery(event.target.value)
   }
 
+  const handleTotalQueryChangeSQL = event => {
+    const query = event.target.value
+    const singleLineQuery = query.replace(/[\n\t]/g, ' ')
+    setSloTotalQuery(singleLineQuery)
+  }
+
   const handleTimeWindowChange = event => {
     setSloTimeWindow(event.target.value)
   }
+
+  const timeoutGoodQueryId = useRef(null)
+  const timeoutTotalQueryId = useRef(null)
+
+  const [goodQueryColor, setGoodQueryColor] = useState('')
+  const [totalQueryColor, setTotalQueryColor] = useState('')
+
+  const handleValidatePrometheusGoodQuery = async query => {
+    try {
+      if (!query.trim()) {
+        setGoodQueryColor('')
+        setGoodQueryValidationMessage('')
+
+        return
+      }
+
+      const payload = {
+        query: query,
+        querytype: 'prometheus'
+      }
+
+      const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json' // Include this if the API expects JSON
+      }
+
+      if (sloTargetConnectionID) {
+        payload.connectionId = sloTargetConnectionID
+      }
+      if (sloTargetConnectionType) {
+        payload.connectionType = sloTargetConnectionType
+      }
+
+      const response = await axios.post('/api/query', payload, { headers })
+
+      // Validate the response structure
+      if (response.data && response.data.status === 'success' && Array.isArray(response.data.data.result)) {
+        if (response.data.data.result.length > 0) {
+          setGoodQueryColor({
+            backgroundColor: '#00910033',
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+          })
+          setGoodQueryValidationMessage('Query validated with results')
+        } else {
+          setGoodQueryColor({
+            backgroundColor: '#c96e4033',
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+          })
+          setGoodQueryValidationMessage('Query validated with no results')
+        }
+      } else {
+        setGoodQueryColor({
+          backgroundColor: '#91000033',
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+        })
+        setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
+      }
+    } catch (error) {
+      setGoodQueryColor({
+        backgroundColor: '#91000033',
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+      })
+      console.error('Error sending PromQL:', error.response?.data || error.message)
+      setGoodQueryValidationMessage(
+        'Query validation failed with error: ' + (error.response?.data?.message || error.message)
+      )
+    }
+  }
+
+  const handleValidatePrometheusTotalQuery = async query => {
+    try {
+      if (!query.trim()) {
+        setTotalQueryColor('')
+        setTotalQueryValidationMessage('')
+
+        return
+      }
+
+      const payload = {
+        query: query,
+        querytype: 'prometheus'
+      }
+
+      const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json' // Include this if the API expects JSON
+      }
+
+      if (sloTargetConnectionID) {
+        payload.connectionId = sloTargetConnectionID
+      }
+      if (sloTargetConnectionType) {
+        payload.connectionType = sloTargetConnectionType
+      }
+
+      const response = await axios.post('/api/query', payload, { headers })
+
+      // Validate the response structure
+      if (response.data && response.data.status === 'success' && Array.isArray(response.data.data.result)) {
+        if (response.data.data.result.length > 0) {
+          setTotalQueryColor({
+            backgroundColor: '#00910033',
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+          })
+          setTotalQueryValidationMessage('Query validated with results')
+        } else {
+          setTotalQueryColor({
+            backgroundColor: '#c96e4033',
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+          })
+          setTotalQueryValidationMessage('Query validated with no results')
+        }
+      } else {
+        setTotalQueryColor({
+          backgroundColor: '#91000033',
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+        })
+        setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
+      }
+    } catch (error) {
+      setTotalQueryColor({
+        backgroundColor: '#91000033',
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+      })
+      console.error('Error sending PromQL:', error.response?.data || error.message)
+      setTotalQueryValidationMessage(
+        'Query validation failed with error: ' + (error.response?.data?.message || error.message)
+      )
+    }
+  }
+
+  const handleValidatePrometheusTotalQueryChange = async query => {}
+
+  const handleValidateSQLGoodQuery = async query => {
+    try {
+      if (!query.trim()) {
+        setTotalQueryColor('')
+        setTotalQueryValidationMessage('')
+
+        return
+      }
+
+      const payload = {
+        query: query,
+        querytype: 'sql'
+      }
+
+      const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+
+      if (sloTargetConnectionID) {
+        payload.connectionId = sloTargetConnectionID
+      }
+      if (sloTargetConnectionType) {
+        payload.connectionType = sloTargetConnectionType
+      }
+
+      const response = await axios.post('/api/query', payload, { headers })
+
+      // Validate the response structure
+      if (response.data && response.data.status === 'success') {
+        const resultCount = response.data.data.result_count
+        if (resultCount > 0) {
+          setGoodQueryColor({
+            backgroundColor: '#00910033',
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+          })
+          setGoodQueryValidationMessage('Query validated with results')
+        } else {
+          setGoodQueryColor({
+            backgroundColor: '#c96e4033',
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+          })
+          setGoodQueryValidationMessage('Query validated with no results')
+        }
+      } else {
+        setGoodQueryColor({
+          backgroundColor: '#91000033',
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+        })
+        setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
+      }
+    } catch (error) {
+      setGoodQueryColor({
+        backgroundColor: '#91000033',
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+      })
+      console.error('Error sending PromQL:', error.response?.data || error.message)
+      setGoodQueryValidationMessage(
+        'Query validation failed with error: ' + (error.response?.data?.message || error.message)
+      )
+    }
+  }
+
+  const handleValidateSQLGoodQueryChange = async query => {}
+
+  const handleValidateSQLTotalQuery = async query => {
+    try {
+      if (!query.trim()) {
+        setTotalQueryColor('')
+        setTotalQueryValidationMessage('')
+
+        return
+      }
+
+      const payload = {
+        query: query,
+        querytype: 'sql'
+      }
+
+      const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json' // Include this if the API expects JSON
+      }
+
+      if (sloTargetConnectionID) {
+        payload.connectionId = sloTargetConnectionID
+      }
+      if (sloTargetConnectionType) {
+        payload.connectionType = sloTargetConnectionType
+      }
+
+      const response = await axios.post('/api/query', payload, { headers })
+
+      // Validate the response structure
+      if (response.data && response.data.status === 'success') {
+        const resultCount = response.data.data.result_count
+
+        if (resultCount > 0) {
+          setTotalQueryColor({
+            backgroundColor: '#00910033',
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+          })
+          setTotalQueryValidationMessage('Query validated with results')
+        } else if (resultCount === 0) {
+          setTotalQueryColor({
+            backgroundColor: '#c96e4033',
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+          })
+          setTotalQueryValidationMessage('Query validated with no results')
+        } else {
+          setTotalQueryColor({
+            backgroundColor: '#91000033',
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+          })
+          setTotalQueryValidationMessage('Unexpected result count')
+        }
+      } else {
+        setTotalQueryColor({
+          backgroundColor: '#91000033',
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+        })
+        setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
+      }
+    } catch (error) {
+      setTotalQueryColor({
+        backgroundColor: '#91000033',
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+      })
+      console.error('Error sending PromQL:', error.response?.data || error.message)
+      setTotalQueryValidationMessage(
+        'Query validation failed with error: ' + (error.response?.data?.message || error.message)
+      )
+    }
+  }
+
+  const connectionTypeSloTargetType = {
+    prometheus: ['http', 'https'],
+    sql: ['mysql', 'oracle', 'postgresql', 'sqlite'],
+    elasticsearch: ['elasticsearch']
+  }
+
+  const filteredConnectionIds = sloConnections
+    .filter(connection => connectionTypeSloTargetType[sloTargetType.toLowerCase()]?.includes(connection.conn_type))
+    .map(connection => connection.connection_id)
+
+  console.log(filteredConnectionIds)
 
   // Handle Confirm Password
   const handleConfirmChange = prop => event => {
     setState({ ...state, [prop]: event.target.value })
   }
 
-
-  const getSloTargetPromQlRelSymbol = value => {
-    switch (value) {
-      case 'More than Or Equal':
-        return '>=';
-      case 'More Than':
-        return '>';
-      case 'Less Than':
-        return '<';
-      case 'Less Than Or Equal':
-        return '<=';
-      default:
-        return value;
+  //efect to reset all query field properties if slo-target-type is changed
+  useEffect(() => {
+    if (prevSloTargetType !== sloTargetType) {
+      setSloGoodQuery('')
+      setSloTargetConnectionID('')
+      setSloTargetConnectionType('')
+      setSloFilterQuery('')
+      setSloTotalQuery('')
+      setSloTargetIndex('')
+      setGoodQueryColor('')
+      setTotalQueryColor('')
+      setGoodQueryValidationMessage('')
+      setTotalQueryValidationMessage('')
     }
-  }
 
-  const getSloTargetPromQlRelLabel = value => {
-    switch (value) {
-      case '>=':
-        return 'More than Or Equal';
-      case '>':
-        return 'More Than';
-      case '<':
-        return 'Less Than';
-      case '<=':
-        return 'Less Than Or Equal';
-      default:
-        return value;
+    setPrevSloTargetType(sloTargetType)
+  }, [sloTargetType, prevSloTargetType])
+
+  //effect to update step with change of SLO-Target-Type
+  useEffect(() => {
+    setSteps(prevSteps => {
+      const updatedSteps = [...prevSteps]
+
+      if (sloTargetType.toUpperCase() !== 'INTERNAL') {
+        updatedSteps[1] = {
+          title: 'Define SLI Details',
+          subtitle: 'Add SLI Details with Custom Query based on Target Type',
+          description:
+            'Add Good Query and Total Query with Target Period in intended query language along with Optional Connection ID and Connection Type'
+        }
+      }
+
+      return updatedSteps
+    })
+  }, [sloTargetType])
+
+  //effect to put out color if query fileed has no text
+  useEffect(() => {
+    if (!sloGoodQuery.trim()) {
+      setGoodQueryColor('')
+      setGoodQueryValidationMessage('')
+
+      return
     }
-  }
 
+    if (!sloTotalQuery.trim()) {
+      setTotalQueryColor('')
+      setTotalQueryValidationMessage('')
+
+      return
+    }
+  })
+
+  //effect to trigger validation if query field is on focus for more than 6 seconds with no inputs
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (sloTargetType.toLowerCase() === 'prometheus') {
+        handleValidatePrometheusGoodQuery(sloGoodQuery)
+        handleValidatePrometheusTotalQuery(sloTotalQuery)
+      }
+
+      if (sloTargetType.toLowerCase() === 'sql') {
+        handleValidateSQLGoodQuery(sloGoodQuery)
+        handleValidateSQLTotalQuery(sloTotalQuery)
+      }
+      //TO DO - ELASTICSEARCH timeout effect
+      if (sloTargetType.toLowerCase() === 'elasticsearch') {
+      }
+    }, 6000)
+
+    return () => {
+      clearTimeout(handler) // Clear timeout if inputs change
+    }
+  }, [sloGoodQuery, sloTotalQuery])
+
+  //effect to load all connectionsin order to populate target connection dropdown
+  useEffect(() => {
+    const fetchConnections = async () => {
+      setConnectionsLoading(true)
+      try {
+        const response = await axios.get('/api/connections')
+        setSloConnections(response.data.connections)
+        console.log('Fetched connections:', response.data.connections)
+      } catch (error) {
+        console.error('Failed to fetch connections:', error)
+        toast.error('Failed load target connections')
+      } finally {
+        setConnectionsLoading(false)
+      }
+    }
+    fetchConnections()
+  }, [])
+
+  //Effect to fetch slected connection details
+  useEffect(() => {
+    const fetchSpecificConnections = async () => {
+      console.log('Specifc Connections: ' + sloTargetConnectionID)
+      if (
+        !sloTargetConnectionID &&
+        (sloTargetType.toLowerCase() === 'prometheus' || sloTargetType.toLowerCase() === 'sql')
+      )
+        return
+
+      if (sloTargetType.toLowerCase() === 'internal') return
+
+      setSpecificConnectionsLoading(true)
+      try {
+        const response = await axios.get(`/api/connections/${sloTargetConnectionID}?include_credentials=false`)
+        setSelectedConnectionType(response.data.conn_type)
+        console.log('Fetched connection:', response.data.conn_type)
+      } catch (error) {
+        console.error('Failed to fetch selectd connection details', error)
+        toast.error('Failed load selected connection details')
+      } finally {
+        setSpecificConnectionsLoading(false)
+      }
+    }
+    fetchSpecificConnections()
+  }, [sloTargetConnectionID])
 
   const getStepContent = step => {
     switch (step) {
@@ -463,7 +858,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   selectOnFocus
                   handleHomeEndKeys
                   id='slotargettype-autocomplete'
-                  options={['INTERNAL', 'ELASTIC', 'PROMETHEUS', 'GRAFANA']}
+                  options={['INTERNAL', 'ELASTIC', 'PROMETHEUS', 'SQL']}
                   value={sloTargetType.toUpperCase()}
                   onChange={(event, newValue) => {
                     // Directly calling handleFormChange with a synthetic event object
@@ -485,53 +880,360 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       case 1:
         return (
           <Fragment>
-            {console.log("Type SLO selected--------------> " + sloTargetType.toUpperCase())}
-            {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
-
+            {console.log('Type SLO selected--------------> ' + sloTargetType.toUpperCase())}
+            {sloTargetType.toUpperCase() === 'PROMETHEUS' ? (
               <Fragment>
                 <Grid container spacing={6}>
-                  <Grid item sm={20} xs={30}>
-                    <TextfieldStyled
-                      fullWidth
-                      multiline
-                      value={sloTargetPromql}
-                      onChange={handleSloTargetPromqlChange}
-                      label='Prometheus Query'
-
-                    />
-                  </Grid>
                   <Grid item xs={12}>
                     <AutocompleteStyled
-                      freeSolo={false}
+                      freeSolo
                       clearOnBlur
                       selectOnFocus
                       handleHomeEndKeys
-                      id='slotargettype-autocomplete'
-                      options={['More than Or Equal', 'More Than', 'Less Than', 'Less Than Or Equal']}
-                      value={getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                      options={filteredConnectionIds.map(id => id.toUpperCase())}
+                      value={sloTargetConnectionID ? sloTargetConnectionID.toUpperCase() : ' '}
                       onChange={(event, newValue) => {
-                        // Directly calling handleFormChange with a synthetic event object
-                        handleSloTargetPromQlRelChange(
-                          { target: { name: 'target_promql_rel', value: newValue } },
+                        handleTargetConnectionIDChange(
+                          { target: { name: 'target_conection', value: newValue } },
                           null,
                           null
                         )
                       }}
                       onInputChange={(event, newInputValue) => {
                         if (event) {
-                          handleSloTargetPromQlRelChange({ target: { name: 'target_promql_rel', value: newInputValue } }, null, null)
+                          handleTargetConnectionIDChange(
+                            { target: { name: 'target_conection', value: newInputValue } },
+                            null,
+                            null
+                          )
                         }
                       }}
                       renderInput={params => (
-                        <TextfieldStyled {...params} label='Acceptable Service Relation with Threshold' fullWidth required autoComplete='off' />
+                        <TextfieldStyled {...params} label='Connection' fullWidth autoComplete='off' />
                       )}
                     />
-
                   </Grid>
 
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      options={sloTargetConnectionID ? [selectedConnectionType] : []}
+                      value={sloTargetConnectionType ? sloTargetConnectionType : ''}
+                      onChange={(event, newValue) => {
+                        handleTargetConnectionTypeChange(
+                          { target: { name: 'target_type', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleTargetConnectionTypeChange(
+                            { target: { name: 'target_type', value: newInputValue } },
+                            null,
+                            null
+                          )
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Connection Type' fullWidth autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloGoodQuery}
+                      onChange={handleGoodQueryChange}
+                      onBlur={() => handleValidatePrometheusGoodQuery(sloGoodQuery)}
+                      label='Good Query Prometheus'
+                      sx={{
+                        backgroundColor: goodQueryColor?.backgroundColor || 'inherit',
+                        color: goodQueryColor?.textColor || 'inherit',
+                        borderRadius: '8px', // Ensure rounded corners
+                        boxShadow: theme.shadows[1],
+                        '&:focus': {
+                          outline: 'none',
+                          boxShadow: theme.shadows[3]
+                        }
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTotalQuery}
+                      onChange={handleTotalQueryChange}
+                      onBlur={() => handleValidatePrometheusTotalQuery(sloTotalQuery)}
+                      label='Total Query Prometheus'
+                      sx={{
+                        backgroundColor: totalQueryColor?.backgroundColor || 'inherit',
+                        color: totalQueryColor?.textColor || 'inherit',
+                        borderRadius: '8px',
+                        boxShadow: theme.shadows[1],
+                        '&:focus': {
+                          outline: 'none',
+                          boxShadow: theme.shadows[3]
+                        }
+                      }}
+                    />
+                  </Grid>
+                  {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                  <Grid item sm={6} xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='sloTargetPeriod-autocomplete'
+                      options={periodOptions}
+                      getOptionLabel={option => option.label}
+                      value={sloTargetPeriod}
+                      onChange={handleTargetPeriodChange}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
                 </Grid>
-              </Fragment>) : (
+              </Fragment>
+            ) : sloTargetType.toUpperCase() === 'ELASTICSEARCH' ? (
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item sm={6} xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTargetIndex}
+                      onChange={e => {
+                        handleTargetIndexChange(e)
+                        handleTargetConnectionIDChange(e)
+                      }}
+                      label='Source Index Elastic Search'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      options={sloTargetConnectionID ? ['ELASTICSEARCH'] : []}
+                      value={sloTargetConnectionType ? sloTargetConnectionType : ''}
+                      onChange={(event, newValue) => {
+                        handleTargetConnectionTypeChange(
+                          { target: { name: 'target_type', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleTargetConnectionTypeChange(
+                            { target: { name: 'target_type', value: newInputValue } },
+                            null,
+                            null
+                          )
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Source Type' fullWidth autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloFilterQuery}
+                      onChange={handleFilterQueryChange}
+                      label='Filter Query Elastic Search'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloGoodQuery}
+                      onChange={handleGoodQueryChange}
+                      label='Good Query'
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTotalQuery}
+                      onChange={handleTotalQueryChange}
+                      label='Total Query Elastic Search'
+                    />
+                  </Grid>
+                  {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                  <Grid item sm={6} xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='sloTargetPeriod-autocomplete'
+                      options={periodOptions}
+                      getOptionLabel={option => option.label}
+                      value={sloTargetPeriod}
+                      onChange={handleTargetPeriodChange}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </Fragment>
+            ) : sloTargetType.toUpperCase() === 'SQL' ? (
+              <Fragment>
+                <Grid container spacing={6}>
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      options={filteredConnectionIds.map(id => id.toUpperCase())}
+                      value={sloTargetConnectionID ? sloTargetConnectionID.toUpperCase() : ' '}
+                      onChange={(event, newValue) => {
+                        handleTargetConnectionIDChange(
+                          { target: { name: 'target_conection', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleTargetConnectionIDChange(
+                            { target: { name: 'target_conection', value: newInputValue } },
+                            null,
+                            null
+                          )
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Connection' fullWidth autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
 
+                  <Grid item xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      options={sloTargetConnectionID ? [selectedConnectionType] : []}
+                      value={sloTargetConnectionType ? sloTargetConnectionType : ''}
+                      onChange={(event, newValue) => {
+                        handleTargetConnectionTypeChange(
+                          { target: { name: 'target_type', value: newValue } },
+                          null,
+                          null
+                        )
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        if (event) {
+                          handleTargetConnectionTypeChange(
+                            { target: { name: 'target_type', value: newInputValue } },
+                            null,
+                            null
+                          )
+                        }
+                      }}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Connection Type' fullWidth autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloGoodQuery}
+                      onChange={handleGoodQueryChange}
+                      onBlur={() => handleValidateSQLGoodQuery(sloGoodQuery)}
+                      label='Good Query SQL'
+                      margin='normal'
+                      multiline
+                      rows={4}
+                      sx={{
+                        backgroundColor: goodQueryColor?.backgroundColor || 'inherit',
+                        color: goodQueryColor?.textColor || 'inherit',
+                        borderRadius: '8px', // Ensure rounded corners
+                        boxShadow: theme.shadows[1],
+                        '&:focus': {
+                          outline: 'none',
+                          boxShadow: theme.shadows[3]
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloTotalQuery}
+                      onChange={handleTotalQueryChange}
+                      onBlur={() => handleValidateSQLTotalQuery(sloTotalQuery)}
+                      label='Total Query SQL'
+                      margin='normal'
+                      multiline
+                      rows={4}
+                      sx={{
+                        backgroundColor: totalQueryColor?.backgroundColor || 'inherit',
+                        color: totalQueryColor?.textColor || 'inherit',
+                        borderRadius: '8px',
+                        boxShadow: theme.shadows[1],
+                        '&:focus': {
+                          outline: 'none',
+                          boxShadow: theme.shadows[3]
+                        }
+                      }}
+                    />
+                  </Grid>
+                  {/*<Grid item sm={6} xs={12}>
+                  <TextfieldStyled
+                    fullWidth
+                    value={sloTargetPeriodNumber}
+                    onChange={handleTargetPeriodNumberChange}
+                    label='Target Period in Days From Provided Query for Calculation'
+                  />
+                </Grid>*/}
+                  <Grid item sm={6} xs={12}>
+                    <AutocompleteStyled
+                      freeSolo
+                      clearOnBlur
+                      selectOnFocus
+                      handleHomeEndKeys
+                      id='sloTargetPeriod-autocomplete'
+                      options={periodOptions}
+                      getOptionLabel={option => option.label}
+                      value={sloTargetPeriod}
+                      onChange={handleTargetPeriodChange}
+                      renderInput={params => (
+                        <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </Fragment>
+            ) : (
               <Fragment>
                 <Grid container spacing={6}>
                   <Grid item sm={6} xs={12}>
@@ -551,7 +1253,12 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextfieldStyled fullWidth value={sloGoodQuery} onChange={handleGoodQueryChange} label='Good Query' />
+                    <TextfieldStyled
+                      fullWidth
+                      value={sloGoodQuery}
+                      onChange={handleGoodQueryChange}
+                      label='Good Query'
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     <TextfieldStyled
@@ -593,22 +1300,28 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   )}
                 />
               </Grid>
-              <Grid item sm={6} xs={12}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='sloTargetPeriod-autocomplete'
-                  options={periodOptions}
-                  getOptionLabel={option => option.label}
-                  value={sloTargetPeriod}
-                  onChange={handleTargetPeriodChange}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
+
+              {sloTargetType.toUpperCase() === 'INTERNAL' ? (
+                <Grid item sm={6} xs={12}>
+                  <AutocompleteStyled
+                    freeSolo
+                    clearOnBlur
+                    selectOnFocus
+                    handleHomeEndKeys
+                    id='sloTargetPeriod-autocomplete'
+                    options={periodOptions}
+                    getOptionLabel={option => option.label}
+                    value={sloTargetPeriod}
+                    onChange={handleTargetPeriodChange}
+                    renderInput={params => (
+                      <TextfieldStyled {...params} label='Target Period' fullWidth required autoComplete='off' />
+                    )}
+                  />
+                </Grid>
+              ) : (
+                <></>
+              )}
+
               <Grid item sm={6} xs={12}>
                 <FormControl fullWidth>
                   <TextfieldStyled
@@ -658,33 +1371,38 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       case 3:
         return (
           <Fragment>
-            {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (
-              <Fragment>
-                <Grid container spacing={2}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                  Review and Confirm
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Name:</strong> {sloName}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Description:</strong> {sloDescription}
+                </Typography>
+              </Grid>
+              {sloTargetType.toUpperCase() === 'PROMETHEUS' ? (
+                <Fragment>
                   <Grid item xs={12}>
-                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                      Review and Confirm
+                    <Typography>
+                      <strong>Selected Connection:</strong> {sloFilterQuery}
                     </Typography>
-                    <Divider sx={{ my: 2 }} />
                   </Grid>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Name:</strong> {sloName}
+                      <strong>Prometheus Good Query:</strong> {sloGoodQuery}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Description:</strong> {sloDescription}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Prometheus Base Query:</strong> {sloTargetPromql}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
+                      <strong>Prometheus Total Query:</strong> {sloTotalQuery}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
@@ -697,38 +1415,37 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                       <strong>Target Period:</strong> {sloTargetPeriod.label}
                     </Typography>
                   </Grid>
+                </Fragment>
+              ) : sloTargetType.toUpperCase() === 'SQL' ? (
+                <Fragment>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Target Value:</strong> {sloTargetValue}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Fragment>
-
-            ) : (
-              <Fragment>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                      Review and Confirm
-                    </Typography>
-                    <Divider sx={{ my: 2 }} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Name:</strong> {sloName}
+                      <strong>Selected Connection:</strong> {sloFilterQuery}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Description:</strong> {sloDescription}
+                      <strong>SQL Good Query:</strong> {sloGoodQuery}
                     </Typography>
                   </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>SQL Total Query:</strong> {sloTotalQuery}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Time Window:</strong> {sloTimeWindow}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <strong>Target Period:</strong> {sloTargetPeriod.label}
+                    </Typography>
+                  </Grid>
+                </Fragment>
+              ) : (
+                <Fragment>
                   <Grid item xs={12}>
                     <Typography>
                       <strong>Target Index:</strong> {sloTargetIndex}
@@ -759,22 +1476,21 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                       <strong>Target Period:</strong> {sloTargetPeriod.label}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Target Value:</strong> {sloTargetValue}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Fragment>
-            )}
+                </Fragment>
+              )}
 
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Value:</strong> {sloTargetValue}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Calculation Method:</strong> {sloTargetCalculationMethod}
+                </Typography>
+              </Grid>
+            </Grid>
           </Fragment>
-
         )
       default:
         return 'Unknown Step'
@@ -812,42 +1528,26 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                   <strong>Description:</strong> {sloDescription}
                 </Typography>
               </Grid>
-              {sloTargetType.toUpperCase() == 'PROMETHEUS' ? (<Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Prometheus Base Query:</strong> {sloTargetPromql}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>
-                    <strong>Acceptable Service Relationship with Threshold:</strong> {getSloTargetPromQlRelLabel(sloTargetPromQlRel)}
-                  </Typography>
-                </Grid>
-              </Grid>) : (
-                <Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Target Index:</strong> {sloTargetIndex}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Filter Query:</strong> {sloFilterQuery}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Good Query:</strong> {sloGoodQuery}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <strong>Total Query:</strong> {sloTotalQuery}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              )}
-
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Target Index:</strong> {sloTargetIndex}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Filter Query:</strong> {sloFilterQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Good Query:</strong> {sloGoodQuery}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  <strong>Total Query:</strong> {sloTotalQuery}
+                </Typography>
+              </Grid>
               <Grid item xs={12}>
                 <Typography>
                   <strong>Time Window:</strong> {sloTimeWindow}

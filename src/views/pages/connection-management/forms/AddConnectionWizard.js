@@ -65,28 +65,21 @@ const initialConnectionFormState = {
 
 // Define available connection types
 const connectionTypes = [
-  'mysql',
-  'postgresql',
-  'mongodb',
-  'mssql',
-  'oracle',
-  'sqlite',
-  'redis',
-  'kafka',
-  'rabbitmq',
-  'activemq',
-  'mqtt',
-  'elasticsearch',
-  'couchbase',
-  'ftp',
-  'sftp',
-  'smtp',
-  'pop3',
-  'imap',
-  'nntp',
-  'telnet',
-  'ssh',
-  'vnc'
+  'MYSQL',
+  'POSTGRESQL',
+  'MONGODB',
+  'ORACLE',
+  'REDIS',
+  'KAFKA',
+  'RABBITMQ',
+  'ELASTICSEARCH',
+  'SFTP',
+  'SMTP',
+  'POP3',
+  'IMAP',
+  'SSH',
+  'HTTP',
+  'HTTPS'
 ]
 
 const steps = [
@@ -188,6 +181,8 @@ const AddConnectionWizard = ({ onSuccess }) => {
     setActiveStep(0)
   }, [connectionForm.type])
 
+  const NO_AUTH_REQUIRED = ['redis', 'kafka', 'rabbitmq', 'sftp', 'http', 'https', 'smtp', 'pop3', 'imap']
+
   const stepValidationSchemas = [
     // Step 0: Connection Type
     yup.object().shape({
@@ -200,8 +195,16 @@ const AddConnectionWizard = ({ onSuccess }) => {
       host: yup.string().required('Host is required'),
       port: yup.number().typeError('Port must be a number').required('Port is required'),
       schema: yup.string(),
-      login: yup.string().required('Login is required'),
-      password: yup.string().required('Password is required'),
+      login: yup.string().when('type', {
+        is: type => !NO_AUTH_REQUIRED.includes(type),
+        then: () => yup.string().required('Login is required'),
+        otherwise: () => yup.string()
+      }),
+      password: yup.string().when('type', {
+        is: type => !NO_AUTH_REQUIRED.includes(type),
+        then: () => yup.string().required('Password is required'),
+        otherwise: () => yup.string()
+      }),
       description: yup.string()
     }),
 
@@ -264,9 +267,13 @@ const AddConnectionWizard = ({ onSuccess }) => {
     const name = target.name
     let value = target.value
 
-    // Convert string values to lowercase, except for specific fields
-    if (typeof value === 'string' && !['description', 'password'].includes(name)) {
-      value = value.toLowerCase()
+    // Convert name field to uppercase, other string values to lowercase except specific fields
+    if (typeof value === 'string') {
+      if (name === 'name') {
+        value = value.toUpperCase()
+      } else if (!['description', 'password'].includes(name)) {
+        value = value.toLowerCase()
+      }
     }
 
     setConnectionForm(prevForm => {
@@ -469,13 +476,21 @@ const AddConnectionWizard = ({ onSuccess }) => {
                       handleHomeEndKeys
                       id='connection-type-autocomplete'
                       options={connectionTypes}
-                      value={connectionForm.type || ''}
-                      onChange={(event, value) => setConnectionForm({ ...connectionForm, type: value })}
+                      value={connectionForm.type?.toUpperCase() || ''}
+                      onChange={(event, value) =>
+                        setConnectionForm({
+                          ...connectionForm,
+                          type: value?.toLowerCase()
+                        })
+                      }
                       onInputChange={(event, value, reason) => {
                         if (reason === 'clear') {
                           setConnectionForm({ ...connectionForm, type: '' })
                         } else {
-                          setConnectionForm({ ...connectionForm, type: value })
+                          setConnectionForm({
+                            ...connectionForm,
+                            type: value?.toLowerCase()
+                          })
                         }
                       }}
                       renderInput={params => (
@@ -487,7 +502,16 @@ const AddConnectionWizard = ({ onSuccess }) => {
                           autoComplete='off'
                           error={Boolean(formErrors.type)}
                           helperText={formErrors.type}
+                          InputProps={{
+                            ...params.InputProps,
+                            style: { textTransform: 'uppercase' }
+                          }}
                         />
+                      )}
+                      renderOption={(props, option) => (
+                        <li {...props} style={{ textTransform: 'uppercase' }}>
+                          {option}
+                        </li>
                       )}
                     />
                   </FormControl>
@@ -559,7 +583,6 @@ const AddConnectionWizard = ({ onSuccess }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldStyled
-                    required
                     id='login'
                     name='login'
                     label='Login'
@@ -569,11 +592,17 @@ const AddConnectionWizard = ({ onSuccess }) => {
                     onChange={handleFormChange}
                     error={Boolean(formErrors?.login)}
                     helperText={formErrors?.login}
+                    required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth variant='outlined'>
-                    <InputLabelStyled htmlFor='outlined-adornment-password'>Password</InputLabelStyled>
+                    <InputLabelStyled
+                      htmlFor='outlined-adornment-password'
+                      required={!NO_AUTH_REQUIRED.includes(connectionForm.type)}
+                    >
+                      Password
+                    </InputLabelStyled>
                     <OutlinedInputStyled
                       id='outlined-adornment-password'
                       type={showPassword ? 'text' : 'password'}
@@ -866,9 +895,7 @@ const ReviewAndSubmitSection = ({ connectionForm }) => {
   return (
     <Fragment>
       {renderGeneralSection(connectionForm)}
-      {connectionForm.extra && connectionForm.extra.length > 0 && (
-        <Section title='Extra' data={connectionForm.extra} />
-      )}
+      {connectionForm.extra && connectionForm.extra.length > 0 && <Section title='Extra' data={connectionForm.extra} />}
     </Fragment>
   )
 }

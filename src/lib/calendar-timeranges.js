@@ -12,6 +12,11 @@ const roundToNearest10Min = date => {
   return date.minute(rounding).second(0)
 }
 
+// ** Function to round today's date to the nearest 10 minutes
+const todayRounded = () => {
+  return roundToNearest10Min(dayjs())
+}
+
 const roundDownToNearest10Min = date => {
   const minutes = date.minute()
   const roundedMinutes = Math.floor(minutes / 10) * 10

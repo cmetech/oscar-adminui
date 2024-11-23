@@ -79,7 +79,7 @@ done
 # Build the Docker image
 echo "Building Docker image ${IMAGE_NAME}:${TAG} for platform ${PLATFORM}..."
 # docker build -t "${IMAGE_NAME}:${TAG}" .
-docker build --platform "${PLATFORM_ARCH}" -t "${IMAGE_NAME}:${TAG}" .
+docker build --progress=plain --platform "${PLATFORM_ARCH}" -t "${IMAGE_NAME}:${TAG}" .
 
 # Verify if the image is available locally
 if docker images | grep -q "${IMAGE_NAME}\s*${TAG}"; then

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 4100",
-    "build": "next build",
+    "build": "next build --debug",
     "start": "next start",
     "export": "next export",
     "lint": "eslint --fix \"src/**/*.{js,jsx}\"",
@@ -103,7 +103,6 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.58",
-    "@iconify/react": "^4.1.0",
     "@iconify/tools": "^2.2.6",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^2.1.5",

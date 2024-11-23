@@ -288,5 +288,10 @@
   "Edit": "Redigera",
   "Active Rules": "Aktiva Regler",
   "Rules": "Regler",
-  "Credentials": "Inloggningsuppgifter"
+  "Credentials": "Inloggningsuppgifter",
+  "Confirm you want to schedule the selected tasks?": "Bekräfta att du vill schemalägga de valda uppgifterna?",
+  "Schedule Tasks": "Schemalägg Uppgifter",
+  "Tasks Successfully Scheduled": "Uppgifter har schemalagts",
+  "Failed to Schedule Tasks": "Misslyckades att schemalägga uppgifter",
+  "No Tasks Selected": "Inga uppgifter valda"
 }

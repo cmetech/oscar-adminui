@@ -288,5 +288,10 @@
     "Edit": "Modifier",
     "Active Rules": "Règles Actives",
     "Rules": "Règles",
-    "Credentials": "Identifiants"
+    "Credentials": "Identifiants",
+    "Confirm you want to schedule the selected tasks?": "Confirmez-vous vouloir planifier les tâches sélectionnées ?",
+    "Schedule Tasks": "Planifier les Tâches",
+    "Tasks Successfully Scheduled": "Tâches planifiées avec succès",
+    "Failed to Schedule Tasks": "Échec de la planification des tâches",
+    "No Tasks Selected": "Aucune tâche sélectionnée"
 }

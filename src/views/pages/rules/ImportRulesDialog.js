@@ -78,7 +78,7 @@ const ImportRulesDialog = ({ open, onClose, onSuccess }) => {
       clearInterval(simulateProcessing)
       setUploadProgress(100)
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         toast.success(t('Successfully imported rules'))
         if (onSuccess) onSuccess()
         setTimeout(() => {

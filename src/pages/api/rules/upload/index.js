@@ -3,7 +3,7 @@ import axios from 'axios'
 import https from 'https'
 import FormData from 'form-data'
 import oscarConfig from 'src/configs/oscarConfig'
-import formidable from 'formidable'
+import { IncomingForm } from 'formidable'
 import fs from 'fs'
 
 async function handler(req, res) {
@@ -14,10 +14,10 @@ async function handler(req, res) {
   }
 
   // Disable Next.js default body parser
-  const form = new formidable.IncomingForm()
+  const form = new IncomingForm()
 
   try {
-    const parseFormAsync = () =>
+    const parseFormAsync = req =>
       new Promise((resolve, reject) => {
         form.parse(req, (err, fields, files) => {
           if (err) reject(err)
@@ -25,40 +25,50 @@ async function handler(req, res) {
         })
       })
 
-    const { files } = await parseFormAsync()
+    const { files } = await parseFormAsync(req)
 
-    const uploadedFile = files.file
+    const uploadedFile = files.file[0]
 
     if (!uploadedFile) {
       return res.status(400).json({ message: 'No file uploaded' })
     }
 
-    const filePath = uploadedFile.filepath || uploadedFile.path
+    const filePath = uploadedFile.filepath
     if (!filePath) {
       return res.status(500).json({ message: 'File path is undefined' })
     }
 
     const formData = new FormData()
-    formData.append('file', fs.createReadStream(filePath), uploadedFile.originalFilename || uploadedFile.name)
+    formData.append('file', fs.createReadStream(filePath), uploadedFile.originalFilename)
 
     const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/rules/upload`, formData, {
       headers: {
         ...formData.getHeaders(),
-        'X-API-Key': oscarConfig.API_KEY
+        'Content-Type': 'multipart/form-data'
       },
       httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
     })
 
     if (response.status === 201 && response.data) {
-      // Optionally delete the uploaded file after successful upload
       fs.unlinkSync(filePath)
       res.status(response.status).json(response.data)
-    } else {
-      res.status(500).json({ message: 'An error occurred in the middleware API' })
     }
   } catch (error) {
-    console.error('Error uploading rules:', error)
-    res.status(error.response?.status || 500).json({ message: error.message })
+    console.error('Axios Error', error.toJSON())
+    if (error.response) {
+      // The request was made and the server responded with a status code that falls out of the range of 2xx
+      console.error('Status:', error.response.status)
+      console.error('Headers:', error.response.headers)
+      console.error('Data:', error.response.data)
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Request:', error.request)
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error Message:', error.message)
+    }
+
+    return res.status(500).json({ message: 'Internal Server Error' })
   }
 }
 

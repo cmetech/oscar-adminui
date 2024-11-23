@@ -15,6 +15,8 @@ import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
+import { useSetAtom } from 'jotai'
+import { refetchRulesTriggerAtom } from 'src/lib/atoms'
 
 const ImportRulesDialog = ({ open, onClose, onSuccess }) => {
   const { t } = useTranslation()
@@ -23,6 +25,7 @@ const ImportRulesDialog = ({ open, onClose, onSuccess }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef(null)
+  const setRefetchTrigger = useSetAtom(refetchRulesTriggerAtom)
 
   const handleButtonClick = () => {
     fileInputRef.current.click()
@@ -80,6 +83,7 @@ const ImportRulesDialog = ({ open, onClose, onSuccess }) => {
 
       if (response.status === 201) {
         toast.success(t('Successfully imported rules'))
+        setRefetchTrigger(prev => prev + 1)
         if (onSuccess) onSuccess()
         setTimeout(() => {
           handleClose()

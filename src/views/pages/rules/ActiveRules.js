@@ -574,7 +574,7 @@ const ActiveRules = forwardRef((props, ref) => {
               anchorEl: isFilterActive ? filterButtonEl : columnsButtonEl
             },
             noRowsOverlay: {
-              message: t('No Probes found')
+              message: t('No Rules found')
             },
             noResultsOverlay: {
               message: t('No Results Found')

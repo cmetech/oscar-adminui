@@ -196,7 +196,11 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
+<<<<<<< HEAD
   const [alphahex, setAlphahex] = useState('33')
+=======
+  const alphahex = '33'
+>>>>>>> 4c3e39b (update for SLO wizard)
 
   const theme = useTheme()
   const session = useSession()
@@ -711,21 +715,33 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
         } else {
           setGoodQueryColor({
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+<<<<<<< HEAD
             textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
           })
           setGoodQueryValidationMessage('Query validated with no results')
         }
       } else {
         setGoodQueryColor({
           backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+<<<<<<< HEAD
           textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
         })
         setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setGoodQueryColor({
         backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+<<<<<<< HEAD
         textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setGoodQueryValidationMessage(
@@ -773,21 +789,33 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
         } else {
           setTotalQueryColor({
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+<<<<<<< HEAD
             textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
           })
           setTotalQueryValidationMessage('Query validated with no results')
         }
       } else {
         setTotalQueryColor({
           backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+<<<<<<< HEAD
           textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
         })
         setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setTotalQueryColor({
         backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+<<<<<<< HEAD
         textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setTotalQueryValidationMessage(
@@ -829,7 +857,11 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
         const resultCount = response.data.data.result_count
         if (resultCount > 0) {
           setGoodQueryColor({
+<<<<<<< HEAD
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark + alphahex : theme.palette.success.light + alphahex,
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark+alphahex: theme.palette.success.light+alphahex,
+>>>>>>> 4c3e39b (update for SLO wizard)
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with results')
@@ -841,22 +873,37 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
             setGoodQueryValidationMessage('Query validated with results')
         } else {
           setGoodQueryColor({
+<<<<<<< HEAD
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
             textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+            textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
           })
           setGoodQueryValidationMessage('Query validated with no results')
         }
       } else {
         setGoodQueryColor({
+<<<<<<< HEAD
           backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
           textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark: theme.palette.error.light,
+          textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
         })
         setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setGoodQueryColor({
+<<<<<<< HEAD
         backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
         textColor: theme.palette.text.primary // Dynamic text color based on theme
+=======
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark: theme.palette.error.light,
+        textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+>>>>>>> 4c3e39b (update for SLO wizard)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setGoodQueryValidationMessage(

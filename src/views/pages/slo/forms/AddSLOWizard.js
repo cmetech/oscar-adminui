@@ -55,6 +55,8 @@ import { useTranslation } from 'react-i18next'
 
 import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 
+const alphahex = '33'
+
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
   '&.Mui-checked': {
@@ -455,27 +457,27 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       if (response.data && response.data.status === 'success' && Array.isArray(response.data.data.result)) {
         if (response.data.data.result.length > 0) {
           setGoodQueryColor({
-            backgroundColor: '#00910033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark+alphahex: theme.palette.success.light+alphahex,
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with results')
         } else {
           setGoodQueryColor({
-            backgroundColor: '#c96e4033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with no results')
         }
       } else {
         setGoodQueryColor({
-          backgroundColor: '#91000033',
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
         })
         setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setGoodQueryColor({
-        backgroundColor: '#91000033',
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
@@ -517,27 +519,27 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
       if (response.data && response.data.status === 'success' && Array.isArray(response.data.data.result)) {
         if (response.data.data.result.length > 0) {
           setTotalQueryColor({
-            backgroundColor: '#00910033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark+alphahex: theme.palette.success.light+alphahex,
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setTotalQueryValidationMessage('Query validated with results')
         } else {
           setTotalQueryColor({
-            backgroundColor: '#c96e4033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
           })
           setTotalQueryValidationMessage('Query validated with no results')
         }
       } else {
         setTotalQueryColor({
-          backgroundColor: '#91000033',
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
         })
         setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setTotalQueryColor({
-        backgroundColor: '#91000033',
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
@@ -582,27 +584,27 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         const resultCount = response.data.data.result_count
         if (resultCount > 0) {
           setGoodQueryColor({
-            backgroundColor: '#00910033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark+alphahex: theme.palette.success.light+alphahex,
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with results')
         } else {
           setGoodQueryColor({
-            backgroundColor: '#c96e4033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with no results')
         }
       } else {
         setGoodQueryColor({
-          backgroundColor: '#91000033',
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
         })
         setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setGoodQueryColor({
-        backgroundColor: '#91000033',
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
@@ -648,33 +650,33 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
 
         if (resultCount > 0) {
           setTotalQueryColor({
-            backgroundColor: '#00910033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark+alphahex: theme.palette.success.light+alphahex,
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setTotalQueryValidationMessage('Query validated with results')
         } else if (resultCount === 0) {
           setTotalQueryColor({
-            backgroundColor: '#c96e4033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
           })
           setTotalQueryValidationMessage('Query validated with no results')
         } else {
           setTotalQueryColor({
-            backgroundColor: '#91000033',
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
           })
           setTotalQueryValidationMessage('Unexpected result count')
         }
       } else {
         setTotalQueryColor({
-          backgroundColor: '#91000033',
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
         })
         setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setTotalQueryColor({
-        backgroundColor: '#91000033',
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
@@ -1392,7 +1394,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                 <Fragment>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Selected Connection:</strong> {sloFilterQuery}
+                      <strong>Selected Connection:</strong> {sloTargetConnectionID}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
@@ -1420,7 +1422,7 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
                 <Fragment>
                   <Grid item xs={12}>
                     <Typography>
-                      <strong>Selected Connection:</strong> {sloFilterQuery}
+                      <strong>Selected Connection:</strong> {sloTargetConnectionID}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>

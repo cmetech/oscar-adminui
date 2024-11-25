@@ -778,13 +778,11 @@ const ActiveNotifiersList = props => {
   const fetchData = useCallback(
     async filterModel => {
       let requestCompleted = false
-
       setLoading(true)
 
       const timeoutId = setTimeout(() => {
         if (!requestCompleted) {
           setLoading(false)
-
           setRows([])
         }
       }, 20000)
@@ -801,10 +799,15 @@ const ActiveNotifiersList = props => {
           timeout: 10000
         })
 
+        const mappedRecords = response.data.records.map(record => ({
+          ...record,
+          webhook_url: record.url
+        }))
+
         setRowCount(response.data.total_records)
-        setRows(response.data.records)
+        setRows(mappedRecords)
         props.set_total(response.data.total_records)
-        setNotifiers(response.data.records)
+        setNotifiers(mappedRecords)
       } catch (error) {
         console.error('Failed to fetch notifiers:', error)
         toast.error('Failed to fetch notifiers')

@@ -167,20 +167,25 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
     })
   }
 
-  const addEmailAddress = () => {
+  const addSectionEntry = section => {
     setNotifierForm(prevForm => {
-      const updatedEmails = [...prevForm.email_addresses, '']
+      const updatedForm = { ...prevForm }
+      if (section === 'email_addresses') {
+        updatedForm[section] = [...updatedForm[section], '']
+      }
 
-      return { ...prevForm, email_addresses: updatedEmails }
+      return updatedForm
     })
   }
 
-  const removeEmailAddress = index => {
+  const removeSectionEntry = (section, index) => {
     setNotifierForm(prevForm => {
-      const updatedEmails = [...prevForm.email_addresses]
-      updatedEmails.splice(index, 1)
+      const updatedForm = { ...prevForm }
+      if (section === 'email_addresses') {
+        updatedForm[section] = updatedForm[section].filter((_, i) => i !== index)
+      }
 
-      return { ...prevForm, email_addresses: updatedEmails }
+      return updatedForm
     })
   }
 
@@ -210,7 +215,7 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
 
         console.log('Notifier form payload', payload)
 
-        const endpoint = `/api/notifiers/update/${currentNotifier.name}`
+        const endpoint = `/api/notifiers/update/${currentNotifier.id}`
         const response = await axios.put(endpoint, payload, { headers })
 
         if (response.data) {
@@ -376,9 +381,9 @@ const UpdateNotifierWizard = ({ onClose, currentNotifier }) => {
                     name='webhook_url'
                     autoComplete='off'
                     value={notifierForm.webhook_url !== undefined ? notifierForm.webhook_url : ''}
+                    onChange={handleFormChange}
                     error={Boolean(formErrors?.webhook_url)}
                     helperText={formErrors?.webhook_url}
-                    disabled
                   />
                 </Grid>
               )}

@@ -55,8 +55,6 @@ import { useTranslation } from 'react-i18next'
 
 import { slosAtom, refetchSloTriggerAtom } from 'src/lib/atoms'
 
-const alphahex = '33'
-
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
   '&.Mui-checked': {
@@ -467,27 +465,42 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           setGoodQueryValidationMessage('Query validated with results')
         } else {
           setGoodQueryColor({
+<<<<<<< HEAD
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.warning.dark + alphahex
                 : theme.palette.warning.light + alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
           })
           setGoodQueryValidationMessage('Query validated with no results')
         }
       } else {
         setGoodQueryColor({
+<<<<<<< HEAD
           backgroundColor:
             theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+          textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
         })
         setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setGoodQueryColor({
+<<<<<<< HEAD
         backgroundColor:
           theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+        textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setGoodQueryValidationMessage(
@@ -537,27 +550,42 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           setTotalQueryValidationMessage('Query validated with results')
         } else {
           setTotalQueryColor({
+<<<<<<< HEAD
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.warning.dark + alphahex
                 : theme.palette.warning.light + alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
           })
           setTotalQueryValidationMessage('Query validated with no results')
         }
       } else {
         setTotalQueryColor({
+<<<<<<< HEAD
           backgroundColor:
             theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+          textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
         })
         setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setTotalQueryColor({
+<<<<<<< HEAD
         backgroundColor:
           theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+        textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setTotalQueryValidationMessage(
@@ -601,14 +629,19 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         const resultCount = response.data.data.result_count
         if (resultCount > 0) {
           setGoodQueryColor({
+<<<<<<< HEAD
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.success.dark + alphahex
                 : theme.palette.success.light + alphahex,
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark + alphahex : theme.palette.success.light + alphahex,
+>>>>>>> 96fac98 (update -SLO query valiation)
             textColor: theme.palette.text.primary // Dynamic text color based on theme
           })
           setGoodQueryValidationMessage('Query validated with results')
         } else if (resultCount === 0) {
+<<<<<<< HEAD
           setGoodQueryColor({
             backgroundColor:
               theme.palette.mode === 'dark'
@@ -640,6 +673,31 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
         backgroundColor:
           theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+            setGoodQueryColor({
+              backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+              textColor: theme.palette.text.primary // Dynamic text color based on theme
+            })
+            setGoodQueryValidationMessage('Query validated with no results')
+        } else {
+            setGoodQueryColor({
+              backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+              textColor: theme.palette.text.primary // Dynamic text color based on theme
+            })
+            setGoodQueryValidationMessage('Query validated with no results')
+        }
+      } else {
+          setGoodQueryColor({
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+          })
+          setGoodQueryValidationMessage('Unexpected response structure or response status is errored')
+      }
+    } catch (error) {
+      setGoodQueryColor({
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+        textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setGoodQueryValidationMessage(
@@ -693,36 +751,56 @@ const AddSLOWizard = ({ onSuccess, ...props }) => {
           setTotalQueryValidationMessage('Query validated with results')
         } else if (resultCount === 0) {
           setTotalQueryColor({
+<<<<<<< HEAD
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.warning.dark + alphahex
                 : theme.palette.warning.light + alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.warning.dark+alphahex: theme.palette.warning.light+alphahex,
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
           })
           setTotalQueryValidationMessage('Query validated with no results')
         } else {
           setTotalQueryColor({
+<<<<<<< HEAD
             backgroundColor:
               theme.palette.mode === 'dark'
                 ? theme.palette.error.dark + alphahex
                 : theme.palette.error.light + alphahex,
             textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+            textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
           })
           setTotalQueryValidationMessage('Unexpected result count')
         }
       } else {
         setTotalQueryColor({
+<<<<<<< HEAD
           backgroundColor:
             theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
           textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+          backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+          textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
         })
         setTotalQueryValidationMessage('Unexpected response structure or response status is errored')
       }
     } catch (error) {
       setTotalQueryColor({
+<<<<<<< HEAD
         backgroundColor:
           theme.palette.mode === 'dark' ? theme.palette.error.dark + alphahex : theme.palette.error.light + alphahex,
         textColor: theme.palette.mode === 'dark' ? 'white' : 'black' // Dynamic text color based on theme
+=======
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.error.dark+alphahex: theme.palette.error.light+alphahex,
+        textColor: theme.palette.text.primary // Dynamic text color based on theme
+>>>>>>> 96fac98 (update -SLO query valiation)
       })
       console.error('Error sending PromQL:', error.response?.data || error.message)
       setTotalQueryValidationMessage(

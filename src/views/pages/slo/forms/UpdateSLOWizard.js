@@ -196,11 +196,7 @@ const UpdateSLOWizard = ({ onClose, ...props }) => {
   const [formErrors, setFormErrors] = useState({})
   const [, setSlos] = useAtom(slosAtom)
   const [, setRefetchTrigger] = useAtom(refetchSloTriggerAtom)
-<<<<<<< HEAD
-  const [alphahex, setAlphahex] = useState('33')
-=======
   const alphahex = '33'
->>>>>>> 4c3e39b (update for SLO wizard)
 
   const theme = useTheme()
   const session = useSession()

@@ -4,7 +4,22 @@ import https from 'https'
 import oscarConfig from '../../../configs/oscarConfig'
 
 async function handler(req, res) {
-  if (req.method === 'GET') {
+  if (req.method === 'POST') {
+    try {
+      const url = `${oscarConfig.MIDDLEWARE_API_URL}/alerts/manager/reload`
+      await axios.post(
+        url,
+        {},
+        {
+          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+        }
+      )
+      res.status(200).json({ message: 'Alert manager reloaded successfully' })
+    } catch (error) {
+      console.error('Error reloading alert manager:', error)
+      res.status(error.response?.status || 500).json({ message: error.message })
+    }
+  } else if (req.method === 'GET') {
     const query = req.query
     const { column = '', sort = '', start_time, end_time, skip = '1', limit = '100', filter = '{}' } = query
 

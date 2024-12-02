@@ -871,9 +871,10 @@ const ServersList = props => {
   }
 
   const StatusDialog = () => {
-    const { row } = currentServer || {}
-    const isActive = row?.status?.toLowerCase() === 'active'
+    const isActive = currentServer?.status?.toLowerCase() === 'active'
+    console.log('Status:', currentServer?.status)
     console.log('Is Active:', isActive)
+
     const newStatus = isActive ? 'inactive' : 'active'
 
     return (

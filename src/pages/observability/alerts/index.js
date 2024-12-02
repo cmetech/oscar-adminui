@@ -231,128 +231,9 @@ const Alerts = () => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
+        <Box display='flex' justifyContent='space-between' alignItems='center' mb={6}>
           <Typography variant='h4'>{t('Alert Management')}</Typography>
-          <Box display='flex' alignItems='center'>
-            {value === '1' && <MoreActionsDropdown onAction={handleMoreActions} />}
-            {value === '2' && (
-              <DateTimeRangePicker
-                calendars={2}
-                closeOnSelect={false}
-                value={dateRange}
-                views={['day', 'hours']}
-                timeSteps={{ minutes: 10 }}
-                viewRenderers={{ hours: renderDigitalClockTimeView }}
-                onChange={newValue => {
-                  setDateRange(newValue)
-                }}
-                onAccept={handleOnAccept}
-                slotProps={{
-                  field: { dateSeparator: 'to' },
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    color: position === 'start' ? 'secondary' : 'secondary',
-                    focused: true,
-                    InputProps: {
-                      endAdornment: <Icon icon='mdi:calendar' />
-                    }
-                  }),
-                  desktopPaper: {
-                    style: {
-                      backgroundColor:
-                        theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
-                    }
-                  },
-                  day: {
-                    sx: {
-                      '& .MuiPickersDay-root': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
-                        '&:hover': {
-                          color: theme.palette.customColors.accent
-                        }
-                      },
-                      '& .MuiPickersDay-root.Mui-selected': {
-                        color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
-                      }
-                    }
-                  },
-                  shortcuts: {
-                    items: extendedPredefinedRangesDayjs,
-                    sx: {
-                      '& .MuiChip-root': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandYellow
-                            : theme.palette.primary.main,
-                        '&:hover': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          backgroundColor:
-                            theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
-                        }
-                      }
-                    }
-                  },
-                  digitalClockItem: {
-                    sx: {
-                      '&:hover': {
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandBlack
-                            : theme.palette.customColors.black,
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandGray4
-                            : theme.palette.customColors.brandGray4
-                      },
-                      '&.Mui-selected': {
-                        background:
-                          theme.palette.mode == 'dark'
-                            ? theme.palette.customColors.brandYellow4
-                            : theme.palette.customColors.brandGray1
-                      }
-                    }
-                  },
-                  actionBar: {
-                    actions: ['clear', 'today', 'cancel', 'accept'],
-                    sx: {
-                      '& .MuiDialogActions-root, .MuiButton-root': {
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandGray1b
-                            : theme.palette.primary.main,
-                        color:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.customColors.brandWhite
-                            : theme.palette.primary.main,
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 255, 0.04)',
-                          borderColor:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandWhite
-                              : theme.palette.primary.main,
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main
-                        }
-                      }
-                    }
-                  },
-                  endDesktopDateTimePicker: {
-                    maxDateTime: getMaxEndDateTime()
-                  },
-                  endMobileDateTimePicker: {
-                    maxDateTime: getMaxEndDateTime()
-                  }
-                }}
-              />
-            )}
-          </Box>
+          <MoreActionsDropdown onAction={handleMoreActions} />
         </Box>
 
         {/* Confirmation Dialog */}
@@ -375,6 +256,129 @@ const Alerts = () => {
           </DialogActions>
         </Dialog>
 
+        {value === '2' && (
+          <DateTimeRangePicker
+            calendars={2}
+            closeOnSelect={false}
+            value={dateRange}
+            views={['day', 'hours']}
+            timeSteps={{ minute: 10 }}
+            viewRenderers={{ hours: renderDigitalClockTimeView }}
+            onChange={newValue => {
+              // console.log('Date range:', newValue)
+              setDateRange(newValue)
+            }}
+            onAccept={handleOnAccept}
+            slotProps={{
+              field: { dateSeparator: 'to' },
+              textField: ({ position }) => ({
+                size: 'small',
+                color: position === 'start' ? 'secondary' : 'secondary',
+                focused: true,
+                InputProps: {
+                  endAdornment: <Icon icon='mdi:calendar' />
+                }
+              }),
+              desktopPaper: {
+                style: {
+                  backgroundColor:
+                    theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                }
+              },
+
+              day: {
+                sx: {
+                  '& .MuiPickersDay-root': {
+                    color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
+                    '&:hover': {
+                      color: theme.palette.customColors.accent
+                    }
+                  },
+                  '& .MuiPickersDay-root.Mui-selected': {
+                    color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
+                  }
+                }
+              },
+
+              shortcuts: {
+                items: extendedPredefinedRangesDayjs,
+                sx: {
+                  '& .MuiChip-root': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandYellow
+                        : theme.palette.primary.main,
+                    '&:hover': {
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main,
+                      backgroundColor:
+                        theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light
+                    }
+                  }
+                }
+              },
+
+              digitalClockItem: {
+                sx: {
+                  '&:hover': {
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandBlack
+                        : theme.palette.customColors.black,
+                    background:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandGray4
+                        : theme.palette.customColors.brandGray4
+                  },
+                  '&.Mui-selected': {
+                    background:
+                      theme.palette.mode == 'dark'
+                        ? theme.palette.customColors.brandYellow4
+                        : theme.palette.customColors.brandGray1
+                  }
+                }
+              },
+
+              actionBar: {
+                actions: ['clear', 'today', 'cancel', 'accept'],
+                sx: {
+                  '& .MuiDialogActions-root, .MuiButton-root': {
+                    // Targeting buttons inside MuiDialogActions-root
+                    borderWidth: '1px', // Ensure there's a visible border
+                    borderStyle: 'solid', // Necessary for the border to show
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandGray1b
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? theme.palette.customColors.brandWhite
+                        : theme.palette.primary.main,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                      borderColor:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandWhite
+                          : theme.palette.primary.main,
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? theme.palette.customColors.brandYellow
+                          : theme.palette.primary.main
+                    }
+                  }
+                }
+              },
+              endDesktopDateTimePicker: {
+                maxDateTime: getMaxEndDateTime()
+              },
+              endMobileDateTimePicker: {
+                maxDateTime: getMaxEndDateTime()
+              }
+            }}
+          />
+        )}
         <TabContext value={value}>
           <TabList onChange={handleChange} aria-label='Alert-tabs'>
             {activeAlertsTotal == 0 ? (

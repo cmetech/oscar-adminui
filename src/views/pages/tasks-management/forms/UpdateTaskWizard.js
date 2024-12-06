@@ -405,12 +405,35 @@ const ScheduleSection = ({ taskForm, handleFormChange, dateRange, setDateRange }
         <Grid item xs={12} sm={2}>
           <TextfieldStyled
             id='jitter'
-            name='schedule.jitter'
+            name='jitter'
             label='Jitter (seconds)'
-            type='number'
             fullWidth
             value={taskForm.schedule.jitter}
-            onChange={e => handleFormChange(e, null, 'schedule')}
+            onChange={e => {
+              const value = e.target.value
+              // Convert to number for validation
+              const numValue = Number(value)
+
+              // Allow empty string or valid numbers
+              if (value === '' || (!isNaN(numValue) && numValue >= 0 && numValue <= 180)) {
+                handleFormChange(
+                  {
+                    target: {
+                      name: 'jitter',
+                      value: value === '' ? 0 : Math.min(180, Math.max(0, numValue))
+                    }
+                  },
+                  null,
+                  'schedule'
+                )
+              }
+            }}
+            error={taskForm.schedule.jitter > 180 || taskForm.schedule.jitter < 0}
+            helperText={
+              taskForm.schedule.jitter > 180 || taskForm.schedule.jitter < 0
+                ? 'Value must be between 0 and 180'
+                : 'Enter a number between 0 and 180'
+            }
           />
         </Grid>
       </Grid>
@@ -973,6 +996,10 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           Authorization: `Bearer ${apiToken}`
         }
 
+        // Log the current task form state
+        console.log('Current taskForm state:', taskForm)
+        console.log('Schedule data:', taskForm.schedule)
+
         const payload = {
           ...taskForm,
           args: taskForm.args.map(arg => arg.value),
@@ -981,8 +1008,12 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
         }
 
+        // Log the final payload
+        console.log('Submitting task with payload:', payload)
+
         const endpoint = `/api/tasks/config/${currentTask.name}`
         const response = await axios.post(endpoint, payload, { headers })
+        console.log('Config API Response:', response.data)
 
         if (response.data) {
           const { task_name } = response.data
@@ -992,13 +1023,16 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
 
             const registerTaskEndpoint = `/api/tasks/register/${task_name}`
             const registerTaskResponse = await axios.post(registerTaskEndpoint, {}, { headers })
+            console.log('Register API Response:', registerTaskResponse.data)
 
             if (registerTaskResponse.data) {
               const queryTaskEndpoint = `/api/tasks/query/${task_name}`
               const queryTaskResponse = await axios.post(queryTaskEndpoint, {}, { headers })
+              console.log('Query API Response:', queryTaskResponse.data)
 
               if (queryTaskResponse.data && queryTaskResponse.status === 200) {
                 const taskDetails = queryTaskResponse.data[0]
+                console.log('Task Details:', taskDetails)
 
                 // Check if the task is not disabled and has a schedule
                 if (
@@ -1009,7 +1043,9 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                 ) {
                   const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}`
                   try {
+                    console.log('Attempting to schedule task...')
                     const scheduleResponse = await axios.post(scheduleTaskEndpoint, {}, { headers })
+                    console.log('Schedule API Response:', scheduleResponse.data)
 
                     if (scheduleResponse.status === 200) {
                       console.log(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
@@ -1032,7 +1068,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   }
                   message += 'and will not be scheduled.'
                   console.log(message)
-                  toast.success(message) // Changed from toast.info to toast.success
+                  toast.success(message)
                 }
 
                 setRefetchTrigger(Date.now())
@@ -1052,7 +1088,8 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           onClose && onClose()
         }
       } catch (error) {
-        console.error('Error updating task details', error)
+        console.error('Error updating task details:', error)
+        console.error('Error response:', error.response?.data)
         toast.error('Error updating task details')
       }
     }

@@ -526,19 +526,20 @@ const TasksList = props => {
       renderCell: params => {
         const { row } = params
         const isActive = row?.status.toLowerCase() === 'enabled'
+        const hasValidSchedule = row?.schedule && Object.keys(row.schedule).length > 0
 
         return (
           <Box sx={{ display: 'flex', flexDirection: 'row' }}>
             <IconButton
               size='small'
-              title='Schedule Task'
-              aria-label='Schedule Task'
+              title={hasValidSchedule ? 'Schedule Task' : 'No Schedule Available'}
+              aria-label={hasValidSchedule ? 'Schedule Task' : 'No Schedule Available'}
               color='info'
               onClick={() => {
                 setCurrentTask(row)
                 setScheduleDialog(true)
               }}
-              disabled={!isActive || !ability.can('schedule', 'tasks')}
+              disabled={!isActive || !ability.can('schedule', 'tasks') || !hasValidSchedule}
             >
               <Icon icon='mdi:clock-outline' />
             </IconButton>

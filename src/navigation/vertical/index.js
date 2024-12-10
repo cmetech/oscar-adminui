@@ -183,9 +183,9 @@ const navigation = () => {
           subject: 'runtime'
         },
         {
-          title: 'Suppressions',
-          path: '/management/application/suppressions',
-          icon: 'mdi:clock-time-eight-outline',
+          title: 'Mapping',
+          path: '/management/application/mapping',
+          icon: 'mdi:table-key',
           action: 'manage',
           subject: 'runtime'
         }

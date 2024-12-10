@@ -126,7 +126,8 @@ const EnvironmentsList = props => {
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
 
   // ** Dialog
-  const [openDialog, setOpenDialog] = useState(false)
+  const [statusDialog, setStatusDialog] = useState(false)
+  const [editDialog, setEditDialog] = useState(false)
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentEnvironment, setCurrentEnvironment] = useState(null)
@@ -416,8 +417,11 @@ const EnvironmentsList = props => {
       headerName: t('Actions'),
       align: 'left',
       flex: 0.025,
-      minWidth: 10,
+      minWidth: 150,
       renderCell: params => {
+        const { row } = params
+        const isActive = row.active_servers > 0 // Determine if the environment is active
+
         return (
           <Box
             sx={{
@@ -431,23 +435,36 @@ const EnvironmentsList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
-                title='Edit'
-                aria-label='Edit'
+                title={isActive ? t('Deactivate') : t('Activate')}
+                aria-label={isActive ? t('Deactivate') : t('Activate')}
+                color={isActive ? 'success' : 'warning'}
                 onClick={() => {
-                  setCurrentEnvironment(params.row)
-                  setOpenDialog(true)
+                  setCurrentEnvironment(row)
+                  setStatusDialog(true)
                 }}
                 disabled={!ability.can('update', 'environments')}
               >
-                <Icon icon='mdi:edit' />
+                <Icon icon={isActive ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off'} />
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Environment'
-                aria-label='Delete Environment'
+                title={t('Edit')}
+                aria-label={t('Edit')}
+                onClick={() => {
+                  setCurrentEnvironment(row)
+                  setEditDialog(true)
+                }}
+                disabled={!ability.can('update', 'environments')}
+              >
+                <Icon icon='mdi:pencil-outline' />
+              </IconButton>
+              <IconButton
+                size='small'
+                title={t('Delete Environment')}
+                aria-label={t('Delete Environment')}
                 color='error'
                 onClick={() => {
-                  setCurrentEnvironment(params.row)
+                  setCurrentEnvironment(row)
                   setDeleteDialog(true)
                 }}
                 disabled={!ability.can('delete', 'environments')}
@@ -462,7 +479,7 @@ const EnvironmentsList = props => {
   ]
 
   const handleUpdateDialogClose = () => {
-    setOpenDialog(false)
+    setEditDialog(false)
   }
 
   const handleDeleteDialogClose = () => {
@@ -475,7 +492,7 @@ const EnvironmentsList = props => {
         fullWidth
         maxWidth='md'
         scroll='body'
-        open={openDialog}
+        open={editDialog}
         onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
@@ -750,6 +767,99 @@ const EnvironmentsList = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  // ** Handle Status Change
+  const handleStatusDialogSubmit = async () => {
+    try {
+      const isActive = currentEnvironment.active_servers > 0 // Determine current status
+      const apiToken = session?.data?.user?.apiToken
+
+      const headers = {
+        Accept: 'application/json',
+        Authorization: `Bearer ${apiToken}`
+      }
+
+      const endpoint = isActive
+        ? `/api/inventory/environments/disable/${currentEnvironment.id}`
+        : `/api/inventory/environments/enable/${currentEnvironment.id}`
+
+      const response = await axios.post(endpoint, null, { headers })
+
+      if (response.status === 200) {
+        // Update the row data with the response
+        const updatedEnvironment = response.data
+        setRows(prevRows => prevRows.map(row => (row.id === updatedEnvironment.id ? updatedEnvironment : row)))
+        setStatusDialog(false)
+        toast.success(t(`Successfully ${isActive ? 'deactivated' : 'activated'} environment`))
+      }
+    } catch (error) {
+      console.error('Failed to update environment status:', error)
+      toast.error(t('Failed to update environment status'))
+    }
+  }
+
+  // ** Status Dialog Component
+  const StatusDialog = () => {
+    const isActive = currentEnvironment?.active_servers > 0 // Determine current status
+
+    return (
+      <Dialog
+        open={statusDialog}
+        onClose={() => setStatusDialog(false)}
+        TransitionComponent={Transition}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
+      >
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {t('Confirm Status Change')}
+              </Typography>
+              <Typography variant='caption' sx={{ color: 'text.warning' }}>
+                {currentEnvironment?.name?.toUpperCase()}
+              </Typography>
+            </Box>
+            <IconButton size='small' onClick={() => setStatusDialog(false)} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant='h6' sx={{ textAlign: 'center' }}>
+            {t(`Confirm you want to ${isActive ? 'deactivate' : 'activate'} this environment?`)}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleStatusDialogSubmit}
+            color={isActive ? 'warning' : 'success'}
+            autoFocus
+            startIcon={<Icon icon={isActive ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />}
+          >
+            {t(isActive ? 'Deactivate' : 'Activate')}
+          </Button>
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={() => setStatusDialog(false)}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1011,8 +1121,9 @@ const EnvironmentsList = props => {
             }
           }}
         />
-        <EditDialog />
-        <DeleteDialog />
+        {statusDialog && <StatusDialog />}
+        {editDialog && <EditDialog />}
+        {deleteDialog && <DeleteDialog />}
       </Card>
     </Box>
   )

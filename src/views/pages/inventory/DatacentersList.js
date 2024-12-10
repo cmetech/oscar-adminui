@@ -125,7 +125,8 @@ const DatacentersList = props => {
   const [detailPanelExpandedRowIds, setDetailPanelExpandedRowIds] = useState([])
 
   // ** Dialog
-  const [openDialog, setOpenDialog] = useState(false)
+  const [statusDialog, setStatusDialog] = useState(false)
+  const [editDialog, setEditDialog] = useState(false)
   const [deactivateDialog, setDeactivateDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentDatacenter, setCurrentDatacenter] = useState(null)
@@ -424,8 +425,11 @@ const DatacentersList = props => {
       headerName: t('Actions'),
       align: 'left',
       flex: 0.025,
-      minWidth: 10,
+      minWidth: 150,
       renderCell: params => {
+        const { row } = params
+        const isActive = row.active_servers > 0 // Assuming active datacenter has active servers
+
         return (
           <Box
             sx={{
@@ -439,11 +443,24 @@ const DatacentersList = props => {
             <Box sx={{ display: 'flex', flexDirection: 'row' }}>
               <IconButton
                 size='small'
+                title={isActive ? 'Deactivate' : 'Activate'}
+                aria-label={isActive ? 'Deactivate' : 'Activate'}
+                color={isActive ? 'success' : 'warning'}
+                onClick={() => {
+                  setCurrentDatacenter(params.row)
+                  setStatusDialog(true)
+                }}
+                disabled={!ability.can('update', 'datacenters')}
+              >
+                <Icon icon={isActive ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off'} />
+              </IconButton>
+              <IconButton
+                size='small'
                 title='Edit'
                 aria-label='Edit'
                 onClick={() => {
                   setCurrentDatacenter(params.row)
-                  setOpenDialog(true)
+                  setEditDialog(true)
                 }}
                 disabled={!ability.can('update', 'datacenters')}
               >
@@ -470,11 +487,103 @@ const DatacentersList = props => {
   ]
 
   const handleUpdateDialogClose = () => {
-    setOpenDialog(false)
+    setEditDialog(false)
   }
 
   const handleDeleteDialogClose = () => {
     setDeleteDialog(false)
+  }
+
+  // Function to handle dialog submission
+  const handleStatusDialogSubmit = async () => {
+    try {
+      const isActive = currentDatacenter.active_servers > 0 // Determine current status
+      const apiToken = session?.data?.user?.apiToken
+
+      const headers = {
+        Accept: 'application/json'
+      }
+
+      const endpoint = isActive
+        ? `/api/inventory/datacenters/disable/${currentDatacenter.id}`
+        : `/api/inventory/datacenters/enable/${currentDatacenter.id}`
+
+      const response = await axios.post(endpoint, null, { headers })
+
+      if (response.status === 200) {
+        // Update the row data with the response
+        const updatedDatacenter = response.data
+        setRows(prevRows => prevRows.map(row => (row.id === updatedDatacenter.id ? updatedDatacenter : row)))
+        setStatusDialog(false)
+        toast.success(`Successfully ${isActive ? 'deactivated' : 'activated'} datacenter`)
+      }
+    } catch (error) {
+      console.error('Failed to update datacenter status:', error)
+      toast.error('Failed to update datacenter status')
+    }
+  }
+
+  // Status Dialog Component
+  const StatusDialog = () => {
+    const isActive = currentDatacenter?.active_servers > 0 // Determine current status
+
+    return (
+      <Dialog
+        open={statusDialog}
+        onClose={() => setStatusDialog(false)}
+        TransitionComponent={Transition}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '450px'
+          }
+        }}
+      >
+        <DialogTitle id='alert-dialog-title'>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {t('Confirm Status Change')}
+              </Typography>
+              <Typography variant='caption' sx={{ color: 'text.warning' }}>
+                {currentDatacenter?.name?.toUpperCase()}
+              </Typography>
+            </Box>
+            <IconButton size='small' onClick={() => setStatusDialog(false)} aria-label='close'>
+              <Icon icon='mdi:close' />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant='h6' sx={{ textAlign: 'center' }}>
+            {t(`Confirm you want to ${isActive ? 'deactivate' : 'activate'} this datacenter?`)}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant='contained'
+            size='large'
+            onClick={handleStatusDialogSubmit}
+            color={isActive ? 'warning' : 'success'}
+            autoFocus
+            startIcon={<Icon icon={isActive ? 'mdi:toggle-switch-off' : 'mdi:toggle-switch'} />}
+          >
+            {t(isActive ? 'Deactivate' : 'Activate')}
+          </Button>
+          <Button
+            variant='outlined'
+            size='large'
+            onClick={() => setStatusDialog(false)}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
+          >
+            {t('Cancel')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
   }
 
   const EditDialog = () => {
@@ -483,7 +592,7 @@ const DatacentersList = props => {
         fullWidth
         maxWidth='md'
         scroll='body'
-        open={openDialog}
+        open={editDialog}
         onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
@@ -1017,8 +1126,9 @@ const DatacentersList = props => {
             }
           }}
         />
-        <EditDialog />
-        <DeleteDialog />
+        {statusDialog && <StatusDialog />}
+        {editDialog && <EditDialog />}
+        {deleteDialog && <DeleteDialog />}
       </Card>
     </Box>
   )

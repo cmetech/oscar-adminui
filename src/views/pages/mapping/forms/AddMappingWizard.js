@@ -50,29 +50,23 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 // ** Import yup for form validation
 import * as yup from 'yup'
 
-import { serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
+import { mappingsAtom, refetchMappingTriggerAtom } from 'src/lib/atoms'
 
-// Define initial state for the server form
-const initialServerFormState = {
-  hostName: '',
-  componentName: '',
-  datacenterName: '',
-  environmentName: '',
-  status: 'ACTIVE',
-  metadata: [{ key: '', value: '' }],
-  networkInterfaces: [{ name: '', ip_address: '', label: '' }]
+// Define initial state for the mapping form
+const initialMappingFormState = {
+  mappingName: '',
+  mappingDescription: '',
+  mappingNamespaceName: '',
+  mappingKey: '',
+  mappingValue: '',
+  mappingMetadata: [{ key: '', value: '' }]
 }
 
 const steps = [
   {
-    title: 'Server Information',
-    subtitle: 'Add Server Information',
-    description: 'Add the Hostname, Datacenter, and Environment details.'
-  },
-  {
-    title: 'Network Information',
-    subtitle: 'Add Network Information',
-    description: 'Add the Network details.'
+    title: 'Mapping Information',
+    subtitle: 'Add Mapping Information',
+    description: 'Add the Name, Description, and Mapping Name for the Mapping.'
   },
   {
     title: 'Metadata Information',
@@ -82,9 +76,10 @@ const steps = [
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the Server details and submit.'
+    description: 'Review the Environment details and submit.'
   }
 ]
+
 
 const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
   ({ theme }) => ({
@@ -171,11 +166,35 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 
 // Define validation schema for the form
 const validationSchema = yup.object({
-  hostName: yup.string().required('Host Name is required'),
-  componentName: yup.string().required('Component Name is required'),
-  datacenterName: yup.string().required('Datacenter Name is required'),
-  environmentName: yup.string().required('Environment Name is required'),
-  status: yup.string().required('Status is required'),
+  mappingName: yup
+    .string()
+    .trim()
+    .required('Mapping Name is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  mappingDescription: yup
+    .string()
+    .trim()
+    .required('Mapping Name is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  mappingNamespaceName: yup
+    .string()
+    .trim()
+    .required('Mapping NameSpace is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(3, 'Name must be at least 3 characters')
+    .trim(),
+  mappingKey: yup
+    .string()
+    .trim()
+    .required('Mapping Key is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .min(2, 'Name must be at least 2 characters')
+    .trim(),
+  mappingValue: yup.string().trim(),
   metadata: yup
     .array()
     .of(
@@ -188,20 +207,7 @@ const validationSchema = yup.object({
       'metadata-key-value-pair',
       'Both key and value are required in metadata if either is provided',
       (metadata = []) => metadata.every(md => (!md.key && !md.value) || (md.key && md.value))
-    ),
-  networkInterfaces: yup.array().of(
-    yup.object().shape({
-      name: yup.string().required('Name is required'),
-      ip_address: yup
-        .string()
-        .required('IP Address is required')
-        .matches(
-          /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-          'Invalid IP address format'
-        ),
-      label: yup.string().required('Label is required')
-    })
-  )
+    )
 })
 
 const Section = ({ title, data, formErrors }) => {
@@ -245,7 +251,7 @@ const ReviewAndSubmitSection = ({ mappingForm, formErrors }) => {
       {Object.entries(mappingForm).map(([key, value]) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           // For nested objects (excluding arrays), recursively render sections
-          return <ReviewAndSubmitSection serverForm={value} formErrors={formErrors} key={key} />
+          return <ReviewAndSubmitSection mappingForm={value} formErrors={formErrors} key={key} />
         } else if (Array.isArray(value)) {
           const sectionErrors = formErrors?.[key] || {}
 
@@ -277,21 +283,20 @@ const ReviewAndSubmitSection = ({ mappingForm, formErrors }) => {
   )
 }
 
+
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
-const AddServerWizard = ({ onSuccess, ...props }) => {
+const AddMappingWizard = ({ onSuccess, ...props }) => {
   // ** States
-  const [serverForm, setServerForm] = useState(initialServerFormState)
+  const [mappingForm, setMappingForm] = useState(initialMappingFormState)
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
-  const [components, setComponents] = useState([])
-  const [datacenters, setDatacenters] = useState([])
-  const [environments, setEnvironments] = useState([])
-  const [isEnvironmentEnabled, setIsEnvironmentEnabled] = useState(false)
-  const [filteredEnvironments, setFilteredEnvironments] = useState([])
+  const [mappingNamespaces, setMappingNamespaces] = useState([])
+  const [isMappingNamespaceEnabled, setIsMappingNamespaceEnabled] = useState(false)
+  const [filteredMappings, setFilteredMappings] = useState([])
   const [formErrors, setFormErrors] = useState({})
-  const [, setServers] = useAtom(serversAtom)
-  const [, setRefetchTrigger] = useAtom(refetchServerTriggerAtom)
+  const [, setMappings] = useAtom(mappingsAtom)
+  const [, setRefetchTrigger] = useAtom(refetchMappingTriggerAtom)
 
   const theme = useTheme()
   const session = useSession()
@@ -301,53 +306,22 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   }, [formErrors])
 
   useEffect(() => {
-    const fetchDatacenters = async () => {
+    const fetchMappingNamespaces = async () => {
       try {
         // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/datacenters')
+        const response = await axios.get('/api/mappingnamespaces')
         const data = response.data.rows
 
         // Iterate over the data array and extract the name value from each object
-        const datacenterNames = data.map(datacenter => datacenter.name.toUpperCase())
-        setDatacenters(datacenterNames)
+        const mappingNamespaceNames = data.map(mappingNamespace => mappingNamespace.name.toUpperCase())
+        setMappingNamespaces(mappingNamespaceNames)
       } catch (error) {
-        console.error('Failed to fetch datacenters:', error)
+        console.error('Failed to fetch mappingnamespaces:', error)
       }
     }
 
-    const fetchEnviroments = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/environments')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const environmentNames = data.map(environment => environment.name.toUpperCase())
-        setEnvironments(environmentNames)
-      } catch (error) {
-        console.error('Failed to fetch environments:', error)
-      }
-    }
-
-    const fetchComponents = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/components')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const componentNames = data.map(component => component.name.toUpperCase())
-        setComponents(componentNames)
-      } catch (error) {
-        console.error('Failed to fetch components:', error)
-      }
-    }
-
-    fetchDatacenters()
-
-    // fetchEnviroments()
-    fetchComponents()
-  }, []) // Empty dependency array means this effect runs once on mount
+    fetchMappingNamespaces()
+  }, [])
 
   const validateField = async (fieldName, value, index, section) => {
     // Construct the correct path for nested fields
@@ -357,7 +331,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
     try {
       // Adjust the context object based on whether we're validating a section or a top-level field
-      const contextObject = section ? { [section]: serverForm[section] } : serverForm
+      const contextObject = section ? { [section]: mappingForm[section] } : mappingForm
 
       await validationSchema.validateAt(fieldPath, contextObject)
 
@@ -391,9 +365,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
   const validateForm = async () => {
     try {
-      // Assuming serverForm is the state holding your form data
+      // Assuming mappingForm is the state holding your form data
       // and validationSchema is your Yup schema
-      await validationSchema.validate(serverForm, { abortEarly: false })
+      await validationSchema.validate(mappingForm, { abortEarly: false })
 
       // If validation is successful, clear errors
       setFormErrors({})
@@ -438,28 +412,28 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
     if (section) {
       // Handle changes for dynamic sections (metadata or networkInterfaces)
-      const updatedSection = [...serverForm[section]]
+      const updatedSection = [...mappingForm[section]]
       updatedSection[index][name] = upperCasedValue
-      setServerForm({ ...serverForm, [section]: updatedSection })
+      setMappingForm({ ...mappingForm, [section]: updatedSection })
     } else {
       console.log(`Updating ${name} to ${value}`)
 
       // Handle changes for static fields
-      setServerForm({ ...serverForm, [name]: upperCasedValue })
+      setMappingForm({ ...mappingForm, [name]: upperCasedValue })
 
       // Validate the field after the value has been updated
       validateField(name, upperCasedValue)
     }
 
-    if (name === 'datacenterName') {
+    if (name === 'mappingNamespaceName') {
       setIsEnvironmentEnabled(false) // Disable environment field initially
       setFilteredEnvironments([]) // Reset filtered environments
 
       try {
-        const response = await axios.get(`/api/inventory/environments?datacenter_name=${upperCasedValue}`)
+        const response = await axios.get(`/api/mappingnamespaces?name=${upperCasedValue}`)
         const data = response.data.rows
-        const environmentNames = data.map(env => env.name.toUpperCase())
-        setFilteredEnvironments(environmentNames)
+        const mappingNamespacesNames = data.map(env => env.name.toUpperCase())
+        setFilteredEnvironments(mappingNamespacesNames)
         setIsEnvironmentEnabled(true) // Enable environment field after fetching
       } catch (error) {
         console.error('Failed to fetch environments for the selected datacenter:', error)
@@ -468,23 +442,24 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     }
   }
 
+
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'metadata' ? { key: '', value: '' } : { name: '', ip_address: '', label: '' }
-    const updatedSection = [...serverForm[section], newEntry]
-    setServerForm({ ...serverForm, [section]: updatedSection })
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: '' } : { metakey: '', metavalue: ''}
+    const updatedSection = [...mappingForm[section], newEntry]
+    setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
 
   // Function to remove an entry from a dynamic section
   const removeSectionEntry = (section, index) => {
-    const updatedSection = [...serverForm[section]]
+    const updatedSection = [...mappingForm[section]]
     updatedSection.splice(index, 1)
-    setServerForm({ ...serverForm, [section]: updatedSection })
+    setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
 
   // Handle Stepper
   const handleBack = () => {
-    if (activeStep === 2 || activeStep === 3) {
+    if (activeStep === 2) {
       // When navigating back from Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state
     }
@@ -492,8 +467,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   }
 
   const handleNext = async () => {
-    if (activeStep === 1 || activeStep === 2) {
-      // Assuming step 1 is Network Info and step 2 is Metadata Info
+    if (activeStep === 1) {
+      // Assuming step 1 is Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state to force UI update
     }
     setActiveStep(prevActiveStep => prevActiveStep + 1)
@@ -515,57 +490,55 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
         }
 
         const payload = {
-          hostname: serverForm.hostName,
-          datacenter_name: serverForm.datacenterName,
-          environment_name: serverForm.environmentName,
-          component_name: serverForm.componentName,
-          metadata: serverForm.metadata,
-          network_interfaces: serverForm.networkInterfaces,
-          ip_address: serverForm.networkInterfaces[0].ip_address,
-          status: serverForm.status
+          name: mappingForm.mappingName,
+          description: mappingForm.mappingDescription,
+          mapping_namespace_name: mappingForm.mappingNamespaceName,
+          key: mappingForm.mappingKey,
+          value: mappingForm.mappingValue,
+          metadata: mappingForm.mappingMetadata
         }
 
-        console.log('Submitting server details', payload)
+        console.log('Submitting mapping details', payload)
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = '/api/inventory/servers'
+        const endpoint = '/api/mappings'
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.status === 201 && response.data) {
-          toast.success('Server details added successfully')
+          toast.success('Mapping details added successfully')
           setRefetchTrigger(Date.now())
 
           // Call the onSuccess callback after successful submission
           onSuccess()
         }
       } catch (error) {
-        console.error('Error adding server details', error)
-        toast.error('Error adding server details')
+        console.error('Error adding mapping details', error)
+        toast.error('Error adding mapping details')
       }
     }
   }
 
   const handleReset = () => {
-    setServerForm(initialServerFormState)
+    setMappingForm(initialMappingFormState)
     setResetFormFields(false)
     setActiveStep(0)
   }
 
-  // Render form fields for metadata and network interfaces
+  // Render form fields for metadata
   const renderDynamicFormSection = section => {
-    return serverForm[section].map((entry, index) => {
-      const errorKeyBase = section === 'metadata' ? 'value' : 'ip_address'
+    return mappingForm[section].map((entry, index) => {
+      const errorKeyBase = section === 'mappingMetadata' ? 'value' : 'metavalue'
       const errorKey = `${section}[${index}].${errorKeyBase}`
 
       return (
         <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
           <Grid container spacing={3} alignItems='center'>
-            <Grid item xs={section === 'metadata' ? 5 : 4}>
+            <Grid item xs={section === 'mappingMetadata' ? 5 : 4}>
               <TextfieldStyled
                 key={`field1-${section}-${index}-${resetFormFields}`}
                 fullWidth
-                label={section === 'metadata' ? 'Key' : 'Name'}
-                name={section === 'metadata' ? 'key' : 'name'}
+                label={section === 'mappingMetadata' ? 'Key' : 'Name'}
+                name={section === 'mappingMetadata' ? 'key' : 'name'}
                 value={entry.key || entry.name}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
@@ -575,39 +548,21 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                 helperText={formErrors[errorKey] || ''}
               />
             </Grid>
-            <Grid item xs={section === 'metadata' ? 5 : 3}>
+            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
               <TextfieldStyled
                 key={`field2-${section}-${index}-${resetFormFields}`}
                 fullWidth
-                label={section === 'metadata' ? 'Value' : 'IP Address'}
-                name={section === 'metadata' ? 'value' : 'ip_address'}
-                value={entry.value || entry.ip_address}
+                label={section === 'mappingMetadata' ? 'Value' : 'MetaValue'}
+                name={section === 'mappingMetadata' ? 'value' : 'meta_value'}
+                value={entry.value || entry.metavalue}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
                 margin='normal'
-                error={!!formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`]}
-                helperText={formErrors[`${section}[${index}].${section === 'metadata' ? 'value' : 'ip_address'}`] || ''}
+                error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`]}
+                helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`] || ''}
               />
             </Grid>
-            {/* Conditional TextField for Label only in networkInterfaces */}
-            {section === 'networkInterfaces' && (
-              <Grid item xs={3}>
-                <TextfieldStyled
-                  key={`label-${section}-${index}-${resetFormFields}`}
-                  fullWidth
-                  label='Label'
-                  name='label'
-                  value={entry.label}
-                  onChange={e => handleFormChange(e, index, section)}
-                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                  variant='outlined'
-                  margin='normal'
-                  error={!!formErrors[`networkInterfaces[${index}].label`]}
-                  helperText={formErrors[`networkInterfaces[${index}].label`] || ''}
-                />
-              </Grid>
-            )}
             <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
               <IconButton
                 onClick={() => addSectionEntry(section)}
@@ -615,7 +570,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               >
                 <Icon icon='mdi:plus-circle-outline' />
               </IconButton>
-              {serverForm[section].length > 1 && (
+              {mappingForm[section].length > 1 && (
                 <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
                   <Icon icon='mdi:minus-circle-outline' />
                 </IconButton>
@@ -646,146 +601,107 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
         return (
           <Fragment>
             <Typography variant='h6' gutterBottom>
-              Server Information
+              Mapping Information
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <CustomToolTip title='The hostname of the server' placement='top'>
+                <CustomToolTip title='The name of the mapping' placement='top'>
                   <TextfieldStyled
                     required
-                    id='hostName'
-                    name='hostName'
-                    label='Host Name'
+                    id='mappingName'
+                    name='mappingName'
+                    label='Mapping Name'
                     fullWidth
                     autoComplete='off'
-                    value={serverForm.hostName}
+                    value={mappingForm.mappingName}
                     onChange={handleFormChange}
                     onBlur={e => validateField(e.target.name, e.target.value)}
-                    error={!!formErrors.hostName}
-                    helperText={formErrors.hostName || ''}
+                    error={!!formErrors.mappingName}
+                    helperText={formErrors.mappingName || ''}
+                  />
+                </CustomToolTip>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomToolTip title='Description of the mapping' placement='top'>
+                  <TextfieldStyled
+                    required
+                    id='mappingDescription'
+                    name='mappingDescription'
+                    label='Mapping Description'
+                    fullWidth
+                    autoComplete='off'
+                    value={mappingForm.mappingDescription}
+                    onChange={handleFormChange}
+                    onBlur={e => validateField(e.target.name, e.target.value)}
+                    error={!!formErrors.mappingDescription}
+                    helperText={formErrors.mappingDescription || ''}
                   />
                 </CustomToolTip>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
-                  autoHighlight
-                  id='componentName-autocomplete'
-                  options={components}
-                  value={serverForm.componentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
-                  )}
-                  error={!!formErrors.componentName}
-                  helperText={formErrors.componentName || ''}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
                   clearOnBlur
                   selectOnFocus
                   handleHomeEndKeys
-                  id='datacenterName-autocomplete'
-                  options={datacenters}
-                  value={serverForm.datacenterName}
+                  id='mappingNamespaceName-autocomplete'
+                  options={mappingNamespaces}
+                  value={mappingForm.mappingNamespaceName}
                   onChange={(event, newValue) => {
                     // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                    handleFormChange({ target: { name: 'mappingNamespaceName', value: newValue } }, null, null)
                   }}
                   onInputChange={(event, newInputValue) => {
                     if (event) {
-                      handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
+                      handleFormChange({ target: { name: 'mappingNamespaceName', value: newInputValue } }, null, null)
                     }
                   }}
                   onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
-                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                    <TextField {...params} label='Mapping Namespace Name' fullWidth required autoComplete='off' />
                   )}
-                  error={!!formErrors.datacenterName}
-                  helperText={formErrors.datacenterName || ''}
+                  error={!!formErrors.mappingNamespaceName}
+                  helperText={formErrors.mappingNamespaceName || ''}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='environmentName-autocomplete'
-                  options={isEnvironmentEnabled ? filteredEnvironments : []}
-                  value={serverForm.environmentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <InputLabelStyled id='status-select-label'>Status</InputLabelStyled>
-                  <SelectStyled
-                    labelId='status-select-label'
-                    id='status-simple-select'
-                    value={serverForm.status}
-                    label='Status'
+                <CustomToolTip title='Key name for the map' placement='top'>
+                  <TextfieldStyled
+                    required
+                    id='mappingKey'
+                    name='mappingKey'
+                    label='Mapping Key'
+                    fullWidth
+                    autoComplete='off'
+                    value={mappingForm.mappingKey}
                     onChange={handleFormChange}
-                    name='status'
-                    error={!!formErrors.status}
-                    helperText={formErrors.status || ''}
-                  >
-                    <MenuItem value={'ACTIVE'}>ACTIVE</MenuItem>
-                    <MenuItem value={'INACTIVE'}>INACTIVE</MenuItem>
-                  </SelectStyled>
-                </FormControl>
+                    onBlur={e => validateField(e.target.name, e.target.value)}
+                    error={!!formErrors.mappingKey}
+                    helperText={formErrors.mappingKey || ''}
+                  />
+                </CustomToolTip>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomToolTip title='Value for the key and map' placement='top'>
+                  <TextfieldStyled
+                    required
+                    id='mappingValue'
+                    name='mappingValue'
+                    label='Mapping Value'
+                    fullWidth
+                    autoComplete='off'
+                    value={mappingForm.mappingValue}
+                    onChange={handleFormChange}
+                    onBlur={e => validateField(e.target.name, e.target.value)}
+                    error={!!formErrors.mappingValue}
+                    helperText={formErrors.mappingValue || ''}
+                  />
+                </CustomToolTip>
               </Grid>
             </Grid>
           </Fragment>
         )
       case 1:
-        return (
-          <Fragment>
-            <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('networkInterfaces')}
-              <Box>
-                <Button
-                  startIcon={
-                    <Icon
-                      icon='mdi:plus-circle-outline'
-                      style={{
-                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                      }}
-                    />
-                  }
-                  onClick={() => addSectionEntry('networkInterfaces')}
-                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                >
-                  Add Network Interface
-                </Button>
-              </Box>
-            </Stack>
-          </Fragment>
-        )
-      case 2:
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
@@ -809,8 +725,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
             </Stack>
           </Fragment>
         )
-      case 3:
-        return <ReviewAndSubmitSection serverForm={serverForm} />
+      case 2:
+        return <ReviewAndSubmitSection mappingForm={mappingForm} />
       default:
         return 'Unknown Step'
     }
@@ -820,8 +736,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>Server details have been submitted.</Typography>
-          <ReviewAndSubmitSection serverForm={serverForm} />
+          <Typography>Mapping details have been submitted.</Typography>
+          <ReviewAndSubmitSection mappingForm={mappingForm} />
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
             <Button size='large' variant='contained' onClick={handleReset}>
               Reset
@@ -889,4 +805,4 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   )
 }
 
-export default AddServerWizard
+export default AddMappingWizard

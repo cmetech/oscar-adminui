@@ -181,6 +181,13 @@ const navigation = () => {
           icon: 'mdi:file-document-alert',
           action: 'manage',
           subject: 'runtime'
+        },
+        {
+          title: 'Mapping',
+          path: '/management/application/mapping',
+          icon: 'mdi:table-key',
+          action: 'manage',
+          subject: 'runtime'
         }
       ]
     },

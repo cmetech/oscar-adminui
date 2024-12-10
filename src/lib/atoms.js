@@ -88,3 +88,11 @@ export const rulesIdsAtom = atom([])
 export const rulesAtom = atom([])
 
 export const refetchRulesTriggerAtom = atom(0)
+
+export const mappingNamespacesAtom = atom([])
+
+export const refetchMappingNamespaceTriggerAtom = atom(0)
+
+export const mappingsAtom = atom([])
+
+export const refetchMappingTriggerAtom = atom(0)

@@ -133,6 +133,7 @@ const MappingList = props => {
   const [timezone] = useAtom(timezoneAtom)
 
   // ** Dialog
+  const [openDialog, setOpenDialog] = useState(false)
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentMapping, setCurrentMapping] = useState(null)

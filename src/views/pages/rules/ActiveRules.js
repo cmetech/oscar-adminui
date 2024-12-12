@@ -107,8 +107,12 @@ const ActiveRules = forwardRef((props, ref) => {
           }
         })
 
-        setRows(response.data.rules || [])
+        const fetchedRules = response.data.rules || []
+        setRows(fetchedRules)
         setRowCount(response.data.total_rules || 0)
+
+        // Update rules in RuleManager
+        setRules(fetchedRules)
 
         // Update parent component if needed
         if (props.setRuleTotal) {

@@ -56,9 +56,9 @@ const ActiveRules = forwardRef((props, ref) => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
   const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
   const [filterModel, setFilterModel] = useState({ items: [], logicOperator: GridLogicOperator.Or })
-  const [filterMode, setFilterMode] = useState('client')
-  const [sortingMode, setSortingMode] = useState('client')
-  const [paginationMode, setPaginationMode] = useState('client')
+  const [filterMode, setFilterMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('server')
+  const [paginationMode, setPaginationMode] = useState('server')
   const [filteredRows, setFilteredRows] = useState([])
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(0)
@@ -93,30 +93,39 @@ const ActiveRules = forwardRef((props, ref) => {
     }
   }))
 
-  const fetchRules = useCallback(async () => {
-    setLoading(true)
-    try {
-      const response = await axios.get('/api/rules')
-      console.log('Fetch Rules Response:', response.data)
+  const fetchRules = useCallback(
+    async (filterModelParam = filterModel) => {
+      setLoading(true)
+      try {
+        const response = await axios.get('/api/rules', {
+          params: {
+            perPage: paginationModel.pageSize,
+            page: paginationModel.page + 1,
+            order: sortModel[0]?.sort || 'asc',
+            column: sortModel[0]?.field || 'name',
+            filter: JSON.stringify(filterModelParam)
+          }
+        })
 
-      setRows(response.data.rules || [])
+        setRows(response.data.rules || [])
+        setRowCount(response.data.total_rules || 0)
 
-      // Set the total rule count
-      if (props.setRuleTotal) {
-        props.setRuleTotal(response.data.rules.length)
+        // Update parent component if needed
+        if (props.setRuleTotal) {
+          props.setRuleTotal(response.data.total_rules || 0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch rules', error)
+        toast.error(t('Failed to fetch rules'))
+      } finally {
+        setLoading(false)
+        setRunRefresh(false)
+        setRunFilterQuery(false)
       }
-
-      setRules(response.data.rules || [])
-    } catch (error) {
-      console.error('Failed to fetch rules', error)
-      toast.error(t('Failed to fetch rules'))
-    } finally {
-      setLoading(false)
-      setRunRefresh(false)
-      setRunFilterQuery(false)
-    }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    [paginationModel, sortModel, filterModel]
+  )
 
   useEffect(() => {
     setRows(rules)
@@ -146,7 +155,7 @@ const ActiveRules = forwardRef((props, ref) => {
       if (filterMode === 'server') {
         const sort = sortModel[0]?.sort
         const sortColumn = sortModel[0]?.field
-        fetchData(filterModel)
+        fetchRules(filterModel)
       } else {
         // client side filtering
         const filteredRows = rows.filter(row => {
@@ -178,7 +187,7 @@ const ActiveRules = forwardRef((props, ref) => {
       setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
       if (filterMode === 'server') {
-        fetchData(filterModel)
+        fetchRules(filterModel)
       } else {
         // client side filtering
         setRows(rows)
@@ -196,7 +205,7 @@ const ActiveRules = forwardRef((props, ref) => {
     // console.log('Sort Model:', JSON.stringify(sortModel))
 
     if (sortingMode === 'server') {
-      fetchData()
+      fetchRules()
     } else {
       // client side sorting
       const column = sortModel[0]?.field

@@ -275,7 +275,7 @@ const MappingList = props => {
     },
     {
       flex: 0.02,
-      field: 'key',
+      field: 'value',
       headerName: t('Value'),
       renderCell: params => {
         const { row } = params

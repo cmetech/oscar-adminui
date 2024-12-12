@@ -195,7 +195,7 @@ const validationSchema = yup.object({
     .min(2, 'Name must be at least 2 characters')
     .trim(),
   mappingValue: yup.string().trim(),
-  metadata: yup
+  mappingMetadata: yup
     .array()
     .of(
       yup.object().shape({
@@ -705,7 +705,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('metadata')}
+              {renderDynamicFormSection('mappingMetadata')}
               <Box>
                 <Button
                   startIcon={
@@ -716,7 +716,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                       }}
                     />
                   }
-                  onClick={() => addSectionEntry('metadata')}
+                  onClick={() => addSectionEntry('mappingMetadata')}
                   style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
                 >
                   Add Metadata

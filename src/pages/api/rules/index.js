@@ -5,11 +5,32 @@ import oscarConfig from 'src/configs/oscarConfig'
 
 async function handler(req, res) {
   if (req.method === 'GET') {
-    const { namespace } = req.query
+    const { namespace, perPage, page, order, column, filter } = req.query
 
     const params = {}
+
     if (namespace) {
       params.namespace = namespace
+    }
+
+    if (perPage) {
+      params.perPage = perPage
+    }
+
+    if (page) {
+      params.page = page
+    }
+
+    if (order) {
+      params.order = order
+    }
+
+    if (column) {
+      params.column = column
+    }
+
+    if (filter) {
+      params.filter = filter
     }
 
     try {

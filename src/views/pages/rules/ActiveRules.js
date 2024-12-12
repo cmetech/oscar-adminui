@@ -59,6 +59,9 @@ const ActiveRules = forwardRef((props, ref) => {
   const [filterMode, setFilterMode] = useState('server')
   const [sortingMode, setSortingMode] = useState('server')
   const [paginationMode, setPaginationMode] = useState('server')
+  const [filterMode, setFilterMode] = useState('server')
+  const [sortingMode, setSortingMode] = useState('server')
+  const [paginationMode, setPaginationMode] = useState('server')
   const [filteredRows, setFilteredRows] = useState([])
   const [runFilterQueryCount, setRunFilterQueryCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(0)
@@ -107,12 +110,8 @@ const ActiveRules = forwardRef((props, ref) => {
           }
         })
 
-        const fetchedRules = response.data.rules || []
-        setRows(fetchedRules)
+        setRows(response.data.rules || [])
         setRowCount(response.data.total_rules || 0)
-
-        // Update rules in RuleManager
-        setRules(fetchedRules)
 
         // Update parent component if needed
         if (props.setRuleTotal) {
@@ -128,6 +127,8 @@ const ActiveRules = forwardRef((props, ref) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    [paginationModel, sortModel, filterModel]
+  )
     [paginationModel, sortModel, filterModel]
   )
 
@@ -159,6 +160,7 @@ const ActiveRules = forwardRef((props, ref) => {
       if (filterMode === 'server') {
         const sort = sortModel[0]?.sort
         const sortColumn = sortModel[0]?.field
+        fetchRules(filterModel)
         fetchRules(filterModel)
       } else {
         // client side filtering
@@ -192,6 +194,7 @@ const ActiveRules = forwardRef((props, ref) => {
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
       if (filterMode === 'server') {
         fetchRules(filterModel)
+        fetchRules(filterModel)
       } else {
         // client side filtering
         setRows(rows)
@@ -209,6 +212,7 @@ const ActiveRules = forwardRef((props, ref) => {
     // console.log('Sort Model:', JSON.stringify(sortModel))
 
     if (sortingMode === 'server') {
+      fetchRules()
       fetchRules()
     } else {
       // client side sorting

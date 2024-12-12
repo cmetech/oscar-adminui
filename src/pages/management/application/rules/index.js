@@ -219,6 +219,8 @@ const RuleManager = () => {
 
   // Handler for confirming deletion
   const handleConfirmDeleteSelected = async () => {
+    console.log('Rules array:', rules)
+    console.log('Row selection model:', rowSelectionModel)
     try {
       const deletePromises = rowSelectionModel.map(ruleId => {
         const rule = rules.find(row => `${row.namespace}-${row.name.replace(/\s+/g, '_')}` === ruleId)
@@ -227,6 +229,9 @@ const RuleManager = () => {
             `/api/rules/delete/${encodeURIComponent(rule.name)}?namespace=${encodeURIComponent(rule.namespace)}`
           )
         } else {
+          // Optionally handle the case where the rule is not found
+          console.warn(`Rule with ID ${ruleId} not found in rules array`)
+
           return Promise.resolve()
         }
       })

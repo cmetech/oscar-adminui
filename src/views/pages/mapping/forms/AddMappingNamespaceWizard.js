@@ -31,6 +31,7 @@ import FormLabel from '@mui/material/FormLabel'
 import Autocomplete from '@mui/material/Autocomplete'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
+
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
@@ -130,15 +131,15 @@ const validationSchema = yup.object({
   mappingNamespaceName: yup
     .string()
     .trim()
-    .required('Namespace Name for mapping is required')
+    .required('Mapping Namespace Name is required')
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
-    .min(5, 'Name must be at least 5 characters')
+    .min(3, 'Name must be at least 3 characters')
     .trim(),
   mappingNamespaceDescription: yup.string().trim()
 })
 
 const AddMappingNamespaceWizard = ({ onSuccess, ...props }) => {
-    // ** States
+  // ** States
   const [mappingNamespaceName, setMappingNamespaceName] = useState('')
   const [mappingNamespaceDescription, setMappingNamespaceDescription] = useState('')
   const [activeStep, setActiveStep] = useState(0)
@@ -151,7 +152,7 @@ const AddMappingNamespaceWizard = ({ onSuccess, ...props }) => {
 
   // Validate Form
   const validateForm = async () => {
-      try {
+    try {
       // Validate the form values
       await validationSchema.validate({ mappingNamespaceName, mappingNamespaceDescription }, { abortEarly: false })
 
@@ -159,26 +160,26 @@ const AddMappingNamespaceWizard = ({ onSuccess, ...props }) => {
       setFormErrors({})
 
       return true
-      } catch (yupError) {
+    } catch (yupError) {
       if (yupError.inner) {
-          // Transform the validation errors to a more manageable structure
-          const transformedErrors = yupError.inner.reduce(
+        // Transform the validation errors to a more manageable structure
+        const transformedErrors = yupError.inner.reduce(
           (acc, currentError) => ({
-              ...acc,
-              [currentError.path]: currentError.message
+            ...acc,
+            [currentError.path]: currentError.message
           }),
           {}
-          )
-          setFormErrors(transformedErrors)
+        )
+        setFormErrors(transformedErrors)
       }
 
       return false
-      }
+    }
   }
 
   // Handle Stepper
   const handleBack = () => {
-      setActiveStep(prevActiveStep => prevActiveStep - 1)
+    setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
   const handleNext = async () => {
@@ -208,22 +209,22 @@ const AddMappingNamespaceWizard = ({ onSuccess, ...props }) => {
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.status === 201 && response.data) {
-          toast.success('Datacenter details added successfully')
+          toast.success('Mapping details added successfully')
           setRefetchTrigger(Date.now())
 
           // Call the onSuccess callback after successful submission
           onSuccess()
         }
       } catch (error) {
-        console.error('Error updating datacenter details', error)
-        toast.error('Error updating datacenter details')
+        console.error('Error updating mapping details', error)
+        toast.error('Error updating mapping details')
       }
     }
   }
 
   const handleReset = () => {
-    setDatacenterName(props?.currentMappingNamespace?.name || '') //the name of obj should be same as List of Namespace
-    setDatacenterLocation(props?.currentMappingNamespace?.description || '') //the name of obj should be same as list of Namespace
+    setMappingNamespaceName(props?.currentMappingNamespace?.name || '')
+    setMappingNamespaceDescription(props?.currentMappingNamespace?.description || '')
     setActiveStep(0)
   }
 
@@ -324,7 +325,7 @@ const AddMappingNamespaceWizard = ({ onSuccess, ...props }) => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>Mapping Namespace details have been submitted.</Typography>
+          <Typography>Mapping details have been submitted.</Typography>
           <Grid container spacing={1}>
             <Grid item xs={4}>
               <Typography

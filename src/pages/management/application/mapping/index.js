@@ -868,14 +868,14 @@ const Settings = () => {
             <Tab
               value='1'
               label={mappingNamespaceTotal == 0 ? t('MappingNamespaces') : `${t('MappingNamespaces')} (${mappingNamespaceTotal})`}
-              icon={<Icon icon='mdi:database' />}
+              icon={<Icon icon='mdi:file-table-box-multiple' />}
               iconPosition='start'
             />
             {/* Environments Tab */}
             <Tab
               value='2'
               label={mappingTotal == 0 ? t('Mappings') : `${t('Mappings')} (${mappingTotal})`}
-              icon={<Icon icon='mdi:file-table-box-multiple' />}
+              icon={<Icon icon='mdi:file-table-box-outline' />}
               iconPosition='start'
             />
           </TabList>

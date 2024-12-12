@@ -107,12 +107,8 @@ const ActiveRules = forwardRef((props, ref) => {
           }
         })
 
-        const fetchedRules = response.data.rules || []
-        setRows(fetchedRules)
+        setRows(response.data.rules || [])
         setRowCount(response.data.total_rules || 0)
-
-        // Update rules in RuleManager
-        setRules(fetchedRules)
 
         // Update parent component if needed
         if (props.setRuleTotal) {
@@ -807,17 +803,7 @@ const ActiveRules = forwardRef((props, ref) => {
               }
             }
           }}
-          getDetailPanelContent={({ row }) => (
-            <ActiveRulesDetailPanel
-              row={row}
-              onDataChange={() => {
-                console.log('onDataChange triggered in parent')
-                setRunRefresh(true)
-                console.log('Calling fetchRules')
-                fetchRules()
-              }}
-            />
-          )}
+          getDetailPanelContent={({ row }) => <ActiveRulesDetailPanel row={row} />}
           getDetailPanelHeight={() => 400}
           detailPanelExpandedRowIds={detailPanelExpandedRowIds}
           onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}

@@ -914,8 +914,15 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         // Check if the section is an array or an object
         if (Array.isArray(newForm[section])) {
           // For array sections, clone the array and update the specific index
-          const updatedSection = [...newForm[section]]
-          updatedSection[index] = { ...updatedSection[index], [name]: value }
+          // For array sections, clone the array and update the specific index
+          let updatedSection = [...newForm[section]]
+
+          if (section === 'hosts' && name === 'ip_address' && value.trim() === '') {
+            // Remove the host entry at this index
+            updatedSection.splice(index, 1)
+          } else {
+            updatedSection[index] = { ...updatedSection[index], [name]: value }
+          }
           newForm[section] = updatedSection
         } else if (typeof newForm[section] === 'object') {
           // For object sections like 'schedule', update directly
@@ -1003,7 +1010,9 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         const payload = {
           ...taskForm,
           args: taskForm.args.map(arg => arg.value),
-          hosts: taskForm.hosts.map(host => host.ip_address),
+          hosts: taskForm.hosts
+            .filter(host => host.ip_address && host.ip_address.trim() !== '')
+            .map(host => host.ip_address),
           kwargs: Object.fromEntries(taskForm.kwargs.map(({ key, value }) => [key, value])),
           metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
         }

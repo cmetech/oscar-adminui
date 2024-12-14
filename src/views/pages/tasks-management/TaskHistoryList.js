@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, forwardRef, useRef } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -126,6 +126,8 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
   const [paginationMode, setPaginationMode] = useState('server')
 
   const [timezone] = useAtom(timezoneAtom)
+
+  const dataLoadedRef = useRef(false)
 
   const getDetailPanelContent = useCallback(({ row }) => <TaskHistoryDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -416,6 +418,8 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
 
       setLoading(true)
 
+      dataLoadedRef.current = false
+
       try {
         const response = await axios.get('/api/tasks/history', {
           params: {
@@ -427,17 +431,18 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
             end_time: endTime,
             filter: JSON.stringify(filterModel)
           },
-          // Add signal from AbortController to handle timeouts more gracefully
-          signal: new AbortController().signal,
           timeout: 30000
         })
 
         // If we get here, we have successful data
         setRowCount(response.data.total_records || 0)
         setRows(response.data.records || [])
+
+        // Data has been successfully loaded
+        dataLoadedRef.current = true
       } catch (error) {
         // Only show error toast if it's not a timeout and we don't have data
-        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+        if (error.code !== 'ECONNABORTED' && !dataLoadedRef.current) {
           console.error(t('Failed to fetch task history'), error)
           toast.error(t('Failed to fetch task history'))
         }

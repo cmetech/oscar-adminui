@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, forwardRef, useRef } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -130,6 +130,8 @@ const ActiveAlertsList = props => {
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentServer, setCurrentServer] = useState(null)
+
+  const dataLoadedRef = useRef(false)
 
   const getDetailPanelContent = useCallback(({ row }) => <ActiveAlertsDetailPanel alert={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
@@ -497,6 +499,8 @@ const ActiveAlertsList = props => {
         endDate = new Date()
       }
 
+      dataLoadedRef.current = false
+
       // Ensure startDate and endDate are Date objects
       startDate = startDate instanceof Date ? startDate : new Date(startDate)
       endDate = endDate instanceof Date ? endDate : new Date(endDate)
@@ -519,13 +523,17 @@ const ActiveAlertsList = props => {
             start_time: startTime,
             end_time: endTime,
             filter: JSON.stringify(filterModel)
-          }
+          },
+          timeout: 30000
         })
 
         if (response.status === 200) {
           setRowCount(response.data.total_records || 0)
           setRows(response.data.records || [])
           props.set_total(response.data.total_records)
+
+          // Data has been successfully loaded
+          dataLoadedRef.current = true
         } else {
           setRows([])
           setRowCount(0)
@@ -533,9 +541,10 @@ const ActiveAlertsList = props => {
         }
       } catch (error) {
         console.log(error)
-        setRows([])
-        setRowCount(0)
-        toast.error('Error fetching alerts')
+        if (error.code !== 'ECONNABORTED' && !dataLoadedRef.current) {
+          console.error(t('Failed to fetch alerts'), error)
+          toast.error(t('Failed to fetch alerts'))
+        }
       } finally {
         setLoading(false)
         setRunRefresh(false)

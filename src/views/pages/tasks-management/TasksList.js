@@ -148,6 +148,8 @@ const TasksList = props => {
   const [runDialog, setRunDialog] = useState(false)
   const [currentTask, setCurrentTask] = useState(null)
 
+  const dataLoadedRef = useRef(false)
+
   const getDetailPanelContent = useCallback(({ row }) => <TaskDetailPanel row={row} />, [])
   const getDetailPanelHeight = useCallback(() => 600, [])
 
@@ -1124,6 +1126,7 @@ const TasksList = props => {
     async filter_model => {
       // Remove the requestCompleted flag as we'll handle this differently
       setLoading(true)
+      dataLoadedRef.current = false
 
       try {
         const response = await axios.get('/api/tasks', {
@@ -1134,8 +1137,6 @@ const TasksList = props => {
             limit: paginationModel.pageSize,
             filter: filter_model ? JSON.stringify(filter_model) : undefined
           },
-          // Add signal from AbortController to handle timeouts more gracefully
-          signal: new AbortController().signal,
           timeout: 30000
         })
 
@@ -1144,9 +1145,12 @@ const TasksList = props => {
         setRows(response.data.records)
         props.set_total(response.data.total_records)
         setTasks(response.data.records)
+
+        // Data has been successfully loaded
+        dataLoadedRef.current = true
       } catch (error) {
         // Only show error toast if it's not a timeout and we don't have data
-        if (error.code !== 'ECONNABORTED' && rows.length === 0) {
+        if (error.code !== 'ECONNABORTED' && !dataLoadedRef.current) {
           console.error(t('Failed to fetch tasks'), error)
           toast.error(t('Failed to fetch tasks'))
         }

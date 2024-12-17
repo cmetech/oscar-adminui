@@ -140,7 +140,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       rule.actions && rule.actions.add_labels
         ? Object.entries(rule.actions.add_labels).map(([key, value]) => ({ key, value }))
         : [],
-    suppression_window_ids: rule.suppression_window_ids || []
+    suppression_window_ids: rule.suppression_windows ? rule.suppression_windows.map(w => w.id) : []
   })
 
   // ** Handle form input changes
@@ -225,14 +225,19 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     const updatedWindows = [...selectedSuppressionWindows]
     updatedWindows.splice(index, 1)
     setSelectedSuppressionWindows(updatedWindows)
+
+    // Update the form's suppression window IDs
+    setRuleForm(prev => ({
+      ...prev,
+      suppression_window_ids: updatedWindows.map(window => window.id)
+    }))
   }
 
   const handleSuppressionWindowChange = (index, windowId) => {
     const windowDetails = availableSuppressionWindows.find(w => w.id === windowId)
     const updatedWindows = [...selectedSuppressionWindows]
-    updatedWindows[index] = { ...windowDetails, id: windowId }
+    updatedWindows[index] = { ...windowDetails }
     setSelectedSuppressionWindows(updatedWindows)
-    console.log('Updated Selected Suppression Windows:', updatedWindows)
 
     // Update the form's suppression window IDs
     const updatedIds = updatedWindows.map(window => window.id).filter(Boolean)
@@ -245,7 +250,7 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
   // ** Add this helper function
   const hasAvailableWindows = () => {
     // Get currently selected window IDs
-    const selectedIds = selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+    const selectedIds = selectedSuppressionWindows.map(window => window.id)
 
     // Check if there are any windows available that aren't already selected
     return availableSuppressionWindows.some(window => !selectedIds.includes(window.id))
@@ -372,44 +377,92 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                 />
               </Grid>
             </Grid>
-            {/* Add Suppression Windows Section */}
+            {/* Suppression Windows Section */}
             {ruleForm.actionSuppress && (
               <Box sx={{ mt: 4 }}>
+                {/* Existing Suppression Windows */}
                 {selectedSuppressionWindows.map((window, index) => (
                   <Box key={index} sx={{ mb: 3 }}>
                     <Grid container spacing={2} alignItems='center'>
                       <Grid item xs={10}>
                         <FormControl fullWidth>
-                          <InputLabelStyled>{t('Select Suppression Window')}</InputLabelStyled>
-                          <SelectStyled
-                            value={window.id || ''}
-                            onChange={e => handleSuppressionWindowChange(index, e.target.value)}
-                            label={t('Select Suppression Window')}
-                          >
-                            {availableSuppressionWindows
-                              .filter(option => {
-                                // Include the window if it's not already selected elsewhere
-                                return (
-                                  option.id === window.id ||
-                                  !selectedSuppressionWindows.some((w, i) => w.id === option.id && i !== index)
-                                )
-                              })
-                              .map(option => (
-                                <MenuItem key={option.id} value={option.id}>
-                                  {option.name}
-                                </MenuItem>
-                              ))}
-                          </SelectStyled>
+                          <InputLabelStyled shrink>{t('Suppression Window')}</InputLabelStyled>
+                          <TextFieldStyled
+                            value={window.name}
+                            InputProps={{
+                              readOnly: true
+                            }}
+                            // Add these props to fix the label overlap issue
+                            variant='outlined'
+                            sx={{
+                              '& .MuiInputLabel-root': {
+                                backgroundColor: theme.palette.background.paper
+                              }
+                            }}
+                          />
                         </FormControl>
                       </Grid>
                       <Grid item xs={2}>
-                        <IconButton onClick={() => removeSuppressionWindow(index)} color='error'>
+                        <IconButton
+                          onClick={() => removeSuppressionWindow(index)}
+                          color='error'
+                          aria-label='Delete suppression window'
+                        >
                           <Icon icon='mdi:delete-outline' />
                         </IconButton>
                       </Grid>
                     </Grid>
                   </Box>
                 ))}
+
+                {/* New Suppression Window Selection */}
+                {selectedSuppressionWindows.length < availableSuppressionWindows.length && (
+                  <Box sx={{ mb: 3 }}>
+                    <Grid container spacing={2} alignItems='center'>
+                      <Grid item xs={10}>
+                        <FormControl fullWidth>
+                          <InputLabelStyled>{t('Select Suppression Window')}</InputLabelStyled>
+                          <SelectStyled
+                            value=''
+                            onChange={e => {
+                              const windowId = e.target.value
+                              if (windowId) {
+                                const windowDetails = availableSuppressionWindows.find(w => w.id === windowId)
+                                if (windowDetails) {
+                                  const updatedWindows = [
+                                    ...selectedSuppressionWindows,
+                                    {
+                                      id: windowDetails.id,
+                                      name: windowDetails.name
+                                    }
+                                  ]
+                                  setSelectedSuppressionWindows(updatedWindows)
+                                  setRuleForm(prev => ({
+                                    ...prev,
+                                    suppression_window_ids: updatedWindows.map(w => w.id)
+                                  }))
+                                }
+                              }
+                            }}
+                          >
+                            <MenuItem value='' disabled>
+                              {t('Select a suppression window')}
+                            </MenuItem>
+                            {availableSuppressionWindows
+                              .filter(window => !selectedSuppressionWindows.some(selected => selected.id === window.id))
+                              .map(window => (
+                                <MenuItem key={window.id} value={window.id}>
+                                  {window.name}
+                                </MenuItem>
+                              ))}
+                          </SelectStyled>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Add Another Window Button */}
                 {hasAvailableWindows() && (
                   <Button
                     startIcon={
@@ -586,6 +639,18 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
       suppression_window_ids: updatedIds
     }))
   }, [selectedSuppressionWindows])
+
+  // Initialize form with existing suppression windows
+  useEffect(() => {
+    if (rule && rule.suppression_windows) {
+      // Convert existing suppression windows to the format expected by the form
+      const existingWindows = rule.suppression_windows.map(window => ({
+        id: window.id,
+        name: window.name
+      }))
+      setSelectedSuppressionWindows(existingWindows)
+    }
+  }, [rule])
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>

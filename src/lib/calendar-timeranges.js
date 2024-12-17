@@ -17,11 +17,6 @@ export const todayRounded = () => {
   return roundToNearest10Min(dayjs())
 }
 
-// ** Function to round today's date plus 1 hour to the nearest 10 minutes
-export const todayRoundedPlus1hour = () => {
-  return roundToNearest10Min(dayjs().add(1, 'hour'))
-}
-
 export const yesterdayRounded = () => {
   return roundToNearest10Min(dayjs().subtract(1, 'day'))
 }

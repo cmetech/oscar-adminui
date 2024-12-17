@@ -5,12 +5,15 @@ import oscarConfig from 'src/configs/oscarConfig'
 
 async function handler(req, res) {
   if (req.method === 'POST') {
-    const payload = req.body
+    const payload = {
+      ...req.body,
+      suppression_window_ids: req.body.suppression_window_ids || []
+    }
 
     try {
       const response = await axios.post(`${oscarConfig.MIDDLEWARE_API_URL}/rules`, payload, {
         headers: {
-          'X-API-Key': oscarConfig.API_KEY, // Ensure this key exists in your oscarConfig
+          'X-API-Key': oscarConfig.API_KEY,
           'Content-Type': 'application/json'
         },
         httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
@@ -23,7 +26,9 @@ async function handler(req, res) {
       }
     } catch (error) {
       console.error(`Error creating rule:`, error)
-      res.status(error.response?.status || 500).json({ message: error.message })
+      res.status(error.response?.status || 500).json({
+        message: error.response?.data?.detail || error.message
+      })
     }
   } else {
     res.setHeader('Allow', ['POST'])

@@ -2,7 +2,7 @@
 import dayjs from 'src/lib/dayjs-config'
 
 // ** Function to round to the nearest 10 minutes
-const roundToNearest10Min = date => {
+export const roundToNearest10Min = date => {
   const minutes = date.minute()
   const seconds = date.second()
 
@@ -13,11 +13,15 @@ const roundToNearest10Min = date => {
 }
 
 // ** Function to round today's date to the nearest 10 minutes
-const todayRounded = () => {
+export const todayRounded = () => {
   return roundToNearest10Min(dayjs())
 }
 
-const roundDownToNearest10Min = date => {
+export const yesterdayRounded = () => {
+  return roundToNearest10Min(dayjs().subtract(1, 'day'))
+}
+
+export const roundDownToNearest10Min = date => {
   const minutes = date.minute()
   const roundedMinutes = Math.floor(minutes / 10) * 10
 

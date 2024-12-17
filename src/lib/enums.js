@@ -53,12 +53,45 @@ export const StateEnum = {
 }
 
 export const TimezoneEnum = {
+  UTC: 'UTC',
   US_EASTERN: 'US/Eastern',
   US_CENTRAL: 'US/Central',
   US_MOUNTAIN: 'US/Mountain',
   US_PACIFIC: 'US/Pacific',
   US_ALASKA: 'US/Alaska',
-  US_HAWAII: 'US/Hawaii'
+  US_HAWAII: 'US/Hawaii',
+  AMERICA_NEW_YORK: 'America/New_York',
+  AMERICA_CHICAGO: 'America/Chicago',
+  AMERICA_DENVER: 'America/Denver',
+  AMERICA_LOS_ANGELES: 'America/Los_Angeles',
+  AMERICA_ANCHORAGE: 'America/Anchorage',
+  AMERICA_HONOLULU: 'America/Honolulu',
+  EUROPE_LONDON: 'Europe/London',
+  EUROPE_PARIS: 'Europe/Paris',
+  EUROPE_BERLIN: 'Europe/Berlin',
+  EUROPE_ROME: 'Europe/Rome',
+  EUROPE_MADRID: 'Europe/Madrid',
+  EUROPE_AMSTERDAM: 'Europe/Amsterdam',
+  EUROPE_BRUSSELS: 'Europe/Brussels',
+  EUROPE_STOCKHOLM: 'Europe/Stockholm',
+  EUROPE_VIENNA: 'Europe/Vienna',
+  EUROPE_DUBLIN: 'Europe/Dublin',
+  EUROPE_PRAGUE: 'Europe/Prague',
+  EUROPE_COPENHAGEN: 'Europe/Copenhagen',
+  EUROPE_OSLO: 'Europe/Oslo',
+  EUROPE_WARSAW: 'Europe/Warsaw',
+  EUROPE_BUDAPEST: 'Europe/Budapest',
+  EUROPE_ZURICH: 'Europe/Zurich',
+  ASIA_TOKYO: 'Asia/Tokyo',
+  ASIA_SHANGHAI: 'Asia/Shanghai',
+  ASIA_SINGAPORE: 'Asia/Singapore',
+  ASIA_HONG_KONG: 'Asia/Hong_Kong',
+  ASIA_DUBAI: 'Asia/Dubai',
+  ASIA_SEOUL: 'Asia/Seoul',
+  AUSTRALIA_SYDNEY: 'Australia/Sydney',
+  AUSTRALIA_MELBOURNE: 'Australia/Melbourne',
+  AUSTRALIA_PERTH: 'Australia/Perth',
+  PACIFIC_AUCKLAND: 'Pacific/Auckland'
 }
 
 export const CountryEnum = {
@@ -70,3 +103,6 @@ export const LanguageEnum = {
   SPANISH: 'Spanish',
   FRENCH: 'French'
 }
+
+// Helper function to get all timezone values
+export const getAllTimezones = () => Object.values(TimezoneEnum)

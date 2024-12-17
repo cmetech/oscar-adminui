@@ -18,7 +18,18 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  Radio,
+  OutlinedInput,
+  Tooltip,
+  tooltipClasses
 } from '@mui/material'
 import { useTheme, styled } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
@@ -49,6 +60,23 @@ const TextFieldStyled = styled(TextField)(({ theme }) => ({
 const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   color: theme.palette.customColors.accent,
   '&.Mui-checked': {
+    color: theme.palette.customColors.accent
+  }
+}))
+
+const SelectStyled = styled(Select)(({ theme }) => ({
+  '&.MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent
+    }
+  }
+}))
+
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
     color: theme.palette.customColors.accent
   }
 }))
@@ -98,15 +126,21 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
 
+  const [availableSuppressionWindows, setAvailableSuppressionWindows] = useState([])
+  const [selectedSuppressionWindows, setSelectedSuppressionWindows] = useState([])
+  const [isLoadingWindows, setIsLoadingWindows] = useState(false)
+
   const [ruleForm, setRuleForm] = useState({
     namespace: rule.namespace || '',
     name: rule.name || '',
     description: rule.description || '',
     condition: rule.condition || '',
-    actionSuppress: rule.actions?.suppress || false,
-    add_labels: rule.actions?.add_labels
-      ? Object.entries(rule.actions.add_labels).map(([key, value]) => ({ key, value }))
-      : []
+    actionSuppress: rule.actions && rule.actions.suppress ? true : false,
+    add_labels:
+      rule.actions && rule.actions.add_labels
+        ? Object.entries(rule.actions.add_labels).map(([key, value]) => ({ key, value }))
+        : [],
+    suppression_window_ids: rule.suppression_window_ids || []
   })
 
   // ** Handle form input changes
@@ -122,6 +156,12 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
         newForm[section][index][name] = value
       } else {
         newForm[name] = value
+
+        // If turning off suppress action, clear all suppression windows
+        if (name === 'actionSuppress' && !value) {
+          setSelectedSuppressionWindows([])
+          newForm.suppression_window_ids = []
+        }
       }
 
       return newForm
@@ -175,6 +215,42 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
     }))
   }
 
+  // ** Add these handler functions for suppression windows
+  const addSuppressionWindow = () => {
+    const updatedWindows = [...selectedSuppressionWindows, { id: '' }]
+    setSelectedSuppressionWindows(updatedWindows)
+  }
+
+  const removeSuppressionWindow = index => {
+    const updatedWindows = [...selectedSuppressionWindows]
+    updatedWindows.splice(index, 1)
+    setSelectedSuppressionWindows(updatedWindows)
+  }
+
+  const handleSuppressionWindowChange = (index, windowId) => {
+    const windowDetails = availableSuppressionWindows.find(w => w.id === windowId)
+    const updatedWindows = [...selectedSuppressionWindows]
+    updatedWindows[index] = { ...windowDetails, id: windowId }
+    setSelectedSuppressionWindows(updatedWindows)
+    console.log('Updated Selected Suppression Windows:', updatedWindows)
+
+    // Update the form's suppression window IDs
+    const updatedIds = updatedWindows.map(window => window.id).filter(Boolean)
+    setRuleForm(prev => ({
+      ...prev,
+      suppression_window_ids: updatedIds
+    }))
+  }
+
+  // ** Add this helper function
+  const hasAvailableWindows = () => {
+    // Get currently selected window IDs
+    const selectedIds = selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+
+    // Check if there are any windows available that aren't already selected
+    return availableSuppressionWindows.some(window => !selectedIds.includes(window.id))
+  }
+
   // ** Submit the form
   const submitRule = async () => {
     try {
@@ -187,11 +263,17 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
         return acc
       }, {})
 
+      // Get all suppression window IDs, including existing ones
+      const suppressionWindowIds = ruleForm.actionSuppress
+        ? selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+        : []
+
       const payload = {
         condition: ruleForm.condition,
         actions: {
           suppress: ruleForm.actionSuppress
-        }
+        },
+        suppression_window_ids: suppressionWindowIds
       }
 
       // Only add description if it's not empty
@@ -204,9 +286,6 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
         payload.actions.add_labels = labelsObject
       }
 
-      console.log('Update Rule Payload:', JSON.stringify(payload, null, 2))
-
-      // Include namespace as a query parameter
       await axios.put(
         `/api/rules/update/${encodeURIComponent(ruleForm.name)}?namespace=${encodeURIComponent(ruleForm.namespace)}`,
         payload
@@ -293,6 +372,63 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                 />
               </Grid>
             </Grid>
+            {/* Add Suppression Windows Section */}
+            {ruleForm.actionSuppress && (
+              <Box sx={{ mt: 4 }}>
+                {selectedSuppressionWindows.map((window, index) => (
+                  <Box key={index} sx={{ mb: 3 }}>
+                    <Grid container spacing={2} alignItems='center'>
+                      <Grid item xs={10}>
+                        <FormControl fullWidth>
+                          <InputLabelStyled>{t('Select Suppression Window')}</InputLabelStyled>
+                          <SelectStyled
+                            value={window.id || ''}
+                            onChange={e => handleSuppressionWindowChange(index, e.target.value)}
+                            label={t('Select Suppression Window')}
+                          >
+                            {availableSuppressionWindows
+                              .filter(option => {
+                                // Include the window if it's not already selected elsewhere
+                                return (
+                                  option.id === window.id ||
+                                  !selectedSuppressionWindows.some((w, i) => w.id === option.id && i !== index)
+                                )
+                              })
+                              .map(option => (
+                                <MenuItem key={option.id} value={option.id}>
+                                  {option.name}
+                                </MenuItem>
+                              ))}
+                          </SelectStyled>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={2}>
+                        <IconButton onClick={() => removeSuppressionWindow(index)} color='error'>
+                          <Icon icon='mdi:delete-outline' />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ))}
+                {hasAvailableWindows() && (
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    onClick={addSuppressionWindow}
+                    sx={{ mt: 2 }}
+                  >
+                    {t('Add Another Window')}
+                  </Button>
+                )}
+              </Box>
+            )}
           </Fragment>
         )
       case 1:
@@ -377,6 +513,27 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                     ))}
                   </Box>
                 )}
+                {ruleForm.actionSuppress && selectedSuppressionWindows.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant='subtitle1'>
+                      <strong>{t('Suppression Windows')}:</strong>
+                    </Typography>
+                    <List>
+                      {selectedSuppressionWindows.map((window, index) => {
+                        const windowDetails = availableSuppressionWindows.find(w => w.id === window.id)
+
+                        return (
+                          <ListItem key={index}>
+                            <ListItemText
+                              primary={windowDetails?.name}
+                              secondary={windowDetails?.description || t('No description')}
+                            />
+                          </ListItem>
+                        )
+                      })}
+                    </List>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </Fragment>
@@ -385,6 +542,50 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
         return 'Unknown Step'
     }
   }
+
+  // Fetch available suppression windows
+  useEffect(() => {
+    const fetchSuppressionWindows = async () => {
+      setIsLoadingWindows(true)
+      try {
+        const response = await axios.get('/api/suppressions')
+        setAvailableSuppressionWindows(response.data.windows)
+        console.log('Available Suppression Windows:', response.data.windows)
+      } catch (error) {
+        console.error('Error fetching suppression windows:', error)
+        toast.error('Failed to fetch suppression windows')
+      } finally {
+        setIsLoadingWindows(false)
+      }
+    }
+
+    fetchSuppressionWindows()
+  }, [])
+
+  // Initialize selected suppression windows when rule or availableSuppressionWindows change
+  useEffect(() => {
+    if (rule && rule.suppression_window_ids && availableSuppressionWindows.length > 0) {
+      const selectedWindows = rule.suppression_window_ids
+        .map(windowId => {
+          const windowDetails = availableSuppressionWindows.find(w => w.id === windowId)
+
+          return windowDetails ? { ...windowDetails, id: windowId } : null
+        })
+        .filter(Boolean) // Remove any null values
+
+      setSelectedSuppressionWindows(selectedWindows)
+      console.log('Selected Suppression Windows:', selectedWindows)
+    }
+  }, [rule, availableSuppressionWindows])
+
+  // Synchronize suppression_window_ids with selectedSuppressionWindows
+  useEffect(() => {
+    const updatedIds = selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+    setRuleForm(prev => ({
+      ...prev,
+      suppression_window_ids: updatedIds
+    }))
+  }, [selectedSuppressionWindows])
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>

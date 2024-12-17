@@ -21,7 +21,18 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  Radio,
+  OutlinedInput,
+  Tooltip,
+  tooltipClasses
 } from '@mui/material'
 import { useTheme, styled } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
@@ -54,6 +65,60 @@ const CheckboxStyled = styled(Checkbox)(({ theme }) => ({
   '&.Mui-checked': {
     color: theme.palette.customColors.accent
   }
+}))
+
+const CustomToolTip = styled(({ className, ...props }) => <Tooltip {...props} arrow classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.arrow}`]: {
+      color: theme.palette.common.black
+    },
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.common.black
+    }
+  })
+)
+
+const SelectStyled = styled(Select)(({ theme }) => ({
+  '&.MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent // border color when focused
+    }
+  }
+}))
+
+// Replace 'defaultBorderColor' with your default border color.
+
+const InputLabelStyled = styled(InputLabel)(({ theme }) => ({
+  '&.Mui-focused': {
+    color: theme.palette.customColors.accent
+  }
+}))
+
+const RadioStyled = styled(Radio)(({ theme }) => ({
+  '&.MuiRadio-root': {
+    color: theme.palette.customColors.accent
+  },
+  '&.Mui-checked': {
+    color: theme.palette.customColors.accent
+  }
+}))
+
+const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
+  // Style the border color
+  // '& .MuiOutlinedInput-notchedOutline': {
+  //   borderColor: 'inherit' // Replace with your default border color
+  // },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'inherit' // Replace with your hover state border color
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.customColors.accent // Border color when focused
+  }
+
+  // You can add more styles here for other parts of the input
 }))
 
 // ** Validation schemas for each step
@@ -117,8 +182,30 @@ const AddRuleForm = ({ open, onClose }) => {
     description: '',
     condition: '',
     actionSuppress: false,
-    add_labels: []
+    add_labels: [],
+    suppression_window_ids: []
   })
+
+  const [availableSuppressionWindows, setAvailableSuppressionWindows] = useState([])
+  const [selectedSuppressionWindows, setSelectedSuppressionWindows] = useState([])
+  const [isLoadingWindows, setIsLoadingWindows] = useState(false)
+
+  useEffect(() => {
+    const fetchSuppressionWindows = async () => {
+      setIsLoadingWindows(true)
+      try {
+        const response = await axios.get('/api/suppressions')
+        setAvailableSuppressionWindows(response.data.windows)
+      } catch (error) {
+        console.error('Error fetching suppression windows:', error)
+        toast.error('Failed to fetch suppression windows')
+      } finally {
+        setIsLoadingWindows(false)
+      }
+    }
+
+    fetchSuppressionWindows()
+  }, [])
 
   // ** Handle form input changes
   const handleFormChange = (event, index, section) => {
@@ -133,6 +220,12 @@ const AddRuleForm = ({ open, onClose }) => {
         newForm[section][index][name] = value
       } else {
         newForm[name] = value
+
+        // If turning off suppress action, clear all suppression windows
+        if (name === 'actionSuppress' && !value) {
+          setSelectedSuppressionWindows([])
+          newForm.suppression_window_ids = []
+        }
       }
 
       return newForm
@@ -186,6 +279,36 @@ const AddRuleForm = ({ open, onClose }) => {
     }))
   }
 
+  // ** Handlers for suppression windows
+  const addSuppressionWindow = () => {
+    setSelectedSuppressionWindows([...selectedSuppressionWindows, { id: '' }])
+  }
+
+  const removeSuppressionWindow = index => {
+    const updatedWindows = [...selectedSuppressionWindows]
+    updatedWindows.splice(index, 1)
+    setSelectedSuppressionWindows(updatedWindows)
+
+    // Update the form's suppression window IDs
+    const updatedIds = updatedWindows.map(window => window.id).filter(id => id)
+    setRuleForm(prev => ({
+      ...prev,
+      suppression_window_ids: updatedIds
+    }))
+  }
+
+  const handleSuppressionWindowChange = (index, windowId) => {
+    const updatedWindows = [...selectedSuppressionWindows]
+    updatedWindows[index] = { id: windowId }
+    setSelectedSuppressionWindows(updatedWindows)
+
+    const updatedIds = updatedWindows.map(window => window.id).filter(id => id)
+    setRuleForm(prev => ({
+      ...prev,
+      suppression_window_ids: updatedIds
+    }))
+  }
+
   // ** Submit the form
   const submitRule = async () => {
     try {
@@ -196,6 +319,11 @@ const AddRuleForm = ({ open, onClose }) => {
         return acc
       }, {})
 
+      // Get the suppression window IDs if suppress action is enabled
+      const suppressionWindowIds = ruleForm.actionSuppress
+        ? selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+        : []
+
       const payload = {
         namespace: ruleForm.namespace,
         name: ruleForm.name,
@@ -204,10 +332,11 @@ const AddRuleForm = ({ open, onClose }) => {
         actions: {
           suppress: ruleForm.actionSuppress,
           add_labels: labelsObject
-        }
+        },
+        suppression_window_ids: suppressionWindowIds
       }
 
-      await axios.post('/api/rules/add', payload) // Updated endpoint
+      await axios.post('/api/rules/add', payload)
       toast.success(t('Successfully added rule'))
       setRefetchTrigger(prev => prev + 1)
       onClose()
@@ -294,6 +423,81 @@ const AddRuleForm = ({ open, onClose }) => {
                 />
               </Grid>
             </Grid>
+            {ruleForm.actionSuppress && (
+              <Box sx={{ mt: 4 }}>
+                {selectedSuppressionWindows.length === 0 ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={addSuppressionWindow}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                      sx={{ mt: 2 }}
+                    >
+                      {t('Add Suppression Window')}
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box>
+                    {selectedSuppressionWindows.map((window, index) => (
+                      <Box key={index} sx={{ mb: 3 }}>
+                        <Grid container spacing={2} alignItems='center'>
+                          <Grid item xs={10}>
+                            <FormControl fullWidth>
+                              <InputLabelStyled>{t('Select Suppression Window')}</InputLabelStyled>
+                              <SelectStyled
+                                value={window.id}
+                                onChange={e => handleSuppressionWindowChange(index, e.target.value)}
+                                label={t('Select Suppression Window')}
+                              >
+                                {availableSuppressionWindows.map(option => (
+                                  <MenuItem
+                                    key={option.id}
+                                    value={option.id}
+                                    disabled={selectedSuppressionWindows.some(
+                                      (w, i) => i !== index && w.id === option.id
+                                    )}
+                                  >
+                                    {option.name}
+                                  </MenuItem>
+                                ))}
+                              </SelectStyled>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <IconButton onClick={() => removeSuppressionWindow(index)} color='error'>
+                              <Icon icon='mdi:delete-outline' />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    ))}
+                    <Button
+                      disabled={!hasAvailableWindows()}
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                      onClick={addSuppressionWindow}
+                      sx={{ mt: 2 }}
+                    >
+                      {t('Add Another Window')}
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            )}
           </Fragment>
         )
       case 2:
@@ -378,6 +582,27 @@ const AddRuleForm = ({ open, onClose }) => {
                     ))}
                   </Box>
                 )}
+                {ruleForm.actionSuppress && selectedSuppressionWindows.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant='subtitle1'>
+                      <strong>{t('Suppression Windows')}:</strong>
+                    </Typography>
+                    <List>
+                      {selectedSuppressionWindows.map((window, index) => {
+                        const windowDetails = availableSuppressionWindows.find(w => w.id === window.id)
+
+                        return (
+                          <ListItem key={index}>
+                            <ListItemText
+                              primary={windowDetails?.name}
+                              secondary={windowDetails?.description || t('No description')}
+                            />
+                          </ListItem>
+                        )
+                      })}
+                    </List>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </Fragment>
@@ -385,6 +610,15 @@ const AddRuleForm = ({ open, onClose }) => {
       default:
         return 'Unknown Step'
     }
+  }
+
+  // Add this function to check if there are available windows
+  const hasAvailableWindows = () => {
+    // Get currently selected window IDs
+    const selectedIds = selectedSuppressionWindows.map(window => window.id).filter(Boolean)
+
+    // Check if there are any windows available that aren't already selected
+    return availableSuppressionWindows.some(window => !selectedIds.includes(window.id))
   }
 
   return (

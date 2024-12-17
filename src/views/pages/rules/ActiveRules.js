@@ -807,7 +807,17 @@ const ActiveRules = forwardRef((props, ref) => {
               }
             }
           }}
-          getDetailPanelContent={({ row }) => <ActiveRulesDetailPanel row={row} />}
+          getDetailPanelContent={({ row }) => (
+            <ActiveRulesDetailPanel
+              row={row}
+              onDataChange={() => {
+                console.log('onDataChange triggered in parent')
+                setRunRefresh(true)
+                console.log('Calling fetchRules')
+                fetchRules()
+              }}
+            />
+          )}
           getDetailPanelHeight={() => 400}
           detailPanelExpandedRowIds={detailPanelExpandedRowIds}
           onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}

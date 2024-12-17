@@ -380,33 +380,51 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
             {/* Suppression Windows Section */}
             {ruleForm.actionSuppress && (
               <Box sx={{ mt: 4 }}>
+                {/* Section Title */}
+                <Typography variant='h6' sx={{ mb: 3 }}>
+                  {t('Suppression Windows')}
+                </Typography>
+
                 {/* Existing Suppression Windows */}
                 {selectedSuppressionWindows.map((window, index) => (
-                  <Box key={index} sx={{ mb: 3 }}>
-                    <Grid container spacing={2} alignItems='center'>
-                      <Grid item xs={10}>
+                  <Box key={index} sx={{ mb: 4 }}>
+                    {' '}
+                    {/* Increased bottom margin */}
+                    <Grid container spacing={3} alignItems='center'>
+                      {' '}
+                      {/* Increased grid spacing */}
+                      <Grid item xs={11}>
+                        {' '}
+                        {/* Increased width */}
                         <FormControl fullWidth>
-                          <InputLabelStyled shrink>{t('Suppression Window')}</InputLabelStyled>
+                          <InputLabelStyled shrink sx={{ mb: 1 }}>
+                            {t('Suppression Window')}
+                          </InputLabelStyled>
                           <TextFieldStyled
                             value={window.name}
                             InputProps={{
                               readOnly: true
                             }}
-                            // Add these props to fix the label overlap issue
                             variant='outlined'
                             sx={{
                               '& .MuiInputLabel-root': {
                                 backgroundColor: theme.palette.background.paper
+                              },
+                              '& .MuiOutlinedInput-root': {
+                                height: '56px' // Increased height
                               }
                             }}
                           />
                         </FormControl>
                       </Grid>
-                      <Grid item xs={2}>
+                      <Grid item xs={1}>
+                        {' '}
+                        {/* Decreased width for delete button */}
                         <IconButton
                           onClick={() => removeSuppressionWindow(index)}
                           color='error'
                           aria-label='Delete suppression window'
+                          sx={{ ml: -2 }} // Adjust button position
                         >
                           <Icon icon='mdi:delete-outline' />
                         </IconButton>
@@ -417,11 +435,17 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
 
                 {/* New Suppression Window Selection */}
                 {selectedSuppressionWindows.length < availableSuppressionWindows.length && (
-                  <Box sx={{ mb: 3 }}>
-                    <Grid container spacing={2} alignItems='center'>
-                      <Grid item xs={10}>
+                  <Box sx={{ mb: 4 }}>
+                    {' '}
+                    {/* Increased bottom margin */}
+                    <Grid container spacing={3} alignItems='center'>
+                      {' '}
+                      {/* Increased grid spacing */}
+                      <Grid item xs={11}>
+                        {' '}
+                        {/* Increased width */}
                         <FormControl fullWidth>
-                          <InputLabelStyled>{t('Select Suppression Window')}</InputLabelStyled>
+                          <InputLabelStyled sx={{ mb: 1 }}>{t('Select Suppression Window')}</InputLabelStyled>
                           <SelectStyled
                             value=''
                             onChange={e => {
@@ -443,6 +467,9 @@ const UpdateRuleForm = ({ open, onClose, rule }) => {
                                   }))
                                 }
                               }
+                            }}
+                            sx={{
+                              height: '56px' // Increased height
                             }}
                           >
                             <MenuItem value='' disabled>

@@ -47,3 +47,19 @@ export const detectTokensInPayload = payload => {
 
   return Array.from(tokens)
 }
+
+// src/lib/utils.js
+
+export const getTimezoneAbbreviation = timezone => {
+  try {
+    const date = new Date()
+    const timeString = date.toLocaleTimeString('en-US', { timeZone: timezone, timeZoneName: 'short' })
+    const abbr = timeString.split(' ')[2]
+
+    return abbr
+  } catch (error) {
+    console.error('Error getting timezone abbreviation:', error)
+
+    return timezone // fallback to full timezone name
+  }
+}

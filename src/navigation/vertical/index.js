@@ -181,6 +181,13 @@ const navigation = () => {
           icon: 'mdi:file-document-alert',
           action: 'manage',
           subject: 'runtime'
+        },
+        {
+          title: 'Suppressions',
+          path: '/management/application/suppressions',
+          icon: 'mdi:clock-time-eight-outline',
+          action: 'manage',
+          subject: 'runtime'
         }
       ]
     },

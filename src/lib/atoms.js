@@ -88,3 +88,9 @@ export const rulesIdsAtom = atom([])
 export const rulesAtom = atom([])
 
 export const refetchRulesTriggerAtom = atom(0)
+
+export const suppressionIdsAtom = atom([])
+
+export const suppressionsAtom = atom([])
+
+export const refetchSuppressionsTriggerAtom = atom(0)

@@ -402,23 +402,23 @@ const MappingList = props => {
                 title='Edit'
                 aria-label='Edit'
                 onClick={() => {
-                  setCurrentServer(params.row)
+                  setCurrentMapping(params.row)
                   setEditDialog(true)
                 }}
-                disabled={!ability.can('update', 'servers')}
+                disabled={!ability.can('update', 'mapping')}
               >
                 <Icon icon='mdi:edit' />
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Server'
-                aria-label='Delete Server'
+                title='Delete Mapping'
+                aria-label='Delete Mapping'
                 color='error'
                 onClick={() => {
-                  setCurrentServer(params.row)
+                  setCurrentMapping(params.row)
                   setDeleteDialog(true)
                 }}
-                disabled={!ability.can('delete', 'servers')}
+                disabled={!ability.can('delete', 'mapping')}
               >
                 <Icon icon='mdi:delete-forever' />
               </IconButton>
@@ -443,7 +443,7 @@ const MappingList = props => {
         fullWidth
         maxWidth='md'
         scroll='body'
-        open={openDialog}
+        open={editDialog}
         onClose={handleUpdateDialogClose}
         TransitionComponent={Transition}
         aria-labelledby='form-dialog-title'
@@ -563,7 +563,7 @@ const MappingList = props => {
         Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
       }
 
-      const endpoint = `/api/mappings/${currentMapping.id}`
+      const endpoint = `/api/mapping/${currentMapping.id}`
       const response = await axios.delete(endpoint, { headers })
 
       if (response.status === 204) {
@@ -592,7 +592,7 @@ const MappingList = props => {
     async (sort, sortColumn, filterModel) => {
       setLoading(true)
       await axios
-        .get('/api/mappings', {
+        .get('/api/mapping', {
           params: {}
         })
         .then(res => {

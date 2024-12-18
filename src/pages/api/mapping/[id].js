@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     const middlewareResponse = await axios({
       method: req.method,
-      url: `${oscarConfig.MIDDLEWARE_MAPPING_API_URL}/servers/${id}`,
+      url: `${oscarConfig.MIDDLEWARE_MAPPING_API_URL}/mapping/${id}`,
       headers: {
         // Forward the Authorization header to the middleware API
         Authorization: apiToken,

@@ -501,7 +501,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
         console.log('Submitting mapping details', payload)
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = '/api/mappings'
+        const endpoint = '/api/mapping'
         const response = await axios.post(endpoint, payload, { headers })
 
         if (response.status === 201 && response.data) {

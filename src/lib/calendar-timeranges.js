@@ -17,6 +17,11 @@ export const todayRounded = () => {
   return roundToNearest10Min(dayjs())
 }
 
+// ** Function to round today's date plus 1 hour to the nearest 10 minutes
+export const todayRoundedPlus1hour = () => {
+  return roundToNearest10Min(dayjs().add(1, 'hour'))
+}
+
 export const yesterdayRounded = () => {
   return roundToNearest10Min(dayjs().subtract(1, 'day'))
 }
@@ -35,6 +40,22 @@ export const getDefaultDateRange = timezone => {
 
   return [startOfLastHour, now]
 }
+
+// ** Export predefined ranges without timezone
+export const predefinedRangesDayjs = [
+  {
+    label: 'Last 24 Hours',
+    value: [dayjs().subtract(24, 'hour'), dayjs()]
+  },
+  {
+    label: 'Last 7 Days',
+    value: [dayjs().subtract(7, 'day'), dayjs()]
+  },
+  {
+    label: 'Last 30 Days',
+    value: [dayjs().subtract(30, 'day'), dayjs()]
+  }
+]
 
 // ** Export function to get extended predefined ranges
 export const getExtendedPredefinedRangesDayjs = (timezone, t) => {

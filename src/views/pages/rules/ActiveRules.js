@@ -396,7 +396,7 @@ const ActiveRules = forwardRef((props, ref) => {
 
   const columns = [
     {
-      flex: 0.01,
+      flex: 0.2,
       field: 'name',
       headerName: t('Name'),
       renderCell: params => {
@@ -429,7 +429,7 @@ const ActiveRules = forwardRef((props, ref) => {
       }
     },
     {
-      flex: 0.04,
+      flex: 0.6,
       field: 'description',
       headerName: t('Description'),
       renderCell: params => {
@@ -445,7 +445,7 @@ const ActiveRules = forwardRef((props, ref) => {
       }
     },
     {
-      flex: 0.015,
+      flex: 0.1,
       field: 'suppression',
       headerName: t('Suppression'),
       align: 'center',
@@ -498,7 +498,7 @@ const ActiveRules = forwardRef((props, ref) => {
       }
     },
     {
-      flex: 0.01,
+      flex: 0.1,
       field: 'actions',
       headerName: t('Actions'),
       type: 'actions',

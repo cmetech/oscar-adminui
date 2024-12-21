@@ -666,8 +666,8 @@ const SLOList = props => {
         open={deleteDialog}
         onClose={handleDeleteDialogClose}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
         PaperProps={{
           sx: {
             width: '100%',
@@ -675,16 +675,12 @@ const SLOList = props => {
           }
         }}
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
               {t('Confirm Deletion')}
             </Typography>
-            <IconButton
-              size='small'
-              onClick={handleDeleteDialogClose}
-              aria-label="close"
-            >
+            <IconButton size='small' onClick={handleDeleteDialogClose} aria-label='close'>
               <Icon icon='mdi:close' />
             </IconButton>
           </Box>
@@ -696,9 +692,7 @@ const SLOList = props => {
                 <img src='/images/warning.png' alt='warning' width='32' height='32' />
               </Box>
               <Box>
-                <Typography variant='h6'>
-                  {t('Confirm you want to delete this SLO?')}
-                </Typography>
+                <Typography variant='h6'>{t('Confirm you want to delete this SLO?')}</Typography>
               </Box>
             </Stack>
           </Box>
@@ -708,9 +702,9 @@ const SLOList = props => {
             variant='contained'
             size='large'
             onClick={handleDeleteDialogSubmit}
-            color="error"
+            color='error'
             autoFocus
-            startIcon={<Icon icon="mdi:delete-forever" />}
+            startIcon={<Icon icon='mdi:delete-forever' />}
           >
             {t('Delete')}
           </Button>
@@ -718,8 +712,8 @@ const SLOList = props => {
             variant='outlined'
             size='large'
             onClick={handleDeleteDialogClose}
-            color="secondary"
-            startIcon={<Icon icon="mdi:close" />}
+            color='secondary'
+            startIcon={<Icon icon='mdi:close' />}
           >
             {t('Cancel')}
           </Button>
@@ -778,24 +772,21 @@ const SLOList = props => {
       let requestCompleted = false
 
       // Default start and end times to the last 24 hours if not defined
-      let [startDate, endDate] = []
-      if (props.onAccept == true) {
-        ;[startDate, endDate] = [yesterdayRounded, todayRounded]
+      let startDate, endDate
+
+      if (props.onAccept === true) {
+        startDate = new Date(yesterdayRounded)
+        endDate = new Date(todayRounded)
+      } else if (Array.isArray(props.onAccept)) {
+        ;[startDate, endDate] = props.onAccept.map(date => new Date(date))
       } else {
-        ;[startDate, endDate] = props.onAccept
+        // Default fallback
+        startDate = new Date(new Date().getTime() - 24 * 60 * 60 * 1000) // 24 hours ago
+        endDate = new Date() // now
       }
 
-      // Assuming props.dateRange contains Date objects or is undefined
-      // console.log('onAccept:', props.onAccept)
-      // console.log('Start Date:', startDate)
-      // console.log('End Date:', endDate)
-
-      const startTime = startDate?.toISOString() || new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
-      const endTime = endDate?.toISOString() || new Date().toISOString()
-
-      // console.log('Start Time:', startTime)
-      // console.log('End Time:', endTime)
-      // console.log('Filter Data:', JSON.stringify(filter_model))
+      const startTime = startDate.toISOString()
+      const endTime = endDate.toISOString()
 
       setLoading(true)
 

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext, useEffect, useCallback, forwardRef } from 'react'
+import { useState, useContext, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Link from 'next/link'
 
 // ** Context Imports
@@ -73,6 +73,7 @@ import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 import { mappingsAtom, refetchMappingTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import { capitalizeWords } from 'src/lib/utils'
 import { useAtom } from 'jotai'
+import MappingDetailPanel from 'src/views/pages/mapping/MappingDetailPanel'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -112,6 +113,7 @@ const MappingList = props => {
   const [rowSelectionModel, setRowSelectionModel] = useState([])
   const [rowCount, setRowCount] = useState(0)
   const [rowCountState, setRowCountState] = useState(rowCount)
+  const [runRefresh, setRunRefresh] = useState(false)
   const [sortModel, setSortModel] = useState([{ field: 'name', sort: 'asc' }])
 
   // ** State
@@ -131,6 +133,16 @@ const MappingList = props => {
   const [paginationMode, setPaginationMode] = useState('client')
 
   const [timezone] = useAtom(timezoneAtom)
+
+  const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
+    setDetailPanelExpandedRowIds(newIds)
+  }, [])
+
+  /*useImperativeHandle(ref, () => ({
+    refresh: () => {
+      fetchData()
+    }
+  }))*/
 
   // ** Dialog
   const [openDialog, setOpenDialog] = useState(false)
@@ -584,10 +596,6 @@ const MappingList = props => {
     }
   }
 
-  useEffect(() => {
-    setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
-  }, [rowCount, setRowCountState])
-
   const fetchData = useCallback(
     async (sort, sortColumn, filterModel) => {
       setLoading(true)
@@ -603,14 +611,31 @@ const MappingList = props => {
         })
 
       setLoading(false)
+      setRunRefresh(false)
+      setRunFilterQuery(false)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [setMappings, setRows]
   )
 
   useEffect(() => {
+    setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
+  }, [rowCount, setRowCountState])
+
+  useEffect(() => {
     fetchData()
   }, [fetchData, refetchTrigger])
+
+  useEffect(() => {
+      if (runRefresh) {
+        fetchData()
+      }
+  
+      // Reset the runRefresh flag
+      return () => {
+        runRefresh && setRunRefresh(false)
+      }
+    }, [fetchData, runRefresh])
 
   // Trigger based on sort
   useEffect(() => {
@@ -641,6 +666,10 @@ const MappingList = props => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel])
+
+  useEffect(() => {
+      setRowCountState(prevRowCountState => (rowCount !== undefined ? rowCount : prevRowCountState))
+    }, [rowCount, setRowCountState])
 
   // Trigger based on filter
   useEffect(() => {
@@ -673,7 +702,7 @@ const MappingList = props => {
   const handleAction = event => {
     setAction(event.target.value)
   }
-
+  
   const handleSearch = value => {
     console.log('Search Value:', value)
 
@@ -706,9 +735,23 @@ const MappingList = props => {
     }
   }
 
-  const handleRowSelection = rowid => {
-    setRowSelectionModel(rowids)
+const handleRowSelection = newRowSelectionModel => {
+    const addedIds = newRowSelectionModel.filter(id => !rowSelectionModel.includes(id))
+
+    console.log('Added IDs:', addedIds)
+
+    addedIds.forEach(id => {
+      const row = rows.find(r => r.id === id)
+      console.log('Added Row:', row)
+    })
+
+    // Update the row selection model
+    setRowSelectionModel(newRowSelectionModel)
+
+    // Update the Jotai atom with the new selection model
+    setMappings(newRowSelectionModel)
   }
+
 
   // Hidden columns
   const hiddenFields = ['id', 'mapping_namespace_name']
@@ -739,13 +782,16 @@ const MappingList = props => {
           }}
           autoHeight={true}
           rows={filteredRows.length ? filteredRows : rows}
+          rowCount={rowCountState}
+          getRowId={row => `${row.name.replace(/\s+/g, '_')}`}
           columns={columns}
-          checkboxSelection={false}
+          checkboxSelection={true}
           disableRowSelectionOnClick
           filterMode={filterMode}
           filterModel={filterModel}
           onFilterModelChange={newFilterModel => setFilterModel(newFilterModel)}
           sortingMode={sortingMode}
+          sortModel={sortModel}
           onSortModelChange={newSortModel => setSortModel(newSortModel)}
           pagination={true}
           paginationMode={paginationMode}
@@ -783,8 +829,11 @@ const MappingList = props => {
               setColumnsButtonEl,
               setFilterButtonEl,
               setFilterActive,
+              setRunFilterQuery,
               showButtons: false,
-              showexport: true
+              showexport: true,
+              showRefresh: true,
+              setRunRefresh
             },
             columnsManagement: {
               getTogglableColumns,
@@ -979,6 +1028,15 @@ const MappingList = props => {
               }
             }
           }}
+          getDetailPanelContent={({ row }) => <MappingDetailPanel row={row} />}
+          getDetailPanelHeight={() => 400}
+          detailPanelExpandedRowIds={detailPanelExpandedRowIds}
+          onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
+          components={
+            {
+              // ... other components ...
+            }
+          }
         />
         <EditDialog />
         <DeleteDialog />

@@ -57,9 +57,9 @@ const initialMappingFormState = {
   mappingName: '',
   mappingDescription: '',
   mappingNamespaceName: '',
-  mappingKey: '',
-  mappingValue: '',
-  mappingMetadata: [{ key: '', value: '' }]
+  mappingComment: '',
+  mappingAdditionalref: '',
+  mappingMetadata: [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:''}]
 }
 
 const steps = [
@@ -176,9 +176,8 @@ const validationSchema = yup.object({
   mappingDescription: yup
     .string()
     .trim()
-    .required('Mapping Name is required')
-    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
-    .min(3, 'Name must be at least 3 characters')
+    .required('Mapping Description is required')
+    .min(3, 'Description must be at least 3 characters')
     .trim(),
   mappingNamespaceName: yup
     .string()
@@ -187,20 +186,16 @@ const validationSchema = yup.object({
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
     .trim(),
-  mappingKey: yup
-    .string()
-    .trim()
-    .required('Mapping Key is required')
-    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
-    .min(2, 'Name must be at least 2 characters')
-    .trim(),
-  mappingValue: yup.string().trim(),
+  mappingComment: yup.string().trim(),
+  mappingAdditionalref: yup.string().trim(),
   mappingMetadata: yup
     .array()
     .of(
       yup.object().shape({
         key: yup.string(),
-        value: yup.string()
+        value: yup.string(),
+        metadata_owner_level: yup.string(),
+        metadata_owner_name: yup.string()
       })
     )
     .test(
@@ -445,7 +440,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
 
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'mappingMetadata' ? { key: '', value: '' } : { metakey: '', metavalue: ''}
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: '', metadata_owner_level: '',  metadata_owner_name:''} : { metakey: '', metavalue: ''}
     const updatedSection = [...mappingForm[section], newEntry]
     setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
@@ -493,8 +488,8 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
           name: mappingForm.mappingName,
           description: mappingForm.mappingDescription,
           mapping_namespace_name: mappingForm.mappingNamespaceName,
-          key: mappingForm.mappingKey,
-          value: mappingForm.mappingValue,
+          comment: mappingForm.mappingComment,
+          additional_ref: mappingForm.mappingAdditionalref,
           metadata: mappingForm.mappingMetadata
         }
 
@@ -561,6 +556,36 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                 margin='normal'
                 error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`]}
                 helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`] || ''}
+              />
+            </Grid>
+            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+              <TextfieldStyled
+                key={`field2-${section}-${index}-${resetFormFields}`}
+                fullWidth
+                label={section === 'mappingMetadata' ? 'Metadata Owner Level' : 'Meta Owner Level'}
+                name={section === 'mappingMetadata' ? 'metadata_owner_level' : 'meta_owner_level'}
+                value={entry.metadata_owner_level || entry.meta_owner_level}
+                onChange={e => handleFormChange(e, index, section)}
+                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                variant='outlined'
+                margin='normal'
+                error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`]}
+                helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`] || ''}
+              />
+            </Grid>
+            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+              <TextfieldStyled
+                key={`field2-${section}-${index}-${resetFormFields}`}
+                fullWidth
+                label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Owner Name'}
+                name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_owner_name'}
+                value={entry.metadata_owner_name || entry.meta_owner_name}
+                onChange={e => handleFormChange(e, index, section)}
+                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                variant='outlined'
+                margin='normal'
+                error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`]}
+                helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`] || ''}
               />
             </Grid>
             <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -665,36 +690,36 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomToolTip title='Key name for the map' placement='top'>
+                <CustomToolTip title='A comment for the map' placement='top'>
                   <TextfieldStyled
                     required
-                    id='mappingKey'
-                    name='mappingKey'
-                    label='Mapping Key'
+                    id='mappingComment'
+                    name='mappingComment'
+                    label='Mapping Comment'
                     fullWidth
                     autoComplete='off'
-                    value={mappingForm.mappingKey}
+                    value={mappingForm.mappingComment}
                     onChange={handleFormChange}
                     onBlur={e => validateField(e.target.name, e.target.value)}
-                    error={!!formErrors.mappingKey}
-                    helperText={formErrors.mappingKey || ''}
+                    error={!!formErrors.mappingComment}
+                    helperText={formErrors.mappingComment || ''}
                   />
                 </CustomToolTip>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomToolTip title='Value for the key and map' placement='top'>
+                <CustomToolTip title='Additional-Reference for the map' placement='top'>
                   <TextfieldStyled
                     required
-                    id='mappingValue'
-                    name='mappingValue'
-                    label='Mapping Value'
+                    id='mappingAdditionalref'
+                    name='mappingAdditionalref'
+                    label='Mapping Additional Reference'
                     fullWidth
                     autoComplete='off'
-                    value={mappingForm.mappingValue}
+                    value={mappingForm.mappingAdditionalref}
                     onChange={handleFormChange}
                     onBlur={e => validateField(e.target.name, e.target.value)}
-                    error={!!formErrors.mappingValue}
-                    helperText={formErrors.mappingValue || ''}
+                    error={!!formErrors.mappingAdditionalref}
+                    helperText={formErrors.mappingAdditionalref || ''}
                   />
                 </CustomToolTip>
               </Grid>

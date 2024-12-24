@@ -176,7 +176,6 @@ const validationSchema = yup.object({
   mappingDescription: yup
     .string()
     .trim()
-    .required('Mapping Description is required')
     .min(3, 'Description must be at least 3 characters')
     .trim(),
   mappingNamespaceName: yup
@@ -528,7 +527,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
       return (
         <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
           <Grid container spacing={3} alignItems='center'>
-            <Grid item xs={section === 'mappingMetadata' ? 5 : 4}>
+            <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
               <TextfieldStyled
                 key={`field1-${section}-${index}-${resetFormFields}`}
                 fullWidth
@@ -543,7 +542,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                 helperText={formErrors[errorKey] || ''}
               />
             </Grid>
-            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+            <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
               <TextfieldStyled
                 key={`field2-${section}-${index}-${resetFormFields}`}
                 fullWidth
@@ -558,36 +557,60 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                 helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`] || ''}
               />
             </Grid>
-            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
-              <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label={section === 'mappingMetadata' ? 'Metadata Owner Level' : 'Meta Owner Level'}
-                name={section === 'mappingMetadata' ? 'metadata_owner_level' : 'meta_owner_level'}
-                value={entry.metadata_owner_level || entry.meta_owner_level}
-                onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                variant='outlined'
-                margin='normal'
-                error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`]}
-                helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`] || ''}
-              />
-            </Grid>
-            <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
-              <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Owner Name'}
-                name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_owner_name'}
-                value={entry.metadata_owner_name || entry.meta_owner_name}
-                onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                variant='outlined'
-                margin='normal'
-                error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`]}
-                helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`] || ''}
-              />
-            </Grid>
+
+            {section === 'mappingMetadata' && (
+              <Grid item xs={3}>
+                <AutocompleteStyled
+                  key={`field2-${section}-${index}-${resetFormFields}`}
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id={`autocomplete-${section}-${index}-${resetFormFields}`}
+                  options={['Mapping', 'MappingElement']}
+                  value={entry.metadata_owner_level || entry.meta_owner_level || 'Mapping'}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'metadata_owner_level', value: newValue } }, index, section);
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'metadata_owner_level', value: newInputValue } }, index, section);
+                    }
+                  }}
+                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Metadata Owner Level"
+                      fullWidth
+                      required
+                      autoComplete="off"
+                    />
+                  )}
+                  error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`]}
+                  helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_level' : 'ip_address'}`] || ''}
+                />
+              </Grid>
+            )}
+
+            {section === 'mappingMetadata' && (
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`field2-${section}-${index}-${resetFormFields}`}
+                  fullWidth
+                  label='Metadata Owner'
+                  name='metadata_owner'
+                  value={entry.metadata_owner || entry.meta_owner}
+                  onChange={e => handleFormChange(e, index, section)}
+                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                  error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`]}
+                  helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`] || ''}
+                />
+              </Grid>
+            )}
+
             <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
               <IconButton
                 onClick={() => addSectionEntry(section)}

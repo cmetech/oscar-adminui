@@ -393,7 +393,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     return mappingForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={section === 'mappingMetadata' ? 5 : 4}>
+          <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
             <TextfieldStyled
               key={`field1-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -405,7 +405,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               margin='normal'
             />
           </Grid>
-          <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+          <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
             <TextfieldStyled
               key={`field2-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -418,31 +418,55 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
             />
           </Grid>
           
-          <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
-            <TextfieldStyled
-              key={`field2-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'mappingMetadata' ? 'Metadata Owner Level' : 'Meta Level'}
-              name={section === 'mappingMetadata' ? 'metadata_owner_level' : 'meta_level'}
-              value={entry.metadata_owner_level || entry.ip_address || ''}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>
+          {section === 'mappingMetadata' && (
+            <Grid item xs={3}>
+              <AutocompleteStyled
+                key={`field2-${section}-${index}-${resetFormFields}`}
+                freeSolo
+                clearOnBlur
+                selectOnFocus
+                handleHomeEndKeys
+                id={`autocomplete-${section}-${index}-${resetFormFields}`}
+                options={['Mapping', 'MappingElement']}
+                value={entry.metadata_owner_level || entry.meta_owner_level}
+                onChange={(event, newValue) => {
+                  handleFormChange({ target: { name: 'metadata_owner_level', value: newValue } }, index, section);
+                }}
+                onInputChange={(event, newInputValue) => {
+                  if (event) {
+                    handleFormChange({ target: { name: 'metadata_owner_level', value: newInputValue } }, index, section);
+                  }
+                }}
+                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label="Metadata Owner Level"
+                    fullWidth
+                    required
+                    autoComplete="off"
+                  />
+                )}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )}
 
-          <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
-            <TextfieldStyled
-              key={`field2-${section}-${index}-${resetFormFields}`}
-              fullWidth
-              label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Name'}
-              name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_name'}
-              value={entry.metadata_owner_name || entry.ip_address || ''}
-              onChange={e => handleFormChange(e, index, section)}
-              variant='outlined'
-              margin='normal'
-            />
-          </Grid>          
+          {section === 'mappingMetadata' && (
+            <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
+              <TextfieldStyled
+                key={`field2-${section}-${index}-${resetFormFields}`}
+                fullWidth
+                label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Name'}
+                name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_name'}
+                value={entry.metadata_owner_name || entry.ip_address || ''}
+                onChange={e => handleFormChange(e, index, section)}
+                variant='outlined'
+                margin='normal'
+              />
+            </Grid>
+          )}
 
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton

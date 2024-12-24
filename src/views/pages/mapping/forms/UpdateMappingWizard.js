@@ -475,7 +475,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
             >
               <Icon icon='mdi:plus-circle-outline' />
             </IconButton>
-            {mappingForm[section].length > 1 && (
+            {mappingForm[section].length > 0 && (
               <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
                 <Icon icon='mdi:minus-circle-outline' />
               </IconButton>

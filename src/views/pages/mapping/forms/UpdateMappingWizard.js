@@ -53,9 +53,9 @@ const initialMappingFormState = {
   mappingName: '',
   mappingDescription: '',
   mappingNamespaceName: '',
-  mappingKey: '',
-  mappingValue: '',
-  mappingMetadata: [{ key: '', value: '' }]
+  mappingComment: '',
+  mappingAdditionalref: '',
+  mappingMetadata: [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:''}]
 }
 
 const steps = [
@@ -160,6 +160,8 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 }))
 
 const Section = ({ title, data }) => {
+ console.log("Section with title" + title + "Data with "+ data)
+
   return (
     <Fragment>
       <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
@@ -172,7 +174,7 @@ const Section = ({ title, data }) => {
               <TextField
                 fullWidth
                 label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                value={itemValue.toString()}
+                value={itemValue != null ? itemValue.toString() : ""}
                 InputProps={{ readOnly: true }}
                 variant='outlined'
                 margin='normal'
@@ -186,13 +188,18 @@ const Section = ({ title, data }) => {
 }
 
 const ReviewAndSubmitSection = ({ mappingForm }) => {
+  console.log("Review And Submit Section started with" + mappingForm)
+  
   return (
     <Fragment>
       {Object.entries(mappingForm).map(([key, value]) => {
+        console.log("Logging----->  Key:" +key+ "Value:", value);
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           // For nested objects (excluding arrays), recursively render sections
           return <ReviewAndSubmitSection mappingForm={value} key={key} />
         } else if (Array.isArray(value)) {
+          console.log("Going inside Array Section", value);
+          
           return <Section title={key} data={value} key={key} />
         } else {
           // For simple key-value pairs
@@ -202,7 +209,7 @@ const ReviewAndSubmitSection = ({ mappingForm }) => {
                 <TextField
                   fullWidth
                   label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value.toString()}
+                  value={value != null ? value.toString() : ""}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
@@ -239,11 +246,11 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         mappingName: currentMapping.name.toUpperCase() || '',
         mappingDescription: currentMapping.description.toUpperCase() || '',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingKey: currentMapping.key.toUpperCase() || '',
-        mappingValue: currentMapping.value.toUpperCase() || '',
-        mappingMetadata: currentMapping.metadata || [{ key: '', value: '' }]
+        mappingComment: currentMapping.comment.toUpperCase() || '',
+        mappingAdditionalref: currentMapping.additional_ref.toUpperCase() || '',
+        mappingMetadata: currentMapping.metadata || [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:'' }]
       }
-      setServerForm(updatedMappingForm)
+      setMappingForm(updatedMappingForm)
     }
   }, [currentMapping])
 
@@ -285,16 +292,16 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
 
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'metadata' ? { key: '', value: '' } : { name: '', ip_address: '', label: '' }
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: '', metadata_owner_level: '', metadata_owner_name:''} : { name: '', ip_address: '', label: '' }
     const updatedSection = [...mappingForm[section], newEntry]
-    setServerForm({ ...mappingForm, [section]: updatedSection })
+    setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
 
   // Function to remove an entry from a dynamic section
   const removeSectionEntry = (section, index) => {
     const updatedSection = [...mappingForm[section]]
     updatedSection.splice(index, 1)
-    setServerForm({ ...mappingForm, [section]: updatedSection })
+    setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
 
   // Handle Stepper
@@ -324,8 +331,8 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         const payload = {
           name: mappingForm.mappingName,
           description: mappingForm.mappingDescription,
-          key: mappingForm.mappingKey,
-          value: mappingForm.mappingValue,
+          comment: mappingForm.mappingComment,
+          additional_ref: mappingForm.mappingAdditionalref,
           mapping_namespace_name: mappingForm.mappingNamespaceName,
           metadata: mappingForm.mappingMetadata
         }
@@ -333,7 +340,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         console.log('Submitting mapping details', payload)
 
         // Update the endpoint to point to your Next.js API route
-        const endpoint = `/api/mappings/${props.currentMapping.id}`
+        const endpoint = `/api/mapping/${props.currentMapping.id}`
         const response = await axios.patch(endpoint, payload, { headers })
 
         if (response.data) {
@@ -364,11 +371,12 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
   const handleReset = () => {
     if (currentMapping && Object.keys(currentMapping).length > 0) {
       const resetMappingForm = {
-        mappingName: currentServer.hostname || '',
-        mappingNamespaceName: currentServer.component_name || '',
-        mappingKey: currentServer.datacenter_name || '',
-        mappingValue: currentServer.environment_name || '',
-        mappingMetadata: [{ key: '', value: '' }] 
+        mappingName: currentMapping.name.toUpperCase() || '',
+        mappingDescription: currentMapping.description.toUpperCase() || '',
+        mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
+        mappingComment: currentMapping.comment.toUpperCase() || '',
+        mappingAdditionalref: currentMapping.additional_ref.toUpperCase() || '',
+        mappingMetadata: [{ key: '', value: '', metadata_owner_level: '', metadata_owner_name: ''}],
       }
       setMappingForm(resetMappingForm)
 
@@ -409,6 +417,33 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               margin='normal'
             />
           </Grid>
+          
+          <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+            <TextfieldStyled
+              key={`field2-${section}-${index}-${resetFormFields}`}
+              fullWidth
+              label={section === 'mappingMetadata' ? 'Metadata Owner Level' : 'Meta Level'}
+              name={section === 'mappingMetadata' ? 'metadata_owner_level' : 'meta_level'}
+              value={entry.metadata_owner_level || entry.ip_address || ''}
+              onChange={e => handleFormChange(e, index, section)}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>
+
+          <Grid item xs={section === 'mappingMetadata' ? 5 : 3}>
+            <TextfieldStyled
+              key={`field2-${section}-${index}-${resetFormFields}`}
+              fullWidth
+              label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Name'}
+              name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_name'}
+              value={entry.metadata_owner_name || entry.ip_address || ''}
+              onChange={e => handleFormChange(e, index, section)}
+              variant='outlined'
+              margin='normal'
+            />
+          </Grid>          
+
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton
               onClick={() => addSectionEntry(section)}
@@ -511,24 +546,24 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               <Grid item xs={12} sm={6}>
                 <TextfieldStyled
                   required
-                  id='mappingKey'
-                  name='mappingKey'
-                  label='Mapping Key'
+                  id='mappingComment'
+                  name='mappingComment'
+                  label='Mapping Comment'
                   fullWidth
                   autoComplete='off'
-                  value={mappingForm.mappingKey}
+                  value={mappingForm.mappingComment}
                   onChange={handleFormChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextfieldStyled
                   required
-                  id='mappingValue'
-                  name='mappingValue'
-                  label='Mapping Value'
+                  id='mappingAdditionalref'
+                  name='mappingAdditionalref'
+                  label='Mapping Additional Reference'
                   fullWidth
                   autoComplete='off'
-                  value={mappingForm.mappingValue}
+                  value={mappingForm.mappingAdditionalref}
                   onChange={handleFormChange}
                 />
               </Grid>
@@ -539,7 +574,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
-              {renderDynamicFormSection('metadata')}
+              {renderDynamicFormSection('mappingMetadata')}
               <Box>
                 <Button
                   startIcon={
@@ -550,7 +585,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                       }}
                     />
                   }
-                  onClick={() => addSectionEntry('metadata')}
+                  onClick={() => addSectionEntry('mappingMetadata')}
                   style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
                 >
                   Add Metadata
@@ -560,7 +595,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
           </Fragment>
         )
       case 2:
-        return <ReviewAndSubmitSection serverForm={serverForm} />
+        return <ReviewAndSubmitSection mappingForm={mappingForm} />
       default:
         return 'Unknown Step'
     }

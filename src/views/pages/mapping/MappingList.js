@@ -249,8 +249,8 @@ const MappingList = props => {
     },
     {
       flex: 0.02,
-      field: 'key',
-      headerName: t('Key'),
+      field: 'comment',
+      headerName: t('Comment'),
       renderCell: params => {
         const { row } = params
 
@@ -265,8 +265,8 @@ const MappingList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.key}>
-                {row.key}
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.comment}>
+                {row.comment}
               </Typography>
             </Box>
           </Box>
@@ -275,8 +275,8 @@ const MappingList = props => {
     },
     {
       flex: 0.02,
-      field: 'value',
-      headerName: t('Value'),
+      field: 'additional_ref',
+      headerName: t('Additional Reference'),
       renderCell: params => {
         const { row } = params
 
@@ -291,8 +291,8 @@ const MappingList = props => {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value}>
-                {row.value}
+              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.additional_ref}>
+                {row.additional_ref}
               </Typography>
             </Box>
           </Box>
@@ -430,7 +430,7 @@ const MappingList = props => {
   ]
 
   const handleUpdateDialogClose = () => {
-    setOpenDialog(false)
+    setEditDialog(false)
   }
 
   const handleDeleteDialogClose = () => {

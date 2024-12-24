@@ -1,33 +1,35 @@
-  // ** React Imports
-  import React, { useState } from 'react'
+// ** React Imports
+import React, { useState } from 'react'
 
-  // ** MUI Imports
-  import { Box, Typography, Tab } from '@mui/material'
-  import MuiTabList from '@mui/lab/TabList'
-  import { styled, useTheme } from '@mui/material/styles'
-  import TabContext from '@mui/lab/TabContext'
-  import TabPanel from '@mui/lab/TabPanel'
+// ** MUI Imports
+import { Box, Typography, Tab } from '@mui/material'
+import MuiTabList from '@mui/lab/TabList'
+import { styled, useTheme } from '@mui/material/styles'
+import { atom, useAtom, useSetAtom } from 'jotai'
+import { timezoneAtom } from 'src/lib/atoms'
+import TabContext from '@mui/lab/TabContext'
+import TabPanel from '@mui/lab/TabPanel'
 
-  // ** DataGrid Imports
-  import { CustomDataGrid } from 'src/lib/styled-components'
-  import {
+// ** DataGrid Imports
+import { CustomDataGrid } from 'src/lib/styled-components'
+import {
   GridToolbarContainer,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
   GridToolbarQuickFilter,
   GridLogicOperator
-  } from '@mui/x-data-grid-pro'
+} from '@mui/x-data-grid-pro'
 
-  // ** Custom Components Imports
-  import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
-  import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
-  import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
+// ** Custom Components Imports
+import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
+import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
+import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
-  // ** Translation Hook
-  import { useTranslation } from 'react-i18next'
+// ** Translation Hook
+import { useTranslation } from 'react-i18next'
 
-  // ** Styled Components
-  const TabList = styled(MuiTabList)(({ theme }) => ({
+// ** Styled Components
+const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
     display: 'none'
   },
@@ -44,9 +46,9 @@
       minWidth: 130
     }
   }
-  }))
+}))
 
-  const CustomToolbar = () => (
+const CustomToolbar = () => (
   <GridToolbarContainer sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
     <Box sx={{ '& > *:not(:last-child)': { marginRight: 2 } }}>
       <GridToolbarColumnsButton />
@@ -74,14 +76,281 @@
       }}
     />
   </GridToolbarContainer>
-  )
+)
 
-  const MappingDetailPanel = ({ row }) => {
+ const MappingDetailPanel = props => {
 
+    const [value, setValue] = useState('1')
+    const { row } = props
+    const { t } = useTranslation()
+  
+    const [timezone] = useAtom(timezoneAtom)
+  
+    const handleChange = (event, newValue) => {
+      setValue(newValue)
+    }
+   
+    // Define columns for metadata DataGrid
+    const metadataColumns = [
+      {
+        field: 'key',
+        headerName: t('Key'),
+        flex: 0.015,
+        width: 100,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.key.toUpperCase()}>
+                  {row.key.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'value',
+        headerName: t('Value'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
+                  {row.value.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'metadata_owner_level',
+        headerName: t('Metadata Owner Level'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.metadata_owner_level?.toUpperCase() || ""}>
+                  {row.metadata_owner_level?.toUpperCase() || ""}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'metadata_owner_name',
+        headerName: t('Metadata Owner Name'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.metadata_owner_name?.toUpperCase() || ""}>
+                  {row.metadata_owner_name?.toUpperCase() || ""}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      }
+    ]
+   
+   
+   const elementColumns = [
+      {
+        field: 'key',
+        headerName: t('Key'),
+        flex: 0.015,
+        width: 100,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.key.toUpperCase()}>
+                  {row.key.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'value',
+        headerName: t('Value'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
+                  {row.value.toUpperCase()}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'description',
+        headerName: t('Description'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.description?.toUpperCase() || ""}>
+                  {row.description?.toUpperCase() || ""}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      },
+      {
+        field: 'comment',
+        headerName: t('Comment'),
+        flex: 0.025,
+        minWidth: 150,
+        renderCell: params => {
+          const { row } = params
+  
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.comment?.toUpperCase() || ""}>
+                  {row.comment?.toUpperCase() || ""}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      }
+   ]
 
+    return (
+      <Box sx={{ m: 5 }}>
+        <TabContext value={value}>
+          <TabList onChange={handleChange} aria-label='Mapping Element and Mapping Metadata tabs'>
+            <Tab label={t('Mapping Element')} value='1' />
+            <Tab label={t('Mapping Metadata')} value='2' />
+          </TabList>
+          <TabPanel value='1'>
+            <CustomDataGrid
+              rows={row.element.map((el, index) => ({
+                id: index,
+                ...el
+              }))}
+              columns={elementColumns}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              autoHeight
+            />
+          </TabPanel>
+          <TabPanel value='2'>
+            <CustomDataGrid
+              rows={row.metadata.map((md, index) => ({
+                id: index,
+                ...md
+              }))}
+              columns={metadataColumns}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              autoHeight
+            />
+          </TabPanel>
+        </TabContext>
+      </Box>
+    ) 
 
 
   }
 
 
-  export default MappingDetailPanel
+export default MappingDetailPanel

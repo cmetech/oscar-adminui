@@ -133,6 +133,8 @@ const MappingList = props => {
   const [paginationMode, setPaginationMode] = useState('client')
 
   const [timezone] = useAtom(timezoneAtom)
+  const getDetailPanelContent = useCallback(({ row }) => <MappingDetailPanel row={row} />, [])
+  const getDetailPanelHeight = useCallback(() => 600, [])
 
   const handleDetailPanelExpandedRowIdsChange = useCallback(newIds => {
     setDetailPanelExpandedRowIds(newIds)
@@ -1028,8 +1030,8 @@ const handleRowSelection = newRowSelectionModel => {
               }
             }
           }}
-          getDetailPanelContent={({ row }) => <MappingDetailPanel row={row} />}
-          getDetailPanelHeight={() => 400}
+          getDetailPanelContent={getDetailPanelContent}
+          getDetailPanelHeight={getDetailPanelHeight}
           detailPanelExpandedRowIds={detailPanelExpandedRowIds}
           onDetailPanelExpandedRowIdsChange={handleDetailPanelExpandedRowIdsChange}
           components={

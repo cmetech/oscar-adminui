@@ -223,7 +223,7 @@ const Section = ({ title, data, formErrors }) => {
                 <TextfieldStyled
                   fullWidth
                   label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                  value={itemValue.toString()}
+                  value={itemValue != null ? itemValue.toString() : ""}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
@@ -261,7 +261,7 @@ const ReviewAndSubmitSection = ({ mappingForm, formErrors }) => {
                 <TextfieldStyled
                   fullWidth
                   label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value.toString()}
+                  value={value != null ? value.toString() : ""}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
@@ -489,7 +489,9 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
           mapping_namespace_name: mappingForm.mappingNamespaceName,
           comment: mappingForm.mappingComment,
           additional_ref: mappingForm.mappingAdditionalref,
-          metadata: mappingForm.mappingMetadata
+          metadata: mappingForm.mappingMetadata.filter(md => {
+            return md.key && typeof md.key === 'string' && md.key.trim() !== '';
+          })
         }
 
         console.log('Submitting mapping details', payload)
@@ -501,6 +503,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
         if (response.status === 201 && response.data) {
           toast.success('Mapping details added successfully')
           setRefetchTrigger(Date.now())
+          setMappingForm(initialMappingFormState)
 
           // Call the onSuccess callback after successful submission
           onSuccess()
@@ -508,6 +511,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
       } catch (error) {
         console.error('Error adding mapping details', error)
         toast.error('Error adding mapping details')
+        setMappingForm(initialMappingFormState)
       }
     }
   }
@@ -567,8 +571,8 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                   selectOnFocus
                   handleHomeEndKeys
                   id={`autocomplete-${section}-${index}-${resetFormFields}`}
-                  options={['Mapping', 'MappingElement']}
-                  value={entry.metadata_owner_level || entry.meta_owner_level || 'Mapping'}
+                  options={[' ','Mapping', 'MappingElement']}
+                  value={entry.metadata_owner_level || entry.meta_owner_level || ' '}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'metadata_owner_level', value: newValue } }, index, section);
                   }}
@@ -599,14 +603,14 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                   key={`field2-${section}-${index}-${resetFormFields}`}
                   fullWidth
                   label='Metadata Owner'
-                  name='metadata_owner'
-                  value={entry.metadata_owner || entry.meta_owner}
+                  name='metadata_owner_name'
+                  value={entry.metadata_owner_name || entry.meta_owner}
                   onChange={e => handleFormChange(e, index, section)}
                   onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                   variant='outlined'
                   margin='normal'
-                  error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`]}
-                  helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'value' : 'ip_address'}`] || ''}
+                  error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`]}
+                  helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`] || ''}
                 />
               </Grid>
             )}

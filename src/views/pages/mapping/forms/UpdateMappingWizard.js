@@ -334,7 +334,9 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
           comment: mappingForm.mappingComment,
           additional_ref: mappingForm.mappingAdditionalref,
           mapping_namespace_name: mappingForm.mappingNamespaceName,
-          metadata: mappingForm.mappingMetadata
+          metadata: mappingForm.mappingMetadata.filter(md => {
+            return md.key && typeof md.key === 'string' && md.key.trim() !== '';
+          })
         }
 
         console.log('Submitting mapping details', payload)
@@ -427,8 +429,8 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                 selectOnFocus
                 handleHomeEndKeys
                 id={`autocomplete-${section}-${index}-${resetFormFields}`}
-                options={['Mapping', 'MappingElement']}
-                value={entry.metadata_owner_level || entry.meta_owner_level}
+                options={[' ','Mapping', 'MappingElement']}
+                value={entry.metadata_owner_level || entry.meta_owner_level ||' '}
                 onChange={(event, newValue) => {
                   handleFormChange({ target: { name: 'metadata_owner_level', value: newValue } }, index, section);
                 }}
@@ -553,18 +555,6 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Mapping Namespace Name' fullWidth required autoComplete='off' />
                   )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextfieldStyled
-                  required
-                  id='mappingDescription'
-                  name='mappingDescription'
-                  label='Mapping Description'
-                  fullWidth
-                  autoComplete='off'
-                  value={mappingForm.mappingDescription}
-                  onChange={handleFormChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

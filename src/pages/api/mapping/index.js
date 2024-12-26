@@ -62,32 +62,42 @@ async function handler(req, res) {
   } else if (req.method === 'PUT') {
     try {
       // Extract the list of server IDs from the request body
-      const { ids } = req.body
+      const { ids } = req.body;
+      console.log('Received IDs:____________________________________________________________________>', ids);
 
-      // console.log('Received IDs:', ids)
 
+
+      // Validate that the IDs are in an array and not empty
       if (!Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).json({ message: "Invalid input: 'ids' must be a non-empty array." })
+        return res.status(400).json({ message: "The request is:"+ req.body});
       }
 
-      // Call the underlying middleware API
+      // Make the second API call to the middleware
       const response = await axios.put(
-        `${oscarConfig.MIDDLEWARE_INVENTORY_API_URL}/servers/bulk`,
-        ids, // Send the list of IDs in the request body
+        `${oscarConfig.MIDDLEWARE_MAPPING_API_URL}/mapping/bulk`,
+        ids, // Directly send the list of IDs (this should match the expected payload format of the middleware API)
         {
           headers: {
             accept: '*/*',
             'Content-Type': 'application/json'
           },
-          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
+          httpsAgent: new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY }) // Ensure SSL verification is handled properly
         }
-      )
+      );
 
-      // Since there's no content to return, send a 204 status code and a message acknowledging the deletion
-      res.status(204).end()
+      // If the external API responds with no content (status 204), acknowledge success
+      if (response.status === 204) {
+        return res.status(204).end();
+      } else {
+        // Handle unexpected status codes here
+        return res.status(response.status).json({ message: response.statusText });
+      }
     } catch (error) {
-      console.error('Error calling middleware API:', error)
-      res.status(error.response?.status || 500).json({ message: error.message })
+      console.error('Error calling middleware API:', error);
+
+      // Return the error response
+      return res.status(error.response?.status || 500).json({ message: error.message });
+
     }
   } else {
     // Handle unsupported HTTP methods

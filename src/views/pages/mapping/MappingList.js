@@ -202,7 +202,7 @@ const MappingList = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.name}>
-                {row.name}
+                {row.name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -228,7 +228,7 @@ const MappingList = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.description}>
-                {row.description}
+                {row.description?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -254,7 +254,7 @@ const MappingList = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.mapping_namespace_name}>
-                {row.mapping_namespace_name}
+                {row.mapping_namespace_name?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -306,7 +306,7 @@ const MappingList = props => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.additional_ref}>
-                {row.additional_ref}
+                {row.additional_ref?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -743,8 +743,10 @@ const handleRowSelection = newRowSelectionModel => {
     console.log('Added IDs:', addedIds)
 
     addedIds.forEach(id => {
+
+      console.log("id:"+id)
       const row = rows.find(r => r.id === id)
-      console.log('Added Row:', row)
+      console.log('Added Row:---->', row)
     })
 
     // Update the row selection model
@@ -785,7 +787,7 @@ const handleRowSelection = newRowSelectionModel => {
           autoHeight={true}
           rows={filteredRows.length ? filteredRows : rows}
           rowCount={rowCountState}
-          getRowId={row => `${row.name.replace(/\s+/g, '_')}`}
+          getRowId={row => `${row.id.replace(/\s+/g, '_')}`}
           columns={columns}
           checkboxSelection={true}
           disableRowSelectionOnClick

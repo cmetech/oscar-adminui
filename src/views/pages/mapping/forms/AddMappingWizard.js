@@ -76,7 +76,7 @@ const steps = [
   {
     title: 'Review',
     subtitle: 'Review and Submit',
-    description: 'Review the Environment details and submit.'
+    description: 'Review the Mapping details and submit.'
   }
 ]
 
@@ -286,8 +286,8 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
   const [mappingNamespaces, setMappingNamespaces] = useState([])
-  const [isMappingNamespaceEnabled, setIsMappingNamespaceEnabled] = useState(false)
-  const [filteredMappings, setFilteredMappings] = useState([])
+  const [isMappingNamespacesEnabled, setIsMappingNamespacesEnabled] = useState(false)
+  const [filteredMappingNamespaces, setFilteredMappingNamespaces] = useState([])
   const [formErrors, setFormErrors] = useState({})
   const [, setMappings] = useAtom(mappingsAtom)
   const [, setRefetchTrigger] = useAtom(refetchMappingTriggerAtom)
@@ -420,18 +420,18 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
     }
 
     if (name === 'mappingNamespaceName') {
-      setIsEnvironmentEnabled(false) // Disable environment field initially
-      setFilteredEnvironments([]) // Reset filtered environments
+      setFilteredMappingNamespaces(false) // Disable environment field initially
+      setIsMappingNamespacesEnabled([]) // Reset filtered environments
 
       try {
         const response = await axios.get(`/api/mappingnamespaces?name=${upperCasedValue}`)
         const data = response.data.rows
         const mappingNamespacesNames = data.map(env => env.name.toUpperCase())
-        setFilteredEnvironments(mappingNamespacesNames)
-        setIsEnvironmentEnabled(true) // Enable environment field after fetching
+        setFilteredMappingNamespaces(mappingNamespacesNames)
+        setIsMappingNamespacesEnabled(true) // Enable environment field after fetching
       } catch (error) {
-        console.error('Failed to fetch environments for the selected datacenter:', error)
-        toast.error('Failed to fetch environments')
+        console.error('Failed to fetch mappingnamespaces for the selected datacenter:', error)
+        toast.error('Failed to fetch mappingnamespaces')
       }
     }
   }
@@ -453,19 +453,26 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
 
   // Handle Stepper
   const handleBack = () => {
+    setActiveStep(prevActiveStep => prevActiveStep - 1)
+    
     if (activeStep === 2) {
       // When navigating back from Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state
     }
-    setActiveStep(prevActiveStep => prevActiveStep - 1)
+    
   }
 
   const handleNext = async () => {
+    console.log("Active step: "+ activeStep)
+
+    setActiveStep(prevActiveStep => prevActiveStep + 1)
+
     if (activeStep === 1) {
       // Assuming step 1 is Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state to force UI update
+      console.log("Active step: "+ activeStep)
     }
-    setActiveStep(prevActiveStep => prevActiveStep + 1)
+
     if (activeStep === steps.length - 1) {
       // Validate the form before proceeding to the next step or submitting
       const isValid = await validateForm()
@@ -503,7 +510,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
         if (response.status === 201 && response.data) {
           toast.success('Mapping details added successfully')
           setRefetchTrigger(Date.now())
-          setMappingForm(initialMappingFormState)
+          //setMappingForm(initialMappingFormState)
 
           // Call the onSuccess callback after successful submission
           onSuccess()
@@ -525,8 +532,10 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
   // Render form fields for metadata
   const renderDynamicFormSection = section => {
     return mappingForm[section].map((entry, index) => {
+      
       const errorKeyBase = section === 'mappingMetadata' ? 'value' : 'metavalue'
       const errorKey = `${section}[${index}].${errorKeyBase}`
+      console.log("Entry:"+ entry + "Index:"+ index)
 
       return (
         <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>

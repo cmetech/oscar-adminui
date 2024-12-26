@@ -679,7 +679,7 @@ const Settings = () => {
 
   const handleConfirmDelete = async tab => {
     const endpointMapping = {
-      2: '/api/mapping'  //equivalent to api/inventory/servers as per next js folder structure
+      2: '/api/mapping'
     }
 
     const ids = {
@@ -698,27 +698,30 @@ const Settings = () => {
       return
     }
 
+    console.log("selected mappings", mappings, typeof(mappings));
+
+    const headers = {
+      Accept: 'application/json' // Add the authorization if necessary
+    };
+    
     try {
-      const response = await axios.put(endpoint, {
-        ids: ids[tab] // Assuming the API expects an object with an ids array
-      })
-
-      // Handle 204 No Content response here
-      // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
+      // Ensure ids[tab] is an array of IDs, not wrapped in an object
+      console.log("Request Ids :"+ids[tab] + " and type "+ typeof(ids[tab]))
+      const response = await axios.put(endpoint, {ids: ids[tab]});  // Send the array directly
+      console.log('Response:', response);
+    
       if (response.status === 204) {
-        toast.success('Mapping deleted successfully')
-
+        toast.success('Mappings deleted successfully');
         // Trigger a refetch of the data
-        refecthTriggers[tab](Date.now())
+        refecthTriggers[tab](Date.now());
       } else {
-        toast.error('Error deleting mapping')
+        toast.error('Error deleting Mappings');
       }
     } catch (error) {
-      console.error('Error deleting mapping:', error)
-
-      // Handle errors here, e.g., show an error notification
-      toast.error('Error deleting mapping')
+      console.error('Error deleting Mappings:', error.response ? error.response.data : error.message);
+      toast.error('Error deleting servers');
     }
+    
 
     setIsDeleteModalOpen(false)
   }
@@ -791,22 +794,29 @@ const Settings = () => {
   }
 
   const handleConfirmStatusUpdate = async newStatus => {
-    try {
-      // Get current server data to access hostnames
+    try
+     {
+      // Get current mapping data to access hostnames
       const response = await axios.get('/api/mapping')
       const allMappings = response.data.rows
 
-      // Create a map of server IDs to their map name
+      // Create a map of mapping IDs to their map name
       const mappingMap = allMappings.reduce((acc, mapping) => {
         acc[mapping.id] = mapping.name
 
         return acc
       }, {})
 
+      const isFeatureAllowed = false;  // Set this according to your logic, e.g., feature flag or condition
+      if (!isFeatureAllowed) {
+        // Throw an error with a message to indicate that the action is not allowed
+        throw new Error('Status update for Mappings are not allowed all Mappings are Active by default');
+      }
+
       // Update each selected server with both hostname and status
       const updatePromises = mappings.map(mappingId =>
         axios.patch(`/api/mapping/${mappingId}`, {
-          name: mappingMap[mappingId], // Include the hostname
+          name: mappingMap[mappingId],
           status: newStatus
         })
       )
@@ -816,8 +826,9 @@ const Settings = () => {
       setRefetchTrigger(Date.now())
       toast.success(t('Successfully updated mapping status'))
     } catch (error) {
+      
       console.error('Error updating mapping statuse:', error)
-      toast.error(t('Failed to update mapping statuses'))
+      toast.error(t('Mapping status update not allowed. All Mappings are active by default'))
     }
 
     setIsStatusModalOpen(false)

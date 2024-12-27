@@ -59,7 +59,8 @@ const initialMappingFormState = {
   mappingNamespaceName: '',
   mappingComment: '',
   mappingAdditionalref: '',
-  mappingMetadata: [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:''}]
+  mappingMetadata: [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:''}],
+  mappingElement: [{key: '', value: '', description:'', comment:''}]
 }
 
 const steps = [
@@ -67,6 +68,11 @@ const steps = [
     title: 'Mapping Information',
     subtitle: 'Add Mapping Information',
     description: 'Add the Name, Description, and Mapping Name for the Mapping.'
+  },
+  {
+    title: 'Mapping Element Information',
+    subtitle: 'Add Mappilement Information',
+    description: 'Add the Mapping Element Key-Value pair details.'
   },
   {
     title: 'Metadata Information',
@@ -173,11 +179,7 @@ const validationSchema = yup.object({
     .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
     .min(3, 'Name must be at least 3 characters')
     .trim(),
-  mappingDescription: yup
-    .string()
-    .trim()
-    .min(3, 'Description must be at least 3 characters')
-    .trim(),
+  mappingDescription: yup.string().trim(),
   mappingNamespaceName: yup
     .string()
     .trim()
@@ -187,6 +189,21 @@ const validationSchema = yup.object({
     .trim(),
   mappingComment: yup.string().trim(),
   mappingAdditionalref: yup.string().trim(),
+  mappingElement: yup
+  .array()
+  .of(
+    yup.object().shape({
+      key: yup.string(),
+      value: yup.string(),
+      description: yup.string(),
+      comment: yup.string()
+    })
+  )
+  .test(
+    'element-key-value-pair',
+    'Both key and value are required in element if either is provided',
+    (element = []) => element.every(md => (!md.key && !md.value) || (md.key && md.value))
+  ),
   mappingMetadata: yup
     .array()
     .of(
@@ -405,7 +422,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
     const upperCasedValue = value?.toUpperCase()
 
     if (section) {
-      // Handle changes for dynamic sections (metadata or networkInterfaces)
+      // Handle changes for dynamic sections (metadata or element)
       const updatedSection = [...mappingForm[section]]
       updatedSection[index][name] = upperCasedValue
       setMappingForm({ ...mappingForm, [section]: updatedSection })
@@ -439,7 +456,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
 
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'mappingMetadata' ? { key: '', value: '', metadata_owner_level: '',  metadata_owner_name:''} : { metakey: '', metavalue: ''}
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: '', metadata_owner_level: '',  metadata_owner_name:''} : { key: '', value: '', description: '',  comment:''}
     const updatedSection = [...mappingForm[section], newEntry]
     setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
@@ -453,25 +470,25 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
 
   // Handle Stepper
   const handleBack = () => {
-    setActiveStep(prevActiveStep => prevActiveStep - 1)
-    
-    if (activeStep === 2) {
+
+    if (activeStep === 2 || activeStep === 3) {
       // When navigating back from Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state
     }
+
+    setActiveStep(prevActiveStep => prevActiveStep - 1)
     
   }
 
   const handleNext = async () => {
     console.log("Active step: "+ activeStep)
-
-    setActiveStep(prevActiveStep => prevActiveStep + 1)
-
-    if (activeStep === 1) {
+    if (activeStep === 1 || activeStep ==2) {
       // Assuming step 1 is Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state to force UI update
       console.log("Active step: "+ activeStep)
     }
+
+    setActiveStep(prevActiveStep => prevActiveStep + 1)
 
     if (activeStep === steps.length - 1) {
       // Validate the form before proceeding to the next step or submitting
@@ -496,6 +513,9 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
           mapping_namespace_name: mappingForm.mappingNamespaceName,
           comment: mappingForm.mappingComment,
           additional_ref: mappingForm.mappingAdditionalref,
+          element: mappingForm.mappingElement.filter(el => {
+            return el.key && typeof el.key === 'string' && el.key.trim() !== '';
+          }),
           metadata: mappingForm.mappingMetadata.filter(md => {
             return md.key && typeof md.key === 'string' && md.key.trim() !== '';
           })
@@ -533,7 +553,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
   const renderDynamicFormSection = section => {
     return mappingForm[section].map((entry, index) => {
       
-      const errorKeyBase = section === 'mappingMetadata' ? 'value' : 'metavalue'
+      const errorKeyBase = section === 'mappingMetadata' ? 'value' : 'value'
       const errorKey = `${section}[${index}].${errorKeyBase}`
       console.log("Entry:"+ entry + "Index:"+ index)
 
@@ -544,9 +564,9 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
               <TextfieldStyled
                 key={`field1-${section}-${index}-${resetFormFields}`}
                 fullWidth
-                label={section === 'mappingMetadata' ? 'Key' : 'Name'}
-                name={section === 'mappingMetadata' ? 'key' : 'name'}
-                value={entry.key || entry.name}
+                label={section === 'mappingMetadata' ? 'Key' : 'Key'}
+                name={section === 'mappingMetadata' ? 'key' : 'key'}
+                value={entry.key}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
@@ -559,8 +579,8 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
               <TextfieldStyled
                 key={`field2-${section}-${index}-${resetFormFields}`}
                 fullWidth
-                label={section === 'mappingMetadata' ? 'Value' : 'MetaValue'}
-                name={section === 'mappingMetadata' ? 'value' : 'meta_value'}
+                label={section === 'mappingMetadata' ? 'Value' : 'Value'}
+                name={section === 'mappingMetadata' ? 'value' : 'value'}
                 value={entry.value || entry.metavalue}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
@@ -620,6 +640,42 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                   margin='normal'
                   error={!!formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`]}
                   helperText={formErrors[`${section}[${index}].${section === 'mappingMetadata' ? 'metadata_owner_name' : 'ip_address'}`] || ''}
+                />
+              </Grid>
+            )}
+
+            {section === 'mappingElement' && (
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`field2-${section}-${index}-${resetFormFields}`}
+                  fullWidth
+                  label='Description'
+                  name='description'
+                  value={entry.description}
+                  onChange={e => handleFormChange(e, index, section)}
+                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                  error={!!formErrors[`${section}[${index}].${section === 'mappingElement' ? 'description' : 'ip_address'}`]}
+                  helperText={formErrors[`${section}[${index}].${section === 'mappingElement' ? 'description' : 'ip_address'}`] || ''}
+                />
+              </Grid>
+            )}
+
+            {section === 'mappingElement' && (
+              <Grid item xs={3}>
+                <TextfieldStyled
+                  key={`field2-${section}-${index}-${resetFormFields}`}
+                  fullWidth
+                  label='Comment'
+                  name='comment'
+                  value={entry.comment}
+                  onChange={e => handleFormChange(e, index, section)}
+                  onBlur={e => validateField(e.target.name, e.target.value, index, section)}
+                  variant='outlined'
+                  margin='normal'
+                  error={!!formErrors[`${section}[${index}].${section === 'mappingElement' ? 'comment' : 'ip_address'}`]}
+                  helperText={formErrors[`${section}[${index}].${section === 'mappingElement' ? 'comment' : 'ip_address'}`] || ''}
                 />
               </Grid>
             )}
@@ -762,7 +818,31 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
             </Grid>
           </Fragment>
         )
-      case 1:
+        case 1:
+          return (
+            <Fragment>
+              <Stack direction='column' spacing={1}>
+                {renderDynamicFormSection('mappingElement')}
+                <Box>
+                  <Button
+                    startIcon={
+                      <Icon
+                        icon='mdi:plus-circle-outline'
+                        style={{
+                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                        }}
+                      />
+                    }
+                    onClick={() => addSectionEntry('mappingElement')}
+                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
+                  >
+                    Add Mapping Element
+                  </Button>
+                </Box>
+              </Stack>
+            </Fragment>
+          )
+      case 2:
         return (
           <Fragment>
             <Stack direction='column' spacing={1}>
@@ -786,7 +866,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
             </Stack>
           </Fragment>
         )
-      case 2:
+      case 3:
         return <ReviewAndSubmitSection mappingForm={mappingForm} />
       default:
         return 'Unknown Step'

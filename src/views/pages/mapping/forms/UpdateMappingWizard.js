@@ -170,25 +170,29 @@ const Section = ({ title, data }) => {
 
   return (
     <Fragment>
-      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-        {title.charAt(0).toUpperCase() + title.slice(1)}
-      </Typography>
-      {data.map((item, index) => (
-        <Grid container spacing={2} key={`${title}-${index}`}>
-          {Object.entries(item).map(([itemKey, itemValue]) => (
-            <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
-              <TextField
-                fullWidth
-                label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                value={itemValue != null ? itemValue.toString() : ""}
-                InputProps={{ readOnly: true }}
-                variant='outlined'
-                margin='normal'
-              />
+      {data && data.length > 0 && (
+        <Fragment>
+          <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+            {title.charAt(0).toUpperCase() + title.slice(1)}
+          </Typography>
+          {data.map((item, index) => (
+            <Grid container spacing={2} key={`${title}-${index}`}>
+              {Object.entries(item).map(([itemKey, itemValue]) => (
+                <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
+                  <TextField
+                    fullWidth
+                    label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
+                    value={itemValue != null ? itemValue.toString() : ""}
+                    InputProps={{ readOnly: true }}
+                    variant='outlined'
+                    margin='normal'
+                  />
+                </Grid>
+              ))}
             </Grid>
           ))}
-        </Grid>
-      ))}
+      </Fragment>
+        )}
     </Fragment>
   )
 }

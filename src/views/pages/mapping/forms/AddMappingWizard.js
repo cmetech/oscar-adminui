@@ -224,34 +224,37 @@ const validationSchema = yup.object({
 const Section = ({ title, data, formErrors }) => {
   return (
     <Fragment>
-      <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
-        {title.charAt(0).toUpperCase() + title.slice(1)}
-      </Typography>
-      {data.map((item, index) => (
-        <Grid container spacing={2} key={`${title}-${index}`}>
-          {Object.entries(item).map(([itemKey, itemValue]) => {
-            // Construct the fieldPath for accessing the error, matching how it's stored in formErrors
-            console.log('Title:', title + ' Index:', index + ' ItemKey:', itemKey + ' ItemValue:', itemValue)
-            const errorKey = `${title}[${index}].${itemKey}`
-            const errorMessage = formErrors?.[errorKey] ?? '' // Access the specific error message
+      {data && data.length > 0 && (
+        <Fragment>
+          <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
+            {title.charAt(0).toUpperCase() + title.slice(1)}
+          </Typography>
+          {data.map((item, index) => (
+            <Grid container spacing={2} key={`${title}-${index}`}>
+              {Object.entries(item).map(([itemKey, itemValue]) => {
+                // Construct the fieldPath for accessing the error, matching how it's stored in formErrors
+                console.log('Title:', title + ' Index:', index + ' ItemKey:', itemKey + ' ItemValue:', itemValue)
+                const errorKey = `${title}[${index}].${itemKey}`
+                const errorMessage = formErrors?.[errorKey] ?? '' // Access the specific error message
 
-            return (
-              <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
-                <TextfieldStyled
-                  fullWidth
-                  label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                  value={itemValue != null ? itemValue.toString() : ""}
-                  InputProps={{ readOnly: true }}
-                  variant='outlined'
-                  margin='normal'
-                  error={Boolean(errorMessage)}
-                  helperText={errorMessage}
-                />
-              </Grid>
-            )
-          })}
-        </Grid>
-      ))}
+                return (
+                  <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
+                    <TextfieldStyled
+                      fullWidth
+                      label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
+                      value={itemValue != null ? itemValue.toString() : ""}
+                      InputProps={{ readOnly: true }}
+                      variant='outlined'
+                      margin='normal'
+                      error={Boolean(errorMessage)}
+                      helperText={errorMessage}
+                    />
+                  </Grid>
+                )
+              })}
+            </Grid>
+          ))}
+        </Fragment>)}
     </Fragment>
   )
 }

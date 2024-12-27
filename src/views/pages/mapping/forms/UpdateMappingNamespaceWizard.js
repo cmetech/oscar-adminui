@@ -287,7 +287,7 @@ const UpdateMappingNamespaceWizard = ({ onClose, ...props }) => {
                     fullWidth
                     value={mappingNamespaceDescription.toUpperCase()}
                     onChange={handleMappingNamespaceDescriptionChange}
-                    label='Location'
+                    label='Description'
                     error={Boolean(formErrors?.mappingNamespaceDescription)}
                     helperText={formErrors?.mappingNamespaceDescription}
                   />

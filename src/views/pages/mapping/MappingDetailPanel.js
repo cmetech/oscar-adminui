@@ -3,12 +3,14 @@ import React, { useState } from 'react'
 
 // ** MUI Imports
 import { Box, Typography, Tab } from '@mui/material'
+import IconButton from '@mui/material/IconButton'
 import MuiTabList from '@mui/lab/TabList'
 import { styled, useTheme } from '@mui/material/styles'
 import { atom, useAtom, useSetAtom } from 'jotai'
 import { timezoneAtom } from 'src/lib/atoms'
 import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
+import { Icon } from '@iconify/react';
 
 // ** DataGrid Imports
 import { CustomDataGrid } from 'src/lib/styled-components'
@@ -20,10 +22,6 @@ import {
   GridLogicOperator
 } from '@mui/x-data-grid-pro'
 
-// ** Custom Components Imports
-import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
-import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
-import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 
 // ** Translation Hook
 import { useTranslation } from 'react-i18next'
@@ -90,6 +88,24 @@ const CustomToolbar = () => (
       setValue(newValue)
     }
    
+    const [showValueMetadata, setShowValueMetadata] = useState({}); // Store show/hide state per row
+
+    const handleToggleValueVisibilityMetadata = (rowId) => {
+      setShowValueMetadata((prev) => ({
+        ...prev,
+        [rowId]: !prev[rowId], // Toggle visibility for specific row by rowId
+      }));
+    };
+   
+    const [showValueElement, setShowValueElement] = useState({}); // Store show/hide state per row
+
+    const handleToggleValueVisibilityElement = (rowId) => {
+      setShowValueElement((prev) => ({
+        ...prev,
+        [rowId]: !prev[rowId], // Toggle visibility for specific row by rowId
+      }));
+    };
+   
     // Define columns for metadata DataGrid
     const metadataColumns = [
       {
@@ -126,7 +142,8 @@ const CustomToolbar = () => (
         minWidth: 150,
         renderCell: params => {
           const { row } = params
-  
+          const isVisible = showValueMetadata[row.id] ?? false;
+
           return (
             <Box
               sx={{
@@ -139,10 +156,17 @@ const CustomToolbar = () => (
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
-                  {row.value.toUpperCase()}
+                  {isVisible ? row.value.toUpperCase() : '********'}
                 </Typography>
               </Box>
-            </Box>
+            <IconButton
+              aria-label="toggle value visibility"
+              onClick={() => handleToggleValueVisibilityMetadata(row.id)} // Pass row.id to track state for each row
+              sx={{ marginLeft: 1 }}
+            >
+              <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+            </IconButton>
+          </Box>
           )
         }
       },
@@ -211,7 +235,7 @@ const CustomToolbar = () => (
         width: 100,
         renderCell: params => {
           const { row } = params
-  
+          
           return (
             <Box
               sx={{
@@ -238,6 +262,7 @@ const CustomToolbar = () => (
         minWidth: 150,
         renderCell: params => {
           const { row } = params
+          const isVisible = showValueElement[row.id] ?? false;
   
           return (
             <Box
@@ -251,9 +276,16 @@ const CustomToolbar = () => (
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
-                  {row.value.toUpperCase()}
+                {isVisible ? row.value.toUpperCase() : '********'}
                 </Typography>
               </Box>
+                <IconButton
+                  aria-label="toggle value visibility"
+                  onClick={() => handleToggleValueVisibilityElement(row.id)} // Pass row.id to track state for each row
+                  sx={{ marginLeft: 1 }}
+                >
+                  <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                </IconButton>
             </Box>
           )
         }

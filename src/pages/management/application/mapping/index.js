@@ -732,27 +732,34 @@ const Settings = () => {
       const response = await axios.get('/api/mapping')
       const mappingss = response.data.rows
 
+      const selectedMappingIds = mappings;
+
+      const filteredMappings = mappingss.filter(mapping => selectedMappingIds.includes(mapping.id))
+
       // Create a new workbook
       const workbook = new ExcelJS.Workbook()
       const worksheet = workbook.addWorksheet('Mappings')
 
       // Define columns
       worksheet.columns = [
-        { header: 'Mapping', key: 'name', width: 30 },
+        { header: 'Mapping Name', key: 'name', width: 30 },
         { header: 'Mapping Description', key: 'description', width: 25 },
         { header: 'Mapping Namespace', key: 'mapping_namespace_name', width: 25 },
-        { header: 'Key', key: 'key', width: 25 },
-        { header: 'Value', key: 'value', width: 25 },
+        { header: 'Comment', key: 'comment', width: 25 },
+        { header: 'Additional Reference', key: 'additional_ref', width: 25 },
+        { header: 'Mapping Element', key: 'element', width: 25 },
         { header: 'Metadata', key: 'metadata', width: 50 },
         { header: 'Created At', key: 'created_at', width: 20 },
         { header: 'Modified At', key: 'modified_at', width: 20 }
       ]
 
+
+
       // Add rows
-      mappingss.forEach(mapping => {
+      filteredMappings.forEach(mapping => {
         worksheet.addRow({
           ...mapping,
-          metadata: mapping.metadata.map(meta => `${meta.key}: ${meta.value}`).join('; ')
+          metadata: mapping.metadata.map(meta => `key: ${meta.key}, value: ${meta.value}, level: ${meta.metadata_owner_level} owner: ${meta.metadata_owner_name}`, ).join('; ')
         })
       })
 
@@ -807,7 +814,7 @@ const Settings = () => {
         return acc
       }, {})
 
-      const isFeatureAllowed = false;  // Set this according to your logic, e.g., feature flag or condition
+      const isFeatureAllowed = false;
       if (!isFeatureAllowed) {
         // Throw an error with a message to indicate that the action is not allowed
         throw new Error('Status update for Mappings are not allowed all Mappings are Active by default');

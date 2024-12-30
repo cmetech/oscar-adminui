@@ -416,7 +416,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               fullWidth
               label={section === 'mappingMetadata' ? 'Key' : 'Key'}
               name={section === 'mappingMetadata' ? 'key' : 'key'}
-              value={entry.key || entry.name}
+              value={entry.key? entry.key.toUpperCase() : entry.name? entry.name.toUpperCase():''}
               onChange={e => handleFormChange(e, index, section)}
               variant='outlined'
               margin='normal'
@@ -428,7 +428,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               fullWidth
               label={section === 'mappingMetadata' ? 'Value' : 'Value'}
               name={section === 'mappingMetadata' ? 'value' : 'value'}
-              value={entry.value || entry.ip_address}
+              value={entry.value?entry.value.toUpperCase() : entry.ip_address? entry.ip_address.toUpperCase():''}
               onChange={e => handleFormChange(e, index, section)}
               variant='outlined'
               margin='normal'
@@ -477,7 +477,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                 fullWidth
                 label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Name'}
                 name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_name'}
-                value={entry.metadata_owner_name || entry.ip_address || ''}
+                value={entry.metadata_owner_name? entry.metadata_owner_name.toUpperCase() :  entry.metadata_owner_name? entry.ip_address.toUpperCase() : ''}
                 onChange={e => handleFormChange(e, index, section)}
                 variant='outlined'
                 margin='normal'
@@ -492,7 +492,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                 fullWidth
                 label='Description'
                 name='description'
-                value={entry.description}
+                value={entry.description?entry.description.toUpperCase(): ''}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'
@@ -508,7 +508,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                 fullWidth
                 label='Comment'
                 name='comment'
-                value={entry.comment}
+                value={entry.comment? entry.comment.toUpperCase(): ''}
                 onChange={e => handleFormChange(e, index, section)}
                 onBlur={e => validateField(e.target.name, e.target.value, index, section)}
                 variant='outlined'

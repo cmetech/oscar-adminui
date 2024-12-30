@@ -315,6 +315,28 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
   const theme = useTheme()
   const session = useSession()
 
+  const resetSectionEntry = section => {
+    const firstEntry = section === 'mappingMetadata'
+      ? { 
+          key: '', 
+          value: '', 
+          metadata_owner_level: '', 
+          metadata_owner_name: '' 
+        }
+      : { 
+          key: '', 
+          value: '', 
+          description: '', 
+          comment: '' 
+        };
+  
+    // Reset the section with the new blank entry (firstEntry)
+    setMappingForm(prevState => ({
+      ...prevState,
+      [section]: [firstEntry]  // This replaces all previous entries with the first entry
+    }));
+  };
+
   useEffect(() => {
     console.log('Current FormErrors:', formErrors)
   }, [formErrors])
@@ -336,6 +358,15 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
 
     fetchMappingNamespaces()
   }, [])
+
+  useEffect(() => {
+    if (activeStep === 0) {
+      // Reset entries for each section when activeStep is 0 (first step)
+      ['mappingMetadata', 'mappingElement'].forEach(section => {
+        resetSectionEntry(section); // Reset entries for each section to the first entry
+      });
+    }
+  }, [activeStep]);  
 
   const validateField = async (fieldName, value, index, section) => {
     // Construct the correct path for nested fields

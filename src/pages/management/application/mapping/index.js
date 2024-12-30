@@ -747,8 +747,8 @@ const Settings = () => {
         { header: 'Mapping Namespace', key: 'mapping_namespace_name', width: 25 },
         { header: 'Comment', key: 'comment', width: 25 },
         { header: 'Additional Reference', key: 'additional_ref', width: 25 },
-        { header: 'Mapping Element', key: 'element', width: 25 },
-        { header: 'Metadata', key: 'metadata', width: 50 },
+        { header: 'Mapping Element', key: 'element', width: 100 },
+        { header: 'Metadata', key: 'metadata', width: 100 },
         { header: 'Created At', key: 'created_at', width: 20 },
         { header: 'Modified At', key: 'modified_at', width: 20 }
       ]
@@ -757,10 +757,9 @@ const Settings = () => {
 
       // Add rows
       filteredMappings.forEach(mapping => {
-        worksheet.addRow({
-          ...mapping,
-          metadata: mapping.metadata.map(meta => `key: ${meta.key}, value: ${meta.value}, level: ${meta.metadata_owner_level} owner: ${meta.metadata_owner_name}`, ).join('; ')
-        })
+        const elementJson = JSON.stringify(mapping.element, null, 2);
+        const metadataJson = JSON.stringify(mapping.metadata, null, 2);
+        worksheet.addRow(mapping)
       })
 
       // Generate Excel file

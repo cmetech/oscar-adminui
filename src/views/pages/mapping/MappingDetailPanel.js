@@ -164,7 +164,7 @@ const CustomToolbar = () => (
               onClick={() => handleToggleValueVisibilityMetadata(row.id)} // Pass row.id to track state for each row
               sx={{ marginLeft: 1 }}
             >
-              <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+              <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-closed'} />
             </IconButton>
           </Box>
           )
@@ -284,7 +284,7 @@ const CustomToolbar = () => (
                   onClick={() => handleToggleValueVisibilityElement(row.id)} // Pass row.id to track state for each row
                   sx={{ marginLeft: 1 }}
                 >
-                  <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                  <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-closed'} />
                 </IconButton>
             </Box>
           )

@@ -391,6 +391,7 @@ const MappingUploadDialog = ({ open, onClose, onSuccess, tab }) => {
       setIsUploading(true)
       let simulatedProgress = 0
 
+      console.log("Upload Simulation Starts")
       // Start the simulation before the request is sent
       simulateProcessing = setInterval(() => {
         simulatedProgress += Math.random() * 10 // Increment progress by a random amount each time
@@ -399,6 +400,7 @@ const MappingUploadDialog = ({ open, onClose, onSuccess, tab }) => {
         }
         setUploadProgress(simulatedProgress)
       }, 500)
+      console.log("Upload Simulation Ends")
 
       const response = await axios.post('/api/mapping/bulk', formData, {  //N.B.: bulk apis to be created
         headers: {
@@ -416,7 +418,7 @@ const MappingUploadDialog = ({ open, onClose, onSuccess, tab }) => {
       setUploadProgress(100)
 
       // Handle response here
-      if (response.status === 200 && response.data) {
+      if (response.status === 201 && response.data) {
         const { requested_count, processed_count } = response.data
         toast.success(`Upload complete: ${processed_count} out of ${requested_count} mappings processed successfully.`)
         setRefetchTrigger(new Date().getTime())

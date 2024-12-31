@@ -254,10 +254,10 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     if (currentMapping && Object.keys(currentMapping).length > 0) {
       const updatedMappingForm = {
         mappingName: currentMapping.name.toUpperCase() || '',
-        mappingDescription: currentMapping.description.toUpperCase() || '',
+        mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() :'',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingComment: currentMapping.comment.toUpperCase() || '',
-        mappingAdditionalref: currentMapping.additional_ref.toUpperCase() || '',
+        mappingComment: currentMapping.comment?currentMapping.comment.toUpperCase() :'',
+        mappingAdditionalref: currentMapping.additional_ref?currentMapping.additional_ref.toUpperCase() :'',
         mappingElement: currentMapping.element || [{ key: '', value: '', description:'', comment:'' }],
         mappingMetadata: currentMapping.metadata || [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:'' }]
       }
@@ -388,10 +388,10 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     if (currentMapping && Object.keys(currentMapping).length > 0) {
       const resetMappingForm = {
         mappingName: currentMapping.name.toUpperCase() || '',
-        mappingDescription: currentMapping.description.toUpperCase() || '',
+        mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() : '',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingComment: currentMapping.comment.toUpperCase() || '',
-        mappingAdditionalref: currentMapping.additional_ref.toUpperCase() || '',
+        mappingComment: currentMapping.comment?currentMapping.comment.toUpperCase(): '',
+        mappingAdditionalref: currentMapping.additional_ref?currentMapping.additional_ref.toUpperCase(): '',
         mappingElement: [{ key: '', value: '', description: '', comment: ''}],
         mappingMetadata: [{ key: '', value: '', metadata_owner_level: '', metadata_owner_name: ''}]
       }

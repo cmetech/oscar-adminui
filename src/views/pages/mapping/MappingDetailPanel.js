@@ -112,7 +112,7 @@ const CustomToolbar = () => (
         field: 'key',
         headerName: t('Key'),
         flex: 0.015,
-        width: 100,
+        width: 75,
         renderCell: params => {
           const { row } = params
   
@@ -139,7 +139,7 @@ const CustomToolbar = () => (
         field: 'value',
         headerName: t('Value'),
         flex: 0.025,
-        minWidth: 150,
+        minWidth: 275,
         renderCell: params => {
           const { row } = params
           const isVisible = showValueMetadata[row.id] ?? false;
@@ -155,7 +155,17 @@ const CustomToolbar = () => (
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
+              <Typography
+                  noWrap={false} // This is important to allow multiline text
+                  sx={{
+                    whiteSpace: 'normal', // Ensures the text wraps normally
+                    wordWrap: 'break-word', // Helps break long words that don't fit
+                    wordBreak: 'break-word', // Helps with very long words
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  title={row.value.toUpperCase()}
+                >
                   {isVisible ? row.value.toUpperCase() : '********'}
                 </Typography>
               </Box>
@@ -169,60 +179,6 @@ const CustomToolbar = () => (
           </Box>
           )
         }
-      },
-      {
-        field: 'metadata_owner_level',
-        headerName: t('Metadata Owner Level'),
-        flex: 0.025,
-        minWidth: 150,
-        renderCell: params => {
-          const { row } = params
-  
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.metadata_owner_level?.toUpperCase() || ""}>
-                  {row.metadata_owner_level?.toUpperCase() || ""}
-                </Typography>
-              </Box>
-            </Box>
-          )
-        }
-      },
-      {
-        field: 'metadata_owner_name',
-        headerName: t('Metadata Owner Name'),
-        flex: 0.025,
-        minWidth: 150,
-        renderCell: params => {
-          const { row } = params
-  
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.metadata_owner_name?.toUpperCase() || ""}>
-                  {row.metadata_owner_name?.toUpperCase() || ""}
-                </Typography>
-              </Box>
-            </Box>
-          )
-        }
       }
     ]
    
@@ -232,7 +188,7 @@ const CustomToolbar = () => (
         field: 'key',
         headerName: t('Key'),
         flex: 0.015,
-        width: 100,
+        width: 75,
         renderCell: params => {
           const { row } = params
           
@@ -259,11 +215,11 @@ const CustomToolbar = () => (
         field: 'value',
         headerName: t('Value'),
         flex: 0.025,
-        minWidth: 150,
+        minWidth: 275,
         renderCell: params => {
-          const { row } = params
+          const { row } = params;
           const isVisible = showValueElement[row.id] ?? false;
-  
+      
           return (
             <Box
               sx={{
@@ -275,76 +231,32 @@ const CustomToolbar = () => (
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.value.toUpperCase()}>
-                {isVisible ? row.value.toUpperCase() : '********'}
-                </Typography>
-              </Box>
-                <IconButton
-                  aria-label="toggle value visibility"
-                  onClick={() => handleToggleValueVisibilityElement(row.id)} // Pass row.id to track state for each row
-                  sx={{ marginLeft: 1 }}
+                <Typography
+                  noWrap={false} // This is important to allow multiline text
+                  sx={{
+                    whiteSpace: 'normal', // Ensures the text wraps normally
+                    wordWrap: 'break-word', // Helps break long words that don't fit
+                    wordBreak: 'break-word', // Helps with very long words
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  title={row.value.toUpperCase()}
                 >
-                  <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-closed'} />
-                </IconButton>
-            </Box>
-          )
-        }
-      },
-      {
-        field: 'description',
-        headerName: t('Description'),
-        flex: 0.025,
-        minWidth: 150,
-        renderCell: params => {
-          const { row } = params
-  
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.description?.toUpperCase() || ""}>
-                  {row.description?.toUpperCase() || ""}
+                  {isVisible ? row.value.toUpperCase() : '********'}
                 </Typography>
               </Box>
+              <IconButton
+                aria-label="toggle value visibility"
+                onClick={() => handleToggleValueVisibilityElement(row.id)} // Pass row.id to track state for each row
+                sx={{ marginLeft: 1 }}
+              >
+                <Icon icon={isVisible ? 'mdi:eye-outline' : 'mdi:eye-closed'} />
+              </IconButton>
             </Box>
-          )
-        }
-      },
-      {
-        field: 'comment',
-        headerName: t('Comment'),
-        flex: 0.025,
-        minWidth: 150,
-        renderCell: params => {
-          const { row } = params
-  
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '100%',
-                height: '100%'
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.comment?.toUpperCase() || ""}>
-                  {row.comment?.toUpperCase() || ""}
-                </Typography>
-              </Box>
-            </Box>
-          )
+          );
         }
       }
-   ]
+     ]
 
     return (
       <Box sx={{ m: 5 }}>

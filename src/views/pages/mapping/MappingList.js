@@ -261,61 +261,9 @@ const MappingList = props => {
         )
       }
     },
-    {
-      flex: 0.02,
-      field: 'comment',
-      headerName: t('Comment'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.comment}>
-                {row.comment}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.02,
-      field: 'additional_ref',
-      headerName: t('Additional Reference'),
-      renderCell: params => {
-        const { row } = params
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography noWrap overflow='hidden' textOverflow='ellipsis' title={row.additional_ref}>
-                {row.additional_ref?.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
       {
       flex: 0.05,
-      minWidth: 250,
+      minWidth: 150,
       field: 'createdAtTime',
       editable: editmode,
       headerName: t('Created At'),
@@ -353,7 +301,7 @@ const MappingList = props => {
     },
     {
       flex: 0.025,
-      minWidth: 100,
+      minWidth: 150,
       field: 'updatedAtTime',
       align: 'center',
       editable: editmode,

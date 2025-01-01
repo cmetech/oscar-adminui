@@ -53,10 +53,8 @@ const initialMappingFormState = {
   mappingName: '',
   mappingDescription: '',
   mappingNamespaceName: '',
-  mappingComment: '',
-  mappingAdditionalref: '',
-  mappingMetadata: [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:''}],
-  mappingElement: [{key: '', value: '', description:'', comment:''}]
+  mappingMetadata: [{ key: '', value: ''}],
+  mappingElement: [{key: '', value: ''}]
 }
 
 const steps = [
@@ -170,7 +168,7 @@ const Section = ({ title, data }) => {
 
   return (
     <Fragment>
-      {data && data.length > 0 && (
+      {data && data.length > 0 && ( 
         <Fragment>
           <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
             {title.charAt(0).toUpperCase() + title.slice(1)}
@@ -182,7 +180,7 @@ const Section = ({ title, data }) => {
                   <TextField
                     fullWidth
                     label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                    value={itemValue != null ? itemValue.toString() : ""}
+                    value={itemValue != null ? itemValue.toString().toUpperCase() : ""}
                     InputProps={{ readOnly: true }}
                     variant='outlined'
                     margin='normal'
@@ -209,7 +207,7 @@ const ReviewAndSubmitSection = ({ mappingForm }) => {
           return <ReviewAndSubmitSection mappingForm={value} key={key} />
         } else if (Array.isArray(value)) {
           console.log("Going inside Array Section", value);
-          
+
           return <Section title={key} data={value} key={key} />
         } else {
           // For simple key-value pairs
@@ -219,7 +217,7 @@ const ReviewAndSubmitSection = ({ mappingForm }) => {
                 <TextField
                   fullWidth
                   label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value != null ? value.toString() : ""}
+                  value={value != null ? value.toString().toUpperCase() : ""}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
@@ -256,10 +254,8 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         mappingName: currentMapping.name.toUpperCase() || '',
         mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() :'',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingComment: currentMapping.comment?currentMapping.comment.toUpperCase() :'',
-        mappingAdditionalref: currentMapping.additional_ref?currentMapping.additional_ref.toUpperCase() :'',
-        mappingElement: currentMapping.element || [{ key: '', value: '', description:'', comment:'' }],
-        mappingMetadata: currentMapping.metadata || [{ key: '', value: '', metadata_owner_level:'', metadata_owner_name:'' }]
+        mappingElement: currentMapping.element || [{ key: '', value: ''}],
+        mappingMetadata: currentMapping.metadata || [{ key: '', value: ''}]
       }
       setMappingForm(updatedMappingForm)
     }
@@ -303,7 +299,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
 
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'mappingMetadata' ? { key: '', value: '', metadata_owner_level: '', metadata_owner_name:''} : { key: '', value: '', description: '',  comment:''}
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: ''} : { key: '', value: ''}
     const updatedSection = [...mappingForm[section], newEntry]
     setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
@@ -342,8 +338,6 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         const payload = {
           name: mappingForm.mappingName,
           description: mappingForm.mappingDescription,
-          comment: mappingForm.mappingComment,
-          additional_ref: mappingForm.mappingAdditionalref,
           mapping_namespace_name: mappingForm.mappingNamespaceName,
           element: mappingForm.mappingElement.filter(el => {
             return el.key && typeof el.key === 'string' && el.key.trim() !== '';
@@ -390,10 +384,8 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
         mappingName: currentMapping.name.toUpperCase() || '',
         mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() : '',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingComment: currentMapping.comment?currentMapping.comment.toUpperCase(): '',
-        mappingAdditionalref: currentMapping.additional_ref?currentMapping.additional_ref.toUpperCase(): '',
-        mappingElement: [{ key: '', value: '', description: '', comment: ''}],
-        mappingMetadata: [{ key: '', value: '', metadata_owner_level: '', metadata_owner_name: ''}]
+        mappingElement: [{ key: '', value: ''}],
+        mappingMetadata: [{ key: '', value: ''}]
       }
       setMappingForm(resetMappingForm)
 
@@ -410,7 +402,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     return mappingForm[section].map((entry, index) => (
       <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
         <Grid container spacing={3} alignItems='center'>
-          <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
+          <Grid item xs={3}>
             <TextfieldStyled
               key={`field1-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -422,7 +414,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               margin='normal'
             />
           </Grid>
-          <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
+          <Grid item xs={7}>
             <TextfieldStyled
               key={`field2-${section}-${index}-${resetFormFields}`}
               fullWidth
@@ -430,92 +422,13 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               name={section === 'mappingMetadata' ? 'value' : 'value'}
               value={entry.value?entry.value.toUpperCase() : entry.ip_address? entry.ip_address.toUpperCase():''}
               onChange={e => handleFormChange(e, index, section)}
+              multiline
+              rows={5}
               variant='outlined'
               margin='normal'
             />
           </Grid>
           
-          {section === 'mappingMetadata' && (
-            <Grid item xs={3}>
-              <AutocompleteStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                freeSolo
-                clearOnBlur
-                selectOnFocus
-                handleHomeEndKeys
-                id={`autocomplete-${section}-${index}-${resetFormFields}`}
-                options={[' ','Mapping', 'MappingElement']}
-                value={entry.metadata_owner_level || entry.meta_owner_level ||' '}
-                onChange={(event, newValue) => {
-                  handleFormChange({ target: { name: 'metadata_owner_level', value: newValue } }, index, section);
-                }}
-                onInputChange={(event, newInputValue) => {
-                  if (event) {
-                    handleFormChange({ target: { name: 'metadata_owner_level', value: newInputValue } }, index, section);
-                  }
-                }}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    label="Metadata Owner Level"
-                    fullWidth
-                    required
-                    autoComplete="off"
-                  />
-                )}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
-
-          {section === 'mappingMetadata' && (
-            <Grid item xs={section === 'mappingMetadata' ? 3 : 3}>
-              <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label={section === 'mappingMetadata' ? 'Metadata Owner Name' : 'Meta Name'}
-                name={section === 'mappingMetadata' ? 'metadata_owner_name' : 'meta_name'}
-                value={entry.metadata_owner_name? entry.metadata_owner_name.toUpperCase() :  entry.metadata_owner_name? entry.ip_address.toUpperCase() : ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
-
-          {section === 'mappingElement' && (
-            <Grid item xs={3}>
-              <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label='Description'
-                name='description'
-                value={entry.description?entry.description.toUpperCase(): ''}
-                onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
-
-          {section === 'mappingElement' && (
-            <Grid item xs={3}>
-              <TextfieldStyled
-                key={`field2-${section}-${index}-${resetFormFields}`}
-                fullWidth
-                label='Comment'
-                name='comment'
-                value={entry.comment? entry.comment.toUpperCase(): ''}
-                onChange={e => handleFormChange(e, index, section)}
-                onBlur={e => validateField(e.target.name, e.target.value, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-          )}
 
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton
@@ -602,30 +515,6 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Mapping Namespace Name' fullWidth required autoComplete='off' />
                   )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextfieldStyled
-                  required
-                  id='mappingComment'
-                  name='mappingComment'
-                  label='Mapping Comment'
-                  fullWidth
-                  autoComplete='off'
-                  value={mappingForm.mappingComment}
-                  onChange={handleFormChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextfieldStyled
-                  required
-                  id='mappingAdditionalref'
-                  name='mappingAdditionalref'
-                  label='Mapping Additional Reference'
-                  fullWidth
-                  autoComplete='off'
-                  value={mappingForm.mappingAdditionalref}
-                  onChange={handleFormChange}
                 />
               </Grid>
             </Grid>

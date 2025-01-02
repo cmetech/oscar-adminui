@@ -663,7 +663,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                     required
                     id='mappingName'
                     name='mappingName'
-                    label='Mapping Name'
+                    label='Name'
                     fullWidth
                     autoComplete='off'
                     value={mappingForm.mappingName}
@@ -680,7 +680,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                     required
                     id='mappingDescription'
                     name='mappingDescription'
-                    label='Mapping Description'
+                    label='Description'
                     fullWidth
                     autoComplete='off'
                     value={mappingForm.mappingDescription}
@@ -711,7 +711,7 @@ const AddMappingWizard = ({ onSuccess, ...props }) => {
                   }}
                   onBlur={e => validateField(e.target.name, e.target.value)}
                   renderInput={params => (
-                    <TextField {...params} label='Mapping Namespace Name' fullWidth required autoComplete='off' />
+                    <TextField {...params} label='Namespace Name' fullWidth required autoComplete='off' />
                   )}
                   error={!!formErrors.mappingNamespaceName}
                   helperText={formErrors.mappingNamespaceName || ''}

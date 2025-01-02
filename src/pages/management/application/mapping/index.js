@@ -188,20 +188,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tab
             >
               <Box sx={styles}>
                 <Icon icon='mdi:delete-forever-outline' />
-                {t('Delete')} {t(getDynamicTitle(tabValue))}
-              </Box>
-            </MenuItem>
-            <MenuItem
-              sx={{ p: 0 }}
-              onClick={() => {
-                onStatusUpdate && onStatusUpdate()
-                handleDropdownClose()
-              }}
-              disabled={!ability.can('update', getDynamicTitle(tabValue).toLowerCase())}
-            >
-              <Box sx={styles}>
-                <Icon icon='mdi:power' />
-                {t('Update Status')}
+                {t('Delete')}
               </Box>
             </MenuItem>
           </>
@@ -230,7 +217,7 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tab
           >
             <Box sx={styles}>
               <Icon icon='mdi:upload' />
-              {t('Upload Mappings')}
+              {t('Upload')}
             </Box>
           </MenuItem>
         )}
@@ -517,7 +504,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicTitle = tabValue => {
     const mapping = {
-      1: 'Add Mapping Namespace Wizard',
+      1: 'Add Namespace Wizard',
       2: 'Add Mapping Wizard'
     }
 
@@ -526,7 +513,7 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
 
   const getDynamicSubTitle = tabValue => {
     const mapping = {
-      1: 'Add Mapping Namespace Information',
+      1: 'Add Namespace Information',
       2: 'Add Mapping Information'
     }
 
@@ -845,7 +832,7 @@ const Settings = () => {
   // Function to determine the dynamic text based on the selected tab
   const getDynamicText = tabValue => {
     const mapping = {
-      1: t('Mapping Namespace'),
+      1: t('Namespace'),
       2: t('Mapping')
     }
 
@@ -886,7 +873,7 @@ const Settings = () => {
             {/* Mapping-Namespaces Tab */}
             <Tab
               value='1'
-              label={mappingNamespaceTotal == 0 ? t('MappingNamespaces') : `${t('MappingNamespaces')} (${mappingNamespaceTotal})`}
+              label={mappingNamespaceTotal == 0 ? t('Namespaces') : `${t('Namespaces')} (${mappingNamespaceTotal})`}
               icon={<Icon icon='mdi:file-table-box-multiple' />}
               iconPosition='start'
             />

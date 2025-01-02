@@ -373,8 +373,8 @@ const MappingList = props => {
               </IconButton>
               <IconButton
                 size='small'
-                title='Delete Mapping'
-                aria-label='Delete Mapping'
+                title='Delete'
+                aria-label='Delete'
                 color='error'
                 onClick={() => {
                   setCurrentMapping(params.row)

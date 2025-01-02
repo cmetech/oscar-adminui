@@ -739,24 +739,20 @@ const Settings = () => {
 
     try {
       const response = await axios.put(endpoint, {
-        ids: ids[tab] // Assuming the API expects an object with an ids array
+        ids: ids[tab]
       })
 
       // Handle 204 No Content response here
       // Handle successful deletion here, e.g., show a notification, refresh the list, etc.
       if (response.status === 204) {
-        toast.success('Servers deleted successfully')
-
-        // Trigger a refetch of the data
+        toast.success(`${getDynamicText(tab)} deleted successfully`)
         refecthTriggers[tab](Date.now())
       } else {
-        toast.error('Error deleting servers')
+        toast.error(`Error deleting ${getDynamicText(tab).toLowerCase()}`)
       }
     } catch (error) {
-      console.error('Error deleting servers:', error)
-
-      // Handle errors here, e.g., show an error notification
-      toast.error('Error deleting servers')
+      console.error(`Error deleting ${getDynamicText(tab).toLowerCase()}:`, error)
+      toast.error(`Error deleting ${getDynamicText(tab).toLowerCase()}`)
     }
 
     setIsDeleteModalOpen(false)
@@ -885,7 +881,7 @@ const Settings = () => {
         <Box display='flex' justifyContent='space-between' alignItems='center' mb={10}>
           <Typography variant='h4'>{t('Inventory Management')}</Typography>
           <Box display='flex' alignItems='center'>
-            {['1', '2', '3'].includes(value) && (
+            {['1', '2', '3', '4', '5'].includes(value) && (
               <Fragment>
                 <Button
                   variant='contained'

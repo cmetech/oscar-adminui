@@ -188,6 +188,13 @@ const navigation = () => {
           icon: 'mdi:clock-time-eight-outline',
           action: 'manage',
           subject: 'runtime'
+        },
+        {
+          title: 'Mapping',
+          path: '/management/application/mapping',
+          icon: 'mdi:table-key',
+          action: 'manage',
+          subject: 'runtime'
         }
       ]
     },

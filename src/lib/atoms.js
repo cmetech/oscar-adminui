@@ -94,3 +94,11 @@ export const suppressionIdsAtom = atom([])
 export const suppressionsAtom = atom([])
 
 export const refetchSuppressionsTriggerAtom = atom(0)
+
+export const mappingNamespacesAtom = atom([])
+
+export const refetchMappingNamespaceTriggerAtom = atom(0)
+
+export const mappingsAtom = atom([])
+
+export const refetchMappingTriggerAtom = atom(0)

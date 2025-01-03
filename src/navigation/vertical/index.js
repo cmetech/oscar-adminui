@@ -191,7 +191,7 @@ const navigation = () => {
         },
         {
           title: 'Mappings',
-          path: '/management/application/mapping',
+          path: '/management/application/mappings',
           icon: 'mdi:table-key',
           action: 'manage',
           subject: 'runtime'

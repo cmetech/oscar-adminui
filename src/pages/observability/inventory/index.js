@@ -126,7 +126,6 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tab
   const [anchorEl, setAnchorEl] = useState(null)
   const { t } = useTranslation()
   const ability = useContext(AbilityContext)
-
   const router = useRouter()
 
   const handleDropdownOpen = event => {
@@ -171,6 +170,8 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tab
 
   // Define tabs where the Delete menu item should be shown
   const deletableTabs = ['3', '4', '5']
+  const showStatusUpdateTab = ['1', '2', '3']
+  const showExportTab = tabValue === '3'
   const showUploadServersTab = tabValue === '3'
 
   return (
@@ -201,34 +202,38 @@ const MoreActionsDropdown = ({ onDelete, onExport, onUpload, onStatusUpdate, tab
                 {t('Delete')} {t(getDynamicTitle(tabValue))}
               </Box>
             </MenuItem>
-            <MenuItem
-              sx={{ p: 0 }}
-              onClick={() => {
-                onStatusUpdate && onStatusUpdate()
-                handleDropdownClose()
-              }}
-              disabled={!ability.can('update', getDynamicTitle(tabValue).toLowerCase())}
-            >
-              <Box sx={styles}>
-                <Icon icon='mdi:power' />
-                {t('Update Status')}
-              </Box>
-            </MenuItem>
           </>
         )}
-        <MenuItem
-          sx={{ p: 0 }}
-          onClick={() => {
-            onExport()
-            handleDropdownClose()
-          }}
-          disabled={!ability.can('read', getDynamicTitle(tabValue).toLowerCase())}
-        >
-          <Box sx={styles}>
-            <Icon icon='mdi:file-export-outline' />
-            {t('Export')}
-          </Box>
-        </MenuItem>
+        {showStatusUpdateTab.includes(tabValue) && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onStatusUpdate && onStatusUpdate()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('update', getDynamicTitle(tabValue).toLowerCase())}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:power' />
+              {t('Update Status')}
+            </Box>
+          </MenuItem>
+        )}
+        {showExportTab && (
+          <MenuItem
+            sx={{ p: 0 }}
+            onClick={() => {
+              onExport()
+              handleDropdownClose()
+            }}
+            disabled={!ability.can('read', getDynamicTitle(tabValue).toLowerCase())}
+          >
+            <Box sx={styles}>
+              <Icon icon='mdi:file-export-outline' />
+              {t('Export')}
+            </Box>
+          </MenuItem>
+        )}
         {showUploadServersTab && (
           <MenuItem
             sx={{ p: 0 }}

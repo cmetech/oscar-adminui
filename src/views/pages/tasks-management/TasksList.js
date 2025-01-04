@@ -1124,9 +1124,8 @@ const TasksList = props => {
 
   const fetchData = useCallback(
     async filter_model => {
-      // Remove the requestCompleted flag as we'll handle this differently
       setLoading(true)
-      dataLoadedRef.current = false
+      let requestSuccessful = false
 
       try {
         const response = await axios.get('/api/tasks', {
@@ -1140,17 +1139,17 @@ const TasksList = props => {
           timeout: 30000
         })
 
-        // If we get here, we have successful data
-        setRowCount(response.data.total_records)
-        setRows(response.data.records)
-        props.set_total(response.data.total_records)
-        setTasks(response.data.records)
-
-        // Data has been successfully loaded
-        dataLoadedRef.current = true
+        // Only update state if we got a successful response
+        if (response.data && response.data.records) {
+          setRowCount(response.data.total_records)
+          setRows(response.data.records)
+          props.set_total(response.data.total_records)
+          setTasks(response.data.records)
+          requestSuccessful = true
+        }
       } catch (error) {
-        // Only show error toast if it's not a timeout and we don't have data
-        if (error.code !== 'ECONNABORTED' && !dataLoadedRef.current) {
+        // Only show error if we haven't successfully loaded data
+        if (!requestSuccessful && error.code !== 'ECONNABORTED') {
           console.error(t('Failed to fetch tasks'), error)
           toast.error(t('Failed to fetch tasks'))
         }

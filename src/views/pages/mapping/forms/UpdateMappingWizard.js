@@ -53,8 +53,8 @@ const initialMappingFormState = {
   mappingName: '',
   mappingDescription: '',
   mappingNamespaceName: '',
-  mappingMetadata: [{ key: '', value: ''}],
-  mappingElement: [{key: '', value: ''}]
+  mappingMetadata: [{ key: '', value: '' }],
+  mappingElement: [{ key: '', value: '' }]
 }
 
 const steps = [
@@ -164,11 +164,11 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 }))
 
 const Section = ({ title, data }) => {
- console.log("Section with title" + title + "Data with "+ data)
+  console.log('Section with title' + title + 'Data with ' + data)
 
   return (
     <Fragment>
-      {data && data.length > 0 && ( 
+      {data && data.length > 0 && (
         <Fragment>
           <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
             {title.charAt(0).toUpperCase() + title.slice(1)}
@@ -180,7 +180,7 @@ const Section = ({ title, data }) => {
                   <TextField
                     fullWidth
                     label={itemKey.charAt(0).toUpperCase() + itemKey.slice(1)}
-                    value={itemValue != null ? itemValue.toString().toUpperCase() : ""}
+                    value={itemValue != null ? itemValue.toString().toUpperCase() : ''}
                     InputProps={{ readOnly: true }}
                     variant='outlined'
                     margin='normal'
@@ -189,24 +189,24 @@ const Section = ({ title, data }) => {
               ))}
             </Grid>
           ))}
-      </Fragment>
-        )}
+        </Fragment>
+      )}
     </Fragment>
   )
 }
 
 const ReviewAndSubmitSection = ({ mappingForm }) => {
-  console.log("Review And Submit Section started with" + mappingForm)
-  
+  console.log('Review And Submit Section started with' + mappingForm)
+
   return (
     <Fragment>
       {Object.entries(mappingForm).map(([key, value]) => {
-        console.log("Logging----->  Key:" +key+ "Value:", value);
+        console.log('Logging----->  Key:' + key + 'Value:', value)
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           // For nested objects (excluding arrays), recursively render sections
           return <ReviewAndSubmitSection mappingForm={value} key={key} />
         } else if (Array.isArray(value)) {
-          console.log("Going inside Array Section", value);
+          console.log('Going inside Array Section', value)
 
           return <Section title={key} data={value} key={key} />
         } else {
@@ -217,7 +217,7 @@ const ReviewAndSubmitSection = ({ mappingForm }) => {
                 <TextField
                   fullWidth
                   label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  value={value != null ? value.toString().toUpperCase() : ""}
+                  value={value != null ? value.toString().toUpperCase() : ''}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
@@ -232,7 +232,6 @@ const ReviewAndSubmitSection = ({ mappingForm }) => {
 }
 
 const UpdateMappingWizard = ({ onClose, ...props }) => {
-
   // Destructure all props here
   const { currentMapping, rows, setRows } = props
 
@@ -252,10 +251,10 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     if (currentMapping && Object.keys(currentMapping).length > 0) {
       const updatedMappingForm = {
         mappingName: currentMapping.name.toUpperCase() || '',
-        mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() :'',
+        mappingDescription: currentMapping.description ? currentMapping.description.toUpperCase() : '',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingElement: currentMapping.element || [{ key: '', value: ''}],
-        mappingMetadata: currentMapping.metadata || [{ key: '', value: ''}]
+        mappingElement: currentMapping.element || [{ key: '', value: '' }],
+        mappingMetadata: currentMapping.metadata || [{ key: '', value: '' }]
       }
       setMappingForm(updatedMappingForm)
     }
@@ -279,7 +278,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     fetchMappingNamespaces()
   }, [])
 
-    // Function to handle form field changes
+  // Function to handle form field changes
   const handleFormChange = (event, index, section) => {
     const { name, value } = event.target
 
@@ -299,7 +298,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
 
   // Function to add a new entry to a dynamic section
   const addSectionEntry = section => {
-    const newEntry = section === 'mappingMetadata' ? { key: '', value: ''} : { key: '', value: ''}
+    const newEntry = section === 'mappingMetadata' ? { key: '', value: '' } : { key: '', value: '' }
     const updatedSection = [...mappingForm[section], newEntry]
     setMappingForm({ ...mappingForm, [section]: updatedSection })
   }
@@ -321,7 +320,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
   }
 
   const handleNext = async () => {
-    if (activeStep === 1 || activeStep ==2) {
+    if (activeStep === 1 || activeStep == 2) {
       // Assuming step 1 is Network Info and step 2 is Metadata Info
       setResetFormFields(prev => !prev) // Toggle reset state to force UI update
     }
@@ -340,10 +339,10 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
           description: mappingForm.mappingDescription,
           mapping_namespace_name: mappingForm.mappingNamespaceName,
           element: mappingForm.mappingElement.filter(el => {
-            return el.key && typeof el.key === 'string' && el.key.trim() !== '';
+            return el.key && typeof el.key === 'string' && el.key.trim() !== ''
           }),
           metadata: mappingForm.mappingMetadata.filter(md => {
-            return md.key && typeof md.key === 'string' && md.key.trim() !== '';
+            return md.key && typeof md.key === 'string' && md.key.trim() !== ''
           })
         }
 
@@ -382,20 +381,18 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
     if (currentMapping && Object.keys(currentMapping).length > 0) {
       const resetMappingForm = {
         mappingName: currentMapping.name.toUpperCase() || '',
-        mappingDescription: currentMapping.description?currentMapping.description.toUpperCase() : '',
+        mappingDescription: currentMapping.description ? currentMapping.description.toUpperCase() : '',
         mappingNamespaceName: currentMapping.mapping_namespace_name.toUpperCase() || '',
-        mappingElement: [{ key: '', value: ''}],
-        mappingMetadata: [{ key: '', value: ''}]
+        mappingElement: [{ key: '', value: '' }],
+        mappingMetadata: [{ key: '', value: '' }]
       }
       setMappingForm(resetMappingForm)
-
     } else {
       setMappingForm(initialMappingFormState) // Fallback to initial state if currentServer is not available
     }
     setResetFormFields(false)
     setActiveStep(0)
   }
-
 
   // Render form fields for metadata
   const renderDynamicFormSection = section => {
@@ -408,7 +405,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               fullWidth
               label={section === 'mappingMetadata' ? 'Key' : 'Key'}
               name={section === 'mappingMetadata' ? 'key' : 'key'}
-              value={entry.key? entry.key.toUpperCase() : entry.name? entry.name.toUpperCase():''}
+              value={entry.key ? entry.key.toUpperCase() : entry.name ? entry.name.toUpperCase() : ''}
               onChange={e => handleFormChange(e, index, section)}
               variant='outlined'
               margin='normal'
@@ -420,7 +417,7 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               fullWidth
               label={section === 'mappingMetadata' ? 'Value' : 'Value'}
               name={section === 'mappingMetadata' ? 'value' : 'value'}
-              value={entry.value?entry.value.toUpperCase() : entry.ip_address? entry.ip_address.toUpperCase():''}
+              value={entry.value ? entry.value.toUpperCase() : entry.ip_address ? entry.ip_address.toUpperCase() : ''}
               onChange={e => handleFormChange(e, index, section)}
               multiline
               rows={5}
@@ -428,7 +425,6 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
               margin='normal'
             />
           </Grid>
-          
 
           <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             <IconButton
@@ -503,47 +499,46 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
                   id='mappingNamespaceName-autocomplete'
                   options={mappingNamespaces}
                   value={mappingForm.mappingNamespaceName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'mappingNamespaceName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'mappingNamespaceName', value: newInputValue } }, null, null)
-                    }
-                  }}
+                  disabled={true}
                   renderInput={params => (
-                    <TextfieldStyled {...params} label='Mapping Namespace Name' fullWidth required autoComplete='off' />
+                    <TextfieldStyled
+                      {...params}
+                      label='Mapping Namespace Name'
+                      fullWidth
+                      required
+                      autoComplete='off'
+                      disabled={true}
+                    />
                   )}
                 />
               </Grid>
             </Grid>
           </Fragment>
         )
-        case 1:
-          return (
-            <Fragment>
-              <Stack direction='column' spacing={1}>
-                {renderDynamicFormSection('mappingElement')}
-                <Box>
-                  <Button
-                    startIcon={
-                      <Icon
-                        icon='mdi:plus-circle-outline'
-                        style={{
-                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                        }}
-                      />
-                    }
-                    onClick={() => addSectionEntry('mappingElement')}
-                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
-                  >
-                    Update Mapping Element
-                  </Button>
-                </Box>
-              </Stack>
-            </Fragment>
-          )
+      case 1:
+        return (
+          <Fragment>
+            <Stack direction='column' spacing={1}>
+              {renderDynamicFormSection('mappingElement')}
+              <Box>
+                <Button
+                  startIcon={
+                    <Icon
+                      icon='mdi:plus-circle-outline'
+                      style={{
+                        color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                      }}
+                    />
+                  }
+                  onClick={() => addSectionEntry('mappingElement')}
+                  style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }} // Optional: Also conditionally change the text color of the button
+                >
+                  Update Mapping Element
+                </Button>
+              </Box>
+            </Stack>
+          </Fragment>
+        )
       case 2:
         return (
           <Fragment>
@@ -649,4 +644,3 @@ const UpdateMappingWizard = ({ onClose, ...props }) => {
 }
 
 export default UpdateMappingWizard
-

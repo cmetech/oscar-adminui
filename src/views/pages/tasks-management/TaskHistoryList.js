@@ -232,7 +232,7 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
     },
     {
       flex: 0.015,
-      field: 'status',
+      field: 'state',
       headerName: t('Status'),
       align: 'center',
       headerAlign: 'center',
@@ -243,7 +243,7 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
         let label = 'UNKN'
         if (row?.state?.toUpperCase() === 'SUCCESS') {
           color = 'success'
-          label = 'COMPLETED'
+          label = 'SUCCESS'
         } else {
           color = 'error'
           label = 'FAILURE'
@@ -502,25 +502,34 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
 
   // Trigger based on filter
   useEffect(() => {
-    console.log('Effect Run:', { itemsLength: filterModel.items.length, runFilterQuery })
-    console.log('Filter Model:', JSON.stringify(filterModel))
+    if (!runFilterQuery) {
+      return
+    }
+    console.log('Filter Effect Running:', {
+      itemsLength: filterModel.items.length,
+      runFilterQuery
+    })
 
     if (runFilterQuery && filterModel.items.length > 0) {
       if (filterMode === 'server') {
         const sort = sortModel[0]?.sort
         const sortColumn = sortModel[0]?.field
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(prevRunFilterQueryCount => (prevRunFilterQueryCount += 1))
     } else if (runFilterQuery && filterModel.items.length === 0 && runFilterQueryCount > 0) {
       if (filterMode === 'server') {
-        fetchData(filterModel)
+        fetchData(filterModel).then(() => {
+          setRunFilterQuery(false)
+          setRunFilterQueryCount(0)
+        })
       } else {
         // client side filtering
       }
-      setRunFilterQueryCount(0)
     } else {
       console.log('Conditions not met', { itemsLength: filterModel.items.length, runFilterQuery })
     }

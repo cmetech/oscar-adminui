@@ -1135,8 +1135,7 @@ const TasksList = props => {
             skip: paginationModel.page + 1,
             limit: paginationModel.pageSize,
             filter: filter_model ? JSON.stringify(filter_model) : undefined
-          },
-          timeout: 30000
+          }
         })
 
         // Only update state if we got a successful response
@@ -1149,7 +1148,7 @@ const TasksList = props => {
         }
       } catch (error) {
         // Only show error if we haven't successfully loaded data
-        if (!requestSuccessful && error.code !== 'ECONNABORTED') {
+        if (!requestSuccessful) {
           console.error(t('Failed to fetch tasks'), error)
           toast.error(t('Failed to fetch tasks'))
         }

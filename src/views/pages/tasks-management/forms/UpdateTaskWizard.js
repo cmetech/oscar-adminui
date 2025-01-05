@@ -1642,7 +1642,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                     displayEmpty
                   >
                     <MenuItem value='' sx={{ height: '32px' }}>
-                      <em>&nbsp;</em>
+                      <em>None</em>
                     </MenuItem>
                     {datacenters.map(datacenter => (
                       <MenuItem key={datacenter} value={datacenter}>

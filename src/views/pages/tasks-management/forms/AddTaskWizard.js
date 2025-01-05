@@ -84,7 +84,8 @@ const initialTaskFormState = {
   promptForAPIKey: false,
   promptForSudoCredentials: false,
   environments: [],
-  components: []
+  components: [],
+  subcomponents: []
 }
 
 const steps = [
@@ -694,6 +695,7 @@ const AddTaskWizard = ({ onClose }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
   const [components, setComponents] = useState([])
+  const [subcomponents, setSubcomponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
   const [selectedDatacenter, setSelectedDatacenter] = useState('')
@@ -758,10 +760,22 @@ const AddTaskWizard = ({ onClose }) => {
       }
     }
 
+    const fetchSubcomponents = async () => {
+      try {
+        const response = await axios.get('/api/inventory/subcomponents')
+        const data = response.data.rows
+        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
+        setSubcomponents(subcomponentNames)
+      } catch (error) {
+        console.error('Failed to fetch subcomponents:', error)
+      }
+    }
+
     fetchDatacenters()
 
     // fetchEnviroments()
     // fetchComponents()
+    // fetchSubcomponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
   useEffect(() => {
@@ -791,6 +805,18 @@ const AddTaskWizard = ({ onClose }) => {
     }
     fetchComponents()
   }, [taskForm.environments])
+
+  useEffect(() => {
+    const fetchSubcomponents = async () => {
+      if (taskForm.components.length > 0) {
+        const response = await axios.get('/api/inventory/subcomponents')
+        const data = response.data.rows
+        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
+        setSubcomponents(subcomponentNames)
+      }
+    }
+    fetchSubcomponents()
+  }, [taskForm.components])
 
   // Function to handle form field changes
   // Function to handle form field changes for dynamic sections
@@ -901,13 +927,28 @@ const AddTaskWizard = ({ onClose }) => {
           Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
         }
 
+        let processedComponents = taskForm.components
+        if (taskForm.components?.length > 0 && taskForm.subcomponents?.length > 0) {
+          processedComponents = taskForm.components
+            .map(component => {
+              const matchingSubcomponents = taskForm.subcomponents
+
+              return matchingSubcomponents.map(subcomponent => `${component}:${subcomponent}`)
+            })
+            .flat()
+        }
+
         const payload = {
           ...taskForm,
           args: taskForm.args.map(arg => arg.value),
           hosts: taskForm.hosts.map(host => host.ip_address),
           kwargs: Object.fromEntries(taskForm.kwargs.map(({ key, value }) => [key, value])),
-          metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value]))
+          metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value])),
+          components: processedComponents
         }
+
+        // Remove subcomponents from payload
+        delete payload.subcomponents
 
         // console.log('Payload:', payload)
 
@@ -1331,7 +1372,7 @@ const AddTaskWizard = ({ onClose }) => {
           <Fragment>
             <Grid container spacing={3} alignItems='center'>
               {/* Datacenter */}
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <FormControl fullWidth>
                   <InputLabelStyled>Datacenter</InputLabelStyled>
                   <SelectStyled
@@ -1359,7 +1400,7 @@ const AddTaskWizard = ({ onClose }) => {
               </Grid>
 
               {/* Environments */}
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <AutocompleteStyled
                   multiple
                   id='environments-autocomplete'
@@ -1383,7 +1424,7 @@ const AddTaskWizard = ({ onClose }) => {
               </Grid>
 
               {/* Components */}
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <AutocompleteStyled
                   multiple
                   id='components-autocomplete'
@@ -1403,6 +1444,30 @@ const AddTaskWizard = ({ onClose }) => {
                     />
                   )}
                   disabled={!taskForm.environments.length}
+                />
+              </Grid>
+
+              {/* Subcomponents */}
+              <Grid item xs={12} sm={3}>
+                <AutocompleteStyled
+                  multiple
+                  id='subcomponents-autocomplete'
+                  options={subcomponents}
+                  getOptionLabel={option => option}
+                  value={taskForm.subcomponents}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'subcomponents', value: newValue } })
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      variant='outlined'
+                      label='Subcomponents'
+                      placeholder='Select multiple subcomponents'
+                      fullWidth
+                    />
+                  )}
+                  disabled={!taskForm.components.length}
                 />
               </Grid>
             </Grid>

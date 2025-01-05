@@ -126,6 +126,17 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
   // You can add more styles here for other parts of the input
 }))
 
+const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: theme.palette.customColors.accent
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.customColors.accent
+    }
+  }
+}))
+
 // Define validation schema for form
 const validationSchema = yup.object({
   componentName: yup
@@ -323,7 +334,7 @@ const UpdateComponentWizard = ({ onClose, ...props }) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Autocomplete
+                <AutocompleteStyled
                   freeSolo
                   clearOnBlur
                   selectOnFocus

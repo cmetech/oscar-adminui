@@ -952,7 +952,14 @@ const Settings = () => {
             )}
           </TabList>
           <TabPanel value='1'>
-            <DatacentersList set_total={setDatacenterTotal} total={datacenterTotal} />
+            <DatacentersList
+              set_total={setDatacenterTotal}
+              set_components_total={setComponentTotal}
+              set_subcomponents_total={setSubcomponentTotal}
+              set_servers_total={setServerTotal}
+              set_environments_total={setEnvironmentTotal}
+              total={datacenterTotal}
+            />
           </TabPanel>
           <TabPanel value='2'>
             <EnvironmentsList set_total={setEnvironmentTotal} total={environmentTotal} />

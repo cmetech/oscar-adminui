@@ -84,7 +84,8 @@ const initialTaskFormState = {
   promptForAPIKey: false,
   promptForSudoCredentials: false,
   environments: [],
-  components: []
+  components: [],
+  subcomponents: []
 }
 
 const steps = [
@@ -659,6 +660,16 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
           margin='normal'
         />
       </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextfieldStyled
+          fullWidth
+          label='Subcomponents'
+          value={taskForm.subcomponents.join(', ') || 'N/A'} // Join the array values into a string
+          InputProps={{ readOnly: true }}
+          variant='outlined'
+          margin='normal'
+        />
+      </Grid>
       {hosts.map((host, index) => (
         <Grid item xs={6} key={`arg-${index}`}>
           <TextfieldStyled
@@ -721,17 +732,16 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
 const UpdateTaskWizard = ({ onClose, ...props }) => {
-  // Destructure all props here
-  const { currentTask, rows, setRows } = props
+  const { currentTask } = props
 
   // ** States
   const [taskForm, setTaskForm] = useState(initialTaskFormState)
-  const [activeStep, setActiveStep] = useState(0)
-  const [resetFormFields, setResetFormFields] = useState(false)
-  const [components, setComponents] = useState([])
-  const [subcomponents, setSubcomponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
+  const [components, setComponents] = useState([])
+  const [subcomponents, setSubcomponents] = useState([])
+  const [activeStep, setActiveStep] = useState(0)
+  const [resetFormFields, setResetFormFields] = useState(false)
   const [selectedDatacenter, setSelectedDatacenter] = useState('')
   const [selectedEnvironments, setSelectedEnvironments] = useState([])
   const [selectedComponents, setSelectedComponents] = useState([])
@@ -751,163 +761,170 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
     handleFormChange({ target: { name: 'schedule.end_date', value: dateRange[1] } }, null, null)
   }, [dateRange])
 
-  // Use useEffect to initialize the form with currentTask data
+  // Fetch task config and reset taskForm when currentTask changes
   useEffect(() => {
-    // Check if currentTask exists and is not empty
-    if (currentTask && Object.keys(currentTask).length > 0) {
-      let promptForCredentials = false
-      let promptForAPIKey = false
+    const fetchTaskConfig = async () => {
+      // Reset taskForm to initial state when currentTask changes
+      setTaskForm(initialTaskFormState)
 
-      // Check directly in the object form of metadata before it's converted into an array
-      if (currentTask?.metadata && currentTask.metadata['credentials'] === '1') {
-        promptForCredentials = true
-      }
+      if (currentTask?.name) {
+        try {
+          const response = await axios.get(`/api/tasks/config/${currentTask.name}`)
+          const taskConfig = response.data
 
-      if (currentTask?.metadata && currentTask.metadata['api_key'] === '1') {
-        promptForAPIKey = true
-      }
+          // Safely process args with null checking and type validation
+          const processedArgs = (() => {
+            if (!taskConfig.args) return [{ value: '' }]
+            if (!Array.isArray(taskConfig.args)) return [{ value: '' }]
 
-      // Initialize the taskForm with the currentTask schedule data
-      const { schedule } = currentTask || {}
+            return taskConfig.args.map(arg => ({
+              value: arg != null ? String(arg) : '' // Convert to string or empty string if null
+            }))
+          })()
 
-      // Check if schedule exists before destructuring
-      const { id, task_id, created_at, modified_at, ...scheduleFields } = schedule || {}
+          // Safely process kwargs with null checking
+          const processedKwargs = (() => {
+            if (!taskConfig.kwargs || typeof taskConfig.kwargs !== 'object') {
+              return [{ key: '', value: '' }]
+            }
 
-      // Dynamically filter out undefined, null, or empty string values from scheduleFields
-      const filteredScheduleFields = Object.entries(scheduleFields).reduce((acc, [key, value]) => {
-        if (value || typeof value === 'number') {
-          // Including '0' as a valid value
-          acc[key] = value
+            return Object.entries(taskConfig.kwargs).map(([key, value]) => ({
+              key: key || '',
+              value: value != null ? String(value) : '' // Convert to string or empty string if null
+            }))
+          })()
+
+          // Parse components and subcomponents with null checking
+          let parsedComponents = []
+          let parsedSubcomponents = []
+
+          if (Array.isArray(taskConfig.components) && taskConfig.components.length > 0) {
+            taskConfig.components.forEach(component => {
+              if (component && typeof component === 'string') {
+                if (component.includes(':')) {
+                  const [comp, subcomp] = component.split(':')
+                  if (comp && !parsedComponents.includes(comp)) {
+                    parsedComponents.push(comp)
+                  }
+                  if (subcomp && !parsedSubcomponents.includes(subcomp)) {
+                    parsedSubcomponents.push(subcomp)
+                  }
+                } else {
+                  if (!parsedComponents.includes(component)) {
+                    parsedComponents.push(component)
+                  }
+                }
+              }
+            })
+          }
+
+          // Safely process other fields
+          const datacenterValue = taskConfig.datacenter ? String(taskConfig.datacenter) : ''
+
+          // Update form with fetched config and safe values
+          setTaskForm(prevForm => ({
+            ...initialTaskFormState,
+            ...taskConfig,
+            datacenter: datacenterValue,
+            args: processedArgs,
+            kwargs: processedKwargs,
+            components: parsedComponents,
+            subcomponents: parsedSubcomponents,
+            prompts: Array.isArray(taskConfig.prompts)
+              ? taskConfig.prompts.map(prompt => ({
+                  prompt: prompt?.prompt || '',
+                  default_value: prompt?.default_value || '',
+                  value: prompt?.value || ''
+                }))
+              : [{ prompt: '', default_value: '', value: '' }],
+            metadata:
+              taskConfig.metadata && typeof taskConfig.metadata === 'object'
+                ? Object.entries(taskConfig.metadata).map(([key, value]) => ({
+                    key: key || '',
+                    value: value != null ? String(value) : ''
+                  }))
+                : [{ key: '', value: '' }],
+            hosts: Array.isArray(taskConfig.hosts)
+              ? taskConfig.hosts.map(host => ({
+                  ip_address: host != null ? String(host) : ''
+                }))
+              : [{ ip_address: '' }],
+            environments: Array.isArray(taskConfig.environments) ? taskConfig.environments.map(env => String(env)) : []
+          }))
+
+          // Fetch datacenters
+          try {
+            const dcResponse = await axios.get('/api/inventory/datacenters')
+            const datacenterNames = dcResponse.data.rows.map(dc => dc.name)
+            setDatacenters(datacenterNames)
+
+            // Fetch environments if datacenter exists
+            if (datacenterValue) {
+              try {
+                const envResponse = await axios.get(`/api/inventory/environments?datacenter_name=${datacenterValue}`)
+                const environmentNames = envResponse.data.rows.map(env => env.name)
+                setEnvironments(environmentNames)
+              } catch (error) {
+                console.error('Error fetching environments:', error)
+                setEnvironments([])
+              }
+            } else {
+              setEnvironments([])
+            }
+          } catch (error) {
+            console.error('Error fetching datacenters:', error)
+          }
+
+          // Fetch components and subcomponents if not already fetched
+          if (components.length === 0 || subcomponents.length === 0) {
+            try {
+              const compResponse = await axios.get('/api/inventory/components')
+              const componentNames = compResponse.data.rows.map(comp => comp.name)
+              setComponents(componentNames)
+
+              const subcompResponse = await axios.get('/api/inventory/subcomponents')
+              const subcomponentNames = subcompResponse.data.rows.map(subcomp => subcomp.name)
+              setSubcomponents(subcomponentNames)
+            } catch (error) {
+              console.error('Error fetching components and subcomponents:', error)
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching task configuration:', error)
+          toast.error('Failed to fetch task configuration')
+          // Set safe default values on error
+          setTaskForm(initialTaskFormState)
         }
-
-        return acc
-      }, {})
-
-      const updatedTaskForm = {
-        ...initialTaskFormState,
-        name: currentTask.name || '',
-        type: currentTask.type || '',
-        status: currentTask.status || 'enabled',
-        owner: currentTask.owner || '',
-        organization: currentTask.organization || '',
-        description: currentTask.description || '',
-        schedule: filteredScheduleFields,
-        args: currentTask.args?.map(arg => ({ value: arg })) || [],
-        kwargs: Object.entries(currentTask.kwargs || {}).map(([key, value]) => ({ key, value })),
-        prompts: currentTask.prompts || [{ prompt: '', default_value: '', value: '' }],
-        metadata: Object.entries(currentTask.metadata || {}).map(([key, value]) => ({ key, value })),
-        hosts: currentTask.hosts?.map(host => ({ ip_address: host })) || [],
-        datacenter: currentTask.datacenter || '',
-        environments: currentTask.environments?.map(environment => ({ value: environment })) || [],
-        components: currentTask.components?.map(component => ({ value: component })) || [],
-        subcomponents: currentTask.subcomponents?.map(subcomponent => ({ value: subcomponent })) || [],
-        promptForCredentials,
-        promptForAPIKey
+      } else {
+        // If no currentTask, reset form and related states
+        setTaskForm(initialTaskFormState)
+        setEnvironments([])
       }
-      setTaskForm(updatedTaskForm)
     }
-  }, [currentTask])
 
+    fetchTaskConfig()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTask?.name]) // Run whenever currentTask.name changes
+
+  // Handle datacenter changes
   useEffect(() => {
-    const fetchDatacenters = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/datacenters')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const datacenterNames = data.map(datacenter => datacenter.name.toUpperCase())
-        setDatacenters(datacenterNames)
-      } catch (error) {
-        console.error('Failed to fetch datacenters:', error)
-      }
-    }
-
-    const fetchEnviroments = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/environments')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const environmentNames = data.map(environment => environment.name.toUpperCase())
-        setEnvironments(environmentNames)
-      } catch (error) {
-        console.error('Failed to fetch environments:', error)
-      }
-    }
-
-    const fetchComponents = async () => {
-      try {
-        // Directly use the result of the await expression
-        const response = await axios.get('/api/inventory/components')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const componentNames = data.map(component => component.name.toUpperCase())
-        setComponents(componentNames)
-      } catch (error) {
-        console.error('Failed to fetch components:', error)
-      }
-    }
-
-    const fetchSubcomponents = async () => {
-      try {
-        const response = await axios.get('/api/inventory/subcomponents')
-        const data = response.data.rows
-        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
-        setSubcomponents(subcomponentNames)
-      } catch (error) {
-        console.error('Failed to fetch subcomponents:', error)
-      }
-    }
-
-    fetchDatacenters()
-
-    // fetchEnviroments()
-    // fetchComponents()
-    // fetchSubcomponents()
-  }, []) // Empty dependency array means this effect runs once on mount
-
-  useEffect(() => {
-    // Fetch environments based on selected datacenter
     const fetchEnvironments = async () => {
       if (taskForm.datacenter) {
-        const response = await axios.get(`/api/inventory/environments?datacenter_name=${taskForm.datacenter}`)
-        const data = response.data.rows
-        const environmentNames = data.map(env => env.name.toUpperCase())
-        setEnvironments(environmentNames)
+        try {
+          const response = await axios.get(`/api/inventory/environments?datacenter_name=${taskForm.datacenter}`)
+          const environmentNames = response.data.rows.map(env => env.name.toUpperCase())
+          setEnvironments(environmentNames)
+        } catch (error) {
+          console.error('Error fetching environments:', error)
+          setEnvironments([])
+        }
+      } else {
+        setEnvironments([])
       }
     }
+
     fetchEnvironments()
   }, [taskForm.datacenter])
-
-  useEffect(() => {
-    // Fetch components based on selected environment
-    const fetchComponents = async () => {
-      if (taskForm.environments.length > 0) {
-        const response = await axios.get('/api/inventory/components')
-        const data = response.data.rows
-
-        // Iterate over the data array and extract the name value from each object
-        const componentNames = data.map(component => component.name.toUpperCase())
-        setComponents(componentNames)
-      }
-    }
-    fetchComponents()
-  }, [taskForm.environments])
-
-  useEffect(() => {
-    const fetchSubcomponents = async () => {
-      if (taskForm.components.length > 0) {
-        const response = await axios.get('/api/inventory/subcomponents')
-        const data = response.data.rows
-        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
-        setSubcomponents(subcomponentNames)
-      }
-    }
-    fetchSubcomponents()
-  }, [taskForm.components])
 
   // Function to handle form field changes
   // Function to handle form field changes for dynamic sections
@@ -965,7 +982,25 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
           }
         } else {
           // Top-level field updates
-          newForm[name] = value
+          if (name === 'datacenter') {
+            // Clear dependent fields when datacenter is empty or changes
+            newForm.environments = []
+            newForm.components = []
+            newForm.subcomponents = []
+            newForm[name] = value
+          } else if (name === 'environments') {
+            // Clear component-related fields when environments change
+            newForm.components = []
+            newForm.subcomponents = []
+            newForm[name] = value
+          } else {
+            newForm[name] = value || ''
+          }
+        }
+
+        if (name === 'datacenter') {
+          // Clear environments when datacenter changes
+          newForm.environments = []
         }
       }
 
@@ -1589,9 +1624,13 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
               {/* Datacenter */}
               <Grid item xs={12} sm={3}>
                 <FormControl fullWidth>
-                  <InputLabelStyled>Datacenter</InputLabelStyled>
+                  <InputLabelStyled id='datacenter-select-label' shrink={Boolean(taskForm.datacenter)}>
+                    Datacenter
+                  </InputLabelStyled>
                   <SelectStyled
-                    value={taskForm.datacenter.toUpperCase()}
+                    labelId='datacenter-select-label'
+                    id='datacenter-select'
+                    value={taskForm.datacenter || ''}
                     onChange={e =>
                       handleFormChange({
                         target: {
@@ -1600,14 +1639,14 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                         }
                       })
                     }
-                    label='Datacenter'
+                    displayEmpty
                   >
-                    <MenuItem value=''>
-                      <em>None</em>
+                    <MenuItem value='' sx={{ height: '32px' }}>
+                      <em>&nbsp;</em>
                     </MenuItem>
                     {datacenters.map(datacenter => (
                       <MenuItem key={datacenter} value={datacenter}>
-                        {datacenter}
+                        {datacenter.toUpperCase()}
                       </MenuItem>
                     ))}
                   </SelectStyled>
@@ -1621,7 +1660,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   id='environments-autocomplete'
                   options={environments}
                   getOptionLabel={option => option}
-                  value={taskForm.environments}
+                  value={taskForm.environments || []}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'environments', value: newValue } })
                   }}
@@ -1630,11 +1669,11 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                       {...params}
                       variant='outlined'
                       label='Environments'
-                      placeholder='Select multiple environments'
+                      placeholder={taskForm.datacenter ? 'Select environments' : 'Select a datacenter first'}
                       fullWidth
                     />
                   )}
-                  disabled={!taskForm.datacenter}
+                  disabled={!taskForm.datacenter} // Only disabled if no datacenter
                 />
               </Grid>
 
@@ -1645,7 +1684,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                   id='components-autocomplete'
                   options={components}
                   getOptionLabel={option => option}
-                  value={taskForm.components}
+                  value={taskForm.components || []}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'components', value: newValue } })
                   }}
@@ -1658,16 +1697,18 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                       fullWidth
                     />
                   )}
-                  disabled={!taskForm.environments.length}
+                  disabled={!taskForm.datacenter || !taskForm.environments?.length} // Disabled if no datacenter or environments
                 />
               </Grid>
+
+              {/* Subcomponents */}
               <Grid item xs={12} sm={3}>
                 <AutocompleteStyled
                   multiple
                   id='subcomponents-autocomplete'
                   options={subcomponents}
                   getOptionLabel={option => option}
-                  value={taskForm.subcomponents}
+                  value={taskForm.subcomponents || []}
                   onChange={(event, newValue) => {
                     handleFormChange({ target: { name: 'subcomponents', value: newValue } })
                   }}
@@ -1680,7 +1721,7 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
                       fullWidth
                     />
                   )}
-                  disabled={!taskForm.components.length}
+                  disabled={!taskForm.datacenter || !taskForm.environments?.length || !taskForm.components?.length} // Disabled if no datacenter, environments, or components
                 />
               </Grid>
             </Grid>

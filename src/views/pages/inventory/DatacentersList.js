@@ -757,9 +757,31 @@ const DatacentersList = props => {
     [setDatacenters, setRows]
   )
 
+  // Add new fetch functions for other tabs
+  const fetchAllCounts = useCallback(async () => {
+    try {
+      // Fetch all counts in parallel
+      const [components, environments, servers, subcomponents] = await Promise.all([
+        axios.get('/api/inventory/components', { params: {} }),
+        axios.get('/api/inventory/environments', { params: {} }),
+        axios.get('/api/inventory/servers', { params: {} }),
+        axios.get('/api/inventory/subcomponents', { params: {} })
+      ])
+
+      // Set counts for other tabs
+      props.set_components_total(components.data.total)
+      props.set_environments_total(environments.data.total)
+      props.set_servers_total(servers.data.total)
+      props.set_subcomponents_total(subcomponents.data.total)
+    } catch (error) {
+      console.error('Error fetching counts:', error)
+    }
+  }, [props])
+
   useEffect(() => {
     fetchData()
-  }, [fetchData, refetchTrigger])
+    fetchAllCounts()
+  }, [fetchData, refetchTrigger, fetchAllCounts])
 
   // Trigger based on sort
   useEffect(() => {

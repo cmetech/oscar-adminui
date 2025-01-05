@@ -56,6 +56,7 @@ import { serversAtom, refetchServerTriggerAtom } from 'src/lib/atoms'
 const initialServerFormState = {
   hostName: '',
   componentName: '',
+  subcomponentName: '',
   datacenterName: '',
   environmentName: '',
   status: 'ACTIVE',
@@ -173,6 +174,7 @@ const OutlinedInputStyled = styled(OutlinedInput)(({ theme }) => ({
 const validationSchema = yup.object({
   hostName: yup.string().required('Host Name is required'),
   componentName: yup.string().required('Component Name is required'),
+  subcomponentName: yup.string().nullable(),
   datacenterName: yup.string().required('Datacenter Name is required'),
   environmentName: yup.string().required('Environment Name is required'),
   status: yup.string().required('Status is required'),
@@ -204,7 +206,7 @@ const validationSchema = yup.object({
   )
 })
 
-const Section = ({ title, data, formErrors }) => {
+const Section = ({ title, data }) => {
   return (
     <Fragment>
       <Typography variant='h6' gutterBottom style={{ marginTop: '20px' }}>
@@ -213,10 +215,9 @@ const Section = ({ title, data, formErrors }) => {
       {data.map((item, index) => (
         <Grid container spacing={2} key={`${title}-${index}`}>
           {Object.entries(item).map(([itemKey, itemValue]) => {
-            // Construct the fieldPath for accessing the error, matching how it's stored in formErrors
-            console.log('Title:', title + ' Index:', index + ' ItemKey:', itemKey + ' ItemValue:', itemValue)
-            const errorKey = `${title}[${index}].${itemKey}`
-            const errorMessage = formErrors?.[errorKey] ?? '' // Access the specific error message
+            if (itemValue === null || itemValue === undefined || itemValue === '') {
+              return null
+            }
 
             return (
               <Grid item xs={12} sm={6} key={`${itemKey}-${index}`}>
@@ -227,8 +228,6 @@ const Section = ({ title, data, formErrors }) => {
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
-                  error={Boolean(errorMessage)}
-                  helperText={errorMessage}
                 />
               </Grid>
             )
@@ -239,34 +238,31 @@ const Section = ({ title, data, formErrors }) => {
   )
 }
 
-const ReviewAndSubmitSection = ({ mappingForm, formErrors }) => {
+const ReviewAndSubmitSection = ({ serverForm }) => {
+  if (!serverForm) {
+    return <Typography>No data to review</Typography>
+  }
+
   return (
     <Fragment>
-      {Object.entries(mappingForm).map(([key, value]) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // For nested objects (excluding arrays), recursively render sections
-          return <ReviewAndSubmitSection serverForm={value} formErrors={formErrors} key={key} />
-        } else if (Array.isArray(value)) {
-          const sectionErrors = formErrors?.[key] || {}
+      {Object.entries(serverForm).map(([key, value]) => {
+        if (value === null || value === undefined || value === '') {
+          return null
+        }
 
-          return <Section title={key} data={value} formErrors={sectionErrors} key={key} />
+        if (Array.isArray(value)) {
+          return <Section title={key} data={value} key={key} />
         } else {
-          // For simple key-value pairs
-          // Directly access the error message using the key for non-array, non-object fields
-          const errorMessage = formErrors?.[key] ?? ''
-
           return (
             <Grid container spacing={2} key={key}>
               <Grid item xs={12} sm={6}>
                 <TextfieldStyled
                   fullWidth
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  label={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                   value={value.toString()}
                   InputProps={{ readOnly: true }}
                   variant='outlined'
                   margin='normal'
-                  error={Boolean(errorMessage)}
-                  helperText={errorMessage}
                 />
               </Grid>
             </Grid>
@@ -285,6 +281,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
   const [components, setComponents] = useState([])
+  const [subcomponents, setSubcomponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
   const [isEnvironmentEnabled, setIsEnvironmentEnabled] = useState(false)
@@ -343,10 +340,21 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
       }
     }
 
-    fetchDatacenters()
+    const fetchSubcomponents = async () => {
+      try {
+        const response = await axios.get('/api/inventory/subcomponents')
+        const data = response.data.rows
+        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
+        setSubcomponents(subcomponentNames)
+      } catch (error) {
+        console.error('Failed to fetch subcomponents:', error)
+      }
+    }
 
+    fetchDatacenters()
     // fetchEnviroments()
     fetchComponents()
+    fetchSubcomponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
   const validateField = async (fieldName, value, index, section) => {
@@ -391,38 +399,24 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
 
   const validateForm = async () => {
     try {
-      // Assuming serverForm is the state holding your form data
-      // and validationSchema is your Yup schema
       await validationSchema.validate(serverForm, { abortEarly: false })
-
-      // If validation is successful, clear errors
       setFormErrors({})
 
       return true
     } catch (yupError) {
       if (yupError instanceof yup.ValidationError) {
-        // Log the entire error
         console.log('Validation Error:', yupError)
 
-        // Log detailed info about each validation error
+        // Transform validation errors into a more readable format
+        const newErrors = {}
         yupError.inner.forEach(error => {
-          console.log(`Field: ${error.path}, Error: ${error.message}`)
+          newErrors[error.path] = error.message
         })
 
-        // Transform the validation errors to a more manageable structure
-        // and set them to state or handle them as needed
-        const transformedErrors = yupError.inner.reduce(
-          (acc, currentError) => ({
-            ...acc,
-            [currentError.path]: currentError.message
-          }),
-          {}
-        )
-
-        setFormErrors(transformedErrors)
+        console.log('Transformed errors:', newErrors)
+        setFormErrors(newErrors)
       } else {
-        // Handle other types of errors (e.g., network errors)
-        console.error('An unexpected error occurred:', yupError)
+        console.error('Unexpected error during validation:', yupError)
       }
 
       return false
@@ -518,7 +512,9 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
           hostname: serverForm.hostName,
           datacenter_name: serverForm.datacenterName,
           environment_name: serverForm.environmentName,
-          component_name: serverForm.componentName,
+          component_name: serverForm.subcomponentName
+            ? `${serverForm.componentName}:${serverForm.subcomponentName}`
+            : serverForm.componentName,
           metadata: serverForm.metadata,
           network_interfaces: serverForm.networkInterfaces,
           ip_address: serverForm.networkInterfaces[0].ip_address,
@@ -649,7 +645,8 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               Server Information
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              {/* Row 1: Hostname and Status */}
+              <Grid item xs={12} sm={8}>
                 <CustomToolTip title='The hostname of the server' placement='top'>
                   <TextfieldStyled
                     required
@@ -666,81 +663,7 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                   />
                 </CustomToolTip>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  autoHighlight
-                  id='componentName-autocomplete'
-                  options={components}
-                  value={serverForm.componentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
-                  )}
-                  error={!!formErrors.componentName}
-                  helperText={formErrors.componentName || ''}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='datacenterName-autocomplete'
-                  options={datacenters}
-                  value={serverForm.datacenterName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'datacenterName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
-                  )}
-                  error={!!formErrors.datacenterName}
-                  helperText={formErrors.datacenterName || ''}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  freeSolo
-                  clearOnBlur
-                  selectOnFocus
-                  handleHomeEndKeys
-                  id='environmentName-autocomplete'
-                  options={isEnvironmentEnabled ? filteredEnvironments : []}
-                  value={serverForm.environmentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'environmentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
                   <InputLabelStyled id='status-select-label'>Status</InputLabelStyled>
                   <SelectStyled
@@ -757,6 +680,77 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
                     <MenuItem value={'INACTIVE'}>INACTIVE</MenuItem>
                   </SelectStyled>
                 </FormControl>
+              </Grid>
+
+              {/* Row 2: Datacenter and Environment */}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='datacenterName-autocomplete'
+                  options={datacenters}
+                  value={serverForm.datacenterName}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                  }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  renderInput={params => (
+                    <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  clearOnBlur
+                  selectOnFocus
+                  handleHomeEndKeys
+                  id='environmentName-autocomplete'
+                  options={isEnvironmentEnabled ? filteredEnvironments : []}
+                  value={serverForm.environmentName}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
+                  }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+
+              {/* Row 3: Component and Subcomponent */}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  autoHighlight
+                  id='componentName-autocomplete'
+                  options={components}
+                  value={serverForm.componentName}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
+                  }}
+                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  renderInput={params => (
+                    <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  freeSolo
+                  autoHighlight
+                  id='subcomponentName-autocomplete'
+                  options={subcomponents}
+                  value={serverForm.subcomponentName}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)
+                  }}
+                  renderInput={params => (
+                    <TextField {...params} label='Choose Subcomponent' fullWidth autoComplete='off' />
+                  )}
+                />
               </Grid>
             </Grid>
           </Fragment>

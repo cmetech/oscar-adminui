@@ -52,6 +52,7 @@ import * as yup from 'yup'
 const initialServerFormState = {
   hostName: '',
   componentName: '',
+  subcomponentName: '',
   datacenterName: '',
   environmentName: '',
   status: 'ACTIVE',
@@ -235,6 +236,7 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [resetFormFields, setResetFormFields] = useState(false)
   const [components, setComponents] = useState([])
+  const [subcomponents, setSubcomponents] = useState([])
   const [datacenters, setDatacenters] = useState([])
   const [environments, setEnvironments] = useState([])
 
@@ -248,6 +250,7 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
       const updatedServerForm = {
         hostName: currentServer.hostname.toUpperCase() || '',
         componentName: currentServer.component_name.toUpperCase() || '',
+        subcomponentName: currentServer.subcomponent_name.toUpperCase() || '',
         datacenterName: currentServer.datacenter_name.toUpperCase() || '',
         environmentName: currentServer.environment_name.toUpperCase() || '',
         status: currentServer.status.toUpperCase() || 'ACTIVE',
@@ -301,9 +304,21 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
       }
     }
 
+    const fetchSubcomponents = async () => {
+      try {
+        const response = await axios.get('/api/inventory/subcomponents')
+        const data = response.data.rows
+        const subcomponentNames = data.map(subcomponent => subcomponent.name.toUpperCase())
+        setSubcomponents(subcomponentNames)
+      } catch (error) {
+        console.error('Failed to fetch subcomponents:', error)
+      }
+    }
+
     fetchDatacenters()
     fetchEnviroments()
     fetchComponents()
+    fetchSubcomponents()
   }, []) // Empty dependency array means this effect runs once on mount
 
   // Function to handle form field changes
@@ -366,7 +381,9 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
           hostname: serverForm.hostName,
           datacenter_name: serverForm.datacenterName,
           environment_name: serverForm.environmentName,
-          component_name: serverForm.componentName,
+          component_name: serverForm.subcomponentName
+            ? `${serverForm.componentName}:${serverForm.subcomponentName}`
+            : serverForm.componentName,
           metadata: serverForm.metadata,
           network_interfaces: serverForm.networkInterfaces,
           ip_address: serverForm.networkInterfaces[0].ip_address,
@@ -505,7 +522,8 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
               Server Information
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              {/* Row 1 */}
+              <Grid item xs={12} sm={8}>
                 <TextfieldStyled
                   required
                   id='hostName'
@@ -517,26 +535,25 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
                   onChange={handleFormChange}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <AutocompleteStyled
-                  autoHighlight
-                  id='componentName-autocomplete'
-                  options={components}
-                  value={serverForm.componentName}
-                  onChange={(event, newValue) => {
-                    // Directly calling handleFormChange with a synthetic event object
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
+              <Grid item xs={12} sm={4}>
+                <TextfieldStyled
+                  id='status'
+                  name='status'
+                  label='Status'
+                  fullWidth
+                  select
+                  SelectProps={{
+                    native: true
                   }}
-                  onInputChange={(event, newInputValue) => {
-                    if (event) {
-                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
-                    }
-                  }}
-                  renderInput={params => (
-                    <TextfieldStyled {...params} label='Choose Component' fullWidth required autoComplete='off' />
-                  )}
-                />
+                  value={serverForm.status}
+                  onChange={handleFormChange}
+                >
+                  <option value='ACTIVE'>ACTIVE</option>
+                  <option value='INACTIVE'>INACTIVE</option>
+                </TextfieldStyled>
               </Grid>
+
+              {/* Row 2 */}
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
@@ -583,22 +600,41 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextfieldStyled
-                  id='status'
-                  name='status'
-                  label='Status'
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true
+
+              {/* Row 3 */}
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  autoHighlight
+                  id='componentName-autocomplete'
+                  options={components}
+                  value={serverForm.componentName}
+                  onChange={(event, newValue) => {
+                    // Directly calling handleFormChange with a synthetic event object
+                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
                   }}
-                  value={serverForm.status}
-                  onChange={handleFormChange}
-                >
-                  <option value='ACTIVE'>ACTIVE</option>
-                  <option value='INACTIVE'>INACTIVE</option>
-                </TextfieldStyled>
+                  onInputChange={(event, newInputValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'componentName', value: newInputValue } }, null, null)
+                    }
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Choose Component' fullWidth required autoComplete='off' />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <AutocompleteStyled
+                  autoHighlight
+                  id='subcomponentName-autocomplete'
+                  options={subcomponents}
+                  value={serverForm.subcomponentName}
+                  onChange={(event, newValue) => {
+                    handleFormChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)
+                  }}
+                  renderInput={params => (
+                    <TextfieldStyled {...params} label='Choose Subcomponent' fullWidth required autoComplete='off' />
+                  )}
+                />
               </Grid>
             </Grid>
           </Fragment>

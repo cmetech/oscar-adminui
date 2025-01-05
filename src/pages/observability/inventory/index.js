@@ -673,7 +673,7 @@ const Settings = () => {
   const { serverRuntimeConfig, publicRuntimeConfig } = getConfig()
   const { t } = useTranslation()
 
-  const [value, setValue] = useState('1')
+  const [value, setValue] = useState('3')
   const [datacenterTotal, setDatacenterTotal] = useState(0)
   const [environmentTotal, setEnvironmentTotal] = useState(0)
   const [serverTotal, setServerTotal] = useState(0)
@@ -690,6 +690,34 @@ const Settings = () => {
   const [, setRefetchComponentTrigger] = useAtom(refetchComponentTriggerAtom)
   const [, setRefetchSubcomponentTrigger] = useAtom(refetchSubcomponentTriggerAtom)
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+
+  // Add this useEffect to fetch initial counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Fetch all counts in parallel
+        const [datacentersRes, environmentsRes, serversRes, componentsRes, subcomponentsRes] = await Promise.all([
+          axios.get('/api/inventory/datacenters'),
+          axios.get('/api/inventory/environments'),
+          axios.get('/api/inventory/servers'),
+          axios.get('/api/inventory/components'),
+          axios.get('/api/inventory/subcomponents')
+        ])
+
+        // Update all totals
+        setDatacenterTotal(datacentersRes.data.total || 0)
+        setEnvironmentTotal(environmentsRes.data.total || 0)
+        setServerTotal(serversRes.data.total || 0)
+        setComponentTotal(componentsRes.data.total || 0)
+        setSubcomponentTotal(subcomponentsRes.data.total || 0)
+      } catch (error) {
+        console.error('Error fetching counts:', error)
+        toast.error('Error fetching inventory counts')
+      }
+    }
+
+    fetchCounts()
+  }, []) // Empty dependency array means this runs once on mount
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)

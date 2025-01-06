@@ -237,7 +237,7 @@ const MappingNamespaceList = props => {
               skin={theme.palette.mode === 'dark' ? 'light' : 'dark'}
               label={label || 'UNKN'}
               color={color}
-              icon={<Icon icon='mdi:office-building-cog' />}
+              icon={<Icon icon='mdi:file-table-box' />}
               sx={{ '& .MuiChip-label': { textTransform: 'capitalize' } }}
             />
           </Box>

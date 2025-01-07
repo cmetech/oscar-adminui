@@ -1290,6 +1290,40 @@ const TasksList = props => {
     return columns.filter(column => !hiddenFields.includes(column.field)).map(column => column.field)
   }
 
+  const handleRunDialogSubmit = async (delay = null) => {
+    try {
+      const taskId = currentTask?.id
+      if (!taskId) {
+        console.error('Task ID is undefined')
+        toast.error(t('Task ID is undefined or invalid'))
+
+        return
+      }
+
+      const endpoint = `/api/tasks/run/${taskId}`
+
+      const payload = {
+        prompts: [],
+        user_data: delay ? { __delay__: delay } : null // Keep delay as string
+      }
+
+      console.log('Running task:', taskId, 'with payload:', payload)
+
+      const response = await axios.post(endpoint, payload)
+
+      if (response.status === 200) {
+        toast.success(t('Task Successfully Run'))
+        setRunDialog(false)
+        setCurrentTask(null)
+      } else {
+        toast.error(t('Failed to Run Task'))
+      }
+    } catch (error) {
+      console.error(t('Failed to Run Task'), error?.response?.data || error)
+      toast.error(t('Failed to Run Task'))
+    }
+  }
+
   return (
     <Box>
       <Card sx={{ position: 'relative' }}>
@@ -1563,7 +1597,12 @@ const TasksList = props => {
           }}
         />
         <ScheduleDialog />
-        <RunTaskConfirmationDialog open={runDialog} onClose={handleRunDialogClose} currentTask={currentTask} />
+        <RunTaskConfirmationDialog
+          open={runDialog}
+          onClose={handleRunDialogClose}
+          onSubmit={handleRunDialogSubmit}
+          currentTask={currentTask}
+        />
         <DisableDialog />
         <EditDialog />
         <DeleteDialog />

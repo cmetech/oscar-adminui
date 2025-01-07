@@ -29,7 +29,7 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
   }
 }))
 
-const RunTaskConfirmationDialog = ({ open, onClose, currentTask }) => {
+const RunTaskConfirmationDialog = ({ open, onClose, onSubmit, currentTask }) => {
   const { t } = useTranslation()
   const [runDelay, setRunDelay] = useState('')
   const [runDelayError, setRunDelayError] = useState('')
@@ -56,41 +56,14 @@ const RunTaskConfirmationDialog = ({ open, onClose, currentTask }) => {
   }
 
   const handleSubmit = async () => {
-    // If user typed something invalid, don’t let them proceed
+    // If user typed something invalid, don't let them proceed
     if (!validateDelay(runDelay)) return
 
-    const taskId = currentTask?.id
-    if (!taskId) {
-      console.error('Task ID is undefined')
-      toast.error(t('Task ID is undefined or invalid'))
+    // Pass the raw string value (don't parse to integer)
+    const delayValue = runDelay === '' ? null : runDelay
 
-      return
-    }
-
-    const headers = {
-      Accept: 'application/json',
-      Authorization: `Bearer ${apiToken}`
-    }
-
-    try {
-      const endpoint = `/api/tasks/run/${taskId}`
-
-      const payload = {
-        prompts: [],
-        user_data: runDelay ? { __delay__: parseInt(runDelay) } : null
-      }
-
-      const response = await axios.post(endpoint, payload, { headers })
-      if (response.status === 200) {
-        toast.success(t('Task Successfully Run'))
-      } else {
-        toast.error(t('Failed to Run Task'))
-      }
-    } catch (error) {
-      console.error(t('Failed to Run Task'), error)
-      toast.error(t('Failed to Run Task'))
-    }
-    onClose() // Close dialog after run
+    // Call the parent's submit handler with the delay value as string
+    await onSubmit(delayValue)
   }
 
   return (

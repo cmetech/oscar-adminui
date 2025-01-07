@@ -416,9 +416,15 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
       const startTime = startDate.toISOString()
       const endTime = endDate.toISOString()
 
+      let requestCompleted = false
       setLoading(true)
 
-      dataLoadedRef.current = false
+      const timeoutId = setTimeout(() => {
+        if (!requestCompleted) {
+          setLoading(false)
+          setRows([])
+        }
+      }, 30000)
 
       try {
         const response = await axios.get('/api/tasks/history', {
@@ -437,9 +443,6 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
         // If we get here, we have successful data
         setRowCount(response.data.total_records || 0)
         setRows(response.data.records || [])
-
-        // Data has been successfully loaded
-        dataLoadedRef.current = true
       } catch (error) {
         // Only show error toast if it's not a timeout and we don't have data
         if (error.code !== 'ECONNABORTED' && !dataLoadedRef.current) {
@@ -447,8 +450,11 @@ const TaskHistoryList = ({ dateRange, onAccept }) => {
           toast.error(t('Failed to fetch task history'))
         }
       } finally {
+        requestCompleted = true
         setLoading(false)
         setRunRefresh(false)
+        setRunFilterQuery(false)
+        clearTimeout(timeoutId)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

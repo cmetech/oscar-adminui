@@ -75,6 +75,7 @@ import NoResultsOverlay from 'src/views/components/NoResultsOverlay'
 import CustomLoadingOverlay from 'src/views/components/CustomLoadingOverlay'
 import { on } from 'form-data'
 import { fi } from 'date-fns/locale'
+import RunTaskConfirmationDialog from 'src/views/pages/tasks-management/RunTaskConfirmationDialog'
 
 function loadServerRows(page, pageSize, data) {
   // console.log(data)
@@ -97,6 +98,17 @@ const StyledLink = styled(Link)(({ theme }) => ({
   '&:hover': {
     color:
       theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : theme.palette.customColors.brandWhite
+  }
+}))
+
+const TextfieldStyled = styled(TextField)(({ theme }) => ({
+  '& label.Mui-focused': {
+    color: theme.palette.customColors.accent
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.customColors.accent
+    }
   }
 }))
 
@@ -621,6 +633,7 @@ const TasksList = props => {
 
   const handleRunDialogClose = () => {
     setRunDialog(false)
+    setCurrentTask(null)
   }
 
   const EditDialog = () => {
@@ -810,73 +823,6 @@ const TasksList = props => {
     )
   }
 
-  const RunDialog = () => {
-    return (
-      <Dialog
-        open={runDialog}
-        onClose={handleRunDialogClose}
-        TransitionComponent={Transition}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-        PaperProps={{
-          sx: {
-            width: '100%',
-            maxWidth: '450px'
-          }
-        }}
-      >
-        <DialogTitle id='alert-dialog-title'>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-              {t('Run Task')}
-            </Typography>
-            <IconButton size='small' onClick={handleRunDialogClose} aria-label='close'>
-              <Icon icon='mdi:close' />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        {currentTask?.prompts?.length ? (
-          <DialogContent>
-            <RunTaskWizard currentTask={currentTask} rows={rows} setRows={setRows} onClose={handleRunDialogClose} />
-          </DialogContent>
-        ) : (
-          <>
-            <DialogContent>
-              <Box sx={{ textAlign: 'center' }}>
-                <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-                  <Box>
-                    <Typography variant='h6'>{t('Confirm you want to run this task.')}</Typography>
-                  </Box>
-                </Stack>
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                variant='contained'
-                size='large'
-                onClick={handleRunDialogSubmit}
-                color='primary'
-                autoFocus
-                startIcon={<Icon icon='mdi:play' />}
-              >
-                {t('Run')}
-              </Button>
-              <Button
-                variant='outlined'
-                size='large'
-                onClick={handleRunDialogClose}
-                color='secondary'
-                startIcon={<Icon icon='mdi:close' />}
-              >
-                {t('Cancel')}
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
-    )
-  }
-
   const ScheduleDialog = () => {
     return (
       <Dialog
@@ -982,51 +928,6 @@ const TasksList = props => {
 
     // Close the dialog
     setScheduleDialog(false)
-  }
-
-  const handleRunDialogSubmit = async () => {
-    const taskId = currentTask?.id
-
-    if (!taskId) {
-      console.error('Task ID is undefined')
-      toast.error(t('Task ID is undefined or invalid'))
-
-      return
-    }
-
-    const apiToken = session?.data?.user?.apiToken // Assume apiToken is retrieved from the session
-
-    const headers = {
-      Accept: 'application/json',
-      Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
-    }
-
-    // Determine the correct endpoint URL based on the task's current status
-    const endpoint = `/api/tasks/run/${taskId}`
-
-    try {
-      const response = await axios.post(
-        endpoint,
-        [], // No body is required for these requests
-        {
-          headers
-        }
-      )
-
-      if (response.status === 200) {
-        // Show success message
-        toast.success(t('Task Successfully Run'))
-      } else {
-        // Handle unsuccessful update
-        toast.error(t('Failed to Run Task'))
-      }
-    } catch (error) {
-      console.error(t('Failed to Run Task'), error)
-      toast.error(t('Failed to Run Task'))
-    }
-
-    // Close the dialog
-    setRunDialog(false)
   }
 
   const handleDisableDialogSubmit = async () => {
@@ -1662,7 +1563,7 @@ const TasksList = props => {
           }}
         />
         <ScheduleDialog />
-        <RunDialog />
+        <RunTaskConfirmationDialog open={runDialog} onClose={handleRunDialogClose} currentTask={currentTask} />
         <DisableDialog />
         <EditDialog />
         <DeleteDialog />

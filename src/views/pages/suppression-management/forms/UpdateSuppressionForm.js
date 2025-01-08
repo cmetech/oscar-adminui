@@ -89,6 +89,28 @@ const SwitchStyled = styled(Switch)(({ theme }) => ({
   }
 }))
 
+const TimePickerStyled = styled(TimePicker)(({ theme }) => ({
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: theme.palette.customColors.accent
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.customColors.accent
+    }
+  }
+}))
+
+const DateTimePickerStyled = styled(DateTimePicker)(({ theme }) => ({
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: theme.palette.customColors.accent
+  },
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: theme.palette.customColors.accent
+    }
+  }
+}))
+
 const DAYS = [
   { value: '0', label: 'Sun' },
   { value: '1', label: 'Mon' },
@@ -342,7 +364,7 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
           <Fragment>
             <Grid container spacing={3}>
               <Grid item xs={6}>
-                <TimePicker
+                <TimePickerStyled
                   label={t('Start Time')}
                   value={suppressionForm.startTime}
                   onChange={newValue => {
@@ -352,17 +374,37 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                       startTime: newValue
                     }))
                   }}
+                  viewRenderers={{
+                    hours: renderDigitalClockTimeView
+                  }}
                   slotProps={{
                     textField: {
                       fullWidth: true,
                       error: Boolean(formErrors?.startTime),
                       helperText: formErrors?.startTime
+                    },
+                    digitalClockItem: {
+                      sx: {
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandBlack
+                              : theme.palette.customColors.black,
+                          background: theme.palette.customColors.brandGray4
+                        },
+                        '&.Mui-selected': {
+                          background:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow4
+                              : theme.palette.customColors.brandGray1
+                        }
+                      }
                     }
                   }}
                 />
               </Grid>
               <Grid item xs={6}>
-                <TimePicker
+                <TimePickerStyled
                   label={t('End Time')}
                   value={suppressionForm.endTime}
                   onChange={newValue => {
@@ -372,17 +414,37 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                       endTime: newValue
                     }))
                   }}
+                  viewRenderers={{
+                    hours: renderDigitalClockTimeView
+                  }}
                   slotProps={{
                     textField: {
                       fullWidth: true,
                       error: Boolean(formErrors?.endTime),
                       helperText: formErrors?.endTime
+                    },
+                    digitalClockItem: {
+                      sx: {
+                        '&:hover': {
+                          color:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandBlack
+                              : theme.palette.customColors.black,
+                          background: theme.palette.customColors.brandGray4
+                        },
+                        '&.Mui-selected': {
+                          background:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.customColors.brandYellow4
+                              : theme.palette.customColors.brandGray1
+                        }
+                      }
                     }
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <DateTimePicker
+              {/* <Grid item xs={12} md={6}>
+                <DateTimePickerStyled
                   label={t('Valid From (Optional)')}
                   value={suppressionForm.valid_from}
                   onChange={newValue => handleFormChange(newValue, 'valid_from')}
@@ -391,28 +453,29 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                   viewRenderers={{
                     hours: renderDigitalClockTimeView
                   }}
-                  sx={{ zIndex: 9999 }}
                   slotProps={{
-                    popper: {
-                      sx: { zIndex: 9999 }
-                    },
-                    layout: {
-                      sx: { zIndex: 9999 }
-                    },
                     textField: {
                       fullWidth: true,
                       error: Boolean(formErrors?.valid_from),
                       helperText: formErrors?.valid_from,
+                      size: 'small',
                       color: 'secondary',
                       focused: true,
                       InputProps: {
                         endAdornment: <Icon icon='mdi:calendar' />
                       }
                     },
-                    desktopPaper: {
+                    popper: {
                       sx: {
-                        backgroundColor:
-                          theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                        zIndex: 9999
+                      }
+                    },
+                    layout: {
+                      sx: {
+                        '.MuiPickersLayout-root': {
+                          backgroundColor:
+                            theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                        }
                       }
                     },
                     day: {
@@ -422,30 +485,9 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                             theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
                           '&:hover': {
                             color: theme.palette.customColors.accent
-                          }
-                        },
-                        '& .MuiPickersDay-root.Mui-selected': {
-                          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
-                        }
-                      }
-                    },
-                    shortcuts: {
-                      items: extendedPredefinedRangesDayjs,
-                      sx: {
-                        '& .MuiChip-root': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          '&:hover': {
-                            color:
-                              theme.palette.mode === 'dark'
-                                ? theme.palette.customColors.brandYellow
-                                : theme.palette.primary.main,
-                            backgroundColor:
-                              theme.palette.mode === 'dark'
-                                ? theme.palette.secondary.dark
-                                : theme.palette.secondary.light
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: theme.palette.customColors.accent
                           }
                         }
                       }
@@ -470,7 +512,7 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                     actionBar: {
                       actions: ['clear', 'today', 'cancel', 'accept'],
                       sx: {
-                        '& .MuiDialogActions-root, .MuiButton-root': {
+                        '& .MuiButton-root': {
                           borderWidth: '1px',
                           borderStyle: 'solid',
                           borderColor:
@@ -499,29 +541,41 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <DateTimePicker
+                <DateTimePickerStyled
                   label={t('Valid Until (Optional)')}
                   value={suppressionForm.valid_until}
                   onChange={newValue => handleFormChange(newValue, 'valid_until')}
                   minDateTime={suppressionForm.valid_from ? dayjs(suppressionForm.valid_from) : null}
+                  views={['year', 'month', 'day', 'hours', 'minutes']}
+                  timeSteps={{ minutes: 10 }}
+                  viewRenderers={{
+                    hours: renderDigitalClockTimeView
+                  }}
                   slotProps={{
-                    field: { dateSeparator: 'to' },
-                    textField: ({ position }) => ({
-                      color: position === 'start' ? 'secondary' : 'secondary',
+                    textField: {
+                      fullWidth: true,
+                      error: Boolean(formErrors?.valid_until),
+                      helperText: formErrors?.valid_until,
+                      size: 'small',
+                      color: 'secondary',
                       focused: true,
                       InputProps: {
                         endAdornment: <Icon icon='mdi:calendar' />
-                      },
-                      error: Boolean(formErrors?.valid_until),
-                      helperText: formErrors?.valid_until
-                    }),
-                    desktopPaper: {
-                      style: {
-                        backgroundColor:
-                          theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
                       }
                     },
-
+                    popper: {
+                      sx: {
+                        zIndex: 9999
+                      }
+                    },
+                    layout: {
+                      sx: {
+                        '.MuiPickersLayout-root': {
+                          backgroundColor:
+                            theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.common.white
+                        }
+                      }
+                    },
                     day: {
                       sx: {
                         '& .MuiPickersDay-root': {
@@ -529,36 +583,13 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                             theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
                           '&:hover': {
                             color: theme.palette.customColors.accent
-                          }
-                        },
-                        '& .MuiPickersDay-root.Mui-selected': {
-                          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.white
-                        }
-                      }
-                    },
-                    // ** Use the extended predefined ranges from calendar-timeranges.js
-                    shortcuts: {
-                      items: extendedPredefinedRangesDayjs,
-                      sx: {
-                        '& .MuiChip-root': {
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.customColors.brandYellow
-                              : theme.palette.primary.main,
-                          '&:hover': {
-                            color:
-                              theme.palette.mode === 'dark'
-                                ? theme.palette.customColors.brandYellow
-                                : theme.palette.primary.main,
-                            backgroundColor:
-                              theme.palette.mode === 'dark'
-                                ? theme.palette.secondary.dark
-                                : theme.palette.secondary.light
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: theme.palette.customColors.accent
                           }
                         }
                       }
                     },
-
                     digitalClockItem: {
                       sx: {
                         '&:hover': {
@@ -566,27 +597,22 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                             theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandBlack
                               : theme.palette.customColors.black,
-                          background:
-                            theme.palette.mode == 'dark'
-                              ? theme.palette.customColors.brandGray4
-                              : theme.palette.customColors.brandGray4
+                          background: theme.palette.customColors.brandGray4
                         },
                         '&.Mui-selected': {
                           background:
-                            theme.palette.mode == 'dark'
+                            theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandYellow4
                               : theme.palette.customColors.brandGray1
                         }
                       }
                     },
-
                     actionBar: {
                       actions: ['clear', 'today', 'cancel', 'accept'],
                       sx: {
-                        '& .MuiDialogActions-root, .MuiButton-root': {
-                          // Targeting buttons inside MuiDialogActions-root
-                          borderWidth: '1px', // Ensure there's a visible border
-                          borderStyle: 'solid', // Necessary for the border to show
+                        '& .MuiButton-root': {
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
                           borderColor:
                             theme.palette.mode === 'dark'
                               ? theme.palette.customColors.brandGray1b
@@ -596,7 +622,7 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                               ? theme.palette.customColors.brandWhite
                               : theme.palette.primary.main,
                           '&:hover': {
-                            backgroundColor: 'rgba(0, 0, 255, 0.04)', // Custom background color on hover
+                            backgroundColor: 'rgba(0, 0, 255, 0.04)',
                             borderColor:
                               theme.palette.mode === 'dark'
                                 ? theme.palette.customColors.brandWhite
@@ -608,16 +634,10 @@ const UpdateSuppressionForm = ({ open, onClose, suppression }) => {
                           }
                         }
                       }
-                    },
-                    endDesktopDateTimePicker: {
-                      maxDateTime: getMaxEndDateTime()
-                    },
-                    endMobileDateTimePicker: {
-                      maxDateTime: getMaxEndDateTime()
                     }
                   }}
                 />
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <AutocompleteStyled
                   options={getAllTimezones()}

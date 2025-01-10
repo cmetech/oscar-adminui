@@ -686,16 +686,22 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
-                  clearOnBlur
+                  clearOnBlur={false}
                   selectOnFocus
                   handleHomeEndKeys
                   id='datacenterName-autocomplete'
                   options={datacenters}
                   value={serverForm.datacenterName}
                   onChange={(event, newValue) => {
-                    handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                    const value = newValue || (event.target?.value ?? '')
+                    handleFormChange({ target: { name: 'datacenterName', value } }, null, null)
                   }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  onInputChange={(event, newValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'datacenterName', value: newValue } }, null, null)
+                    }
+                  }}
+                  onBlur={e => validateField('datacenterName', e.target.value)}
                   renderInput={params => (
                     <TextField {...params} label='Datacenter Name' fullWidth required autoComplete='off' />
                   )}
@@ -704,16 +710,22 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
-                  clearOnBlur
+                  clearOnBlur={false}
                   selectOnFocus
                   handleHomeEndKeys
                   id='environmentName-autocomplete'
                   options={isEnvironmentEnabled ? filteredEnvironments : []}
                   value={serverForm.environmentName}
                   onChange={(event, newValue) => {
-                    handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
+                    const value = newValue || (event.target?.value ?? '')
+                    handleFormChange({ target: { name: 'environmentName', value } }, null, null)
                   }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  onInputChange={(event, newValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'environmentName', value: newValue } }, null, null)
+                    }
+                  }}
+                  onBlur={e => validateField('environmentName', e.target.value)}
                   renderInput={params => (
                     <TextfieldStyled {...params} label='Environment Name' fullWidth required autoComplete='off' />
                   )}
@@ -724,14 +736,21 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
+                  clearOnBlur={false}
                   autoHighlight
                   id='componentName-autocomplete'
                   options={components}
                   value={serverForm.componentName}
                   onChange={(event, newValue) => {
-                    handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
+                    const value = newValue || (event.target?.value ?? '')
+                    handleFormChange({ target: { name: 'componentName', value } }, null, null)
                   }}
-                  onBlur={e => validateField(e.target.name, e.target.value)}
+                  onInputChange={(event, newValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'componentName', value: newValue } }, null, null)
+                    }
+                  }}
+                  onBlur={e => validateField('componentName', e.target.value)}
                   renderInput={params => (
                     <TextField {...params} label='Choose Component' fullWidth required autoComplete='off' />
                   )}
@@ -740,12 +759,19 @@ const AddServerWizard = ({ onSuccess, ...props }) => {
               <Grid item xs={12} sm={6}>
                 <AutocompleteStyled
                   freeSolo
+                  clearOnBlur={false}
                   autoHighlight
                   id='subcomponentName-autocomplete'
                   options={subcomponents}
                   value={serverForm.subcomponentName}
                   onChange={(event, newValue) => {
-                    handleFormChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)
+                    const value = newValue || (event.target?.value ?? '')
+                    handleFormChange({ target: { name: 'subcomponentName', value } }, null, null)
+                  }}
+                  onInputChange={(event, newValue) => {
+                    if (event) {
+                      handleFormChange({ target: { name: 'subcomponentName', value: newValue } }, null, null)
+                    }
                   }}
                   renderInput={params => (
                     <TextField {...params} label='Choose Subcomponent' fullWidth autoComplete='off' />

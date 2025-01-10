@@ -92,27 +92,27 @@ const steps = [
   {
     title: 'General',
     subtitle: 'Information',
-    description: 'Edit the Task details.'
+    description: 'Clone the Task details.'
   },
   {
     title: 'Schedule',
     subtitle: 'Details',
-    description: 'Edit the Schedule details. Click on Show Schedule Instructions below for more information.'
+    description: 'Clone the Schedule details. Click on Show Schedule Instructions below for more information.'
   },
   {
     title: 'Arguments',
     subtitle: 'Positional',
-    description: 'Edit the Task Positional and Keyword Argument details.'
+    description: 'Clone the Task Positional and Keyword Argument details.'
   },
   {
     title: 'Metadata',
     subtitle: 'Information',
-    description: 'Edit the Task Metadata Arguments details.'
+    description: 'Clone the Task Metadata Arguments details.'
   },
   {
     title: 'Prompts',
     subtitle: 'Details',
-    description: 'Edit the Prompts details.'
+    description: 'Clone the Prompts details.'
   },
   {
     title: 'Targets',
@@ -731,7 +731,7 @@ const ReviewAndSubmitSection = ({ taskForm }) => {
 
 // Replace 'defaultBorderColor' and 'hoverBorderColor' with actual color values
 
-const UpdateTaskWizard = ({ onClose, ...props }) => {
+const CloneTaskWizard = ({ onClose, ...props }) => {
   const { currentTask } = props
 
   // ** States
@@ -1096,81 +1096,25 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
         // Log the final payload
         console.log('Submitting task with payload:', payload)
 
-        const endpoint = `/api/tasks/config/${currentTask.name}`
+        const endpoint = `/api/tasks/add`
         const response = await axios.post(endpoint, payload, { headers })
         console.log('Config API Response:', response.data)
 
         if (response.data) {
-          const { task_name } = response.data
+          const task = response.data
 
-          if (task_name) {
-            console.log('Task configuration successfully updated for ', task_name)
-
-            const registerTaskEndpoint = `/api/tasks/register/${task_name}`
-            const registerTaskResponse = await axios.post(registerTaskEndpoint, {}, { headers })
-            console.log('Register API Response:', registerTaskResponse.data)
-
-            if (registerTaskResponse.data) {
-              const queryTaskEndpoint = `/api/tasks/query/${task_name}`
-              const queryTaskResponse = await axios.post(queryTaskEndpoint, {}, { headers })
-              console.log('Query API Response:', queryTaskResponse.data)
-
-              if (queryTaskResponse.data && queryTaskResponse.status === 200) {
-                const taskDetails = queryTaskResponse.data[0]
-                console.log('Task Details:', taskDetails)
-
-                // Check if the task is not disabled and has a schedule
-                if (
-                  taskDetails &&
-                  taskDetails.status?.toLowerCase() !== 'disabled' &&
-                  taskDetails.schedule &&
-                  Object.keys(taskDetails.schedule).length > 0
-                ) {
-                  const scheduleTaskEndpoint = `/api/tasks/schedule/${taskDetails.id}`
-                  try {
-                    console.log('Attempting to schedule task...')
-                    const scheduleResponse = await axios.post(scheduleTaskEndpoint, {}, { headers })
-                    console.log('Schedule API Response:', scheduleResponse.data)
-
-                    if (scheduleResponse.status === 200) {
-                      console.log(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
-                      toast.success(`Task ${taskDetails.name} successfully configured, registered and scheduled.`)
-                    } else {
-                      console.error(`Failed to schedule task ${taskDetails.name}.`)
-                      toast.error(`Failed to schedule task ${taskDetails.name}.`)
-                    }
-                  } catch (error) {
-                    console.error(`Error scheduling task ${taskDetails.name}:`, error)
-                    toast.error(`Error scheduling task ${taskDetails.name}.`)
-                  }
-                } else {
-                  let message = `Task ${taskDetails.name} `
-                  if (taskDetails.status?.toLowerCase() === 'disabled') {
-                    message += 'is disabled '
-                  }
-                  if (!taskDetails.schedule || Object.keys(taskDetails.schedule).length === 0) {
-                    message += (message.includes('disabled') ? 'and ' : '') + 'has no schedule defined '
-                  }
-                  message += 'and will not be scheduled.'
-                  console.log(message)
-                  toast.success(message)
-                }
-
-                setRefetchTrigger(Date.now())
-              } else {
-                console.error('Task successfully configured and registered, Failed to query updated task details')
-                toast.error('Task successfully configured and registered, Failed to query updated task details')
-              }
-            } else {
-              console.error('Failed to register task, configuration updated successfully')
-              toast.error('Failed to register task, configuration updated successfully')
-            }
+          if (task) {
+            console.log('Task successfully created for ', task.name)
           } else {
-            console.error('Failed to update task configuration')
-            toast.error('Failed to update task configuration')
+            console.error('Failed to create task')
+            toast.error('Failed to create task')
           }
 
+          // Call onClose to close the modal
           onClose && onClose()
+
+          // Trigger a refetch of the task list
+          setRefetchTrigger(new Date().getTime())
         }
       } catch (error) {
         console.error('Error updating task details:', error)
@@ -1844,4 +1788,4 @@ const UpdateTaskWizard = ({ onClose, ...props }) => {
   )
 }
 
-export default UpdateTaskWizard
+export default CloneTaskWizard

@@ -122,7 +122,7 @@ const steps = [
   {
     title: 'Review',
     subtitle: 'Summary',
-    description: 'Review the Server details and submit.'
+    description: 'Review the Task details and submit.'
   }
 ]
 
@@ -941,7 +941,9 @@ const AddTaskWizard = ({ onClose }) => {
         const payload = {
           ...taskForm,
           args: taskForm.args.map(arg => arg.value),
-          hosts: taskForm.hosts.map(host => host.ip_address),
+          hosts: taskForm.hosts
+            .filter(host => host.ip_address && host.ip_address.trim() !== '')
+            .map(host => host.ip_address),
           kwargs: Object.fromEntries(taskForm.kwargs.map(({ key, value }) => [key, value])),
           metadata: Object.fromEntries(taskForm.metadata.map(({ key, value }) => [key, value])),
           components: processedComponents

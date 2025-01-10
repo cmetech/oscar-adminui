@@ -155,6 +155,7 @@ const TasksList = props => {
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
+  const [cloneDialog, setCloneDialog] = useState(false)
   const [disableDialog, setDisableDialog] = useState(false)
   const [scheduleDialog, setScheduleDialog] = useState(false)
   const [runDialog, setRunDialog] = useState(false)
@@ -596,6 +597,19 @@ const TasksList = props => {
             >
               <Icon icon='mdi:edit' />
             </IconButton>
+            {/* <IconButton
+              size='small'
+              title='Clone Task'
+              aria-label='Clone Task'
+              color='secondary'
+              onClick={() => {
+                setCurrentTask(row)
+                setCloneDialog(true)
+              }}
+              disabled={!ability.can('create', 'tasks')}
+            >
+              <Icon icon='mdi:content-copy' />
+            </IconButton> */}
             <IconButton
               size='small'
               title='Delete Task'
@@ -617,6 +631,10 @@ const TasksList = props => {
 
   const handleUpdateDialogClose = () => {
     setEditDialog(false)
+  }
+
+  const handleCloneDialogClose = () => {
+    setCloneDialog(false)
   }
 
   const handleDisableDialogClose = () => {
@@ -686,6 +704,63 @@ const TasksList = props => {
               rows={rows}
               setRows={setRows}
               onClose={handleUpdateDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  const CloneDialog = () => {
+    return (
+      <Dialog
+        fullWidth
+        maxWidth='lg'
+        scroll='body'
+        open={cloneDialog}
+        onClose={handleCloneDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby='form-dialog-title'
+      >
+        <DialogTitle id='form-dialog-title'>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {currentTask?.name?.toUpperCase() ?? ''}
+            </Typography>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {currentTask?.id ?? ''}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleCloneDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Typography variant='h5' sx={{ mb: 3 }}>
+              Clone Task Information
+            </Typography>
+            <Typography variant='body2'>Cloning task information will be effective immediately.</Typography>
+          </Box>
+          {currentTask && (
+            <UpdateTaskWizard
+              currentTask={currentTask}
+              rows={rows}
+              setRows={setRows}
+              onClose={handleCloneDialogClose}
             />
           )}
         </DialogContent>
@@ -1605,6 +1680,7 @@ const TasksList = props => {
         />
         <DisableDialog />
         <EditDialog />
+        <CloneDialog />
         <DeleteDialog />
       </Card>
     </Box>

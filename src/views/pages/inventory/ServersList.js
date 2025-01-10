@@ -65,6 +65,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import ServerSideToolbar from 'src/views/pages/misc/ServerSideToolbar'
 import { CustomDataGrid } from 'src/lib/styled-components.js'
 import UpdateServerWizard from 'src/views/pages/inventory/forms/UpdateServerWizard'
+import CloneServerWizard from 'src/views/pages/inventory/forms/CloneServerWizard'
 import ServerDetailPanel from 'src/views/pages/inventory/ServerDetailPanel'
 import { serverIdsAtom, refetchServerTriggerAtom, timezoneAtom } from 'src/lib/atoms'
 import NoRowsOverlay from 'src/views/components/NoRowsOverlay'
@@ -125,6 +126,7 @@ const ServersList = props => {
 
   // ** Dialog
   const [editDialog, setEditDialog] = useState(false)
+  const [cloneDialog, setCloneDialog] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [currentServer, setCurrentServer] = useState(null)
   const [statusDialog, setStatusDialog] = useState(false)
@@ -515,6 +517,18 @@ const ServersList = props => {
               </IconButton>
               <IconButton
                 size='small'
+                title='Clone Server'
+                aria-label='Clone Server'
+                onClick={() => {
+                  setCurrentServer(params.row)
+                  setCloneDialog(true)
+                }}
+                disabled={!ability.can('create', 'servers')}
+              >
+                <Icon icon='mdi:content-copy' />
+              </IconButton>
+              <IconButton
+                size='small'
                 title='Delete Server'
                 aria-label='Delete Server'
                 color='error'
@@ -535,6 +549,10 @@ const ServersList = props => {
 
   const handleUpdateDialogClose = () => {
     setEditDialog(false)
+  }
+
+  const handleCloneDialogClose = () => {
+    setCloneDialog(false)
   }
 
   const handleDisableDialogClose = () => {
@@ -595,6 +613,63 @@ const ServersList = props => {
               rows={rows}
               setRows={setRows}
               onClose={handleUpdateDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  const CloneDialog = () => {
+    return (
+      <Dialog
+        fullWidth
+        maxWidth='md'
+        scroll='body'
+        open={cloneDialog}
+        onClose={handleCloneDialogClose}
+        TransitionComponent={Transition}
+        aria-labelledby='form-dialog-title'
+      >
+        <DialogTitle id='form-dialog-title'>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {currentServer?.hostname?.toUpperCase() ?? ''}
+            </Typography>
+            <Typography
+              noWrap
+              variant='caption'
+              sx={{
+                color:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.customColors.brandBlack
+                    : theme.palette.customColors.brandYellow
+              }}
+            >
+              {currentServer?.id ?? ''}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <IconButton
+            size='small'
+            onClick={() => handleCloneDialogClose()}
+            sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Typography variant='h5' sx={{ mb: 3 }}>
+              Clone Server Information
+            </Typography>
+            <Typography variant='body2'>Cloning server information will be effective immediately.</Typography>
+          </Box>
+          {currentServer && (
+            <CloneServerWizard
+              currentServer={currentServer}
+              rows={rows}
+              setRows={setRows}
+              onClose={handleCloneDialogClose}
             />
           )}
         </DialogContent>
@@ -1226,6 +1301,7 @@ const ServersList = props => {
         />
         <StatusDialog />
         <EditDialog />
+        <CloneDialog />
         <DeleteDialog />
       </Card>
     </Box>

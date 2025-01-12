@@ -479,6 +479,15 @@ const ServersList = props => {
         const { row } = params
         const isActive = row.status?.toLowerCase() === 'active'
 
+        // Add debug logging
+        const handleEditClick = () => {
+          console.log('Edit clicked for row:', row)
+          console.log('Component name:', row.component_name)
+          console.log('Subcomponent name:', row.subcomponent_name)
+          setCurrentServer(row)
+          setEditDialog(true)
+        }
+
         return (
           <Box
             sx={{
@@ -507,10 +516,7 @@ const ServersList = props => {
                 size='small'
                 title='Edit'
                 aria-label='Edit'
-                onClick={() => {
-                  setCurrentServer(params.row)
-                  setEditDialog(true)
-                }}
+                onClick={handleEditClick}
                 disabled={!ability.can('update', 'servers')}
               >
                 <Icon icon='mdi:edit' />

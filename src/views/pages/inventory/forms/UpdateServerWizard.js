@@ -245,18 +245,25 @@ const UpdateServerWizard = ({ onClose, ...props }) => {
 
   // Use useEffect to initialize the form with currentServer data
   useEffect(() => {
+    // Add debug logging
+    console.log('Current Server Data:', currentServer)
+
     // Check if currentServer exists and is not empty
     if (currentServer && Object.keys(currentServer).length > 0) {
       const updatedServerForm = {
-        hostName: currentServer.hostname.toUpperCase() || '',
-        componentName: currentServer.component_name.toUpperCase() || '',
-        subcomponentName: currentServer.subcomponent_name.toUpperCase() || '',
-        datacenterName: currentServer.datacenter_name.toUpperCase() || '',
-        environmentName: currentServer.environment_name.toUpperCase() || '',
-        status: currentServer.status.toUpperCase() || 'ACTIVE',
-        metadata: currentServer.metadata || [{ key: '', value: '' }],
-        networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
+        hostName: currentServer?.hostname?.toUpperCase() ?? '',
+        componentName: currentServer?.component_name?.toUpperCase() ?? '',
+        subcomponentName: currentServer?.subcomponent_name?.toUpperCase() ?? '',
+        datacenterName: currentServer?.datacenter_name?.toUpperCase() ?? '',
+        environmentName: currentServer?.environment_name?.toUpperCase() ?? '',
+        status: currentServer?.status?.toUpperCase() ?? 'ACTIVE',
+        metadata: currentServer?.metadata ?? [{ key: '', value: '' }],
+        networkInterfaces: currentServer?.network_interfaces ?? [{ name: '', ip_address: '', label: '' }]
       }
+
+      // Add debug logging
+      console.log('Updated Server Form:', updatedServerForm)
+
       setServerForm(updatedServerForm)
     }
   }, [currentServer])

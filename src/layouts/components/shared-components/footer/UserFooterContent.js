@@ -52,8 +52,7 @@ const UserFooterContent = props => {
           }`
         }}
       >
-        <i className='icon icon-econ' style={{ fontSize: '1rem' }} />
-        {` © ${oscarConfig.COMPANY_NAME} 1994-${new Date().getFullYear()}`}
+        {` © ${oscarConfig.COMPANY_NAME} ${new Date().getFullYear()}`}
       </Typography>
       {hidden ? null : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>

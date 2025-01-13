@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack'
 import Icon from '@mui/material/Icon'
 import { useTranslation } from 'react-i18next'
 import getConfig from 'next/config'
+import oscarConfig from 'src/configs/oscarConfig'
 
 const StyledLink = styled(Link)({
   display: 'flex',
@@ -52,7 +53,7 @@ const UserFooterContent = props => {
         }}
       >
         <i className='icon icon-econ' style={{ fontSize: '1rem' }} />
-        {` © Ericsson 1994-${new Date().getFullYear()}`}
+        {` © ${oscarConfig.COMPANY_NAME} 1994-${new Date().getFullYear()}`}
       </Typography>
       {hidden ? null : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 0 } }}>

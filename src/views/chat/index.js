@@ -18,7 +18,7 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
 import getConfig from 'next/config'
-
+import oscarConfig from 'src/configs/oscarConfig'
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
 
@@ -254,7 +254,7 @@ const ChatBot = () => {
         <ChatContainer>
           <ConversationHeader>
             <Avatar src='/images/oscar.png' name='Oscar' status={isChatEnabled ? 'available' : 'unavailable'} />
-            <ConversationHeader.Content userName='OSCAR' info='Ericsson Powered ChatBot' />
+            <ConversationHeader.Content userName='OSCAR' info={`${oscarConfig.COMPANY_NAME} Powered ChatBot`} />
             <ConversationHeader.Actions>
               <IconButton onClick={clearChat} title={t('clearChat')} color='error' size='medium'>
                 <Icon icon='mdi:trash-can' />

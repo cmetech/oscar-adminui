@@ -30,7 +30,7 @@ import OutlinedInput from '@mui/material/OutlinedInput'
 // ** Third Party Imports
 import { useForm, Controller } from 'react-hook-form'
 import ChangePasswordCard from 'src/views/pages/account-settings/security/ChangePasswordCard'
-
+import oscarConfig from 'src/configs/oscarConfig'
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
@@ -357,7 +357,12 @@ const TabAccount = () => {
                     control={control}
                     defaultValue=''
                     render={({ field }) => (
-                      <TextfieldStyled {...field} fullWidth label='Organization' placeholder='Ericsson' />
+                      <TextfieldStyled
+                        {...field}
+                        fullWidth
+                        label='Organization'
+                        placeholder={oscarConfig.COMPANY_NAME}
+                      />
                     )}
                   />
                 </Grid>

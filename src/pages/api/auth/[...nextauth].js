@@ -9,6 +9,8 @@ import AzureADProvider from 'next-auth/providers/azure-ad'
 import axios from 'axios'
 import https from 'https'
 
+import oscarConfig from 'src/configs/oscarConfig'
+
 const node_env = process.env.NODE_ENV || 'production'
 
 function extractRoles(decodedToken, client_id) {
@@ -278,7 +280,9 @@ export const authOptions = {
             sub: token.sub,
             firstName: profile.given_name,
             lastName: profile.family_name,
-            organization: profile.organization ? 'ericsson' : 'ericsson',
+            organization: profile.organization
+              ? oscarConfig.COMPANY_NAME.toLowerCase()
+              : oscarConfig.COMPANY_NAME.toLowerCase(),
             timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
             username: profile.preferred_username,
             idToken: account.id_token,
@@ -313,7 +317,9 @@ export const authOptions = {
             sub: token.sub,
             firstName: profile.given_name,
             lastName: profile.family_name,
-            organization: profile.organization ? 'ericsson' : 'ericsson',
+            organization: profile.organization
+              ? oscarConfig.COMPANY_NAME.toLowerCase()
+              : oscarConfig.COMPANY_NAME.toLowerCase(),
             timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
             username: profile.preferred_username,
             idToken: account.id_token,
@@ -344,7 +350,9 @@ export const authOptions = {
             sub: token.sub,
             firstName: profile.given_name,
             lastName: profile.family_name,
-            organization: profile.organization ? 'ericsson' : 'ericsson',
+            organization: profile.organization
+              ? oscarConfig.COMPANY_NAME.toLowerCase()
+              : oscarConfig.COMPANY_NAME.toLowerCase(),
             timezone: profile.zoneinfo ? profile.zoneinfo : 'America/New_York',
             username: profile.preferred_username,
             idToken: account.id_token,

@@ -155,7 +155,11 @@ const AppBrand = () => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', marginLeft: 3, marginTop: 2 }}
-            src={theme.palette.mode == 'dark' ? '/images/ECON_RGB_WHITE_48px.png' : '/images/ECON_RGB_BLACK_48px.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark-48.png`
+                : `/images/${oscarConfig.company.toLowerCase()}-logo-light-48.png`
+            }
             alt='logo'
             width='48px'
             height='48px'
@@ -165,7 +169,11 @@ const AppBrand = () => {
             bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
             component='img'
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-            src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_RGB.png'}
+            src={
+              theme.palette.mode == 'dark'
+                ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
+                : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+            }
             alt='logo'
             width='170px'
             height='40px'
@@ -197,11 +205,11 @@ const User = () => {
   const userFullName = userSession?.data?.user?.name || 'John Doe'
   const imageFileName = userFullName.toLowerCase().replace(/\s+/g, '') || '1'
 
-  const userRoles = userSession?.data?.user?.roles || [];
+  const userRoles = userSession?.data?.user?.roles || []
 
-  const isAdmin = userRoles.includes('admin');
-  const isEditor = userRoles.includes('Editor');
-  const firstRole = isAdmin ? 'admin' : isEditor ? 'Editor' : 'viewer';
+  const isAdmin = userRoles.includes('admin')
+  const isEditor = userRoles.includes('Editor')
+  const firstRole = isAdmin ? 'admin' : isEditor ? 'Editor' : 'viewer'
 
   return (
     <Box sx={{ py: 2, px: 4, mb: 2.5 }}>

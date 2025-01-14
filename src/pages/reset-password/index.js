@@ -43,6 +43,7 @@ import themeConfig from 'src/configs/themeConfig'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
+import oscarConfig from 'src/configs/oscarConfig'
 
 const RightWrapper = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -192,7 +193,11 @@ const ResetPassword = () => {
                   bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : '#F4F5FA'}
                   component='img'
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
-                  src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/logo.png'}
+                  src={
+                    theme.palette.mode == 'dark'
+                      ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
+                      : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                  }
                   alt='logo'
                 />
                 <Typography

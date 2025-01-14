@@ -49,6 +49,8 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
 
+import oscarConfig from 'src/configs/oscarConfig'
+
 // ** Styled Components
 const LoginIllustrationWrapper = styled(Box)(({ theme }) => ({
   padding: theme.spacing(20),
@@ -183,7 +185,7 @@ const LoginPage = ({ csrfToken, providers }) => {
   // console.log('CSRF: ' + csrfToken)
   // console.log('Providers: ' + JSON.stringify(providers))
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     const { email, password } = data
 
     try {
@@ -265,7 +267,11 @@ const LoginPage = ({ csrfToken, providers }) => {
                   bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
                   component='img'
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
-                  src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}
+                  src={
+                    theme.palette.mode == 'dark'
+                      ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
+                      : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                  }
                   alt='logo'
                 />
                 <Typography
@@ -320,9 +326,7 @@ const LoginPage = ({ csrfToken, providers }) => {
               >
                 Login with Azure AD
               </Button>
-              {showDivider && (
-                <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>
-              )}
+              {showDivider && <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }}>or</Divider>}
               <Box sx={{ mb: 6 }}>
                 <Typography variant='h6'>Please sign-in using local account</Typography>
               </Box>

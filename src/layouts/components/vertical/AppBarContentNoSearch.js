@@ -22,6 +22,8 @@ import UserNotificationDropdown from 'src/layouts/components/UserNotificationDro
 import UserLanguageDropdown from 'src/layouts/components/UserLanguageDropdown'
 import OscarChatToggler from 'src/layouts/components/shared-components/OscarChatToggler'
 
+import oscarConfig from 'src/configs/oscarConfig'
+
 const CustomBreadcrumbs = () => {
   const router = useRouter()
   const theme = useTheme()
@@ -91,7 +93,11 @@ const AppBarContent = props => {
         bgcolor={theme.palette.mode === 'dark' ? 'customColors.dark' : ''}
         component='img'
         sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
-        src={theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'}
+        src={
+          theme.palette.mode == 'dark'
+            ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
+            : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+        }
         alt='logo'
         width='170px'
         height='40px'

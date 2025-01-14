@@ -46,6 +46,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 
 import useBgColor from 'src/@core/hooks/useBgColor'
 import { useSettings } from 'src/@core/hooks/useSettings'
+import oscarConfig from 'src/configs/oscarConfig'
 
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -225,7 +226,9 @@ const RegisterPage = () => {
                     component='img'
                     sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                     src={
-                      theme.palette.mode == 'dark' ? '/images/logo.png' : '/images/ERI_horizontal_black_login_RGB.png'
+                      theme.palette.mode == 'dark'
+                        ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
+                        : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
                     }
                     alt='logo'
                   />

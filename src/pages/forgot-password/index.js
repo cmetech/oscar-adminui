@@ -95,6 +95,8 @@ const ForgotPassword = () => {
   // ** Vars
   const { skin } = settings
 
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
+
   const handleSubmit = async e => {
     e.preventDefault()
     console.log(e.target[0].value)
@@ -130,8 +132,8 @@ const ForgotPassword = () => {
       sx={{
         backgroundImage: `${
           theme.palette.mode === 'dark'
-            ? 'url(/images/black-spotlight-bg.jpg)'
-            : 'url(/images/white-spotlight-bg-1.jpg)'
+            ? `url(/images/${companySlug}-black-spotlight-bg.jpg)`
+            : `url(/images/${companySlug}-white-spotlight-bg-1.jpg)`
         }`,
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
@@ -170,8 +172,8 @@ const ForgotPassword = () => {
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                   src={
                     theme.palette.mode == 'dark'
-                      ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-                      : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                      ? `/images/${companySlug}-logo-dark.png`
+                      : `/images/${companySlug}-logo-light.png`
                   }
                   alt='logo'
                 />

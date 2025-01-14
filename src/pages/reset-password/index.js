@@ -90,7 +90,7 @@ const ResetPassword = () => {
   const { settings } = useSettings()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const token = router.query.token
-
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
   // ** Vars
   const { skin } = settings
 
@@ -195,8 +195,8 @@ const ResetPassword = () => {
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                   src={
                     theme.palette.mode == 'dark'
-                      ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-                      : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                      ? `/images/${companySlug}-logo-dark.png`
+                      : `/images/${companySlug}-logo-light.png`
                   }
                   alt='logo'
                 />

@@ -171,6 +171,8 @@ const LoginPage = ({ csrfToken, providers }) => {
   const azure_ad_enabled = publicRuntimeConfig.AZURE_ENABLE === 'true'
   const showDivider = keycloak_enabled || azure_ad_enabled
 
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
+
   const {
     control,
     setError,
@@ -269,8 +271,8 @@ const LoginPage = ({ csrfToken, providers }) => {
                   sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                   src={
                     theme.palette.mode == 'dark'
-                      ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-                      : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                      ? `/images/${companySlug}-logo-dark.png`
+                      : `/images/${companySlug}-logo-light.png`
                   }
                   alt='logo'
                 />

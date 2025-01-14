@@ -87,6 +87,8 @@ const AppBarContent = props => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
 
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
+
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box
@@ -95,8 +97,8 @@ const AppBarContent = props => {
         sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
         src={
           theme.palette.mode == 'dark'
-            ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-            : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+            ? `/images/${companySlug}-logo-dark.png`
+            : `/images/${companySlug}-logo-light.png`
         }
         alt='logo'
         width='170px'

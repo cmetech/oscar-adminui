@@ -147,6 +147,9 @@ const AppBrand = () => {
     textColor = 'customColors.brandWhite'
   }
 
+  // You can even define this outside the component if you want
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
+
   return (
     <StyledLink href='/'>
       <Stack>
@@ -157,8 +160,8 @@ const AppBrand = () => {
             sx={{ display: 'flex', alignItems: 'center', marginLeft: 3, marginTop: 2 }}
             src={
               theme.palette.mode == 'dark'
-                ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark-48.png`
-                : `/images/${oscarConfig.company.toLowerCase()}-logo-light-48.png`
+                ? `/images/${companySlug}-logo-dark-48.png`
+                : `/images/${companySlug}-logo-light-48.png`
             }
             alt='logo'
             width='48px'
@@ -171,8 +174,8 @@ const AppBrand = () => {
             sx={{ display: 'flex', alignItems: 'center', paddingLeft: 3, paddingTop: 1, paddingBottom: 1 }}
             src={
               theme.palette.mode == 'dark'
-                ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-                : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                ? `/images/${companySlug}-logo-dark.png`
+                : `/images/${companySlug}-logo-light.png`
             }
             alt='logo'
             width='170px'

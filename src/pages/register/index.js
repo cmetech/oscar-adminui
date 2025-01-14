@@ -138,6 +138,7 @@ const RegisterPage = () => {
   const { settings } = useSettings()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
 
+  const companySlug = oscarConfig.COMPANY_NAME.toLowerCase()
   // ** Vars
   const { skin } = settings
 
@@ -227,8 +228,8 @@ const RegisterPage = () => {
                     sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
                     src={
                       theme.palette.mode == 'dark'
-                        ? `/images/${oscarConfig.company.toLowerCase()}-logo-dark.png`
-                        : `/images/${oscarConfig.company.toLowerCase()}-logo-light.png`
+                        ? `/images/${companySlug}-logo-dark.png`
+                        : `/images/${companySlug}-logo-light.png`
                     }
                     alt='logo'
                   />

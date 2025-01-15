@@ -358,7 +358,6 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
 
   const renderDynamicFormSection = section => {
     if (section !== 'extra') {
-      // Handle other sections if needed
       return null
     }
 
@@ -399,15 +398,17 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
             </Box>
           </Grid>
         ))}
-        <Grid item xs={12}>
-          <Button
-            startIcon={<Icon icon='mdi:plus-circle-outline' />}
-            onClick={() => addSectionEntry('extra')}
-            style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-          >
-            Add Extra Field
-          </Button>
-        </Grid>
+        {connectionForm.extra.length > 0 && (
+          <Grid item xs={12}>
+            <Button
+              startIcon={<Icon icon='mdi:plus-circle-outline' />}
+              onClick={() => addSectionEntry('extra')}
+              style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+            >
+              Add Extra Field
+            </Button>
+          </Grid>
+        )}
       </Fragment>
     )
   }
@@ -527,6 +528,7 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
                     <OutlinedInputStyled
                       id='outlined-adornment-password'
                       type={showPassword ? 'text' : 'password'}
+                      name='password'
                       value={connectionForm.password}
                       onChange={e => handleFormChange({ target: { name: 'password', value: e.target.value } })}
                       endAdornment={
@@ -565,22 +567,24 @@ const UpdateConnectionWizard = ({ connectionData, onSuccess }) => {
             <Fragment>
               <Stack direction='column' spacing={1}>
                 {renderDynamicFormSection('extra')}
-                <Box>
-                  <Button
-                    startIcon={
-                      <Icon
-                        icon='mdi:plus-circle-outline'
-                        style={{
-                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                        }}
-                      />
-                    }
-                    onClick={() => addSectionEntry('extra')}
-                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                  >
-                    Add Extra
-                  </Button>
-                </Box>
+                {connectionForm.extra.length === 0 && (
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('extra')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Extra
+                    </Button>
+                  </Box>
+                )}
               </Stack>
             </Fragment>
           )

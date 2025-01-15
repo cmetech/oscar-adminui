@@ -60,7 +60,7 @@ const initialConnectionFormState = {
   schema: '',
   port: '',
   password: '',
-  extra: [{ key: '', value: '' }]
+  extra: []
 }
 
 // Define available connection types
@@ -357,8 +357,9 @@ const AddConnectionWizard = ({ onSuccess }) => {
           Authorization: `Bearer ${apiToken}`
         }
 
-        // Convert extra to an object and then to a JSON string
-        const extraObject = Object.fromEntries(connectionForm.extra.map(({ key, value }) => [key, value]))
+        // Filter out empty key-value pairs and convert to object
+        const filteredExtra = connectionForm.extra.filter(({ key, value }) => key.trim() !== '' && value.trim() !== '')
+        const extraObject = Object.fromEntries(filteredExtra.map(({ key, value }) => [key, value]))
         const extraString = JSON.stringify(extraObject)
 
         const payload = {
@@ -413,51 +414,53 @@ const AddConnectionWizard = ({ onSuccess }) => {
 
     const { keyLabel, valueLabel } = getFieldLabels(section)
 
-    return connectionForm[section].map((entry, index) => (
-      <Grid item xs={12} key={`${index}-${resetFormFields}`}>
-        <Box key={`${index}-${resetFormFields}`} sx={{ marginBottom: 1 }}>
-          <Grid container spacing={3} alignItems='center'>
-            <Grid item xs={4}>
-              <TextfieldStyled
-                key={`key-${section}-${index}`}
-                fullWidth
-                label={keyLabel}
-                name='key'
-                value={entry.key?.toUpperCase() || ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextfieldStyled
-                key={`value-${section}-${index}`}
-                fullWidth
-                label={valueLabel}
-                name='value'
-                value={entry.value?.toUpperCase() || ''}
-                onChange={e => handleFormChange(e, index, section)}
-                variant='outlined'
-                margin='normal'
-              />
-            </Grid>
-            <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-              <IconButton
-                onClick={() => addSectionEntry(section)}
-                style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
-              >
-                <Icon icon='mdi:plus-circle-outline' />
-              </IconButton>
-              {connectionForm[section].length > 1 && (
-                <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
-                  <Icon icon='mdi:minus-circle-outline' />
-                </IconButton>
-              )}
-            </Grid>
+    return (
+      <Fragment>
+        {connectionForm[section].map((entry, index) => (
+          <Grid item xs={12} key={`${index}-${resetFormFields}`}>
+            <Box sx={{ marginBottom: 1 }}>
+              <Grid container spacing={3} alignItems='center'>
+                <Grid item xs={4}>
+                  <TextfieldStyled
+                    key={`key-${section}-${index}`}
+                    fullWidth
+                    label={keyLabel}
+                    name='key'
+                    value={entry.key?.toUpperCase() || ''}
+                    onChange={e => handleFormChange(e, index, section)}
+                    variant='outlined'
+                    margin='normal'
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextfieldStyled
+                    key={`value-${section}-${index}`}
+                    fullWidth
+                    label={valueLabel}
+                    name='value'
+                    value={entry.value?.toUpperCase() || ''}
+                    onChange={e => handleFormChange(e, index, section)}
+                    variant='outlined'
+                    margin='normal'
+                  />
+                </Grid>
+                <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <IconButton onClick={() => removeSectionEntry(section, index)} color='secondary'>
+                    <Icon icon='mdi:minus-circle-outline' />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => addSectionEntry(section)}
+                    style={{ color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black' }}
+                  >
+                    <Icon icon='mdi:plus-circle-outline' />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </Box>
           </Grid>
-        </Box>
-      </Grid>
-    ))
+        ))}
+      </Fragment>
+    )
   }
 
   const renderContent = () => {
@@ -643,23 +646,26 @@ const AddConnectionWizard = ({ onSuccess }) => {
           return (
             <Fragment>
               <Stack direction='column' spacing={1}>
-                {renderDynamicFormSection('extra')}
-                <Box>
-                  <Button
-                    startIcon={
-                      <Icon
-                        icon='mdi:plus-circle-outline'
-                        style={{
-                          color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
-                        }}
-                      />
-                    }
-                    onClick={() => addSectionEntry('extra')}
-                    style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
-                  >
-                    Add Extra
-                  </Button>
-                </Box>
+                {connectionForm.extra.length > 0 ? (
+                  renderDynamicFormSection('extra')
+                ) : (
+                  <Box>
+                    <Button
+                      startIcon={
+                        <Icon
+                          icon='mdi:plus-circle-outline'
+                          style={{
+                            color: theme.palette.mode === 'dark' ? theme.palette.customColors.brandYellow : 'black'
+                          }}
+                        />
+                      }
+                      onClick={() => addSectionEntry('extra')}
+                      style={{ color: theme.palette.mode === 'dark' ? 'white' : 'black' }}
+                    >
+                      Add Extra
+                    </Button>
+                  </Box>
+                )}
               </Stack>
             </Fragment>
           )

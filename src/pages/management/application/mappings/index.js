@@ -723,7 +723,12 @@ const Settings = () => {
 
       const selectedMappingIds = mappings;
 
-      const filteredMappings = mappingss.filter(mapping => selectedMappingIds.includes(mapping.id))
+      let filteredMappings = mappingss.filter(mapping => selectedMappingIds.includes(mapping.id))
+
+      // Check if filteredMappings is null or empty
+      if (!filteredMappings || filteredMappings.length === 0) {
+        filteredMappings = mappingss
+      }
 
       // Create a new workbook
       const workbook = new ExcelJS.Workbook()
@@ -742,7 +747,9 @@ const Settings = () => {
         { header: 'Modified At', key: 'modified_at', width: 20 }
       ]
 
-
+      if (!filteredMappings || filteredMappings.length === 0) {
+        toast.error('Error exporting mappings') 
+      }
 
       // Add rows
       filteredMappings.forEach(mapping => {
@@ -759,11 +766,12 @@ const Settings = () => {
         new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
         'Mappings.xlsx'
       )
+      
       console.log('Exporting...')
-      toast.success('Exporting...') // Assuming you have a toast notification system
+      toast.success('Exporting...') 
     } catch (error) {
       console.error('Error exporting mappings:', error)
-      toast.error('Error exporting mappings') // Assuming you have a toast notification system
+      toast.error('Error exporting mappings')
     }
     setIsExportModalOpen(false)
   }
@@ -921,7 +929,7 @@ const Settings = () => {
       <ConfirmationStatusModal
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
-        onConfirm={handleConfirmStatusUpdate}
+        onConfirm={handleConfirmStatusUpdate}  
         tab={value}
       />
     </Grid>

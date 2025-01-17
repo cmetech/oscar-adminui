@@ -133,7 +133,7 @@ const validationSchema = yup.object({
     .string()
     .trim()
     .required('Namespace Name for mapping is required')
-    .matches(/^[A-Za-z0-9-]+$/, 'Only alphanumeric characters and hyphens are allowed')
+    .matches(/^[A-Za-z0-9-_]+$/, 'Only alphanumeric characters ,hyphens and underscores are allowed')
     .min(5, 'Name must be at least 5 characters')
     .trim(),
   mappingNamespaceDescription: yup.string().trim()

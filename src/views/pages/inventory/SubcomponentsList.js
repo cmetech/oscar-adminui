@@ -146,7 +146,7 @@ const SubcomponentsList = props => {
       headerName: t('Identifier')
     },
     {
-      flex: 0.035,
+      flex: 0.25,
       minWidth: 100,
       field: 'name',
       editable: editmode,
@@ -184,11 +184,11 @@ const SubcomponentsList = props => {
       }
     },
     {
-      flex: 0.05,
+      flex: 0.5,
       minWidth: 100,
       field: 'specification',
       editable: editmode,
-      headerName: t('Specification'),
+      headerName: t('Description'),
       renderCell: params => {
         const { row } = params
 
@@ -210,82 +210,10 @@ const SubcomponentsList = props => {
       }
     },
     {
-      flex: 0.05,
-      minWidth: 250,
-      field: 'createdAtTime',
-      editable: editmode,
-      headerName: t('Created At'),
-      renderCell: params => {
-        const { row } = params
-
-        let humanReadableDate = ''
-
-        if (row.created_at) {
-          humanReadableDate = formatInTimeZone(
-            parseISO(row.created_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
-            'MMM d, yyyy, h:mm:ss aa zzz'
-          )
-        }
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
-      flex: 0.05,
-      minWidth: 100,
-      field: 'updatedAtTime',
-      editable: editmode,
-      headerName: t('Updated At'),
-      renderCell: params => {
-        const { row } = params
-
-        let humanReadableDate = ''
-
-        if (row.modified_at) {
-          humanReadableDate = formatInTimeZone(
-            parseISO(row.modified_at),
-            timezone || 'UTC', // Default to 'UTC' if timezone is undefined
-            'MMM d, yyyy, h:mm:ss aa zzz'
-          )
-        }
-
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center', // Ensures vertical centering inside the Box
-              justifyContent: 'flex-start',
-              width: '100%', // Ensures the Box takes full width of the cell
-              height: '100%' // Ensures the Box takes full height of the cell
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography noWrap>{humanReadableDate}</Typography>
-            </Box>
-          </Box>
-        )
-      }
-    },
-    {
       field: 'actions',
       headerName: t('Actions'),
       type: 'string',
-      flex: 0.025,
+      flex: 0.2,
       minWidth: 10,
       renderCell: params => {
         return (

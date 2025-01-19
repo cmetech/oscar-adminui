@@ -253,12 +253,12 @@ const CloneServerWizard = ({ onClose, ...props }) => {
     // Check if currentServer exists and is not empty
     if (currentServer && Object.keys(currentServer).length > 0) {
       const updatedServerForm = {
-        hostName: currentServer.hostname.toUpperCase() || '',
-        componentName: currentServer.component_name.toUpperCase() || '',
-        subcomponentName: currentServer.subcomponent_name.toUpperCase() || '',
-        datacenterName: currentServer.datacenter_name.toUpperCase() || '',
-        environmentName: currentServer.environment_name.toUpperCase() || '',
-        status: currentServer.status.toUpperCase() || 'ACTIVE',
+        hostName: currentServer.hostname?.toUpperCase() || '',
+        componentName: currentServer.component_name?.toUpperCase() || '',
+        subcomponentName: currentServer.subcomponent_name?.toUpperCase() || '',
+        datacenterName: currentServer.datacenter_name?.toUpperCase() || '',
+        environmentName: currentServer.environment_name?.toUpperCase() || '',
+        status: currentServer.status?.toUpperCase() || 'ACTIVE',
         metadata: currentServer.metadata || [{ key: '', value: '' }],
         networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
       }
@@ -382,6 +382,13 @@ const CloneServerWizard = ({ onClose, ...props }) => {
           Authorization: `Bearer ${apiToken}` // Include the bearer token in the Authorization header
         }
 
+        // Clean up network interfaces by removing unnecessary fields
+        const cleanedNetworkInterfaces = serverForm.networkInterfaces.map(ni => ({
+          name: ni.name,
+          ip_address: ni.ip_address,
+          label: ni.label || ''
+        }))
+
         const payload = {
           hostname: serverForm.hostName,
           datacenter_name: serverForm.datacenterName,
@@ -389,46 +396,47 @@ const CloneServerWizard = ({ onClose, ...props }) => {
           component_name: serverForm.subcomponentName
             ? `${serverForm.componentName}:${serverForm.subcomponentName}`
             : serverForm.componentName,
-          metadata: serverForm.metadata,
-          network_interfaces: serverForm.networkInterfaces,
-          ip_address: serverForm.networkInterfaces[0].ip_address,
+          metadata: serverForm.metadata.filter(m => m.key && m.value),
+          network_interfaces: cleanedNetworkInterfaces,
           status: serverForm.status
         }
+
+        console.log('Sending payload:', payload) // For debugging
 
         // Update the endpoint to point to your Next.js API route
         const endpoint = '/api/inventory/servers'
         const response = await axios.post(endpoint, payload, { headers })
 
-        if (response.status === 201 && response.data) {
-          toast.success('ClonedServer details added successfully')
-          setRefetchTrigger(Date.now())
-
-          // Call onClose to close the modal
+        if (response.data) {
+          setRefetchTrigger(Date.now()) // Trigger a refetch of the servers list
+          toast.success('Server cloned successfully')
           onClose && onClose()
         }
       } catch (error) {
-        console.error('Error cloning server details', error)
+        console.error('Error cloning server details:', error)
+        console.error('Error details:', error.response?.data)
         toast.error('Error cloning server details')
       }
     }
   }
 
+  // Function to handle form reset
   const handleReset = () => {
     if (currentServer && Object.keys(currentServer).length > 0) {
-      const resetServerForm = {
-        hostName: currentServer.hostname || '',
-        componentName: currentServer.component_name || '',
-        datacenterName: currentServer.datacenter_name || '',
-        environmentName: currentServer.environment_name || '',
-        status: currentServer.status || 'ACTIVE',
+      const resetForm = {
+        hostName: currentServer.hostname?.toUpperCase() || '',
+        componentName: currentServer.component_name?.toUpperCase() || '',
+        subcomponentName: currentServer.subcomponent_name?.toUpperCase() || '',
+        datacenterName: currentServer.datacenter_name?.toUpperCase() || '',
+        environmentName: currentServer.environment_name?.toUpperCase() || '',
+        status: currentServer.status?.toUpperCase() || 'ACTIVE',
         metadata: currentServer.metadata || [{ key: '', value: '' }],
         networkInterfaces: currentServer.network_interfaces || [{ name: '', ip_address: '', label: '' }]
       }
-      setServerForm(resetServerForm)
+      setServerForm(resetForm)
     } else {
-      setServerForm(initialServerFormState) // Fallback to initial state if currentServer is not available
+      setServerForm(initialServerFormState)
     }
-    setResetFormFields(false)
     setActiveStep(0)
   }
 

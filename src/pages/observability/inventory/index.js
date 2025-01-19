@@ -868,18 +868,50 @@ const Settings = () => {
       const response = await axios.get('/api/inventory/servers')
       const allServers = response.data.rows
 
-      // Create a map of server IDs to their hostnames
       const serverMap = allServers.reduce((acc, server) => {
-        acc[server.id] = server.hostname
+        acc[server.id] = {
+          hostname: server.hostname,
+          datacenter_name: server.datacenter_name,
+          environment_name: server.environment_name,
+          status: newStatus,
+          component_name: server.subcomponent_name
+            ? `${server.component_name}:${server.subcomponent_name}`
+            : server.component_name,
+          metadata: server.metadata,
+          network_interfaces: server.network_interfaces
+        }
 
         return acc
       }, {})
 
+      // Log the data we're about to send
+      serverIds.forEach(serverId => {
+        const payload = {
+          hostname: serverMap[serverId].hostname,
+          datacenter_name: serverMap[serverId].datacenter_name,
+          environment_name: serverMap[serverId].environment_name,
+          status: newStatus,
+          component_name: serverMap[serverId].subcomponent_name
+            ? `${serverMap[serverId].component_name}:${serverMap[serverId].subcomponent_name}`
+            : serverMap[serverId].component_name,
+          metadata: serverMap[serverId].metadata,
+          network_interfaces: serverMap[serverId].network_interfaces
+        }
+        // console.log(`Updating server ${serverId} with payload:`, payload)
+      })
+
       // Update each selected server with both hostname and status
       const updatePromises = serverIds.map(serverId =>
         axios.patch(`/api/inventory/servers/${serverId}`, {
-          hostname: serverMap[serverId], // Include the hostname
-          status: newStatus
+          hostname: serverMap[serverId].hostname,
+          datacenter_name: serverMap[serverId].datacenter_name,
+          environment_name: serverMap[serverId].environment_name,
+          status: newStatus,
+          component_name: serverMap[serverId].subcomponent_name
+            ? `${serverMap[serverId].component_name}:${serverMap[serverId].subcomponent_name}`
+            : serverMap[serverId].component_name,
+          metadata: serverMap[serverId].metadata,
+          network_interfaces: serverMap[serverId].network_interfaces
         })
       )
 

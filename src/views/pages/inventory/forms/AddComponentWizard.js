@@ -250,7 +250,7 @@ const AddComponentWizard = ({ onSuccess, ...props }) => {
 
         const payload = {
           name: componentName,
-          subcomponent_name: subcomponentName,
+          default_subcomponent_name: subcomponentName,
           type: componentType,
           details: componentDetails
         }

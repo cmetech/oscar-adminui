@@ -163,7 +163,7 @@ const UpdateComponentWizard = ({ onClose, ...props }) => {
   const [componentName, setComponentName] = useState(props.currentComponent?.name || '')
   const [componentDetails, setComponentDetails] = useState(props.currentComponent?.details || '')
   const [componentType, setComponentType] = useState(props.currentComponent?.type || '')
-  const [subcomponentName, setSubcomponentName] = useState(props.currentComponent?.subcomponent_name || '')
+  const [subcomponentName, setSubcomponentName] = useState(props.currentComponent?.default_subcomponent_name || '')
   const [subComponents, setSubComponents] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   const [formErrors, setFormErrors] = useState({})
@@ -254,7 +254,7 @@ const UpdateComponentWizard = ({ onClose, ...props }) => {
 
         const payload = {
           name: componentName,
-          subcomponent_name: subcomponentName,
+          default_subcomponent_name: subcomponentName,
           details: componentDetails,
           type: componentType
         }
@@ -292,7 +292,7 @@ const UpdateComponentWizard = ({ onClose, ...props }) => {
   const handleReset = () => {
     setComponentName(props?.currentComponent?.name || '')
     setComponentDetails(props?.currentComponent?.details || '')
-    setSubComponentName(props?.currentComponent?.subcomponent_name || '')
+    setSubComponentName(props?.currentComponent?.default_subcomponent_name || '')
     setComponentType(props?.currentComponent?.type || '')
     setActiveStep(0)
   }

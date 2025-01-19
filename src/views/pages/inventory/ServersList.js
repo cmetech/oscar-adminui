@@ -1024,7 +1024,14 @@ const ServersList = props => {
 
       await axios.patch(`/api/inventory/servers/${currentServer.id}`, {
         hostname: currentServer.hostname,
-        status: newStatus
+        datacenter_name: currentServer.datacenter_name,
+        environment_name: currentServer.environment_name,
+        status: newStatus,
+        component_name: currentServer.subcomponent_name
+          ? `${currentServer.component_name}:${currentServer.subcomponent_name}`
+          : currentServer.component_name,
+        metadata: currentServer.metadata,
+        network_interfaces: currentServer.network_interfaces
       })
 
       setStatusDialog(false)

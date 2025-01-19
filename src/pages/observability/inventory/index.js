@@ -438,8 +438,14 @@ const ServerUploadDialog = ({ open, onClose, onSuccess, tab }) => {
 
       // Handle response here
       if (response.status === 200 && response.data) {
-        const { requested_count, processed_count } = response.data
-        toast.success(`Upload complete: ${processed_count} out of ${requested_count} servers processed successfully.`)
+        const { requested_created_count, processed_created_count, requested_updated_count, processed_updated_count } =
+          response.data
+        toast.success(
+          `Upload complete: ${processed_created_count} out of ${requested_created_count} servers created successfully.`
+        )
+        toast.success(
+          `Upload complete: ${processed_updated_count} out of ${requested_updated_count} servers updated successfully.`
+        )
         setRefetchTrigger(new Date().getTime())
       } else {
         toast.success('Upload complete.')
@@ -793,53 +799,151 @@ const Settings = () => {
 
   const handleConfirmExport = async () => {
     try {
-      // Fetch server data
+      // Fetch all servers from the API
       const response = await axios.get('/api/inventory/servers')
-      const servers = response.data.rows
+      const allServers = response.data.rows
 
-      // Create a new workbook
+      // Use selected servers if any are selected, otherwise use all servers
+      const serversToExport =
+        serverIds.length > 0 ? allServers.filter(server => serverIds.includes(server.id)) : allServers
+
+      // Group servers by datacenter
+      const serversByDatacenter = serversToExport.reduce((acc, server) => {
+        const datacenter = server.datacenter_name || 'UNKNOWN'
+        if (!acc[datacenter]) {
+          acc[datacenter] = []
+        }
+        acc[datacenter].push(server)
+
+        return acc
+      }, {})
+
+      // Create workbook
       const workbook = new ExcelJS.Workbook()
-      const worksheet = workbook.addWorksheet('Servers')
 
-      // Define columns
-      worksheet.columns = [
-        { header: 'ID', key: 'id', width: 30 },
-        { header: 'Hostname', key: 'hostname', width: 25 },
-        { header: 'Datacenter', key: 'datacenter_name', width: 25 },
-        { header: 'Environment', key: 'environment_name', width: 25 },
-        { header: 'Status', key: 'status', width: 15 },
-        { header: 'Component', key: 'component_name', width: 20 },
-        { header: 'Subcomponent', key: 'subcomponent_name', width: 20 },
-        { header: 'Metadata', key: 'metadata', width: 50 },
-        { header: 'Network Interfaces', key: 'network_interfaces', width: 50 },
-        { header: 'Created At', key: 'created_at', width: 20 },
-        { header: 'Modified At', key: 'modified_at', width: 20 }
-      ]
+      // Get sorted datacenter names
+      const sortedDatacenters = Object.keys(serversByDatacenter).sort((a, b) =>
+        a.toUpperCase().localeCompare(b.toUpperCase())
+      )
 
-      // Add rows
-      servers.forEach(server => {
-        worksheet.addRow({
-          ...server,
-          metadata: server.metadata.map(meta => `${meta.key}: ${meta.value}`).join('; '),
-          network_interfaces: server.network_interfaces.map(ni => `${ni.name} (${ni.ip_address})`).join('; ')
+      // Process each datacenter in sorted order
+      sortedDatacenters.forEach(datacenter => {
+        const servers = serversByDatacenter[datacenter]
+
+        // Collect all unique metadata keys and network interface combinations for this datacenter
+        const metadataKeys = new Set()
+        const networkKeys = new Set()
+
+        servers.forEach(server => {
+          // Collect metadata keys
+          server.metadata?.forEach(meta => {
+            metadataKeys.add(meta.key.toUpperCase())
+          })
+
+          // Collect network interface combinations
+          server.network_interfaces?.forEach(ni => {
+            networkKeys.add(`${ni.name}:${ni.label || ''}`.toUpperCase())
+          })
         })
+
+        // Create the rows with all columns for this datacenter
+        const exportRows = servers.map(server => {
+          // Start with the ordered fields
+          const row = {
+            ENVIRONMENT: server.environment_name || '',
+            COMPONENT: server.component_name || '',
+            SUBCOMPONENT: server.subcomponent_name || '',
+            'SERVER NAME': server.hostname,
+            STATUS: server.status
+          }
+
+          // Add metadata columns
+          metadataKeys.forEach(key => {
+            const metaValue = server.metadata?.find(m => m.key.toUpperCase() === key)?.value || ''
+            row[`META:${key}`] = metaValue
+          })
+
+          // Add network interface columns
+          networkKeys.forEach(key => {
+            const [name, label] = key.split(':')
+
+            const netInterface = server.network_interfaces?.find(
+              ni => ni.name.toUpperCase() === name && (ni.label || '').toUpperCase() === label
+            )
+            row[`NET:${key}`] = netInterface?.ip_address || ''
+          })
+
+          return row
+        })
+
+        // Sort the rows by environment, component, and subcomponent
+        exportRows.sort((a, b) => {
+          // First, compare environments
+          const envCompare = (a.ENVIRONMENT || '').localeCompare(b.ENVIRONMENT || '')
+          if (envCompare !== 0) return envCompare
+
+          // If environments are equal, compare components
+          const compCompare = (a.COMPONENT || '').localeCompare(b.COMPONENT || '')
+          if (compCompare !== 0) return compCompare
+
+          // If components are equal, compare subcomponents
+          return (a.SUBCOMPONENT || '').localeCompare(b.SUBCOMPONENT || '')
+        })
+
+        // Create worksheet for this datacenter
+        const worksheet = workbook.addWorksheet(datacenter.toUpperCase())
+
+        // Get all column headers
+        const headers = Object.keys(exportRows[0])
+
+        // Add headers to worksheet
+        worksheet.columns = headers.map(header => ({
+          header,
+          key: header,
+          width: 20 // Adjust width as needed
+        }))
+
+        // Add data rows
+        exportRows.forEach(row => {
+          worksheet.addRow(row)
+        })
+
+        // Style the header row
+        const headerRow = worksheet.getRow(1)
+        headerRow.font = { bold: true }
+        headerRow.eachCell(cell => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' }
+          }
+        })
+
+        // Auto-filter for all columns
+        worksheet.autoFilter = {
+          from: { row: 1, column: 1 },
+          to: { row: 1, column: headers.length }
+        }
+
+        // Freeze the header row
+        worksheet.views = [{ state: 'frozen', ySplit: 1 }]
       })
 
-      // Generate Excel file
+      // Generate the Excel file
       const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      saveAs(blob, `server_inventory_${new Date().toISOString().split('T')[0]}.xlsx`)
 
-      // Trigger file download
-      saveAs(
-        new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-        'Servers.xlsx'
+      toast.success(
+        `Successfully exported ${serversToExport.length} servers across ${
+          Object.keys(serversByDatacenter).length
+        } datacenters`
       )
-      console.log('Exporting...')
-      toast.success('Exporting...') // Assuming you have a toast notification system
+      handleCloseExportModal()
     } catch (error) {
-      console.error('Error exporting servers:', error)
-      toast.error('Error exporting servers') // Assuming you have a toast notification system
+      console.error('Export error:', error)
+      toast.error('Failed to export data')
     }
-    setIsExportModalOpen(false)
   }
 
   const handleChange = (event, newValue) => {

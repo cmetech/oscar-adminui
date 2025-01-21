@@ -1,4 +1,4 @@
-const COMPANY_NAME = 'Ericsson'
+const COMPANY_NAME = 'SMART2D'
 
 const oscarConfig = {
   SSL_VERIFY: false,

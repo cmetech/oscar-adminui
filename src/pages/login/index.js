@@ -275,6 +275,8 @@ const LoginPage = ({ csrfToken, providers }) => {
                       : `/images/${companySlug}-logo-light.png`
                   }
                   alt='logo'
+                  width='170px'
+                  height='40px'
                 />
                 <Typography
                   variant='h6'

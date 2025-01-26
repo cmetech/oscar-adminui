@@ -111,30 +111,51 @@ const TextfieldStyled = styled(TextField)(({ theme }) => ({
   }
 }))
 
-// ** More Actions Dropdown
-const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
-  const [anchorEl, setAnchorEl] = useState(null)
+// ** Confirmation Export Modal
+const ConfirmationExportModal = ({ isOpen, onClose, onConfirm }) => {
   const { t } = useTranslation()
 
-  const router = useRouter()
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{t('Confirm Action')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{t('Are you sure you want to export all selected notifiers?')}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:file-export' />}
+        >
+          {t('Export')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
+// ** More Actions Dropdown
+const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, onExport, onImport }) => {
+  const [anchorEl, setAnchorEl] = useState(null)
+  const { t } = useTranslation()
 
   const handleDropdownOpen = event => {
     setAnchorEl(event.currentTarget)
   }
 
-  // Function to determine the dynamic text based on the selected tab
-  const getDynamicTitle = tabValue => {
-    const mapping = {
-      1: 'Active Notifiers'
-    }
-
-    return mapping[tabValue] || ''
-  }
-
-  const handleDropdownClose = url => {
-    if (url) {
-      router.push(url)
-    }
+  const handleDropdownClose = () => {
     setAnchorEl(null)
   }
 
@@ -149,11 +170,9 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
     '& svg': {
       mr: 2,
       fontSize: '1.375rem',
-      color: 'text.primary'
+      color: 'text.secondary'
     }
   }
-
-  const deletableTabs = ['1']
 
   return (
     <Fragment>
@@ -165,51 +184,45 @@ const MoreActionsDropdown = ({ onDelete, onDisable, onEnable, tabValue }) => {
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
-        onClose={() => handleDropdownClose()}
+        onClose={handleDropdownClose}
         sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
       >
-        {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onDelete()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:delete-forever-outline' />
-              {t('Delete')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
-        )}
-        {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onEnable()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:plus-box' />
-              {t('Enable')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
-        )}
-        {deletableTabs.includes(tabValue) && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onDisable()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:minus-box' />
-              {t('Disable')} {t(getDynamicTitle(tabValue))}
-            </Box>
-          </MenuItem>
-        )}
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onExport()
+            handleDropdownClose()
+          }}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:file-export-outline' />
+            {t('Export')}
+          </Box>
+        </MenuItem>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onImport()
+            handleDropdownClose()
+          }}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:file-import-outline' />
+            {t('Import')}
+          </Box>
+        </MenuItem>
+        <MenuItem
+          sx={{ p: 0 }}
+          onClick={() => {
+            onDelete()
+            handleDropdownClose()
+          }}
+        >
+          <Box sx={styles}>
+            <Icon icon='mdi:delete-outline' />
+            {t('Delete')}
+          </Box>
+        </MenuItem>
       </Menu>
     </Fragment>
   )
@@ -418,6 +431,231 @@ const DynamicDialogForm = ({ open, handleClose, onSubmit, tab }) => {
   )
 }
 
+// ** Notifier Upload Dialog
+const NotifierUploadDialog = ({ open, onClose }) => {
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [, setNotifierRefetchTrigger] = useAtom(refetchNotifierTriggerAtom)
+  const fileInputRef = useRef(null)
+  const { t } = useTranslation()
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = event => {
+    const file = event.target.files[0]
+    if (file) {
+      setFile(file)
+      setFileName(file.name)
+    } else {
+      setFile(null)
+      setFileName('')
+    }
+  }
+
+  const resetForm = () => {
+    setFile(null)
+    setFileName('')
+    setUploadProgress(0)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!file) return
+
+    setIsUploading(true)
+    let successCount = 0
+    let errorCount = 0
+    const errors = []
+
+    try {
+      const workbook = new ExcelJS.Workbook()
+      await workbook.xlsx.load(await file.arrayBuffer())
+      const worksheet = workbook.worksheets[0]
+
+      // Get headers and validate required columns
+      const headers = worksheet.getRow(1).values
+      const requiredColumns = ['Name', 'Type'] // Removed Description from required columns
+      const missingColumns = requiredColumns.filter(col => !headers.includes(col))
+
+      if (missingColumns.length > 0) {
+        throw new Error(`Missing required columns: ${missingColumns.join(', ')}`)
+      }
+
+      // Get column indices
+      const nameIndex = headers.indexOf('Name')
+      const descriptionIndex = headers.indexOf('Description')
+      const typeIndex = headers.indexOf('Type')
+      const statusIndex = headers.indexOf('Status')
+      const emailAddressesIndex = headers.indexOf('Email Addresses')
+      const webhookUrlIndex = headers.indexOf('Webhook URL')
+
+      const totalRows = worksheet.rowCount - 1 // Exclude header row
+      let processedRows = 0
+
+      // Process each row
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+        const row = worksheet.getRow(rowNumber).values
+
+        // Skip empty rows
+        if (row.length === 0) continue
+
+        try {
+          const type = row[typeIndex]?.toLowerCase()
+          if (!type || !['email', 'webhook'].includes(type)) {
+            throw new Error(`Invalid notifier type: ${type}. Must be 'email' or 'webhook'`)
+          }
+
+          const notifier = {
+            name: row[nameIndex],
+            description: row[descriptionIndex] || '', // Make description optional with empty string default
+            type: type,
+            status: row[statusIndex]?.toLowerCase() || 'enabled'
+          }
+
+          // Add type-specific fields
+          if (type === 'email' && row[emailAddressesIndex]) {
+            notifier.email_addresses = row[emailAddressesIndex].split(',').map(email => email.trim())
+          } else if (type === 'webhook' && row[webhookUrlIndex]) {
+            notifier.webhook_url = row[webhookUrlIndex]
+          }
+
+          // Validate only required fields
+          if (!notifier.name) {
+            throw new Error('Name is required')
+          }
+
+          // Create notifier
+          await axios.post('/api/notifiers/add', notifier)
+          successCount++
+        } catch (error) {
+          errorCount++
+          errors.push(`Row ${rowNumber}: ${error.message}`)
+        }
+
+        // Update progress
+        processedRows++
+        setUploadProgress((processedRows / totalRows) * 100)
+      }
+
+      // Show results
+      if (successCount > 0) {
+        toast.success(`Successfully created ${successCount} notifiers`)
+        setNotifierRefetchTrigger(Date.now())
+      }
+      if (errorCount > 0) {
+        toast.error(`Failed to create ${errorCount} notifiers`)
+        errors.forEach(error => toast.error(error))
+      }
+
+      resetForm()
+      onClose()
+    } catch (error) {
+      console.error('Error processing file:', error)
+      toast.error('Error processing file: ' + error.message)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <Dialog
+      fullWidth
+      maxWidth='sm'
+      scroll='body'
+      open={open}
+      onClose={() => !isUploading && onClose()}
+      TransitionComponent={Transition}
+    >
+      <DialogTitle>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {t('Import Notifiers')}
+          </Typography>
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        <IconButton
+          size='small'
+          onClick={() => !isUploading && onClose()}
+          sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
+        >
+          <Icon icon='mdi:close' />
+        </IconButton>
+        <Box sx={{ mb: 8, textAlign: 'center' }}>
+          <Typography variant='h5' sx={{ mb: 3 }}>
+            {t('Upload Notifiers')}
+          </Typography>
+          <Typography variant='body2'>{t('Upload an Excel file containing notifier information.')}</Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <input
+            type='file'
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+            accept='.xlsx'
+          />
+          {!file && (
+            <Button
+              variant='contained'
+              onClick={handleButtonClick}
+              startIcon={<Icon icon='mdi:file-upload' />}
+              sx={{ mb: 2 }}
+            >
+              {t('Choose File')}
+            </Button>
+          )}
+          {file && (
+            <Box sx={{ width: '100%', textAlign: 'center' }}>
+              <Typography variant='body2' sx={{ mb: 2 }}>
+                {fileName}
+              </Typography>
+              {isUploading && (
+                <Box sx={{ width: '100%', mt: 2 }}>
+                  <LinearProgress variant='determinate' value={uploadProgress} />
+                  <Typography variant='body2' sx={{ mt: 1 }}>
+                    {Math.round(uploadProgress)}%
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          size='large'
+          variant='outlined'
+          color='secondary'
+          startIcon={<Icon icon='mdi:close' />}
+          disabled={isUploading}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          size='large'
+          variant='contained'
+          color='warning'
+          autoFocus
+          startIcon={<Icon icon='mdi:upload-multiple' />}
+          disabled={isUploading || !file}
+        >
+          {isUploading ? t('Uploading...') : t('Upload')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
 const NotifierManager = () => {
   // ** Hooks
   const ability = useContext(AbilityContext)
@@ -436,6 +674,9 @@ const NotifierManager = () => {
 
   const [dateRange, setDateRange] = useState([yesterdayRounded, todayRounded])
   const [onAccept, setOnAccept] = useState(value)
+
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [openNotifierUploadDialog, setOpenNotifierUploadDialog] = useState(false)
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true)
@@ -576,6 +817,91 @@ const NotifierManager = () => {
     setOnAccept(value)
   }
 
+  const handleExport = () => {
+    setIsExportModalOpen(true)
+  }
+
+  const handleCloseExportModal = () => {
+    setIsExportModalOpen(false)
+  }
+
+  const handleImport = () => {
+    setOpenNotifierUploadDialog(true)
+  }
+
+  const handleConfirmExport = async () => {
+    try {
+      const response = await axios.get('/api/notifiers')
+      const allNotifiers = response.data.records
+
+      // Use selected notifiers if any are selected, otherwise use all notifiers
+      const notifiersToExport =
+        selectedNotifierIds.length > 0
+          ? allNotifiers.filter(notifier => selectedNotifierIds.includes(notifier.id))
+          : allNotifiers
+
+      // Create workbook
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet('Notifiers')
+
+      // Define columns
+      worksheet.columns = [
+        { header: 'Name', key: 'name', width: 30 },
+        { header: 'Description', key: 'description', width: 40 },
+        { header: 'Type', key: 'type', width: 20 },
+        { header: 'Status', key: 'status', width: 20 },
+        { header: 'Email Addresses', key: 'email_addresses', width: 40 },
+        { header: 'Webhook URL', key: 'url', width: 60 }
+      ]
+
+      // Add data rows
+      notifiersToExport.forEach(notifier => {
+        worksheet.addRow({
+          name: notifier.name,
+          description: notifier.description,
+          type: notifier.type,
+          status: notifier.status,
+          email_addresses: notifier.type === 'email' ? notifier.email_addresses?.join(', ') : '',
+          url: notifier.type === 'webhook' ? notifier.url : ''
+        })
+      })
+
+      // Style the header row
+      const headerRow = worksheet.getRow(1)
+      headerRow.font = { bold: true }
+      headerRow.eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' }
+        }
+      })
+
+      // Auto-filter for all columns
+      worksheet.autoFilter = {
+        from: { row: 1, column: 1 },
+        to: { row: 1, column: worksheet.columns.length }
+      }
+
+      // Freeze the header row
+      worksheet.views = [{ state: 'frozen', ySplit: 1 }]
+
+      // Generate the Excel file
+      const buffer = await workbook.xlsx.writeBuffer()
+
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      saveAs(blob, `notifiers_export_${new Date().toISOString().split('T')[0]}.xlsx`)
+
+      toast.success(`Successfully exported ${notifiersToExport.length} notifiers`)
+      handleCloseExportModal()
+    } catch (error) {
+      console.error('Error exporting notifiers:', error)
+      toast.error('Failed to export notifiers')
+    }
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -595,9 +921,10 @@ const NotifierManager = () => {
                 </Button>
                 <MoreActionsDropdown
                   onDelete={handleDelete}
-                  onEnable={handleEnable}
                   onDisable={handleDisable}
-                  tabValue={value}
+                  onEnable={handleEnable}
+                  onExport={handleExport}
+                  onImport={handleImport}
                 />
               </Fragment>
             )}
@@ -643,6 +970,14 @@ const NotifierManager = () => {
         onConfirm={handleConfirmEnable}
         tab={value}
       />
+
+      <ConfirmationExportModal
+        isOpen={isExportModalOpen}
+        onClose={handleCloseExportModal}
+        onConfirm={handleConfirmExport}
+      />
+
+      <NotifierUploadDialog open={openNotifierUploadDialog} onClose={() => setOpenNotifierUploadDialog(false)} />
     </Grid>
   )
 }

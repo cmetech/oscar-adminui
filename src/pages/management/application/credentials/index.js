@@ -125,9 +125,9 @@ const MoreActionsDropdown = ({ onDelete, onTest, onExport, onImport, tabValue })
   }
 
   // Define which tabs show which menu items
-  const showImportTab = true // Only show Import for Connections
-  const showTestTab = tabValue === '1' // Only show Test for Connections
+  const showImportTab = true // Show Import for both Connections and Secrets
   const showExportTab = true // Show Export for both tabs
+  // Remove showTestTab since we're disabling test functionality
 
   const styles = {
     py: 2,
@@ -154,7 +154,7 @@ const MoreActionsDropdown = ({ onDelete, onTest, onExport, onImport, tabValue })
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
-        onClose={() => handleDropdownClose()}
+        onClose={handleDropdownClose}
         sx={{ '& .MuiMenu-paper': { width: 230, mt: 4 } }}
       >
         {showExportTab && (
@@ -182,20 +182,6 @@ const MoreActionsDropdown = ({ onDelete, onTest, onExport, onImport, tabValue })
             <Box sx={styles}>
               <Icon icon='mdi:file-import-outline' />
               {t('Import')}
-            </Box>
-          </MenuItem>
-        )}
-        {showTestTab && (
-          <MenuItem
-            sx={{ p: 0 }}
-            onClick={() => {
-              onTest()
-              handleDropdownClose()
-            }}
-          >
-            <Box sx={styles}>
-              <Icon icon='mdi:connection' />
-              {t('Test')}
             </Box>
           </MenuItem>
         )}

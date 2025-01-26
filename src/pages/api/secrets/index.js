@@ -7,12 +7,12 @@ async function handler(req, res) {
   const httpsAgent = new https.Agent({ rejectUnauthorized: oscarConfig.SSL_VERIFY })
 
   if (req.method === 'GET') {
-    const { path = '', limit = 1000 } = req.query
+    const { path = '', format = 'flat' } = req.query
 
     try {
       const url = new URL(`${oscarConfig.MIDDLEWARE_API_URL}/vault/secrets`)
       url.searchParams.append('path', path)
-      url.searchParams.append('format', 'flat')
+      url.searchParams.append('format', format)
 
       const response = await axios.get(url.toString(), {
         timeout: 30000,

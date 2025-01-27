@@ -465,12 +465,19 @@ const NotifierUploadDialog = ({ open, onClose }) => {
     }
   }
 
+  const handleClose = () => {
+    resetForm()
+    setIsUploading(false)
+    onClose()
+  }
+
   const handleSubmit = async () => {
     if (!file) return
 
     setIsUploading(true)
     let successCount = 0
     let errorCount = 0
+    let skippedCount = 0
     const errors = []
 
     try {
@@ -480,7 +487,7 @@ const NotifierUploadDialog = ({ open, onClose }) => {
 
       // Get headers and validate required columns
       const headers = worksheet.getRow(1).values
-      const requiredColumns = ['Name', 'Type'] // Removed Description from required columns
+      const requiredColumns = ['Name', 'Type']
       const missingColumns = requiredColumns.filter(col => !headers.includes(col))
 
       if (missingColumns.length > 0) {
@@ -506,14 +513,32 @@ const NotifierUploadDialog = ({ open, onClose }) => {
         if (row.length === 0) continue
 
         try {
+          const notifierName = row[nameIndex]
+
+          // Validate name is present
+          if (!notifierName) {
+            throw new Error('Name is required')
+          }
+
+          // Check if notifier already exists
+          const existingNotifier = await axios.get(
+            `/api/notifiers/lookup?identifier=${encodeURIComponent(notifierName)}&by_name=true`
+          )
+
+          if (Object.keys(existingNotifier.data).length > 0) {
+            skippedCount++
+            console.log(`Skipping existing notifier: ${notifierName}`)
+            continue // Skip to next row
+          }
+
           const type = row[typeIndex]?.toLowerCase()
           if (!type || !['email', 'webhook'].includes(type)) {
             throw new Error(`Invalid notifier type: ${type}. Must be 'email' or 'webhook'`)
           }
 
           const notifier = {
-            name: row[nameIndex],
-            description: row[descriptionIndex] || '', // Make description optional with empty string default
+            name: notifierName,
+            description: row[descriptionIndex] || '',
             type: type,
             status: row[statusIndex]?.toLowerCase() || 'enabled'
           }
@@ -523,11 +548,6 @@ const NotifierUploadDialog = ({ open, onClose }) => {
             notifier.email_addresses = row[emailAddressesIndex].split(',').map(email => email.trim())
           } else if (type === 'webhook' && row[webhookUrlIndex]) {
             notifier.webhook_url = row[webhookUrlIndex]
-          }
-
-          // Validate only required fields
-          if (!notifier.name) {
-            throw new Error('Name is required')
           }
 
           // Create notifier
@@ -546,13 +566,21 @@ const NotifierUploadDialog = ({ open, onClose }) => {
       // Show results
       if (successCount > 0) {
         toast.success(`Successfully created ${successCount} notifiers`)
-        setNotifierRefetchTrigger(Date.now())
+      }
+      if (skippedCount > 0) {
+        toast.success(`Skipped ${skippedCount} existing notifiers`, {
+          style: {
+            background: '#3498db',
+            color: '#fff'
+          }
+        })
       }
       if (errorCount > 0) {
         toast.error(`Failed to create ${errorCount} notifiers`)
         errors.forEach(error => toast.error(error))
       }
 
+      setNotifierRefetchTrigger(Date.now())
       resetForm()
       onClose()
     } catch (error) {
@@ -564,25 +592,12 @@ const NotifierUploadDialog = ({ open, onClose }) => {
   }
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth='sm'
-      scroll='body'
-      open={open}
-      onClose={() => !isUploading && onClose()}
-      TransitionComponent={Transition}
-    >
-      <DialogTitle>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography noWrap variant='h6' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {t('Import Notifiers')}
-          </Typography>
-        </Box>
-      </DialogTitle>
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>{t('Upload Notifiers')}</DialogTitle>
       <DialogContent>
         <IconButton
           size='small'
-          onClick={() => !isUploading && onClose()}
+          onClick={() => handleClose()}
           sx={{ position: 'absolute', right: '1rem', top: '1rem' }}
         >
           <Icon icon='mdi:close' />
@@ -593,45 +608,41 @@ const NotifierUploadDialog = ({ open, onClose }) => {
           </Typography>
           <Typography variant='body2'>{t('Upload an Excel file containing notifier information.')}</Typography>
         </Box>
+        <input
+          type='file'
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept='.xlsx,.xls'
+          style={{ display: 'none' }}
+        />
+        <Button
+          size='large'
+          color='primary'
+          variant='contained'
+          onClick={handleButtonClick}
+          disabled={isUploading}
+          startIcon={<Icon icon='mdi:file-upload' />}
+        >
+          {t('Choose File')}
+        </Button>
+        {fileName && (
+          <Typography variant='subtitle1' sx={{ mt: 2 }}>
+            {t('Selected file')}: {fileName}
+          </Typography>
+        )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <input
-            type='file'
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-            accept='.xlsx'
-          />
-          {!file && (
-            <Button
-              variant='contained'
-              onClick={handleButtonClick}
-              startIcon={<Icon icon='mdi:file-upload' />}
-              sx={{ mb: 2 }}
-            >
-              {t('Choose File')}
-            </Button>
-          )}
-          {file && (
-            <Box sx={{ width: '100%', textAlign: 'center' }}>
-              <Typography variant='body2' sx={{ mb: 2 }}>
-                {fileName}
-              </Typography>
-              {isUploading && (
-                <Box sx={{ width: '100%', mt: 2 }}>
-                  <LinearProgress variant='determinate' value={uploadProgress} />
-                  <Typography variant='body2' sx={{ mt: 1 }}>
-                    {Math.round(uploadProgress)}%
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          )}
-        </Box>
+        {isUploading && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant='determinate' value={uploadProgress} />
+            <Typography variant='subtitle2' align='center'>
+              {Math.round(uploadProgress)}% {t('uploaded')}
+            </Typography>
+          </Box>
+        )}
       </DialogContent>
       <DialogActions>
         <Button
-          onClick={onClose}
+          onClick={handleClose}
           size='large'
           variant='outlined'
           color='secondary'

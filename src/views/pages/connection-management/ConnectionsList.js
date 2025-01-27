@@ -283,6 +283,7 @@ const ConnectionsList = props => {
                   setCurrentConnection(row)
                   setTestDialog(true)
                 }}
+                disabled={true}
               >
                 <Icon icon='mdi:lan-check' />
               </IconButton>
